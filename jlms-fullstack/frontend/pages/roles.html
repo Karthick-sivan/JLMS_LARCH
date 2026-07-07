@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Roles</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Administration</a><span class="sep">/</span><span class="current">Roles</span></div>
+          <div class="h1">Roles</div>
+        </div>
+        <div class="page-actions"><button class="btn-jlms btn-jlms-primary"><i class="bi bi-plus-lg"></i> New Role</button></div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="panel">
+            <div class="panel-head"><div class="h4">System Roles</div></div>
+            <div class="panel-body no-pad table-jlms-wrap">
+              <table class="table-jlms">
+                <thead><tr><th>Role Name</th><th>Description</th><th class="text-center">Users</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
+                <tbody>
+                  <tr style="background:var(--navy-50);">
+                    <td class="cell-strong">Branch Manager</td><td class="text-muted-jlms">Full branch operations, approvals &amp; reports</td><td class="text-center">8</td>
+                    <td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-strong">Loan Officer</td><td class="text-muted-jlms">Customer registration, appraisal &amp; loan entry</td><td class="text-center">15</td>
+                    <td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-strong">Cashier</td><td class="text-muted-jlms">Collections, disbursements &amp; receipts</td><td class="text-center">12</td>
+                    <td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-strong">Administrator</td><td class="text-muted-jlms">Full system access incl. settings &amp; audit</td><td class="text-center">3</td>
+                    <td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-strong">Auditor</td><td class="text-muted-jlms">Read-only access to reports &amp; audit logs</td><td class="text-center">2</td>
+                    <td class="text-center"><span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Branch Manager — Permissions</div></div>
+            <div class="panel-body" style="padding:6px 0;">
+              <div style="padding:9px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--n-150);"><span style="font-size:12.5px;">Approve Loans</span><i class="bi bi-toggle-on" style="font-size:22px; color:var(--success-600);"></i></div>
+              <div style="padding:9px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--n-150);"><span style="font-size:12.5px;">Disburse Loans</span><i class="bi bi-toggle-on" style="font-size:22px; color:var(--success-600);"></i></div>
+              <div style="padding:9px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--n-150);"><span style="font-size:12.5px;">View Reports</span><i class="bi bi-toggle-on" style="font-size:22px; color:var(--success-600);"></i></div>
+              <div style="padding:9px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--n-150);"><span style="font-size:12.5px;">Manage Gold Rates</span><i class="bi bi-toggle-on" style="font-size:22px; color:var(--success-600);"></i></div>
+              <div style="padding:9px 16px; display:flex; justify-content:space-between; align-items:center;"><span style="font-size:12.5px;">System Settings</span><i class="bi bi-toggle-off" style="font-size:22px; color:var(--n-300);"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "roles";</script>
+<script src="js/jlms-shell.js"></script>
+<script>jlmsInitShell();</script>
+</body>
+</html>

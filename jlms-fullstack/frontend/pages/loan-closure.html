@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Loan Closure</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Closure</span></div>
+          <div class="h1">Loan Closure</div>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="panel mb-3">
+            <div class="panel-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-9">
+                  <label class="field-label">Loan Number<span class="req">*</span></label>
+                  <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input id="loanNumberInput" placeholder="e.g. JL-20260001"></div>
+                </div>
+                <div class="col-md-3"><button class="btn-jlms btn-jlms-outline" id="btnFind" style="width:100%; justify-content:center;">Find</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel mb-3" id="detailPanel" style="display:none;">
+            <div class="panel-head"><div class="h4">Loan Details</div></div>
+            <div class="panel-body">
+              <div class="row g-3">
+                <div class="col-md-4"><div class="text-caption">Customer</div><div class="cell-strong" id="detCustomer"></div></div>
+                <div class="col-md-4"><div class="text-caption">Loan Date</div><div class="cell-strong" id="detLoanDate"></div></div>
+                <div class="col-md-4"><div class="text-caption">Pledged Jewels</div><div class="cell-strong" id="detJewels"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="closurePanel" style="display:none;">
+            <div class="panel-head"><div class="h4">Closure Calculation</div></div>
+            <div class="panel-body">
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label class="field-label">Payment Mode<span class="req">*</span></label>
+                  <select class="form-select-jlms" id="paymentModeSelect"><option>Cash</option><option>UPI</option><option>BankTransfer</option></select>
+                </div>
+                <div class="col-md-4">
+                  <label class="field-label">Reference No. <span class="opt">optional</span></label>
+                  <input class="form-control-jlms" id="refNoInput" placeholder="Transaction reference">
+                </div>
+              </div>
+              <div class="summary-panel">
+                <div class="summary-row"><span class="label">Outstanding Principal</span><span class="value" id="sumPrincipal">₹0</span></div>
+                <div class="summary-row"><span class="label">Outstanding Interest</span><span class="value" id="sumInterest">₹0</span></div>
+                <div class="summary-row"><span class="label">Penalty</span><span class="value danger" id="sumPenalty">₹0</span></div>
+                <div class="summary-row total"><span class="label">Total Closure Amount</span><span class="value" id="sumTotal">₹0</span></div>
+              </div>
+              <div class="d-flex justify-content-end gap-2 mt-3">
+                <button class="btn-jlms btn-jlms-primary btn-lg" id="btnClose"><i class="bi bi-x-circle"></i> Close Loan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-jlms-backdrop" id="closureModal" style="display:none;">
+  <div class="modal-jlms">
+    <div class="modal-jlms-head">
+      <div class="h4">Loan Closure</div>
+      <i class="bi bi-x-lg" style="cursor:pointer; color:var(--n-500);" onclick="document.getElementById('closureModal').style.display='none'; location.reload();"></i>
+    </div>
+    <div class="modal-jlms-body">
+      <div class="success-icon-circle"><i class="bi bi-check-lg"></i></div>
+      <div class="h3">Loan Closed Successfully</div>
+      <div class="text-muted-jlms" style="margin-top:6px;" id="closureModalText"></div>
+      <div style="background:var(--n-100); border-radius:var(--radius-md); padding:12px; margin-top:16px; text-align:left;" id="closureModalDetails"></div>
+    </div>
+    <div class="modal-jlms-foot">
+      <a href="jewel-release.html" class="btn-jlms btn-jlms-primary" id="proceedToReleaseLink"><i class="bi bi-unlock"></i> Proceed to Jewel Release</a>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "loan-closure";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+let currentLoan = null;
+let currentCalc = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  Session.requireLogin();
+
+  document.getElementById('btnFind').addEventListener('click', async () => {
+    clearApiError();
+    const loanNumber = document.getElementById('loanNumberInput').value.trim();
+    if (!loanNumber) { showApiError(new Error('Enter a loan number to search.')); return; }
+
+    try {
+      const loan = await Api.getLoanByNumber(loanNumber);
+      if (loan.status !== 'Active') {
+        document.getElementById('detailPanel').style.display = 'none';
+        document.getElementById('closurePanel').style.display = 'none';
+        showApiError(new Error(`Loan status is '${loan.status}'. Closure only applies to Active loans.`));
+        return;
+      }
+      currentLoan = loan;
+
+      document.getElementById('detailPanel').style.display = 'block';
+      document.getElementById('detCustomer').textContent = loan.customerName;
+      document.getElementById('detLoanDate').textContent = loan.loanDate ? new Date(loan.loanDate).toLocaleDateString('en-IN') : '—';
+      const totalItems = (loan.jewelItems || []).reduce((s, i) => s + i.quantity, 0);
+      const totalWeight = (loan.jewelItems || []).reduce((s, i) => s + Number(i.netWeightGrams), 0);
+      document.getElementById('detJewels').textContent = `${totalItems} items, ${totalWeight.toFixed(1)} g`;
+
+      currentCalc = await Api.getClosureCalculation(loan.loanId);
+      document.getElementById('sumPrincipal').textContent = '₹' + Number(currentCalc.outstandingPrincipal).toLocaleString('en-IN');
+      document.getElementById('sumInterest').textContent = '₹' + Number(currentCalc.outstandingInterest).toLocaleString('en-IN');
+      document.getElementById('sumPenalty').textContent = '₹' + Number(currentCalc.penalty).toLocaleString('en-IN');
+      document.getElementById('sumTotal').textContent = '₹' + Number(currentCalc.totalClosureAmount).toLocaleString('en-IN');
+      document.getElementById('closurePanel').style.display = 'block';
+    } catch (err) {
+      document.getElementById('detailPanel').style.display = 'none';
+      document.getElementById('closurePanel').style.display = 'none';
+      showApiError(err);
+    }
+  });
+
+  document.getElementById('btnClose').addEventListener('click', async () => {
+    if (!currentLoan) return;
+    clearApiError();
+    const user = Session.get();
+    const btn = document.getElementById('btnClose');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Closing...';
+    try {
+      const receipt = await Api.closeLoan(currentLoan.loanId, {
+        paymentMode: document.getElementById('paymentModeSelect').value,
+        referenceNo: document.getElementById('refNoInput').value.trim() || null,
+        processedByUserId: user.userId
+      });
+
+      document.getElementById('closureModalText').innerHTML = `Loan <strong>${receipt.loanNumber}</strong> has been closed.<br>Jewels are now ready for release.`;
+      document.getElementById('closureModalDetails').innerHTML = `
+        <div class="summary-row"><span class="label">Amount Collected</span><span class="value">₹${Number(receipt.totalReceived).toLocaleString('en-IN')}</span></div>
+        <div class="summary-row"><span class="label">Receipt No.</span><span class="value">${receipt.receiptNumber}</span></div>`;
+      document.getElementById('proceedToReleaseLink').href = `jewel-release.html?loanId=${currentLoan.loanId}`;
+      document.getElementById('closureModal').style.display = 'flex';
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-x-circle"></i> Close Loan';
+    }
+  });
+});
+</script>
+</body>
+</html>

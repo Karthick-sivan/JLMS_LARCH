@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Interest Collection</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .receipt-box { border:1px solid var(--n-200); border-radius:var(--radius-md); padding:18px; font-family:"Consolas",monospace; font-size:11.5px; background:#fdfdfd; }
+  .receipt-box .r-row { display:flex; justify-content:space-between; padding:3px 0; }
+  .receipt-divider { border-top:1px dashed var(--n-300); margin:8px 0; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Interest Collection</span></div>
+          <div class="h1">Interest Collection</div>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="panel mb-3">
+            <div class="panel-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-9">
+                  <label class="field-label">Loan Number<span class="req">*</span></label>
+                  <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input id="loanNumberInput" placeholder="e.g. JL-20260001"></div>
+                </div>
+                <div class="col-md-3"><button class="btn-jlms btn-jlms-outline" id="btnFind" style="width:100%; justify-content:center;">Find</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel mb-3" id="detailPanel" style="display:none;">
+            <div class="panel-head"><div class="h4">Loan Details</div><span class="badge-jlms badge-warning" id="statusBadge"><span class="dot"></span>Active</span></div>
+            <div class="panel-body">
+              <div class="row g-3">
+                <div class="col-md-4"><div class="text-caption">Customer Name</div><div class="cell-strong" id="detCustomer"></div></div>
+                <div class="col-md-4"><div class="text-caption">Loan Date</div><div class="cell-strong" id="detLoanDate"></div></div>
+                <div class="col-md-4"><div class="text-caption">Due / Maturity Date</div><div class="cell-strong" id="detDueDate"></div></div>
+              </div>
+              <div class="divider-jlms"></div>
+              <div class="row g-3">
+                <div class="col-md-4"><div class="text-caption">Outstanding Principal</div><div class="cell-strong" style="font-size:16px;" id="detPrincipal"></div></div>
+                <div class="col-md-4"><div class="text-caption">Accrued Interest (as of today)</div><div class="cell-strong" style="font-size:16px; color:var(--navy-700);" id="detInterest"></div></div>
+                <div class="col-md-4"><div class="text-caption">Penalty</div><div class="cell-strong" style="font-size:16px; color:var(--danger-700);" id="detPenalty"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="paymentPanel" style="display:none;">
+            <div class="panel-head"><div class="h4">Receive Payment</div></div>
+            <div class="panel-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="field-label">Amount Received<span class="req">*</span></label>
+                  <div class="input-affix" style="border-color:var(--navy-700);"><span class="affix">₹</span><input type="number" id="amountInput" style="font-weight:700; color:var(--navy-700);"></div>
+                </div>
+                <div class="col-md-4">
+                  <label class="field-label">Payment Mode<span class="req">*</span></label>
+                  <select class="form-select-jlms" id="paymentModeSelect"><option>Cash</option><option>UPI</option><option>BankTransfer</option></select>
+                </div>
+                <div class="col-md-4">
+                  <label class="field-label">Reference No. <span class="opt">optional</span></label>
+                  <input class="form-control-jlms" id="refNoInput" placeholder="UPI / Txn ref">
+                </div>
+              </div>
+              <div class="form-check-jlms mt-2">
+                <input type="checkbox" id="partialPay">
+                <label for="partialPay">This is a partial payment</label>
+              </div>
+              <div class="d-flex justify-content-end gap-2 mt-3">
+                <button class="btn-jlms btn-jlms-primary btn-lg" id="btnReceive"><i class="bi bi-cash-coin"></i> Receive Payment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="panel" id="receiptPanel" style="display:none;">
+            <div class="panel-head"><div class="h4">Receipt</div><span class="badge-jlms badge-success" id="receiptNoBadge"></span></div>
+            <div class="panel-body">
+              <div class="receipt-box" id="receiptBox"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "interest-collection";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+let currentLoan = null;
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  Session.requireLogin();
+
+  document.getElementById('btnFind').addEventListener('click', async () => {
+    clearApiError();
+    document.getElementById('receiptPanel').style.display = 'none';
+    const loanNumber = document.getElementById('loanNumberInput').value.trim();
+    if (!loanNumber) { showApiError(new Error('Enter a loan number to search.')); return; }
+
+    try {
+      const loan = await Api.getLoanByNumber(loanNumber);
+      if (loan.status !== 'Active') {
+        document.getElementById('detailPanel').style.display = 'none';
+        document.getElementById('paymentPanel').style.display = 'none';
+        showApiError(new Error(`Loan status is '${loan.status}'. Interest collection only applies to Active loans.`));
+        return;
+      }
+      currentLoan = loan;
+      const outstanding = await Api.getOutstanding(loan.loanId);
+
+      document.getElementById('detailPanel').style.display = 'block';
+      document.getElementById('paymentPanel').style.display = 'block';
+      document.getElementById('statusBadge').innerHTML = '<span class="dot"></span>' + loan.status;
+      document.getElementById('detCustomer').textContent = loan.customerName;
+      document.getElementById('detLoanDate').textContent = fmtDate(loan.loanDate);
+      document.getElementById('detDueDate').textContent = fmtDate(loan.maturityDate);
+      document.getElementById('detPrincipal').textContent = '₹' + Number(outstanding.outstandingPrincipal).toLocaleString('en-IN');
+      document.getElementById('detInterest').textContent = '₹' + Number(outstanding.outstandingInterest).toLocaleString('en-IN');
+      document.getElementById('detPenalty').textContent = '₹' + Number(outstanding.penalty).toLocaleString('en-IN');
+      document.getElementById('amountInput').value = (Number(outstanding.outstandingInterest) + Number(outstanding.penalty)).toFixed(2);
+    } catch (err) {
+      document.getElementById('detailPanel').style.display = 'none';
+      document.getElementById('paymentPanel').style.display = 'none';
+      showApiError(err);
+    }
+  });
+
+  document.getElementById('btnReceive').addEventListener('click', async () => {
+    if (!currentLoan) return;
+    clearApiError();
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    if (!amount || amount <= 0) { showApiError(new Error('Enter a valid amount received.')); return; }
+
+    const user = Session.get();
+    const btn = document.getElementById('btnReceive');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+    try {
+      const receipt = await Api.collectInterest(currentLoan.loanId, {
+        amountReceived: amount,
+        paymentMode: document.getElementById('paymentModeSelect').value,
+        referenceNo: document.getElementById('refNoInput').value.trim() || null,
+        isPartial: document.getElementById('partialPay').checked,
+        processedByUserId: user.userId
+      });
+
+      document.getElementById('receiptPanel').style.display = 'block';
+      document.getElementById('receiptNoBadge').innerHTML = '<span class="dot"></span>' + receipt.receiptNumber;
+      document.getElementById('receiptBox').innerHTML = `
+        <div style="text-align:center; font-weight:700; font-size:13px;">JLMS RECEIPT</div>
+        <div style="text-align:center; color:var(--n-500); margin-bottom:8px;">Interest Collection</div>
+        <div class="receipt-divider"></div>
+        <div class="r-row"><span>Receipt No.</span><span>${receipt.receiptNumber}</span></div>
+        <div class="r-row"><span>Date</span><span>${new Date(receipt.transactionDate).toLocaleString('en-IN')}</span></div>
+        <div class="r-row"><span>Loan No.</span><span>${receipt.loanNumber}</span></div>
+        <div class="r-row"><span>Customer</span><span>${receipt.customerName}</span></div>
+        <div class="receipt-divider"></div>
+        <div class="r-row"><span>Interest Collected</span><span>₹${Number(receipt.interestCollected).toLocaleString('en-IN')}</span></div>
+        <div class="r-row"><span>Penalty Collected</span><span>₹${Number(receipt.penaltyCollected).toLocaleString('en-IN')}</span></div>
+        <div class="receipt-divider"></div>
+        <div class="r-row" style="font-weight:700;"><span>Total Received</span><span>₹${Number(receipt.totalReceived).toLocaleString('en-IN')}</span></div>
+        <div class="r-row"><span>Mode</span><span>${receipt.paymentMode}</span></div>
+        <div class="receipt-divider"></div>
+        <div class="r-row"><span>Balance Principal</span><span>₹${Number(receipt.balancePrincipal).toLocaleString('en-IN')}</span></div>
+        <div class="r-row"><span>Next Due Date</span><span>${fmtDate(receipt.nextDueDate)}</span></div>`;
+
+      document.getElementById('paymentPanel').style.display = 'none';
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-cash-coin"></i> Receive Payment';
+    }
+  });
+});
+</script>
+</body>
+</html>

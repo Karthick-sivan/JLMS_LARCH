@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Jewel Appraisal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .appraisal-table input { width:100%; border:1px solid var(--n-200); border-radius:3px; padding:5px 7px; font-size:12px; text-align:right; }
+  .appraisal-table select { width:100%; min-width:130px; border:1px solid var(--n-200); border-radius:3px; padding:5px 6px; font-size:11.5px; }
+  .appraisal-table th:nth-child(2), .appraisal-table td:nth-child(2) { min-width:140px; }
+  .appraisal-table th:nth-child(7), .appraisal-table td:nth-child(7) { min-width:110px; }
+  .photo-tile { width:64px; height:64px; border-radius:var(--radius-sm); background:var(--n-150); display:flex; align-items:center; justify-content:center; color:var(--n-400); font-size:18px; flex-shrink:0; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Jewel Appraisal</span></div>
+          <div class="h1">Jewel Appraisal</div>
+          <div class="api-error-banner" style="display:block; background:var(--info-100); border-color:var(--info-600); color:var(--info-700); margin-top:10px;">
+            This screen is a static demo. Live jewel appraisal (with real gold rates and calculation) is now part of the <a href="new-loan.html">New Loan</a> screen, Step 2.
+          </div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-jlms btn-jlms-outline"><i class="bi bi-search"></i> Find Customer</button>
+        </div>
+      </div>
+
+      <div class="panel mb-3">
+        <div class="panel-body">
+          <div class="row g-3">
+            <div class="col-md-3"><label class="field-label">Customer</label><input class="form-control-jlms" value="Murugan Subramaniam" disabled></div>
+            <div class="col-md-3"><label class="field-label">Customer Code</label><input class="form-control-jlms" value="CUS-008421" disabled></div>
+            <div class="col-md-3"><label class="field-label">Appraisal Date</label><input class="form-control-jlms" value="20/06/2026" disabled></div>
+            <div class="col-md-3"><label class="field-label">Appraised By</label><input class="form-control-jlms" value="Suresh M. (Loan Officer)" disabled></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-9">
+          <div class="panel mb-3">
+            <div class="panel-head">
+              <div class="h4">Jewel Items</div>
+              <button class="btn-jlms btn-jlms-outline btn-sm"><i class="bi bi-plus-lg"></i> Add Item</button>
+            </div>
+            <div class="panel-body no-pad table-jlms-wrap appraisal-table">
+              <table class="table-jlms">
+                <thead>
+                  <tr>
+                    <th style="width:40px;">#</th><th>Jewel Type</th><th class="text-center">Qty</th><th class="text-end">Gross Wt (g)</th><th class="text-end">Stone Wt (g)</th><th class="text-end">Net Wt (g)</th><th>Purity</th><th class="text-end">Market Value</th><th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-muted-jlms">1</td>
+                    <td><select><option>Gold Chain</option><option>Gold Ring</option><option>Gold Bangle</option></select></td>
+                    <td class="text-center"><input value="1" style="text-align:center;"></td>
+                    <td><input value="24.500"></td>
+                    <td><input value="0.500"></td>
+                    <td><input value="24.000" disabled style="background:var(--n-100); font-weight:600;"></td>
+                    <td><select><option>22K (91.6%)</option><option>18K (75.0%)</option><option>24K (99.9%)</option></select></td>
+                    <td><input value="1,48,800" disabled style="background:var(--n-100); font-weight:700; color:var(--navy-700);"></td>
+                    <td><i class="bi bi-trash" style="color:var(--danger-600); cursor:pointer;"></i></td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted-jlms">2</td>
+                    <td><select><option>Gold Bangle</option><option>Gold Chain</option><option>Gold Ring</option></select></td>
+                    <td class="text-center"><input value="2" style="text-align:center;"></td>
+                    <td><input value="36.200"></td>
+                    <td><input value="0.000"></td>
+                    <td><input value="36.200" disabled style="background:var(--n-100); font-weight:600;"></td>
+                    <td><select><option>22K (91.6%)</option><option>18K (75.0%)</option></select></td>
+                    <td><input value="2,24,440" disabled style="background:var(--n-100); font-weight:700; color:var(--navy-700);"></td>
+                    <td><i class="bi bi-trash" style="color:var(--danger-600); cursor:pointer;"></i></td>
+                  </tr>
+                  <tr>
+                    <td class="text-muted-jlms">3</td>
+                    <td><select><option>Gold Ring</option><option>Gold Chain</option></select></td>
+                    <td class="text-center"><input value="1" style="text-align:center;"></td>
+                    <td><input value="6.800"></td>
+                    <td><input value="0.200"></td>
+                    <td><input value="6.600" disabled style="background:var(--n-100); font-weight:600;"></td>
+                    <td><select><option>22K (91.6%)</option></select></td>
+                    <td><input value="40,920" disabled style="background:var(--n-100); font-weight:700; color:var(--navy-700);"></td>
+                    <td><i class="bi bi-trash" style="color:var(--danger-600); cursor:pointer;"></i></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3">Total</td>
+                    <td class="text-end">67.500 g</td>
+                    <td class="text-end">0.700 g</td>
+                    <td class="text-end">66.800 g</td>
+                    <td></td>
+                    <td class="text-end" style="color:var(--navy-700);">₹4,14,160</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Jewel Photos</div></div>
+            <div class="panel-body">
+              <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <div class="photo-tile"><i class="bi bi-image"></i></div>
+                <div class="photo-tile"><i class="bi bi-image"></i></div>
+                <div class="photo-tile"><i class="bi bi-image"></i></div>
+                <div class="photo-tile" style="border:1.5px dashed var(--n-300); cursor:pointer; background:var(--n-50);"><i class="bi bi-plus-lg"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-3">
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Valuation Summary</div></div>
+            <div class="panel-body">
+              <div class="summary-panel">
+                <div class="summary-row"><span class="label">Total Gross Weight</span><span class="value">67.500 g</span></div>
+                <div class="summary-row"><span class="label">Total Stone Weight</span><span class="value">0.700 g</span></div>
+                <div class="summary-row"><span class="label">Total Net Weight</span><span class="value">66.800 g</span></div>
+                <div class="summary-row"><span class="label">Gold Rate (22K)</span><span class="value">₹6,200 / g</span></div>
+                <div class="summary-row"><span class="label">Market Value</span><span class="value gold">₹4,14,160</span></div>
+                <div class="summary-row"><span class="label">LTV Ratio</span><span class="value">75%</span></div>
+                <div class="summary-row total"><span class="label">Eligible Loan Value</span><span class="value">₹3,10,620</span></div>
+              </div>
+              <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+                <button class="btn-jlms btn-jlms-outline" style="width:100%; justify-content:center;"><i class="bi bi-calculator"></i> Calculate</button>
+                <button class="btn-jlms btn-jlms-primary" style="width:100%; justify-content:center;"><i class="bi bi-save"></i> Save Appraisal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "jewel-appraisal";</script>
+<script src="js/jlms-shell.js"></script>
+<script>jlmsInitShell();</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Customer Search</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><span class="current">Customer Search</span></div>
+          <div class="h1">Customer Search</div>
+        </div>
+        <div class="page-actions">
+          <a href="customer-registration.html" class="btn-jlms btn-jlms-primary"><i class="bi bi-person-plus"></i> New Customer</a>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+
+      <div class="panel mb-3">
+        <div class="panel-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label class="field-label">Customer Name</label>
+              <input type="text" class="form-control-jlms" id="searchName" placeholder="Search by name">
+            </div>
+            <div class="col-md-3">
+              <label class="field-label">Mobile Number</label>
+              <input type="text" class="form-control-jlms" id="searchMobile" placeholder="10-digit mobile">
+            </div>
+            <div class="col-md-2">
+              <label class="field-label">Aadhaar Number</label>
+              <input type="text" class="form-control-jlms" id="searchAadhaar" placeholder="XXXX-XXXX-XXXX">
+            </div>
+            <div class="col-md-2">
+              <label class="field-label">Customer Code</label>
+              <input type="text" class="form-control-jlms" id="searchCode" placeholder="CUS-000000">
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+              <button class="btn-jlms btn-jlms-primary" id="btnSearch" style="flex:1;"><i class="bi bi-search"></i> Search</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="grid-toolbar">
+          <div class="grid-toolbar-left">
+            <span class="h4">Results</span>
+            <span class="badge-jlms badge-neutral" id="resultCount">0 customers</span>
+          </div>
+        </div>
+        <div class="panel-body no-pad table-jlms-wrap">
+          <table class="table-jlms">
+            <thead>
+              <tr>
+                <th>Customer Code</th><th>Customer Name</th><th>Mobile</th><th class="text-center">Active Loans</th><th class="text-end">Outstanding</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody">
+              <tr><td colspan="6" class="text-center text-muted-jlms" style="padding:28px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "customer-master";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+
+function statusBadge(status) {
+  if (status === 'Active') return '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>';
+  if (status === 'Overdue') return '<span class="badge-jlms badge-warning"><span class="dot"></span>Has Overdue</span>';
+  return '<span class="badge-jlms badge-neutral"><span class="dot"></span>No Active Loan</span>';
+}
+
+function initials(name) {
+  return name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+}
+
+async function runSearch() {
+  clearApiError();
+  const body = document.getElementById('resultsBody');
+  body.innerHTML = '<tr><td colspan="6" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
+
+  const params = {};
+  const name = document.getElementById('searchName').value.trim();
+  const mobile = document.getElementById('searchMobile').value.trim();
+  const aadhaar = document.getElementById('searchAadhaar').value.trim();
+  const code = document.getElementById('searchCode').value.trim();
+  if (name) params.search = name;
+  if (mobile) params.mobile = mobile;
+  if (aadhaar) params.aadhaar = aadhaar;
+  if (code) params.code = code;
+
+  try {
+    const rows = await Api.searchCustomers(params);
+    document.getElementById('resultCount').textContent = `${rows.length} customer${rows.length === 1 ? '' : 's'}`;
+
+    if (rows.length === 0) {
+      body.innerHTML = '<tr><td colspan="6" class="text-center text-muted-jlms" style="padding:28px;">No customers found. Try different filters, or register a new customer.</td></tr>';
+      return;
+    }
+
+    body.innerHTML = rows.map(c => `
+      <tr>
+        <td class="cell-link">${c.customerCode}</td>
+        <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(c.customerName)}</div>${c.customerName}</div></td>
+        <td>${c.mobile}</td>
+        <td class="text-center">${c.activeLoans}</td>
+        <td class="text-end cell-strong">₹${Number(c.totalOutstanding).toLocaleString('en-IN')}</td>
+        <td>${statusBadge(c.status)}</td>
+      </tr>`).join('');
+  } catch (err) {
+    showApiError(err);
+    body.innerHTML = '<tr><td colspan="6" class="text-center text-muted-jlms" style="padding:28px;">Could not load customers.</td></tr>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  Session.requireLogin();
+  document.getElementById('btnSearch').addEventListener('click', runSearch);
+  [['searchName'], ['searchMobile'], ['searchAadhaar'], ['searchCode']].forEach(([id]) => {
+    document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+  });
+  runSearch(); // initial load shows all customers (empty list on a fresh DB)
+});
+</script>
+</body>
+</html>

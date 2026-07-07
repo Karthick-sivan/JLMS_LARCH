@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — New Loan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .appraisal-table input { width:100%; border:1px solid var(--n-200); border-radius:3px; padding:5px 7px; font-size:12px; text-align:right; }
+  .appraisal-table select { width:100%; min-width:140px; border:1px solid var(--n-200); border-radius:3px; padding:5px 6px; font-size:11.5px; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">New Loan</span></div>
+          <div class="h1">New Loan Creation</div>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+      <div id="apiSuccessBanner" class="api-success-banner"></div>
+
+      <div class="row g-3">
+        <div class="col-lg-9">
+
+          <fieldset class="section-fieldset" style="background:#fff; padding-top:18px;">
+            <legend>Step 1 — Select Customer</legend>
+            <div class="row g-3 align-items-end">
+              <div class="col-md-7">
+                <label class="field-label">Search customer by name, mobile, or code<span class="req">*</span></label>
+                <input type="text" class="form-control-jlms" id="customerSearchInput" placeholder="Start typing to search...">
+                <div id="customerSearchResults" style="border:1px solid var(--n-200); border-radius:6px; margin-top:4px; max-height:180px; overflow-y:auto; display:none; background:#fff; position:relative; z-index:10;"></div>
+              </div>
+              <div class="col-md-5">
+                <div id="selectedCustomerCard" style="display:none; padding:10px 14px; background:var(--navy-50); border:1px solid var(--navy-100); border-radius:6px;">
+                  <div class="cell-strong" id="selCustName"></div>
+                  <div class="text-caption" id="selCustMeta"></div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="section-fieldset" style="background:#fff;">
+            <legend>Step 2 — Jewel Items &amp; Appraisal</legend>
+            <div class="table-jlms-wrap appraisal-table">
+              <table class="table-jlms">
+                <thead>
+                  <tr><th style="width:36px;">#</th><th>Jewel Type</th><th class="text-center">Qty</th><th class="text-end">Gross Wt (g)</th><th class="text-end">Stone Wt (g)</th><th>Purity</th><th></th></tr>
+                </thead>
+                <tbody id="jewelItemsBody"></tbody>
+              </table>
+            </div>
+            <button class="btn-jlms btn-jlms-outline btn-sm mt-2" id="btnAddItem"><i class="bi bi-plus-lg"></i> Add Jewel Item</button>
+          </fieldset>
+
+          <fieldset class="section-fieldset" style="background:#fff;">
+            <legend>Step 3 — Loan Terms</legend>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="field-label">Loan Scheme<span class="req">*</span></label>
+                <select class="form-select-jlms" id="schemeSelect"></select>
+              </div>
+              <div class="col-md-4">
+                <label class="field-label">Requested Loan Amount<span class="req">*</span></label>
+                <div class="input-affix"><span class="affix">₹</span><input type="number" id="requestedAmount" placeholder="Up to eligible amount"></div>
+              </div>
+              <div class="col-md-4">
+                <label class="field-label">Remarks <span class="opt">optional</span></label>
+                <input class="form-control-jlms" id="loanRemarks" placeholder="Internal notes">
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+
+        <div class="col-lg-3">
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Loan Summary</div></div>
+            <div class="panel-body">
+              <div class="summary-panel">
+                <div class="summary-row"><span class="label">Total Market Value</span><span class="value" id="sumMarketValue">₹0</span></div>
+                <div class="summary-row"><span class="label">Scheme Max LTV</span><span class="value" id="sumLtv">—</span></div>
+                <div class="summary-row total"><span class="label">Eligible Amount</span><span class="value" id="sumEligible">₹0</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            <button class="btn-jlms btn-jlms-outline" id="btnCalculate" style="width:100%; justify-content:center;"><i class="bi bi-calculator"></i> Calculate Valuation</button>
+            <button class="btn-jlms btn-jlms-primary btn-lg" id="btnSubmitLoan" style="width:100%; justify-content:center;"><i class="bi bi-send-check"></i> Submit for Approval</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "new-loan";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+
+let selectedCustomer = null;
+let jewelTypesCache = [];
+let schemesCache = [];
+let itemRowCount = 0;
+
+function jewelRowHtml(rowId) {
+  const options = jewelTypesCache.map(jt => `<option value="${jt.jewelTypeId}" data-purity="${jt.defaultPurity || ''}">${jt.jewelTypeName}</option>`).join('');
+  return `
+    <tr data-row-id="${rowId}">
+      <td class="text-muted-jlms">${rowId}</td>
+      <td><select class="jewelTypeSelect">${options}</select></td>
+      <td><input type="number" class="qtyInput" value="1" min="1" style="text-align:center;"></td>
+      <td><input type="number" step="0.001" class="grossInput" value="0.000"></td>
+      <td><input type="number" step="0.001" class="stoneInput" value="0.000"></td>
+      <td><select class="purityInput"><option>22K</option><option>18K</option><option>24K</option></select></td>
+      <td><i class="bi bi-trash removeRowBtn" style="color:var(--danger-600); cursor:pointer;"></i></td>
+    </tr>`;
+}
+
+function addJewelRow() {
+  itemRowCount++;
+  document.getElementById('jewelItemsBody').insertAdjacentHTML('beforeend', jewelRowHtml(itemRowCount));
+  wireRow(document.querySelector(`tr[data-row-id="${itemRowCount}"]`));
+}
+
+function wireRow(tr) {
+  tr.querySelector('.removeRowBtn').addEventListener('click', () => tr.remove());
+  tr.querySelector('.jewelTypeSelect').addEventListener('change', (e) => {
+    const purity = e.target.selectedOptions[0].dataset.purity;
+    if (purity) tr.querySelector('.purityInput').value = purity;
+  });
+}
+
+function collectJewelItems() {
+  const rows = document.querySelectorAll('#jewelItemsBody tr');
+  const items = [];
+  rows.forEach(tr => {
+    const jewelTypeId = parseInt(tr.querySelector('.jewelTypeSelect').value, 10);
+    const quantity = parseInt(tr.querySelector('.qtyInput').value, 10) || 1;
+    const grossWeightGrams = parseFloat(tr.querySelector('.grossInput').value) || 0;
+    const stoneWeightGrams = parseFloat(tr.querySelector('.stoneInput').value) || 0;
+    const purity = tr.querySelector('.purityInput').value;
+    if (grossWeightGrams > 0) items.push({ jewelTypeId, quantity, grossWeightGrams, stoneWeightGrams, purity });
+  });
+  return items;
+}
+
+async function loadLookups() {
+  jewelTypesCache = await Api.getJewelTypes(true);
+  schemesCache = await Api.getLoanSchemes(true);
+
+  const schemeSelect = document.getElementById('schemeSelect');
+  if (schemesCache.length === 0) {
+    schemeSelect.innerHTML = '<option value="">No active loan schemes — add one in Loan Scheme Master</option>';
+  } else {
+    schemeSelect.innerHTML = schemesCache.map(s =>
+      `<option value="${s.loanSchemeId}">${s.schemeName} — ${s.interestRatePct}% / ${s.tenureMonths}mo / LTV ${s.maxLtvPercent}%</option>`).join('');
+  }
+
+  if (jewelTypesCache.length === 0) {
+    document.getElementById('jewelItemsBody').innerHTML =
+      '<tr><td colspan="7" class="text-center text-muted-jlms" style="padding:16px;">No jewel types configured yet — add one in Jewel Type Master, then come back here.</td></tr>';
+  } else {
+    addJewelRow();
+  }
+}
+
+async function searchCustomersLive(query) {
+  const resultsBox = document.getElementById('customerSearchResults');
+  if (!query || query.length < 2) { resultsBox.style.display = 'none'; return; }
+  try {
+    const rows = await Api.searchCustomers({ search: query });
+    const mobileRows = await Api.searchCustomers({ mobile: query });
+    const merged = [...rows, ...mobileRows].filter((r, i, arr) => arr.findIndex(x => x.customerId === r.customerId) === i);
+
+    if (merged.length === 0) {
+      resultsBox.innerHTML = '<div style="padding:10px 14px; color:var(--n-500); font-size:12px;">No matching customers. <a href="customer-registration.html">Register a new customer</a>.</div>';
+    } else {
+      resultsBox.innerHTML = merged.map(c => `
+        <div class="customerResultRow" data-id="${c.customerId}" data-name="${c.customerName}" data-code="${c.customerCode}" data-mobile="${c.mobile}"
+             style="padding:9px 14px; cursor:pointer; border-bottom:1px solid var(--n-150); font-size:12.5px;">
+          <strong>${c.customerName}</strong> &middot; ${c.customerCode} &middot; ${c.mobile}
+        </div>`).join('');
+      resultsBox.querySelectorAll('.customerResultRow').forEach(row => {
+        row.addEventListener('click', () => {
+          selectedCustomer = { id: parseInt(row.dataset.id, 10), name: row.dataset.name, code: row.dataset.code, mobile: row.dataset.mobile };
+          document.getElementById('selCustName').textContent = selectedCustomer.name;
+          document.getElementById('selCustMeta').textContent = `${selectedCustomer.code} · ${selectedCustomer.mobile}`;
+          document.getElementById('selectedCustomerCard').style.display = 'block';
+          document.getElementById('customerSearchInput').value = selectedCustomer.name;
+          resultsBox.style.display = 'none';
+        });
+      });
+    }
+    resultsBox.style.display = 'block';
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+async function calculateValuation() {
+  clearApiError();
+  const items = collectJewelItems();
+  if (items.length === 0) {
+    showApiError(new Error('Add at least one jewel item with a gross weight greater than zero.'));
+    return null;
+  }
+  try {
+    const result = await Api.calculateAppraisal({ customerId: selectedCustomer ? selectedCustomer.id : 0, items });
+    document.getElementById('sumMarketValue').textContent = '₹' + Number(result.totalMarketValue).toLocaleString('en-IN');
+
+    const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
+    const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
+    if (scheme) {
+      const eligible = result.totalMarketValue * (scheme.maxLtvPercent / 100);
+      document.getElementById('sumLtv').textContent = scheme.maxLtvPercent + '%';
+      document.getElementById('sumEligible').textContent = '₹' + Math.round(eligible).toLocaleString('en-IN');
+      document.getElementById('requestedAmount').max = Math.round(eligible);
+    }
+    return result;
+  } catch (err) {
+    showApiError(err);
+    return null;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  Session.requireLogin();
+  document.getElementById('btnAddItem').addEventListener('click', addJewelRow);
+  document.getElementById('btnCalculate').addEventListener('click', calculateValuation);
+
+  let searchDebounce;
+  document.getElementById('customerSearchInput').addEventListener('input', (e) => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => searchCustomersLive(e.target.value.trim()), 300);
+  });
+
+  try {
+    await loadLookups();
+  } catch (err) {
+    showApiError(err);
+  }
+
+  document.getElementById('btnSubmitLoan').addEventListener('click', async () => {
+    clearApiError();
+    document.getElementById('apiSuccessBanner').style.display = 'none';
+
+    if (!selectedCustomer) { showApiError(new Error('Please select a customer first.')); return; }
+    const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
+    if (!schemeId) { showApiError(new Error('Please select a loan scheme.')); return; }
+    const requestedAmount = parseFloat(document.getElementById('requestedAmount').value);
+    if (!requestedAmount || requestedAmount <= 0) { showApiError(new Error('Please enter a valid requested loan amount.')); return; }
+
+    const items = collectJewelItems();
+    if (items.length === 0) { showApiError(new Error('Add at least one jewel item.')); return; }
+
+    const btn = document.getElementById('btnSubmitLoan');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
+    try {
+      const result = await Api.createLoan({
+        customerId: selectedCustomer.id,
+        loanSchemeId: schemeId,
+        jewelItems: items,
+        requestedLoanAmount: requestedAmount,
+        remarks: document.getElementById('loanRemarks').value.trim() || null
+      });
+      const successEl = document.getElementById('apiSuccessBanner');
+      successEl.innerHTML = `Loan <strong>${result.loanNumber}</strong> created and submitted for approval. Go to <a href="loan-approval.html">Loan Approval</a> to approve it.`;
+      successEl.style.display = 'block';
+      btn.innerHTML = '<i class="bi bi-check-lg"></i> Submitted';
+    } catch (err) {
+      showApiError(err);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-send-check"></i> Submit for Approval';
+    }
+  });
+});
+</script>
+</body>
+</html>

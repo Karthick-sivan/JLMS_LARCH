@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Gold Rate Master</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<script src="vendor/chartjs/chart.umd.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Gold Rate Master</span></div>
+          <div class="h1">Gold Rate Master</div>
+        </div>
+      </div>
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+<div id="apiSuccessBanner" class="api-success-banner"></div>
+
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-4"><div class="kpi-card gold"><div class="kpi-top"><span class="kpi-label">22K Rate Today</span><div class="kpi-icon gold"><i class="bi bi-coin"></i></div></div><div class="kpi-value" id="lbl22K">₹0 / g</div><div class="kpi-foot"><span class="kpi-trend-up"><i class="bi bi-arrow-up-short"></i>₹40</span><span class="text-muted-jlms">vs yesterday</span></div></div></div>
+        <div class="col-md-4"><div class="kpi-card navy"><div class="kpi-top"><span class="kpi-label">24K Rate Today</span><div class="kpi-icon navy"><i class="bi bi-coin"></i></div></div><div class="kpi-value" id="lbl24K">₹0 / g</div><div class="kpi-foot"><span class="kpi-trend-up"><i class="bi bi-arrow-up-short"></i>₹44</span><span class="text-muted-jlms">vs yesterday</span></div></div></div>
+        <div class="col-md-4"><div class="kpi-card info"><div class="kpi-top"><span class="kpi-label">18K Rate Today</span><div class="kpi-icon info"><i class="bi bi-coin"></i></div></div><div class="kpi-value" id="lbl18K">₹0 / g</div><div class="kpi-foot"><span class="kpi-trend-up"><i class="bi bi-arrow-up-short"></i>₹33</span><span class="text-muted-jlms">vs yesterday</span></div></div></div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Update Today's Rate</div></div>
+            <div class="panel-body">
+              <div class="field-group"><label class="field-label">Effective Date</label><input class="form-control-jlms" id="effectiveDate" disabled></div>
+              <div class="field-group"><label class="field-label">24K Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rate24K"></div></div>
+              <div class="field-group"><label class="field-label">22K Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rate22K"></div></div>
+              <div class="field-group"><label class="field-label">18K Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rate18K"></div></div>
+              <button id="btnSaveRate" class="btn-jlms btn-jlms-primary" style="width:100%; justify-content:center;"><i class="bi bi-save"></i> Update Rate</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Rate Trend — 22K (Last 30 Days)</div></div>
+            <div class="panel-body"><canvas id="goldRateChart" height="160"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div class="h4">Rate History</div></div>
+        <div class="panel-body no-pad table-jlms-wrap">
+          <table class="table-jlms">
+            <thead><tr><th>Effective Date</th><th class="text-end">24K Rate</th><th class="text-end">22K Rate</th><th class="text-end">18K Rate</th><th>Updated By</th></tr></thead>
+            <tbody id="historyBody">
+              <tr><td class="cell-strong">20 Jun 2026</td><td class="text-end">₹6,765.00</td><td class="text-end">₹6,200.00</td><td class="text-end">₹5,074.00</td><td>Ravi Kumar</td></tr>
+              <tr><td>19 Jun 2026</td><td class="text-end">₹6,721.00</td><td class="text-end">₹6,160.00</td><td class="text-end">₹5,041.00</td><td>Ravi Kumar</td></tr>
+              <tr><td>18 Jun 2026</td><td class="text-end">₹6,698.00</td><td class="text-end">₹6,140.00</td><td class="text-end">₹5,024.00</td><td>System (API)</td></tr>
+              <tr><td>17 Jun 2026</td><td class="text-end">₹6,654.00</td><td class="text-end">₹6,100.00</td><td class="text-end">₹4,991.00</td><td>System (API)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "gold-rate-master";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+
+window.JLMS_ACTIVE = "gold-rate-master";
+
+jlmsInitShell();
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    Session.requireLogin();
+
+    document.getElementById("effectiveDate").value =
+        new Date().toLocaleDateString('en-GB');
+
+    await loadGoldRate();
+    await loadHistory();
+
+    new Chart(document.getElementById('goldRateChart'), {
+
+        type: 'line',
+
+        data: {
+            labels: Array.from({length:30}, (_,i)=>i+1),
+
+            datasets: [{
+                data: [
+                    5980,5990,6010,6005,6020,
+                    6040,6035,6050,6070,6065,
+                    6080,6090,6085,6100,6110,
+                    6105,6120,6130,6125,6140,
+                    6135,6150,6160,6155,6140,
+                    6160,6100,6140,6160,6200
+                ],
+
+                borderColor:'#D4AF37',
+                backgroundColor:'rgba(212,175,55,0.1)',
+                fill:true,
+                tension:0.3,
+                pointRadius:0,
+                borderWidth:2
+            }]
+        },
+
+        options:{
+            plugins:{
+                legend:{display:false}
+            },
+            scales:{
+                y:{
+                    grid:{color:'#EDEFF2'}
+                },
+                x:{
+                    grid:{display:false},
+                    ticks:{display:false}
+                }
+            }
+        }
+    });
+
+});
+
+async function loadGoldRate(){
+
+    try{
+
+        const rate = await Api.getTodayGoldRate();
+
+        document.getElementById('rate24K').value =
+            rate.rate24K ?? '';
+
+        document.getElementById('rate22K').value =
+            rate.rate22K ?? '';
+
+        document.getElementById('rate18K').value =
+            rate.rate18K ?? '';
+
+        document.getElementById('lbl24K').innerHTML =
+            '₹' + (rate.rate24K ?? 0) + ' / g';
+
+        document.getElementById('lbl22K').innerHTML =
+            '₹' + (rate.rate22K ?? 0) + ' / g';
+
+        document.getElementById('lbl18K').innerHTML =
+            '₹' + (rate.rate18K ?? 0) + ' / g';
+
+    }
+    catch(err){
+        showApiError(err);
+    }
+}
+
+async function loadHistory(){
+
+    try{
+
+        const rows = await Api.getGoldRateHistory(30);
+
+        let html = '';
+
+        rows.forEach(r => {
+
+            html += `
+            <tr>
+                <td>${r.effectiveDate}</td>
+                <td class="text-end">₹${r.rate24K}</td>
+                <td class="text-end">₹${r.rate22K}</td>
+                <td class="text-end">₹${r.rate18K}</td>
+                <td>${r.updatedBy || ''}</td>
+            </tr>`;
+        });
+
+        document.getElementById('historyBody').innerHTML = html;
+
+    }
+    catch(err){
+        console.log(err);
+    }
+}
+
+document.addEventListener('click', async function(e){
+
+    if(e.target.closest('#btnSaveRate')){
+
+        clearApiError();
+
+        try{
+
+            await Api.setTodayGoldRate({
+
+                effectiveDate:
+                    document.getElementById('effectiveDate').value,
+
+                rate24K:
+                    parseFloat(document.getElementById('rate24K').value),
+
+                rate22K:
+                    parseFloat(document.getElementById('rate22K').value),
+
+                rate18K:
+                    parseFloat(document.getElementById('rate18K').value)
+
+            });
+
+            const success =
+                document.getElementById('apiSuccessBanner');
+
+            success.innerHTML =
+                'Gold Rate Updated Successfully';
+
+            success.style.display = 'block';
+
+            await loadGoldRate();
+            await loadHistory();
+
+        }
+        catch(err){
+
+            showApiError(err);
+
+        }
+
+    }
+
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Loan Disbursement</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Disbursement</span></div>
+          <div class="h1">Loan Disbursement</div>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+      <div id="apiSuccessBanner" class="api-success-banner"></div>
+
+      <div class="row g-3 justify-content-center">
+        <div class="col-lg-7">
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Find Approved Loan</div></div>
+            <div class="panel-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                  <label class="field-label">Loan Number</label>
+                  <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input id="loanNumberInput" placeholder="e.g. JL-20260001"></div>
+                </div>
+                <div class="col-md-4">
+                  <button class="btn-jlms btn-jlms-outline" id="btnFind" style="width:100%; justify-content:center;">Find Loan</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel mb-3" id="detailPanel" style="display:none;">
+            <div class="panel-head">
+              <div class="h4">Loan Details</div>
+              <span class="badge-jlms badge-success" id="statusBadge"><span class="dot"></span>Approved</span>
+            </div>
+            <div class="panel-body">
+              <div class="row g-3">
+                <div class="col-md-6"><div class="text-caption">Loan Number</div><div class="cell-strong" id="detLoanNo"></div></div>
+                <div class="col-md-6"><div class="text-caption">Customer</div><div class="cell-strong" id="detCustomer"></div></div>
+              </div>
+              <div class="divider-jlms"></div>
+              <div class="summary-panel">
+                <div class="summary-row"><span class="label">Loan Amount</span><span class="value" id="sumLoanAmount">₹0</span></div>
+                <div class="summary-row"><span class="label">Processing Fee</span><span class="value" id="sumFee">− ₹0</span></div>
+                <div class="summary-row total"><span class="label">Net Disbursement Amount</span><span class="value" id="sumNet">₹0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="paymentPanel" style="display:none;">
+            <div class="panel-head"><div class="h4">Payment Mode</div></div>
+            <div class="panel-body">
+              <div class="radio-pill-group mb-3" id="paymentModePills">
+                <div class="radio-pill selected" data-value="Cash"><i class="bi bi-cash-stack"></i> Cash</div>
+                <div class="radio-pill" data-value="UPI"><i class="bi bi-phone"></i> UPI</div>
+                <div class="radio-pill" data-value="BankTransfer"><i class="bi bi-bank"></i> Bank Transfer</div>
+              </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="field-label">Reference / Cheque No. <span class="opt">optional</span></label>
+                  <input class="form-control-jlms" id="refNoInput" placeholder="Transaction reference">
+                </div>
+              </div>
+              <div class="d-flex justify-content-end gap-2 mt-3">
+                <button class="btn-jlms btn-jlms-primary btn-lg" id="btnDisburse"><i class="bi bi-cash-coin"></i> Disburse Loan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "loan-disbursement";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+let currentLoan = null;
+let selectedPaymentMode = 'Cash';
+
+document.addEventListener('DOMContentLoaded', () => {
+  Session.requireLogin();
+
+  document.querySelectorAll('#paymentModePills .radio-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#paymentModePills .radio-pill').forEach(p => p.classList.remove('selected'));
+      pill.classList.add('selected');
+      selectedPaymentMode = pill.dataset.value;
+    });
+  });
+
+  document.getElementById('btnFind').addEventListener('click', async () => {
+    clearApiError();
+    document.getElementById('apiSuccessBanner').style.display = 'none';
+    const loanNumber = document.getElementById('loanNumberInput').value.trim();
+    if (!loanNumber) { showApiError(new Error('Enter a loan number to search.')); return; }
+
+    try {
+      const loan = await Api.getLoanByNumber(loanNumber);
+      currentLoan = loan;
+
+      document.getElementById('detailPanel').style.display = 'block';
+      document.getElementById('detLoanNo').textContent = loan.loanNumber;
+      document.getElementById('detCustomer').textContent = loan.customerName;
+      document.getElementById('statusBadge').innerHTML = `<span class="dot"></span>${loan.status}`;
+      document.getElementById('sumLoanAmount').textContent = '₹' + Number(loan.loanAmount).toLocaleString('en-IN');
+      document.getElementById('sumFee').textContent = '− ₹' + Number(loan.processingFee).toLocaleString('en-IN');
+      document.getElementById('sumNet').textContent = '₹' + (Number(loan.loanAmount) - Number(loan.processingFee)).toLocaleString('en-IN');
+
+      if (loan.status === 'Approved') {
+        document.getElementById('paymentPanel').style.display = 'block';
+      } else {
+        document.getElementById('paymentPanel').style.display = 'none';
+        showApiError(new Error(`Loan status is '${loan.status}'. Only 'Approved' loans can be disbursed.`));
+      }
+    } catch (err) {
+      document.getElementById('detailPanel').style.display = 'none';
+      document.getElementById('paymentPanel').style.display = 'none';
+      showApiError(err);
+    }
+  });
+
+  document.getElementById('btnDisburse').addEventListener('click', async () => {
+    if (!currentLoan) return;
+    clearApiError();
+    const user = Session.get();
+    const btn = document.getElementById('btnDisburse');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+    try {
+      const receipt = await Api.disburseLoan(currentLoan.loanId, {
+        paymentMode: selectedPaymentMode,
+        referenceNo: document.getElementById('refNoInput').value.trim() || null,
+        processedByUserId: user.userId
+      });
+      const successEl = document.getElementById('apiSuccessBanner');
+      successEl.innerHTML = `Loan <strong>${receipt.loanNumber}</strong> disbursed successfully. Receipt: <strong>${receipt.receiptNumber}</strong>. Net amount paid: ₹${Number(receipt.totalReceived).toLocaleString('en-IN')}.`;
+      successEl.style.display = 'block';
+      document.getElementById('paymentPanel').style.display = 'none';
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-cash-coin"></i> Disburse Loan';
+    }
+  });
+});
+</script>
+</body>
+</html>

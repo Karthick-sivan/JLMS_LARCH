@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Principal Collection</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div id="apiErrorBanner" class="api-error-banner"></div>
+<div id="apiSuccessBanner" class="api-success-banner"></div>
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Principal Collection</span></div>
+          <div class="h1">Principal (Part-Payment) Collection</div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="panel mb-3">
+            <div class="panel-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-9">
+                  <label class="field-label">Loan Number<span class="req">*</span></label>
+                  <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input
+id="txtLoanNumber"
+placeholder="Enter Loan Number"></div>
+                </div>
+                <div class="col-md-3"><button
+id="btnFind"
+class="btn-jlms btn-jlms-outline" style="width:100%; justify-content:center;">Find</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Loan Details</div></div>
+            <div class="panel-body">
+              <div class="row g-3">
+                <div class="col-md-4"><div class="text-caption">Customer Name</div><div class="cell-strong" id="lblCustomerName"></div></div>
+                <div class="col-md-4"><div class="text-caption">Original Principal</div><div class="cell-strong" id="lblOriginalPrincipal"></div></div>
+                <div class="col-md-4"><div class="text-caption">Outstanding Principal</div><div class="cell-strong" id="lblOutstandingPrincipal"></div></div>
+                <div class="col-md-4"><div class="text-caption">Outstanding Interest</div><div class="cell-strong" id="lblOutstandingInterest"></div></div>
+                <div class="col-md-4"><div class="text-caption">Min. Part-Payment</div><div class="cell-strong" id="lblMinPartPayment"></div></div>
+                <div class="col-md-4"><div class="text-caption">Last Payment</div><div class="cell-strong" id="lblLastPayment"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Receive Principal Payment</div></div>
+            <div class="panel-body">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="field-label">Principal Amount<span class="req">*</span></label>
+                  <div class="input-affix" style="border-color:var(--navy-700);"><span class="affix">₹</span><input
+id="txtPrincipalAmount"
+placeholder="Enter Amount" style="font-weight:700; color:var(--navy-700);"></div>
+                </div>
+                <div class="col-md-4">
+                  <label class="field-label">Payment Mode<span class="req">*</span></label>
+                  <select
+id="ddlPaymentMode"
+class="form-select-jlms"><option>Cash</option><option>UPI</option><option>Bank Transfer</option></select>
+                </div>
+                <div class="col-md-4">
+                  <label class="field-label">Reference No. <span class="opt">optional</span></label>
+                  <input
+id="txtReference"
+class="form-control-jlms" placeholder="Transaction reference">
+                </div>
+              </div>
+              <div class="divider-jlms"></div>
+              <div class="summary-panel">
+                <div class="summary-row"><span class="label">Current Outstanding Principal</span><span class="value" id="lblCurrentOutstanding"></span></div>
+                <div class="summary-row"><span class="label">Part-Payment Amount</span><span class="value" id="lblPaymentAmount"></span></div>
+                <div class="summary-row total"><span class="label">Revised Outstanding Principal</span><span class="value" id="lblRevisedOutstanding"></span></div>
+              </div>
+              <div class="d-flex justify-content-end gap-2 mt-3">
+                <button
+id="btnPrint"
+class="btn-jlms btn-jlms-ghost"><i class="bi bi-printer"></i> Print Receipt</button>
+                <button
+id="btnReceive"
+class="btn-jlms btn-jlms-primary btn-lg"><i class="bi bi-wallet2"></i> Receive Payment</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "principal-collection";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+
+<script>
+jlmsInitShell();
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    Session.requireLogin();
+
+    let currentLoan = null;
+    let currentOutstanding = null;
+    let currentReceiptNo = "";
+
+    const txtLoanNumber = document.getElementById("txtLoanNumber");
+    const txtPrincipalAmount = document.getElementById("txtPrincipalAmount");
+    const txtReference = document.getElementById("txtReference");
+    const ddlPaymentMode = document.getElementById("ddlPaymentMode");
+
+    const btnFind = document.getElementById("btnFind");
+    const btnReceive = document.getElementById("btnReceive");
+    const btnPrint = document.getElementById("btnPrint");
+
+    btnPrint.disabled = true;
+    btnReceive.disabled = true;
+
+    //----------------------------------------------------------
+    // FIND LOAN
+    //----------------------------------------------------------
+
+    btnFind.addEventListener("click", async () => {
+
+        clearApiError();
+        document.getElementById("apiSuccessBanner").style.display = "none";
+
+        const loanNumber = txtLoanNumber.value.trim();
+
+        if (loanNumber === "") {
+            showApiError(new Error("Please enter Loan Number."));
+            return;
+        }
+
+        btnFind.disabled = true;
+        btnFind.innerHTML = "Searching...";
+
+        try {
+
+            //--------------------------------------------------
+            // Loan Details
+            //--------------------------------------------------
+
+            currentLoan = await Api.getLoanByNumber(loanNumber);
+
+            //--------------------------------------------------
+            // Outstanding Details
+            //--------------------------------------------------
+
+            currentOutstanding = await Api.getOutstanding(currentLoan.loanId);
+
+            //--------------------------------------------------
+            // Populate Labels
+            //--------------------------------------------------
+
+            document.getElementById("lblCustomerName").textContent =
+                currentLoan.customerName;
+
+            document.getElementById("lblOriginalPrincipal").textContent =
+                "₹" + Number(currentLoan.loanAmount).toLocaleString();
+
+            document.getElementById("lblOutstandingPrincipal").textContent =
+                "₹" + Number(currentOutstanding.outstandingPrincipal).toLocaleString();
+
+            document.getElementById("lblOutstandingInterest").textContent =
+                "₹" + Number(currentOutstanding.outstandingInterest).toLocaleString();
+
+            document.getElementById("lblCurrentOutstanding").textContent =
+                "₹" + Number(currentOutstanding.outstandingPrincipal).toLocaleString();
+
+            //--------------------------------------------------
+            // Last Payment
+            //--------------------------------------------------
+
+            if (currentLoan.loanDate) {
+
+                document.getElementById("lblLastPayment").textContent =
+                    new Date(currentLoan.loanDate).toLocaleDateString();
+
+            }
+            else {
+
+                document.getElementById("lblLastPayment").textContent = "-";
+
+            }
+
+            //--------------------------------------------------
+            // Minimum Part Payment
+            //--------------------------------------------------
+
+            let minimumPayment = currentOutstanding.outstandingPrincipal * 0.05;
+
+            if (minimumPayment < 1000)
+                minimumPayment = 1000;
+
+            document.getElementById("lblMinPartPayment").textContent =
+                "₹" + minimumPayment.toLocaleString();
+
+            //--------------------------------------------------
+            // Reset Summary
+            //--------------------------------------------------
+
+            document.getElementById("lblPaymentAmount").textContent = "₹0";
+
+            document.getElementById("lblRevisedOutstanding").textContent =
+                "₹" + Number(currentOutstanding.outstandingPrincipal).toLocaleString();
+
+            txtPrincipalAmount.value = "";
+            txtReference.value = "";
+
+            btnReceive.disabled = false;
+btnPrint.disabled = true;
+
+        }
+        catch (err) {
+
+            currentLoan = null;
+            currentOutstanding = null;
+
+            btnReceive.disabled = true;
+            btnPrint.disabled = true;
+
+            clearScreen();
+
+            showApiError(err);
+
+        }
+        finally {
+
+            btnFind.disabled = false;
+            btnFind.innerHTML = "Find";
+
+        }
+
+    });
+
+    //----------------------------------------------------------
+    // LIVE CALCULATION
+    //----------------------------------------------------------
+
+    txtPrincipalAmount.addEventListener("input", function () {
+
+        if (currentOutstanding == null)
+            return;
+
+        let amount = parseFloat(this.value.replace(/,/g, ""));
+
+        if (isNaN(amount))
+            amount = 0;
+
+        document.getElementById("lblPaymentAmount").textContent =
+            "- ₹" + amount.toLocaleString();
+
+        let balance =
+            currentOutstanding.outstandingPrincipal - amount;
+
+        if (balance < 0)
+            balance = 0;
+
+        document.getElementById("lblRevisedOutstanding").textContent =
+            "₹" + balance.toLocaleString();
+
+    });
+
+    //----------------------------------------------------------
+    // Helper
+    //----------------------------------------------------------
+
+    function clearScreen() {
+
+        document.getElementById("lblCustomerName").textContent = "";
+        document.getElementById("lblOriginalPrincipal").textContent = "";
+        document.getElementById("lblOutstandingPrincipal").textContent = "";
+        document.getElementById("lblOutstandingInterest").textContent = "";
+        document.getElementById("lblCurrentOutstanding").textContent = "";
+        document.getElementById("lblLastPayment").textContent = "";
+        document.getElementById("lblMinPartPayment").textContent = "";
+        document.getElementById("lblPaymentAmount").textContent = "";
+        document.getElementById("lblRevisedOutstanding").textContent = "";
+
+        txtPrincipalAmount.value = "";
+        txtReference.value = "";
+
+    }
+    //----------------------------------------------------------
+    // RECEIVE PAYMENT
+    //----------------------------------------------------------
+
+    btnReceive.addEventListener("click", async () => {
+
+        clearApiError();
+        document.getElementById("apiSuccessBanner").style.display = "none";
+
+        if (currentLoan == null) {
+            showApiError(new Error("Please search and select a loan first."));
+            return;
+        }
+
+        let amount = parseFloat(txtPrincipalAmount.value.replace(/,/g, ""));
+
+        if (isNaN(amount) || amount <= 0) {
+            showApiError(new Error("Please enter a valid principal amount."));
+            return;
+        }
+
+        if (amount > currentOutstanding.outstandingPrincipal) {
+            showApiError(new Error("Principal amount cannot exceed outstanding principal."));
+            return;
+        }
+
+        const paymentMode = ddlPaymentMode.value;
+
+        btnReceive.disabled = true;
+        btnReceive.innerHTML =
+            '<i class="bi bi-hourglass-split"></i> Receiving...';
+
+        try {
+
+            const response = await Api.collectPrincipal(currentLoan.loanId, {
+
+                principalAmount: amount,
+                paymentMode: paymentMode,
+                referenceNo: txtReference.value.trim(),
+                processedByUserId: Session.get().userId
+
+            });
+
+            //--------------------------------------------------
+            // Success Banner
+            //--------------------------------------------------
+
+            const success = document.getElementById("apiSuccessBanner");
+
+            success.innerHTML =
+                `<strong>Principal collected successfully.</strong><br>
+                 Receipt No : ${response.receiptNo}<br>
+                 Outstanding Principal : ₹${Number(response.outstandingPrincipal).toLocaleString()}`;
+
+            success.style.display = "block";
+
+            //--------------------------------------------------
+            // Update Screen
+            //--------------------------------------------------
+
+            currentOutstanding.outstandingPrincipal =
+                response.outstandingPrincipal;
+
+            document.getElementById("lblOutstandingPrincipal").textContent =
+                "₹" + Number(response.outstandingPrincipal).toLocaleString();
+
+            document.getElementById("lblCurrentOutstanding").textContent =
+                "₹" + Number(response.outstandingPrincipal).toLocaleString();
+
+            document.getElementById("lblPaymentAmount").textContent =
+                "- ₹0";
+
+            document.getElementById("lblRevisedOutstanding").textContent =
+                "₹" + Number(response.outstandingPrincipal).toLocaleString();
+
+            //--------------------------------------------------
+            // Recalculate Minimum Payment
+            //--------------------------------------------------
+
+            let minimumPayment = response.outstandingPrincipal * 0.05;
+
+            if (minimumPayment < 1000)
+                minimumPayment = 1000;
+
+            document.getElementById("lblMinPartPayment").textContent =
+                "₹" + minimumPayment.toLocaleString();
+
+            //--------------------------------------------------
+            // Clear Inputs
+            //--------------------------------------------------
+
+            txtPrincipalAmount.value = "";
+            txtReference.value = "";
+
+        }
+        catch (err) {
+
+            showApiError(err);
+
+        }
+        finally {
+
+            btnReceive.disabled = false;
+            btnReceive.innerHTML =
+                '<i class="bi bi-wallet2"></i> Receive Payment';
+
+        }
+
+    });
+
+    //----------------------------------------------------------
+    // PRINT RECEIPT
+    //----------------------------------------------------------
+
+    btnPrint.addEventListener("click", () => {
+
+        if (currentLoan == null) {
+
+            showApiError(new Error("Please search a loan first."));
+            return;
+
+        }
+
+        alert(
+            "Receipt printing will be implemented in the next step."
+        );
+
+    });
+
+});
+</script>
+</body>
+</html>

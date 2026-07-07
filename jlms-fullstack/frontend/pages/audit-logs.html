@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Audit Logs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Administration</a><span class="sep">/</span><span class="current">Audit Logs</span></div>
+          <div class="h1">Audit Logs</div>
+        </div>
+        <div class="page-actions"><button class="btn-jlms btn-jlms-outline"><i class="bi bi-download"></i> Export Logs</button></div>
+      </div>
+
+      <div class="panel mb-3">
+        <div class="panel-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3"><label class="field-label">From Date</label><input class="form-control-jlms" value="13/06/2026"></div>
+            <div class="col-md-3"><label class="field-label">To Date</label><input class="form-control-jlms" value="20/06/2026"></div>
+            <div class="col-md-2"><label class="field-label">User</label><select class="form-select-jlms"><option>All Users</option><option>Ravi Kumar</option><option>Priya S.</option></select></div>
+            <div class="col-md-2"><label class="field-label">Module</label><select class="form-select-jlms"><option>All Modules</option><option>Loans</option><option>Customers</option><option>Settings</option></select></div>
+            <div class="col-md-2"><button class="btn-jlms btn-jlms-primary" style="width:100%; justify-content:center;"><i class="bi bi-funnel"></i> Filter</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="grid-toolbar">
+          <div class="grid-toolbar-left"><span class="h4">Activity Log</span><span class="badge-jlms badge-neutral">1,204 events</span></div>
+          <div class="grid-search"><i class="bi bi-search"></i><input placeholder="Search action or record ID"></div>
+        </div>
+        <div class="panel-body no-pad table-jlms-wrap">
+          <table class="table-jlms">
+            <thead><tr><th>Timestamp</th><th>User</th><th>Module</th><th>Action</th><th>Record</th><th>IP Address</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">20-Jun-2026 11:52:03</td><td>Priya S.</td><td><span class="badge-jlms badge-info"><span class="dot"></span>Collections</span></td><td>Interest payment received</td><td class="cell-link">JL-20259812</td><td class="mono text-muted-jlms">10.20.4.12</td></tr>
+              <tr><td class="mono">20-Jun-2026 11:40:21</td><td>Ravi Kumar</td><td><span class="badge-jlms badge-success"><span class="dot"></span>Loans</span></td><td>Loan approved</td><td class="cell-link">JL-20261247</td><td class="mono text-muted-jlms">10.20.4.02</td></tr>
+              <tr><td class="mono">20-Jun-2026 11:14:55</td><td>Suresh M.</td><td><span class="badge-jlms badge-success"><span class="dot"></span>Loans</span></td><td>New loan submitted for approval</td><td class="cell-link">JL-20261247</td><td class="mono text-muted-jlms">10.20.4.18</td></tr>
+              <tr><td class="mono">20-Jun-2026 10:47:09</td><td>Priya S.</td><td><span class="badge-jlms badge-warning"><span class="dot"></span>Loans</span></td><td>Loan closed, jewels released</td><td class="cell-link">JL-20260987</td><td class="mono text-muted-jlms">10.20.4.12</td></tr>
+              <tr><td class="mono">20-Jun-2026 10:12:44</td><td>Suresh M.</td><td><span class="badge-jlms badge-info"><span class="dot"></span>Customers</span></td><td>New customer registered, KYC verified</td><td class="cell-link">CUS-008421</td><td class="mono text-muted-jlms">10.20.4.18</td></tr>
+              <tr><td class="mono">20-Jun-2026 09:05:12</td><td>Ravi Kumar</td><td><span class="badge-jlms badge-danger"><span class="dot"></span>Settings</span></td><td>Gold rate updated (22K: ₹6,160 → ₹6,200)</td><td class="text-muted-jlms">—</td><td class="mono text-muted-jlms">10.20.4.02</td></tr>
+              <tr><td class="mono">19-Jun-2026 18:22:31</td><td>Anitha J.</td><td><span class="badge-jlms badge-danger"><span class="dot"></span>Administration</span></td><td>User role modified: Vignesh K. → Inactive</td><td class="text-muted-jlms">EMP-1121</td><td class="mono text-muted-jlms">10.20.1.05</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid-footer">
+          <span>Showing 1–7 of 1,204</span>
+          <div class="pagination-jlms"><div class="page-btn"><i class="bi bi-chevron-left"></i></div><div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">3</div><div class="page-btn"><i class="bi bi-chevron-right"></i></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "audit-logs";</script>
+<script src="js/jlms-shell.js"></script>
+<script>jlmsInitShell();</script>
+</body>
+</html>

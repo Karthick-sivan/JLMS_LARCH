@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Loan Approval</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Approval</span></div>
+          <div class="h1">Loan Approval Queue</div>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+      <div id="apiSuccessBanner" class="api-success-banner"></div>
+
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Pending Approvals</div><span class="badge-jlms badge-warning" id="pendingCount"><span class="dot"></span>0 Pending</span></div>
+            <div class="panel-body" style="padding:8px 0;" id="pendingList">
+              <div class="text-muted-jlms" style="padding:16px; font-size:12.5px; text-align:center;">Loading...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8" id="decisionPanel" style="display:none;">
+          <div class="panel mb-3">
+            <div class="panel-head">
+              <div class="h4">Loan <span id="loanNumberLabel"></span> <span class="badge-jlms badge-info" style="margin-left:8px;"><span class="dot"></span>Pending Review</span></div>
+            </div>
+            <div class="panel-body">
+              <div class="row g-3 mb-2">
+                <div class="col-md-4"><div class="text-caption">Customer</div><div class="cell-strong" id="detCustomer"></div></div>
+                <div class="col-md-4"><div class="text-caption">Customer Code</div><div class="cell-strong" id="detCode"></div></div>
+                <div class="col-md-4"><div class="text-caption">KYC Status</div><div id="detKyc"></div></div>
+                <div class="col-md-4"><div class="text-caption">Loan Scheme</div><div class="cell-strong" id="detScheme"></div></div>
+                <div class="col-md-4"><div class="text-caption">Loan Amount Requested</div><div class="cell-strong" style="color:var(--navy-700); font-size:15px;" id="detAmount"></div></div>
+                <div class="col-md-4"><div class="text-caption">Market Value / Eligible</div><div class="cell-strong" id="detMarket"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Jewel Summary</div></div>
+            <div class="panel-body no-pad table-jlms-wrap">
+              <table class="table-jlms">
+                <thead><tr><th>Jewel Type</th><th class="text-center">Qty</th><th class="text-end">Net Wt (g)</th><th>Purity</th><th class="text-end">Market Value</th></tr></thead>
+                <tbody id="jewelSummaryBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Approval Decision</div></div>
+            <div class="panel-body">
+              <div class="field-group">
+                <label class="field-label">Remarks<span class="opt">required for rejection</span></label>
+                <textarea class="form-control-jlms" id="decisionRemarks" rows="3" placeholder="Add notes for this decision (visible in audit log)"></textarea>
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button class="btn-jlms btn-jlms-outline-danger" id="btnReject"><i class="bi bi-x-lg"></i> Reject</button>
+                <button class="btn-jlms btn-jlms-success btn-lg" id="btnApprove"><i class="bi bi-check2-circle"></i> Approve Loan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "loan-approval";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+let currentLoanId = null;
+
+async function loadPending() {
+  const list = document.getElementById('pendingList');
+  try {
+    const loans = await Api.getLoans('PendingApproval');
+    document.getElementById('pendingCount').innerHTML = `<span class="dot"></span>${loans.length} Pending`;
+    if (loans.length === 0) {
+      list.innerHTML = '<div class="text-muted-jlms" style="padding:16px; font-size:12.5px; text-align:center;">No loans waiting for approval.</div>';
+      return;
+    }
+    list.innerHTML = loans.map(l => `
+      <div class="pendingRow" data-id="${l.loanId}" style="padding:12px 16px; border-bottom:1px solid var(--n-150); cursor:pointer;">
+        <div style="display:flex; justify-content:space-between;"><span class="cell-strong">${l.loanNumber}</span><span class="cell-strong">₹${Number(l.loanAmount).toLocaleString('en-IN')}</span></div>
+        <div class="text-caption" style="margin-top:2px;">${l.customerName}</div>
+      </div>`).join('');
+    list.querySelectorAll('.pendingRow').forEach(row => {
+      row.addEventListener('click', () => loadLoanDetail(parseInt(row.dataset.id, 10)));
+    });
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+async function loadLoanDetail(loanId) {
+  clearApiError();
+  try {
+    const loan = await Api.getLoanById(loanId);
+    currentLoanId = loanId;
+    document.getElementById('decisionPanel').style.display = 'block';
+    document.getElementById('loanNumberLabel').textContent = loan.loanNumber;
+    document.getElementById('detCustomer').textContent = loan.customer ? loan.customer.customerName : '';
+    document.getElementById('detCode').textContent = loan.customer ? loan.customer.customerCode : '';
+    document.getElementById('detKyc').innerHTML = (loan.customer && loan.customer.kycVerified)
+      ? '<span class="badge-jlms badge-success"><span class="dot"></span>Verified</span>'
+      : '<span class="badge-jlms badge-warning"><span class="dot"></span>Not Verified</span>';
+    document.getElementById('detScheme').textContent = loan.loanScheme ? loan.loanScheme.schemeName : '';
+    document.getElementById('detAmount').textContent = '₹' + Number(loan.loanAmount).toLocaleString('en-IN');
+    document.getElementById('detMarket').textContent = `₹${Number(loan.marketValue).toLocaleString('en-IN')} / ₹${Number(loan.eligibleAmount).toLocaleString('en-IN')}`;
+
+    document.getElementById('jewelSummaryBody').innerHTML = (loan.jewelItems || []).map(ji => `
+      <tr>
+        <td>${ji.jewelType ? ji.jewelType.jewelTypeName : ''}</td>
+        <td class="text-center">${ji.quantity}</td>
+        <td class="text-end">${Number(ji.netWeightGrams).toFixed(3)}</td>
+        <td>${ji.purity || ''}</td>
+        <td class="text-end cell-strong">₹${Number(ji.marketValue).toLocaleString('en-IN')}</td>
+      </tr>`).join('');
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+async function submitDecision(approved) {
+  if (!currentLoanId) return;
+  const remarks = document.getElementById('decisionRemarks').value.trim();
+  if (!approved && !remarks) {
+    showApiError(new Error('Remarks are required when rejecting a loan.'));
+    return;
+  }
+  const user = Session.get();
+  try {
+    await Api.approveLoan(currentLoanId, { approved, remarks: remarks || null, approvedByUserId: user.userId });
+    const successEl = document.getElementById('apiSuccessBanner');
+    successEl.textContent = approved
+      ? 'Loan approved. You can now disburse it from the Loan Disbursement screen.'
+      : 'Loan rejected.';
+    successEl.style.display = 'block';
+    document.getElementById('decisionPanel').style.display = 'none';
+    currentLoanId = null;
+    await loadPending();
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  Session.requireLogin();
+  document.getElementById('btnApprove').addEventListener('click', () => submitDecision(true));
+  document.getElementById('btnReject').addEventListener('click', () => submitDecision(false));
+  loadPending();
+});
+</script>
+</body>
+</html>

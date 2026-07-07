@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Report Center</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .report-cat-item { display:flex; align-items:center; gap:10px; padding:10px 14px; font-size:12.5px; font-weight:600; color:var(--n-700); cursor:pointer; border-left:3px solid transparent; }
+  .report-cat-item:hover { background:var(--n-50); }
+  .report-cat-item.active { background:var(--navy-50); color:var(--navy-700); border-left-color:var(--navy-700); }
+  .report-cat-item .count { margin-left:auto; font-size:10.5px; background:var(--n-150); color:var(--n-600); padding:1px 7px; border-radius:10px; }
+  .report-cat-item.active .count { background:var(--navy-100); color:var(--navy-700); }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><span class="current">Report Center</span></div>
+          <div class="h1">Report Center</div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-3">
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Report Categories</div></div>
+            <div class="panel-body" style="padding:6px 0;">
+              <div class="report-cat-item"><i class="bi bi-person-vcard"></i> Customer Reports <span class="count">4</span></div>
+              <div class="report-cat-item active"><i class="bi bi-folder2-open"></i> Active Loan Report <span class="count">1</span></div>
+              <div class="report-cat-item"><i class="bi bi-graph-down"></i> Outstanding Reports <span class="count">3</span></div>
+              <div class="report-cat-item"><i class="bi bi-cash-coin"></i> Collection Reports <span class="count">5</span></div>
+              <div class="report-cat-item"><i class="bi bi-arrow-repeat"></i> Renewal Report <span class="count">2</span></div>
+              <div class="report-cat-item"><i class="bi bi-check2-circle"></i> Closure Report <span class="count">2</span></div>
+              <div class="report-cat-item"><i class="bi bi-hammer"></i> Auction Reports <span class="count">3</span></div>
+              <div class="report-cat-item"><i class="bi bi-clipboard-data"></i> Audit Reports <span class="count">6</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-9">
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Active Loan Report — Filters</div></div>
+            <div class="panel-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-3"><label class="field-label">From Date</label><input class="form-control-jlms" value="01/06/2026"></div>
+                <div class="col-md-3"><label class="field-label">To Date</label><input class="form-control-jlms" value="20/06/2026"></div>
+                <div class="col-md-3"><label class="field-label">Branch</label><select class="form-select-jlms"><option>All Branches</option><option>Madurai Main</option><option>Trichy</option></select></div>
+                <div class="col-md-3"><label class="field-label">Loan Scheme</label><select class="form-select-jlms"><option>All Schemes</option><option>Gold Plus</option><option>Gold Saver</option></select></div>
+                <div class="col-md-3"><button class="btn-jlms btn-jlms-primary" style="width:100%; justify-content:center;"><i class="bi bi-funnel"></i> Apply Filters</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="grid-toolbar">
+              <div class="grid-toolbar-left"><span class="h4">Results</span><span class="badge-jlms badge-neutral">3,482 records</span></div>
+              <div class="grid-toolbar-left">
+                <button class="btn-jlms btn-jlms-outline btn-sm"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
+                <button class="btn-jlms btn-jlms-outline btn-sm"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                <button class="btn-jlms btn-jlms-outline btn-sm"><i class="bi bi-printer"></i> Print</button>
+              </div>
+            </div>
+            <div class="panel-body no-pad table-jlms-wrap">
+              <table class="table-jlms">
+                <thead><tr><th>Loan No.</th><th>Customer</th><th>Branch</th><th>Scheme</th><th class="text-end">Principal</th><th class="text-end">Outstanding</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-link">JL-20261247</td><td>Murugan S.</td><td>Madurai Main</td><td>Gold Plus</td><td class="text-end">₹3,00,000</td><td class="text-end cell-strong">₹3,00,000</td><td><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td></tr>
+                  <tr><td class="cell-link">JL-20259812</td><td>Ramesh P.</td><td>Madurai Main</td><td>Gold Saver</td><td class="text-end">₹2,80,000</td><td class="text-end cell-strong">₹2,40,000</td><td><span class="badge-jlms badge-warning"><span class="dot"></span>Due</span></td></tr>
+                  <tr><td class="cell-link">JL-20259744</td><td>Geetha N.</td><td>Trichy</td><td>Gold Plus</td><td class="text-end">₹1,80,000</td><td class="text-end cell-strong">₹1,80,000</td><td><span class="badge-jlms badge-danger"><span class="dot"></span>Overdue</span></td></tr>
+                  <tr><td class="cell-link">JL-20258230</td><td>Karthik V.</td><td>Coimbatore</td><td>Gold Express</td><td class="text-end">₹95,000</td><td class="text-end cell-strong">₹62,400</td><td><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td></tr>
+                </tbody>
+                <tfoot><tr><td colspan="4">Total</td><td class="text-end">₹8,55,000</td><td class="text-end">₹7,82,400</td><td></td></tr></tfoot>
+              </table>
+            </div>
+            <div class="grid-footer">
+              <span>Showing 1–4 of 3,482</span>
+              <div class="pagination-jlms"><div class="page-btn"><i class="bi bi-chevron-left"></i></div><div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">3</div><div class="page-btn"><i class="bi bi-chevron-right"></i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "report-center";</script>
+<script src="js/jlms-shell.js"></script>
+<script>jlmsInitShell();</script>
+</body>
+</html>

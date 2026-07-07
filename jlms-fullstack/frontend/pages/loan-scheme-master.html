@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Loan Scheme Master</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Loan Scheme Master</span></div>
+          <div class="h1">Loan Scheme Master</div>
+        </div>
+        <div class="page-actions"><button class="btn-jlms btn-jlms-primary"><i class="bi bi-plus-lg"></i> New Scheme</button></div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Scheme Details</div></div>
+            <div class="panel-body">
+              <div class="field-group"><label class="field-label">Scheme Name<span class="req">*</span></label><input class="form-control-jlms" value="Gold Plus"></div>
+              <div class="field-group"><label class="field-label">Interest Rate (p.a.)<span class="req">*</span></label><div class="input-affix"><input value="12.00"><span class="affix suffix">%</span></div></div>
+              <div class="field-group"><label class="field-label">Tenure<span class="req">*</span></label><div class="input-affix"><input value="12"><span class="affix suffix">months</span></div></div>
+              <div class="field-group"><label class="field-label">Max LTV Ratio<span class="req">*</span></label><div class="input-affix"><input value="75"><span class="affix suffix">%</span></div></div>
+              <div class="field-group"><label class="field-label">Processing Fee</label><div class="input-affix"><span class="affix">₹</span><input value="750"></div></div>
+              <div class="field-group"><label class="field-label">Penalty Rate (per day, overdue)</label><div class="input-affix"><input value="0.05"><span class="affix suffix">%</span></div></div>
+              <div class="form-check-jlms mb-3"><input type="checkbox" checked id="schemeActive"><label for="schemeActive">Active</label></div>
+              <div class="d-flex gap-2">
+                <button class="btn-jlms btn-jlms-ghost" style="flex:1; justify-content:center;">Clear</button>
+                <button class="btn-jlms btn-jlms-primary" style="flex:1; justify-content:center;"><i class="bi bi-save"></i> Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="panel">
+            <div class="grid-toolbar"><span class="h4">Loan Schemes</span><div class="grid-search"><i class="bi bi-search"></i><input placeholder="Search scheme"></div></div>
+            <div class="panel-body no-pad table-jlms-wrap">
+              <table class="table-jlms">
+                <thead><tr><th>Scheme Name</th><th class="text-end">Interest %</th><th class="text-end">Tenure</th><th class="text-end">Max LTV</th><th class="text-end">Processing Fee</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
+                <tbody>
+                  <tr style="background:var(--navy-50);"><td class="cell-strong">Gold Plus</td><td class="text-end">12.00%</td><td class="text-end">12 mo</td><td class="text-end">75%</td><td class="text-end">₹750</td><td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td></tr>
+                  <tr><td class="cell-strong">Gold Saver</td><td class="text-end">10.00%</td><td class="text-end">6 mo</td><td class="text-end">70%</td><td class="text-end">₹500</td><td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td></tr>
+                  <tr><td class="cell-strong">Gold Express</td><td class="text-end">15.00%</td><td class="text-end">3 mo</td><td class="text-end">80%</td><td class="text-end">₹250</td><td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td></tr>
+                  <tr><td class="cell-strong">Gold Bullet</td><td class="text-end">13.50%</td><td class="text-end">12 mo</td><td class="text-end">70%</td><td class="text-end">₹600</td><td class="text-center"><span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "loan-scheme-master";</script>
+<script src="js/jlms-shell.js"></script>
+<script>jlmsInitShell();</script>
+</body>
+</html>

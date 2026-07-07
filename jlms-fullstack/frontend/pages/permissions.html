@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Permissions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .perm-table th, .perm-table td { text-align:center; }
+  .perm-table td:first-child, .perm-table th:first-child { text-align:left; }
+  .perm-check { width:17px; height:17px; accent-color:var(--navy-700); cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Administration</a><span class="sep">/</span><span class="current">Permissions</span></div>
+          <div class="h1">Permissions Matrix</div>
+        </div>
+        <div class="page-actions"><button class="btn-jlms btn-jlms-primary"><i class="bi bi-save"></i> Save Changes</button></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="h4">Module-Level Permissions</div>
+          <select class="form-select-jlms" style="width:200px;"><option>Group by Module</option><option>Group by Role</option></select>
+        </div>
+        <div class="panel-body no-pad table-jlms-wrap">
+          <table class="table-jlms perm-table">
+            <thead>
+              <tr><th>Module / Action</th><th>Branch Manager</th><th>Loan Officer</th><th>Cashier</th><th>Administrator</th><th>Auditor</th></tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="6" style="background:var(--n-100); font-weight:700; color:var(--navy-700);">Customer Management</td></tr>
+              <tr><td>View Customers</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td></tr>
+              <tr><td>Create / Edit Customer</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td></tr>
+              <tr><td colspan="6" style="background:var(--n-100); font-weight:700; color:var(--navy-700);">Loan Operations</td></tr>
+              <tr><td>Create New Loan</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td></tr>
+              <tr><td>Approve Loan</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td></tr>
+              <tr><td>Disburse Loan</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td></tr>
+              <tr><td>Collect Interest / Principal</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td></tr>
+              <tr><td>Close Loan / Release Jewel</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td></tr>
+              <tr><td colspan="6" style="background:var(--n-100); font-weight:700; color:var(--navy-700);">Administration</td></tr>
+              <tr><td>Manage Gold Rates</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td></tr>
+              <tr><td>System Settings</td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td></tr>
+              <tr><td>View Audit Logs</td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check"></td><td><input type="checkbox" class="perm-check" checked></td><td><input type="checkbox" class="perm-check" checked></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "permissions";</script>
+<script src="js/jlms-shell.js"></script>
+<script>jlmsInitShell();</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Auction Management</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Auction Management</span></div>
+          <div class="h1">Auction Management</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-jlms btn-jlms-outline"><i class="bi bi-megaphone"></i> Generate Notices (Bulk)</button>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="kpi-card warning"><div class="kpi-top"><span class="kpi-label">Auction Eligible</span><div class="kpi-icon warning"><i class="bi bi-hammer"></i></div></div><div class="kpi-value">34</div></div></div>
+        <div class="col-md-3"><div class="kpi-card danger"><div class="kpi-top"><span class="kpi-label">Notice Sent</span><div class="kpi-icon danger"><i class="bi bi-envelope-exclamation"></i></div></div><div class="kpi-value">21</div></div></div>
+        <div class="col-md-3"><div class="kpi-card navy"><div class="kpi-top"><span class="kpi-label">Auction Approved</span><div class="kpi-icon navy"><i class="bi bi-clipboard-check"></i></div></div><div class="kpi-value">9</div></div></div>
+        <div class="col-md-3"><div class="kpi-card success"><div class="kpi-top"><span class="kpi-label">Recovery Value</span><div class="kpi-icon success"><i class="bi bi-cash-stack"></i></div></div><div class="kpi-value">₹18.4 L</div></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="grid-toolbar">
+          <div class="grid-toolbar-left">
+            <span class="h4">Auction Eligible Loans</span>
+            <span class="badge-jlms badge-warning"><span class="dot"></span>Overdue &gt; 365 days</span>
+          </div>
+          <div class="grid-search"><i class="bi bi-search"></i><input placeholder="Search loan or customer"></div>
+        </div>
+        <div class="panel-body no-pad table-jlms-wrap">
+          <table class="table-jlms">
+            <thead>
+              <tr>
+                <th><input type="checkbox"></th><th>Loan Number</th><th>Customer</th><th class="text-end">Outstanding</th><th class="text-center">Overdue Days</th><th>Status</th><th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-alert">
+                <td><input type="checkbox" checked></td><td class="cell-link">JL-20245511</td><td>Pandian R</td><td class="text-end cell-strong">₹68,200</td><td class="text-center" style="color:var(--danger-700); font-weight:700;">412</td>
+                <td><span class="badge-jlms badge-danger"><span class="dot"></span>Notice Sent</span></td>
+                <td class="text-center"><button class="btn-jlms btn-jlms-outline btn-sm">Approve</button></td>
+              </tr>
+              <tr class="row-alert">
+                <td><input type="checkbox"></td><td class="cell-link">JL-20244982</td><td>Selvi K</td><td class="text-end cell-strong">₹42,000</td><td class="text-center" style="color:var(--danger-700); font-weight:700;">398</td>
+                <td><span class="badge-jlms badge-danger"><span class="dot"></span>Notice Sent</span></td>
+                <td class="text-center"><button class="btn-jlms btn-jlms-outline btn-sm">Approve</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td><td class="cell-link">JL-20246102</td><td>Bose M</td><td class="text-end cell-strong">₹1,12,500</td><td class="text-center" style="font-weight:700;">381</td>
+                <td><span class="badge-jlms badge-warning"><span class="dot"></span>Eligible</span></td>
+                <td class="text-center"><button class="btn-jlms btn-jlms-outline btn-sm">Send Notice</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td><td class="cell-link">JL-20245760</td><td>Thangam S</td><td class="text-end cell-strong">₹29,800</td><td class="text-center" style="font-weight:700;">377</td>
+                <td><span class="badge-jlms badge-warning"><span class="dot"></span>Eligible</span></td>
+                <td class="text-center"><button class="btn-jlms btn-jlms-outline btn-sm">Send Notice</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td><td class="cell-link">JL-20243390</td><td>Murthy V</td><td class="text-end cell-strong">₹95,400</td><td class="text-center" style="font-weight:700;">429</td>
+                <td><span class="badge-jlms badge-info"><span class="dot"></span>Auction Scheduled</span></td>
+                <td class="text-center"><button class="btn-jlms btn-jlms-primary btn-sm">Record Result</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid-footer">
+          <span>Showing 1–5 of 34</span>
+          <div class="pagination-jlms">
+            <div class="page-btn"><i class="bi bi-chevron-left"></i></div>
+            <div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">3</div>
+            <div class="page-btn"><i class="bi bi-chevron-right"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "auction-management";</script>
+<script src="js/jlms-shell.js"></script>
+<script>jlmsInitShell();</script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Customer Registration</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .upload-box { border: 1.5px dashed var(--n-300); border-radius: var(--radius-md); padding: 18px 12px; text-align:center; background: var(--n-50); cursor:pointer; }
+  .upload-box:hover { border-color: var(--navy-700); background: var(--navy-50); }
+  .upload-box i { font-size: 22px; color: var(--n-400); }
+  .upload-box .ul-text { font-size: 11.5px; color: var(--n-600); margin-top:6px; font-weight:600; }
+  .upload-box .ul-sub { font-size: 10.5px; color: var(--n-400); }
+  .doc-thumb { width:100%; height:78px; border-radius:var(--radius-sm); background:var(--n-150); display:flex; align-items:center; justify-content:center; color:var(--n-400); font-size:22px; position:relative; overflow:hidden; }
+  .doc-thumb .remove-x { position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.55); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Customer Master</span></div>
+          <div class="h1">Customer Registration</div>
+        </div>
+        <div class="page-actions">
+          <a href="customer-search.html" class="btn-jlms btn-jlms-ghost"><i class="bi bi-list-ul"></i> View All / Search</a>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+      <div id="apiSuccessBanner" class="api-success-banner"></div>
+
+      <div class="row g-3">
+        <!-- LEFT: FORM -->
+        <div class="col-lg-9">
+          <div class="panel mb-3">
+            <div class="panel-body">
+
+              <fieldset class="section-fieldset">
+                <legend>Customer Information</legend>
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="field-label">Customer Code</label>
+                    <input type="text" class="form-control-jlms" id="custCode" value="(auto-generated)" disabled>
+                  </div>
+                  <div class="col-md-5">
+                    <label class="field-label">Customer Name<span class="req">*</span></label>
+                    <input type="text" class="form-control-jlms" id="custName" placeholder="As per ID proof">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">Gender<span class="req">*</span></label>
+                    <div class="radio-pill-group" id="genderPills">
+                      <div class="radio-pill" data-value="Male">Male</div>
+                      <div class="radio-pill" data-value="Female">Female</div>
+                      <div class="radio-pill" data-value="Other">Other</div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">Mobile Number<span class="req">*</span></label>
+                    <div class="input-affix"><span class="affix">+91</span><input type="text" id="custMobile" placeholder="10-digit mobile"></div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">Alternate Mobile<span class="opt">optional</span></label>
+                    <div class="input-affix"><span class="affix">+91</span><input type="text" id="custAltMobile" placeholder="Alternate contact"></div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">Date of Birth<span class="opt">optional</span></label>
+                    <input type="date" class="form-control-jlms" id="custDob">
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset class="section-fieldset">
+                <legend>Address Information</legend>
+                <div class="row g-3">
+                  <div class="col-md-12">
+                    <label class="field-label">Address<span class="opt">optional</span></label>
+                    <textarea class="form-control-jlms" id="custAddress" rows="2" placeholder="Door No, Street, Area"></textarea>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">City<span class="opt">optional</span></label>
+                    <input type="text" class="form-control-jlms" id="custCity">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">State<span class="opt">optional</span></label>
+                    <select class="form-select-jlms" id="custState">
+                      <option value="">Select state</option>
+                      <option>Tamil Nadu</option><option>Kerala</option><option>Karnataka</option>
+                      <option>Andhra Pradesh</option><option>Telangana</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">Pincode<span class="opt">optional</span></label>
+                    <input type="text" class="form-control-jlms" id="custPincode">
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset class="section-fieldset">
+                <legend>KYC Information</legend>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="field-label">Aadhaar Number<span class="opt">optional</span></label>
+                    <div class="input-affix"><span class="affix"><i class="bi bi-credit-card"></i></span><input type="text" id="custAadhaar" placeholder="12-digit Aadhaar"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="field-label">PAN Number<span class="opt">optional</span></label>
+                    <div class="input-affix"><span class="affix"><i class="bi bi-credit-card-2-front"></i></span><input type="text" id="custPan" placeholder="ABCDE1234F" style="text-transform:uppercase;"></div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset class="section-fieldset">
+                <legend>Document Upload</legend>
+                <div class="row g-3">
+                  <div class="col-md-4">
+    <label class="field-label">Customer Photo</label>
+
+    <div class="doc-thumb" id="photoPreview">
+        <i class="bi bi-person-circle"></i>
+    </div>
+
+    <div class="upload-box" id="photoUploadBox">
+        <i class="bi bi-cloud-arrow-up"></i>
+        <div class="ul-text">Click to upload</div>
+        <div class="ul-sub">JPG, PNG up to 5MB</div>
+    </div>
+
+    <input
+        type="file"
+        id="customerPhoto"
+        accept=".jpg,.jpeg,.png"
+        hidden>
+</div>
+                  <div class="col-md-4">
+    <label class="field-label">Aadhaar Copy</label>
+
+    <div class="doc-thumb" id="aadhaarPreview">
+        <i class="bi bi-file-earmark-text"></i>
+    </div>
+
+    <div class="upload-box" id="aadhaarUploadBox">
+        <i class="bi bi-cloud-arrow-up"></i>
+        <div class="ul-text" id="aadhaarText">Click or drag to upload</div>
+        <div class="ul-sub">PDF, JPG up to 5MB</div>
+    </div>
+
+    <input
+        type="file"
+        id="aadhaarFile"
+        accept=".pdf,.jpg,.jpeg,.png"
+        hidden>
+</div>
+                  <div class="col-md-4">
+    <label class="field-label">PAN Copy</label>
+
+    <div class="doc-thumb" id="panPreview">
+        <i class="bi bi-file-earmark-text"></i>
+    </div>
+
+    <div class="upload-box" id="panUploadBox">
+        <i class="bi bi-cloud-arrow-up"></i>
+        <div class="ul-text" id="panText">Click or drag to upload</div>
+        <div class="ul-sub">PDF, JPG up to 5MB</div>
+    </div>
+
+    <input
+        type="file"
+        id="panFile"
+        accept=".pdf,.jpg,.jpeg,.png"
+        hidden>
+</div>
+                </div>
+              </fieldset>
+
+            </div>
+            <div class="panel-foot">
+              <button class="btn-jlms btn-jlms-ghost" id="btnClear"><i class="bi bi-x-lg"></i> Clear</button>
+              <button class="btn-jlms btn-jlms-primary" id="btnSaveCustomer"><i class="bi bi-save"></i> Save Customer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: SUMMARY -->
+        <div class="col-lg-3">
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Customer Summary</div></div>
+            <div class="panel-body" style="text-align:center;" id="summaryPanelBody">
+              <div style="width:72px; height:72px; border-radius:50%; background:var(--n-150); color:var(--n-500); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; margin:0 auto 10px;">
+                <i class="bi bi-person-plus"></i>
+              </div>
+              <div class="h4 text-muted-jlms">New Customer</div>
+              <div class="text-muted-jlms" style="margin-top:2px;">Fill the form and click Save</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Loan History</div></div>
+            <div class="panel-body" id="loanHistoryBody" style="padding:16px;">
+              <div class="text-muted-jlms" style="font-size:12px; text-align:center;">No loans yet — save the customer first, then create a loan from the New Loan screen.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "customer-registration";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+let selectedGender = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  Session.requireLogin();
+
+      // ==========================
+    // Customer Photo Upload
+    // ==========================
+    document.getElementById("photoUploadBox").onclick = function () {
+        document.getElementById("customerPhoto").click();
+    };
+
+    document.getElementById("customerPhoto").addEventListener("change", function () {
+
+        const file = this.files[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+
+            document.getElementById("photoPreview").innerHTML =
+                `<img src="${e.target.result}"
+                      style="width:100%;height:100%;object-fit:cover;">`;
+
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+    // ==========================
+    // Aadhaar Upload
+    // ==========================
+    document.getElementById("aadhaarUploadBox").onclick = function () {
+    document.getElementById("aadhaarFile").click();
+};
+
+document.getElementById("aadhaarFile").addEventListener("change", function () {
+
+    const file = this.files[0];
+
+    if (!file) return;
+
+    document.getElementById("aadhaarText").innerText = file.name;
+
+    if (file.type === "application/pdf") {
+
+        document.getElementById("aadhaarPreview").innerHTML =
+            `<i class="bi bi-file-earmark-pdf-fill" style="font-size:34px;color:red;"></i>`;
+
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+
+        document.getElementById("aadhaarPreview").innerHTML =
+            `<img src="${e.target.result}"
+                  style="width:100%;height:100%;object-fit:cover;">`;
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
+    // ==========================
+    // PAN Upload
+    // ==========================
+document.getElementById("panUploadBox").onclick = function () {
+    document.getElementById("panFile").click();
+};
+
+document.getElementById("panFile").addEventListener("change", function () {
+
+    const file = this.files[0];
+
+    if (!file) return;
+
+    document.getElementById("panText").innerText = file.name;
+
+    if (file.type === "application/pdf") {
+
+        document.getElementById("panPreview").innerHTML =
+            `<i class="bi bi-file-earmark-pdf-fill" style="font-size:34px;color:red;"></i>`;
+
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+
+        document.getElementById("panPreview").innerHTML =
+            `<img src="${e.target.result}"
+                  style="width:100%;height:100%;object-fit:cover;">`;
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
+
+  document.querySelectorAll('#genderPills .radio-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#genderPills .radio-pill').forEach(p => p.classList.remove('selected'));
+      pill.classList.add('selected');
+      selectedGender = pill.dataset.value;
+    });
+  });
+
+  document.getElementById('btnClear').addEventListener('click', () => {
+    document.querySelectorAll('#custName, #custMobile, #custAltMobile, #custDob, #custAddress, #custCity, #custPincode, #custAadhaar, #custPan')
+      .forEach(el => el.value = '');
+    document.getElementById('custState').value = '';
+    document.querySelectorAll('#genderPills .radio-pill').forEach(p => p.classList.remove('selected'));
+    selectedGender = null;
+    clearApiError();
+    document.getElementById('apiSuccessBanner').style.display = 'none';
+  });
+
+  document.getElementById('btnSaveCustomer').addEventListener('click', async () => {
+    clearApiError();
+    document.getElementById('apiSuccessBanner').style.display = 'none';
+
+    const name = document.getElementById('custName').value.trim();
+    const mobile = document.getElementById('custMobile').value.trim();
+
+    if (!name || !mobile) {
+      showApiError(new Error('Customer Name and Mobile Number are required.'));
+      return;
+    }
+
+const formData = new FormData();
+
+formData.append("CustomerName", name);
+formData.append("Gender", selectedGender || "");
+formData.append("DateOfBirth", document.getElementById("custDob").value);
+formData.append("Mobile", mobile);
+formData.append("AlternateMobile", document.getElementById("custAltMobile").value);
+formData.append("Address", document.getElementById("custAddress").value);
+formData.append("City", document.getElementById("custCity").value);
+formData.append("State", document.getElementById("custState").value);
+formData.append("Pincode", document.getElementById("custPincode").value);
+formData.append("AadhaarNumber", document.getElementById("custAadhaar").value);
+formData.append("PanNumber", document.getElementById("custPan").value.toUpperCase());
+formData.append("BranchId", "1");
+const photo = document.getElementById("customerPhoto").files[0];
+
+if (photo)
+    formData.append("CustomerPhoto", photo);
+
+const aadhaar = document.getElementById("aadhaarFile").files[0];
+
+if (aadhaar)
+    formData.append("AadhaarFile", aadhaar);
+
+const pan = document.getElementById("panFile").files[0];
+
+if (pan)
+    formData.append("PanFile", pan);
+
+    const btn = document.getElementById('btnSaveCustomer');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+    try {
+      const saved = await Api.createCustomer(formData);
+      document.getElementById('custCode').value = saved.customerCode;
+
+      const successEl = document.getElementById('apiSuccessBanner');
+      successEl.textContent = `Customer saved successfully as ${saved.customerCode}. You can now create a loan for them from the New Loan screen.`;
+      successEl.style.display = 'block';
+
+      const initials = name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('summaryPanelBody').innerHTML = `
+        <div style="width:72px; height:72px; border-radius:50%; background:var(--navy-100); color:var(--navy-700); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700; margin:0 auto 10px;">${initials}</div>
+        <div class="h4">${saved.customerName}</div>
+        <div class="text-muted-jlms" style="margin-top:2px;">${saved.customerCode}</div>
+        <span class="badge-jlms badge-neutral" style="margin-top:10px;"><span class="dot"></span>KYC Not Verified</span>
+        <div class="divider-jlms"></div>
+        <div class="summary-row"><span class="label">Active Loans</span><span class="value">0</span></div>
+        <div class="summary-row"><span class="label">Total Outstanding</span><span class="value">₹0</span></div>`;
+    } catch (err) {
+      showApiError(err);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-save"></i> Save Customer';
+    }
+  });
+});
+</script>
+</body>
+</html>
