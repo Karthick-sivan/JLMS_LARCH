@@ -119,17 +119,29 @@
               <fieldset class="section-fieldset">
                 <legend>Document Upload</legend>
                 <div class="row g-3">
-                  <div class="col-md-4">
+                 <div class="col-md-4">
     <label class="field-label">Customer Photo</label>
 
     <div class="doc-thumb" id="photoPreview">
         <i class="bi bi-person-circle"></i>
     </div>
 
-    <div class="upload-box" id="photoUploadBox">
-        <i class="bi bi-cloud-arrow-up"></i>
-        <div class="ul-text">Click to upload</div>
-        <div class="ul-sub">JPG, PNG up to 5MB</div>
+    <div class="d-grid gap-2 mt-2">
+
+        <button type="button"
+                class="btn btn-outline-primary"
+                id="photoUploadBox">
+            <i class="bi bi-upload"></i>
+            Upload Photo
+        </button>
+
+        <button type="button"
+                class="btn btn-outline-success"
+                id="capturePhotoBtn">
+            <i class="bi bi-camera"></i>
+            Capture Photo
+        </button>
+
     </div>
 
     <input
@@ -222,6 +234,109 @@ let selectedGender = null;
 document.addEventListener('DOMContentLoaded', () => {
   Session.requireLogin();
 
+  let cameraStream = null;
+let capturedPhoto = null;
+
+const cameraModal =
+    new bootstrap.Modal(document.getElementById("cameraModal"));
+
+const video =
+    document.getElementById("cameraVideo");
+
+const canvas =
+    document.getElementById("cameraCanvas");
+
+    document.getElementById("capturePhotoBtn")
+.addEventListener("click", async () => {
+
+    try {
+
+       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    alert("Camera is not supported in this browser.");
+    return;
+}
+
+cameraStream = await navigator.mediaDevices.getUserMedia({
+    video: true
+});
+
+        video.srcObject = cameraStream;
+
+        cameraModal.show();
+
+    }
+    catch {
+
+        alert("Unable to access camera.");
+
+    }
+
+});
+
+document.getElementById("takePhotoBtn")
+.addEventListener("click", () => {
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+
+    ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    canvas.toBlob(blob => {
+
+    if (!blob) {
+        alert("Unable to capture photo.");
+        return;
+    }
+
+    capturedPhoto = new File(
+        [blob],
+            "CustomerPhoto.jpg",
+            {
+                type: "image/jpeg"
+            }
+        );
+        document.getElementById("customerPhoto").value = "";
+
+        document.getElementById("photoPreview").innerHTML =
+            `<img src="${URL.createObjectURL(blob)}"
+                style="width:100%;
+                       height:100%;
+                       object-fit:cover;">`;
+
+    }, "image/jpeg");
+
+    cameraModal.hide();
+    if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+}
+
+});
+
+
+document
+.getElementById("cameraModal")
+.addEventListener("hidden.bs.modal", () => {
+
+    if (cameraStream) {
+
+        cameraStream.getTracks()
+            .forEach(track => track.stop());
+
+        cameraStream = null;
+
+    }
+
+});
+
       // ==========================
     // Customer Photo Upload
     // ==========================
@@ -231,6 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById("customerPhoto").addEventListener("change", function () {
 
+         capturedPhoto = null;
         const file = this.files[0];
 
         if (!file) return;
@@ -334,6 +450,25 @@ document.getElementById("panFile").addEventListener("change", function () {
     document.querySelectorAll('#custName, #custMobile, #custAltMobile, #custDob, #custAddress, #custCity, #custPincode, #custAadhaar, #custPan')
       .forEach(el => el.value = '');
     document.getElementById('custState').value = '';
+    capturedPhoto = null;
+
+document.getElementById("customerPhoto").value = "";
+document.getElementById("aadhaarFile").value = "";
+document.getElementById("panFile").value = "";
+document.getElementById("photoPreview").innerHTML =
+'<i class="bi bi-person-circle"></i>';
+
+document.getElementById("aadhaarPreview").innerHTML =
+'<i class="bi bi-file-earmark-text"></i>';
+
+document.getElementById("panPreview").innerHTML =
+'<i class="bi bi-file-earmark-text"></i>';
+
+document.getElementById("aadhaarText").innerText =
+'Click or drag to upload';
+
+document.getElementById("panText").innerText =
+'Click or drag to upload';
     document.querySelectorAll('#genderPills .radio-pill').forEach(p => p.classList.remove('selected'));
     selectedGender = null;
     clearApiError();
@@ -366,10 +501,19 @@ formData.append("Pincode", document.getElementById("custPincode").value);
 formData.append("AadhaarNumber", document.getElementById("custAadhaar").value);
 formData.append("PanNumber", document.getElementById("custPan").value.toUpperCase());
 formData.append("BranchId", "1");
-const photo = document.getElementById("customerPhoto").files[0];
+const uploadedPhoto =
+    document.getElementById("customerPhoto").files[0];
 
-if (photo)
-    formData.append("CustomerPhoto", photo);
+if (uploadedPhoto) {
+
+    formData.append("CustomerPhoto", uploadedPhoto);
+
+}
+else if (capturedPhoto) {
+
+    formData.append("CustomerPhoto", capturedPhoto);
+
+}
 
 const aadhaar = document.getElementById("aadhaarFile").files[0];
 
@@ -410,5 +554,52 @@ if (pan)
   });
 });
 </script>
+
+<div class="modal fade" id="cameraModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Capture Customer Photo
+                </h5>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center">
+
+                <video id="cameraVideo"
+                       autoplay
+                       playsinline
+                       style="width:100%;
+                              border-radius:10px;">
+                </video>
+
+                <canvas id="cameraCanvas"
+                        style="display:none;">
+                </canvas>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                <button class="btn btn-success"
+                        id="takePhotoBtn">
+                    <i class="bi bi-camera-fill"></i>
+                    Capture
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 </body>
 </html>

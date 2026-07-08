@@ -180,9 +180,15 @@ async function searchCustomersLive(query) {
   const resultsBox = document.getElementById('customerSearchResults');
   if (!query || query.length < 2) { resultsBox.style.display = 'none'; return; }
   try {
-    const rows = await Api.searchCustomers({ search: query });
-    const mobileRows = await Api.searchCustomers({ mobile: query });
-    const merged = [...rows, ...mobileRows].filter((r, i, arr) => arr.findIndex(x => x.customerId === r.customerId) === i);
+    const searchResult = await Api.searchCustomers({ search: query });
+const mobileResult = await Api.searchCustomers({ mobile: query });
+
+const rows = searchResult.items || [];
+const mobileRows = mobileResult.items || [];
+
+const merged = [...rows, ...mobileRows].filter(
+  (r, i, arr) => arr.findIndex(x => x.customerId === r.customerId) === i
+);
 
     if (merged.length === 0) {
       resultsBox.innerHTML = '<div style="padding:10px 14px; color:var(--n-500); font-size:12px;">No matching customers. <a href="customer-registration.html">Register a new customer</a>.</div>';
