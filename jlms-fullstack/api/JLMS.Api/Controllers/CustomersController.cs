@@ -13,13 +13,17 @@ public class CustomersController : ControllerBase
     private readonly JlmsDbContext _db;
     public CustomersController(JlmsDbContext db) => _db = db;
 
-    // GET /api/customers?search=&mobile=&aadhaar=&code=
+    // GET /api/customers?search=&mobile=&aadhaar=&code=&page=1&pageSize=20
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CustomerListItemDto>>> Search(
+    public async Task<ActionResult<PagedResultDto<CustomerListItemDto>>> Search(
         [FromQuery] string? search, [FromQuery] string? mobile,
         [FromQuery] string? aadhaar, [FromQuery] string? code,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 20;
+        if (pageSize > 200) pageSize = 200;
+
         var query = _db.Customers.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -30,6 +34,8 @@ public class CustomersController : ControllerBase
             query = query.Where(c => c.AadhaarNumber != null && c.AadhaarNumber.Contains(aadhaar));
         if (!string.IsNullOrWhiteSpace(code))
             query = query.Where(c => c.CustomerCode.Contains(code));
+
+        var totalCount = await query.CountAsync();
 
         var customers = await query
             .OrderByDescending(c => c.CreatedAt)
@@ -50,10 +56,19 @@ public class CustomersController : ControllerBase
 
             string status = activeLoans == 0 ? "No Active Loan" : (hasOverdue ? "Overdue" : "Active");
 
+            // All loan numbers for this customer (any status), most recent first.
+            var loanNumbers = await _db.Loans
+                .Where(l => l.CustomerId == c.CustomerId)
+                .OrderByDescending(l => l.LoanDate)
+                .Select(l => l.LoanNumber)
+                .ToListAsync();
+            string? loanNumbersStr = loanNumbers.Count > 0 ? string.Join(", ", loanNumbers) : null;
+
             result.Add(new CustomerListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Mobile,
-                activeLoans, outstanding, status));
+                activeLoans, outstanding, status, loanNumbersStr));
         }
-        return Ok(result);
+
+        return Ok(new PagedResultDto<CustomerListItemDto>(result, totalCount, page, pageSize));
     }
 
     // GET /api/customers/5
@@ -71,10 +86,62 @@ public class CustomersController : ControllerBase
 
         return Ok(new CustomerDetailDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Gender, c.DateOfBirth,
             c.Mobile, c.AlternateMobile, c.Address, c.City, c.State, c.Pincode, c.AadhaarNumber, c.PanNumber,
-            c.KycVerified, activeLoans, outstanding, closedLoans, c.CreatedAt));
+            c.KycVerified, activeLoans, outstanding, closedLoans, c.CreatedAt,
+            c.PhotoPath, c.AadhaarDocPath, c.PanDocPath));
     }
 
-    // POST /api/customers
+    // GET /api/customers/5/documents/photo|aadhaar|pan
+    // Streams the actual file from disk. Only the relative path is stored in SQL.
+    [HttpGet("{id:int}/documents/{docType}")]
+    public async Task<IActionResult> GetDocument(int id, string docType)
+    {
+        var c = await _db.Customers.AsNoTracking()
+            .Where(x => x.CustomerId == id)
+            .Select(x => new { x.PhotoPath, x.AadhaarDocPath, x.PanDocPath })
+            .FirstOrDefaultAsync();
+
+        if (c == null) return NotFound(new { message = "Customer not found." });
+
+        string? relativePath = docType.ToLowerInvariant() switch
+        {
+            "photo" => c.PhotoPath,
+            "aadhaar" => c.AadhaarDocPath,
+            "pan" => c.PanDocPath,
+            _ => null
+        };
+
+        if (string.IsNullOrEmpty(relativePath))
+            return NotFound(new { message = "No document uploaded for this type." });
+
+        var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        var fullPath = Path.GetFullPath(Path.Combine(uploadsRoot, relativePath));
+
+        // Guard against path traversal - resolved path must stay inside Uploads.
+        if (!fullPath.StartsWith(Path.GetFullPath(uploadsRoot), StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { message = "Invalid document path." });
+
+        if (!System.IO.File.Exists(fullPath))
+            return NotFound(new { message = "File missing on server." });
+
+        var contentType = GetContentType(fullPath);
+        var bytes = await System.IO.File.ReadAllBytesAsync(fullPath);
+        return File(bytes, contentType, Path.GetFileName(fullPath));
+    }
+
+    private static string GetContentType(string path)
+    {
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".pdf" => "application/pdf",
+            _ => "application/octet-stream"
+        };
+    }
+
     // POST /api/customers
     [HttpPost]
     public async Task<ActionResult<CustomerDetailDto>> Create([FromForm] CustomerCreateDto dto)
@@ -203,12 +270,14 @@ public class CustomersController : ControllerBase
                 0,
                 0,
                 0,
-                entity.CreatedAt));
+                entity.CreatedAt,
+                entity.PhotoPath,
+                entity.AadhaarDocPath,
+                entity.PanDocPath));
     }
 
-
-        // PUT /api/customers/5
-        [HttpPut("{id:int}")]
+    // PUT /api/customers/5
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] CustomerUpdateDto dto)
     {
         var entity = await _db.Customers.FindAsync(id);

@@ -168,6 +168,22 @@ document.addEventListener('DOMContentLoaded', () => {
         processedByUserId: user.userId
       });
 
+      // Refresh outstanding values
+const outstanding = await Api.getOutstanding(currentLoan.loanId);
+
+document.getElementById('detPrincipal').textContent =
+    '₹' + Number(outstanding.outstandingPrincipal).toLocaleString('en-IN');
+
+document.getElementById('detInterest').textContent =
+    '₹' + Number(outstanding.outstandingInterest).toLocaleString('en-IN');
+
+document.getElementById('detPenalty').textContent =
+    '₹' + Number(outstanding.penalty).toLocaleString('en-IN');
+
+document.getElementById('amountInput').value =
+    (Number(outstanding.outstandingInterest) +
+     Number(outstanding.penalty)).toFixed(2);
+
       document.getElementById('receiptPanel').style.display = 'block';
       document.getElementById('receiptNoBadge').innerHTML = '<span class="dot"></span>' + receipt.receiptNumber;
       document.getElementById('receiptBox').innerHTML = `

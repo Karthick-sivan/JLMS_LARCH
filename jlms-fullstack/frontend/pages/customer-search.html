@@ -7,6 +7,71 @@
 <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
 <link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .btn-icon-jlms {
+    border: none;
+    background: transparent;
+    color: var(--jlms-primary, #0d3b66);
+    font-size: 1.05rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+  }
+  .btn-icon-jlms:hover { background: rgba(13, 59, 102, 0.08); }
+  .doc-card {
+    border: 1px solid #e5e9ef;
+    border-radius: 10px;
+    padding: 14px;
+    height: 100%;
+  }
+  .doc-card-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .doc-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    background: #f7f8fa;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .doc-preview img { max-width: 100%; max-height: 220px; object-fit: contain; }
+  .doc-preview iframe { width: 100%; height: 220px; border: 0; background: #fff; }
+  .doc-preview .doc-empty { color: #9aa4b2; font-size: 0.85rem; text-align: center; padding: 20px; }
+  .doc-preview .doc-loading { color: #9aa4b2; font-size: 0.85rem; }
+  .doc-preview .doc-error { color: #c0392b; font-size: 0.8rem; text-align: center; padding: 20px; line-height: 1.4; }
+  .loan-no-cell { font-size: 0.85rem; color: #334155; }
+  .pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid #eef0f3;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .pagination-bar .page-info { color: #6b7280; font-size: 0.85rem; }
+  .page-size-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+  .page-size-select select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #d7dce3;
+    font-size: 0.85rem;
+  }
+</style>
 </head>
 <body>
 <div class="app-shell">
@@ -63,24 +128,88 @@
           <table class="table-jlms">
             <thead>
               <tr>
-                <th>Customer Code</th><th>Customer Name</th><th>Mobile</th><th class="text-center">Active Loans</th><th class="text-end">Outstanding</th><th>Status</th>
+                <th>Customer Code</th><th>Customer Name</th><th>Loan No.</th><th>Mobile</th><th class="text-center">Active Loans</th><th class="text-end">Outstanding</th><th>Status</th><th class="text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="resultsBody">
-              <tr><td colspan="6" class="text-center text-muted-jlms" style="padding:28px;">Loading...</td></tr>
+              <tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">Loading...</td></tr>
             </tbody>
           </table>
+        </div>
+        <div class="pagination-bar">
+          <div class="page-size-select">
+            <span>Rows per page</span>
+            <select id="pageSizeSelect">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <div class="page-info" id="pageInfo">Page 1</div>
+          <nav>
+            <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+          </nav>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Documents Modal -->
+<div class="modal fade" id="docsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Customer Documents — <span id="docsModalCustomerName">-</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="doc-card">
+              <div class="doc-card-title">
+                <span><i class="bi bi-person-badge"></i> Photo</span>
+                <button class="btn-icon-jlms" id="btnDownloadPhoto" title="Download" disabled><i class="bi bi-download"></i></button>
+              </div>
+              <div class="doc-preview" id="previewPhoto"><span class="doc-loading">Loading...</span></div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="doc-card">
+              <div class="doc-card-title">
+                <span><i class="bi bi-file-earmark-text"></i> Aadhaar</span>
+                <button class="btn-icon-jlms" id="btnDownloadAadhaar" title="Download" disabled><i class="bi bi-download"></i></button>
+              </div>
+              <div class="doc-preview" id="previewAadhaar"><span class="doc-loading">Loading...</span></div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="doc-card">
+              <div class="doc-card-title">
+                <span><i class="bi bi-file-earmark-text"></i> PAN</span>
+                <button class="btn-icon-jlms" id="btnDownloadPan" title="Download" disabled><i class="bi bi-download"></i></button>
+              </div>
+              <div class="doc-preview" id="previewPan"><span class="doc-loading">Loading...</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "customer-master";</script>
 <script src="js/jlms-shell.js"></script>
 <script src="js/api-client.js"></script>
 <script>
 jlmsInitShell();
+
+let pageSize = 20;
+let currentPage = 1;
+let totalPages = 1;
+let activeDocObjectUrls = []; // track blob URLs to revoke on close
 
 function statusBadge(status) {
   if (status === 'Active') return '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>';
@@ -92,12 +221,13 @@ function initials(name) {
   return name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
 }
 
-async function runSearch() {
+async function runSearch(page = 1) {
   clearApiError();
+  currentPage = page;
   const body = document.getElementById('resultsBody');
-  body.innerHTML = '<tr><td colspan="6" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
+  body.innerHTML = '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
 
-  const params = {};
+  const params = { page: currentPage, pageSize: pageSize };
   const name = document.getElementById('searchName').value.trim();
   const mobile = document.getElementById('searchMobile').value.trim();
   const aadhaar = document.getElementById('searchAadhaar').value.trim();
@@ -108,11 +238,16 @@ async function runSearch() {
   if (code) params.code = code;
 
   try {
-    const rows = await Api.searchCustomers(params);
-    document.getElementById('resultCount').textContent = `${rows.length} customer${rows.length === 1 ? '' : 's'}`;
+    // Backend returns a paged shape: { items, totalCount, page, pageSize }
+    const pagedResult = await Api.searchCustomers(params);
+    const rows = pagedResult.items || [];
+    const totalCount = pagedResult.totalCount ?? rows.length;
+
+    document.getElementById('resultCount').textContent = `${totalCount} customer${totalCount === 1 ? '' : 's'}`;
 
     if (rows.length === 0) {
-      body.innerHTML = '<tr><td colspan="6" class="text-center text-muted-jlms" style="padding:28px;">No customers found. Try different filters, or register a new customer.</td></tr>';
+      body.innerHTML = '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">No customers found. Try different filters, or register a new customer.</td></tr>';
+      renderPagination(0, 0);
       return;
     }
 
@@ -120,24 +255,154 @@ async function runSearch() {
       <tr>
         <td class="cell-link">${c.customerCode}</td>
         <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(c.customerName)}</div>${c.customerName}</div></td>
+        <td class="loan-no-cell">${c.loanNumbers ? c.loanNumbers : '<span class="text-muted-jlms">—</span>'}</td>
         <td>${c.mobile}</td>
         <td class="text-center">${c.activeLoans}</td>
         <td class="text-end cell-strong">₹${Number(c.totalOutstanding).toLocaleString('en-IN')}</td>
         <td>${statusBadge(c.status)}</td>
+        <td class="text-center">
+          <button class="btn-icon-jlms" title="View documents" onclick="openDocsModal(${c.customerId}, '${c.customerName.replace(/'/g, "\\'")}')">
+            <i class="bi bi-eye"></i>
+          </button>
+        </td>
       </tr>`).join('');
+
+    totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+    renderPagination(currentPage, totalPages);
   } catch (err) {
     showApiError(err);
-    body.innerHTML = '<tr><td colspan="6" class="text-center text-muted-jlms" style="padding:28px;">Could not load customers.</td></tr>';
+    body.innerHTML = '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">Could not load customers.</td></tr>';
+    renderPagination(0, 0);
   }
 }
 
+function renderPagination(page, pages) {
+  const info = document.getElementById('pageInfo');
+  const controls = document.getElementById('paginationControls');
+  if (pages === 0) {
+    info.textContent = '';
+    controls.innerHTML = '';
+    return;
+  }
+  info.textContent = `Page ${page} of ${pages}`;
+
+  let html = '';
+  html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
+    <button class="page-link" onclick="runSearch(${page - 1})">Prev</button></li>`;
+
+  const windowSize = 5;
+  let start = Math.max(1, page - Math.floor(windowSize / 2));
+  let end = Math.min(pages, start + windowSize - 1);
+  start = Math.max(1, end - windowSize + 1);
+
+  for (let p = start; p <= end; p++) {
+    html += `<li class="page-item ${p === page ? 'active' : ''}">
+      <button class="page-link" onclick="runSearch(${p})">${p}</button></li>`;
+  }
+
+  html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
+    <button class="page-link" onclick="runSearch(${page + 1})">Next</button></li>`;
+
+  controls.innerHTML = html;
+}
+
+// ---------- Documents modal ----------
+
+async function openDocsModal(customerId, customerName) {
+  document.getElementById('docsModalCustomerName').textContent = customerName || '-';
+  resetDocPreview('previewPhoto', 'btnDownloadPhoto');
+  resetDocPreview('previewAadhaar', 'btnDownloadAadhaar');
+  resetDocPreview('previewPan', 'btnDownloadPan');
+
+  const modalEl = document.getElementById('docsModal');
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+  modal.show();
+
+  let detail;
+  try {
+    detail = await Api.getCustomer(customerId);
+  } catch (err) {
+    showApiError(err);
+    ['previewPhoto', 'previewAadhaar', 'previewPan'].forEach(id => {
+      document.getElementById(id).innerHTML = '<span class="doc-error">Could not load customer details.</span>';
+    });
+    return;
+  }
+
+  loadDocument(customerId, 'photo', detail.photoPath, 'previewPhoto', 'btnDownloadPhoto', `${customerName}-photo`);
+  loadDocument(customerId, 'aadhaar', detail.aadhaarDocPath, 'previewAadhaar', 'btnDownloadAadhaar', `${customerName}-aadhaar`);
+  loadDocument(customerId, 'pan', detail.panDocPath, 'previewPan', 'btnDownloadPan', `${customerName}-pan`);
+}
+
+function resetDocPreview(previewId, btnId) {
+  document.getElementById(previewId).innerHTML = '<span class="doc-loading">Loading...</span>';
+  const btn = document.getElementById(btnId);
+  btn.disabled = true;
+  btn.onclick = null;
+}
+
+async function loadDocument(customerId, docType, hasPath, previewId, btnId, downloadNameBase) {
+  const previewEl = document.getElementById(previewId);
+  const btnEl = document.getElementById(btnId);
+
+  if (!hasPath) {
+    previewEl.innerHTML = '<span class="doc-empty">Not uploaded</span>';
+    return;
+  }
+
+  try {
+    // API_BASE_URL comes from api-client.js (loaded before this script).
+    const url = `${API_BASE_URL}/customers/${customerId}/documents/${docType}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status} — the API returned an error for this document.`);
+
+    const blob = await res.blob();
+    if (blob.size === 0) throw new Error('The file on the server is empty.');
+
+    const objectUrl = URL.createObjectURL(blob);
+    activeDocObjectUrls.push(objectUrl);
+
+    const type = blob.type || '';
+    if (type.startsWith('image/')) {
+      previewEl.innerHTML = `<img src="${objectUrl}" alt="${docType}">`;
+    } else if (type === 'application/pdf') {
+      // Aadhaar/PAN are frequently uploaded as scanned PDFs - render them inline.
+      previewEl.innerHTML = `<iframe src="${objectUrl}" title="${docType} document"></iframe>`;
+    } else {
+      previewEl.innerHTML = `<div class="doc-empty"><i class="bi bi-file-earmark" style="font-size:1.8rem;"></i><br>Preview not available for this file type.<br><a href="${objectUrl}" target="_blank" rel="noopener">Open in new tab</a></div>`;
+    }
+
+    const ext = type === 'application/pdf' ? '.pdf' : (type.startsWith('image/') ? '.' + type.split('/')[1] : '');
+    btnEl.disabled = false;
+    btnEl.onclick = () => {
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `${downloadNameBase}${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+  } catch (err) {
+    previewEl.innerHTML = `<span class="doc-error">Could not load document.<br>${err.message}</span>`;
+  }
+}
+
+document.getElementById('docsModal').addEventListener('hidden.bs.modal', () => {
+  activeDocObjectUrls.forEach(url => URL.revokeObjectURL(url));
+  activeDocObjectUrls = [];
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   Session.requireLogin();
-  document.getElementById('btnSearch').addEventListener('click', runSearch);
-  [['searchName'], ['searchMobile'], ['searchAadhaar'], ['searchCode']].forEach(([id]) => {
-    document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
+  document.getElementById('btnSearch').addEventListener('click', () => runSearch(1));
+  document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+    pageSize = parseInt(e.target.value, 10) || 20;
+    runSearch(1);
   });
-  runSearch(); // initial load shows all customers (empty list on a fresh DB)
+  [['searchName'], ['searchMobile'], ['searchAadhaar'], ['searchCode']].forEach(([id]) => {
+    document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(1); });
+  });
+  runSearch(1); // initial load shows all customers (empty list on a fresh DB)
 });
 </script>
 </body>

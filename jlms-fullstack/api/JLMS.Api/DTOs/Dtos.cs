@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Http;
 public record LoginRequest(string Username, string Password, int? BranchId);
 public record LoginResponse(int UserId, string FullName, string Username, string RoleName, string BranchName, string Token);
 
+// ---------- Common ----------
+public record PagedResultDto<T>(List<T> Items, int TotalCount, int Page, int PageSize);
+
 // ---------- Customers ----------
 public class CustomerCreateDto
 {
@@ -47,14 +50,15 @@ public record CustomerUpdateDto(
 
 public record CustomerListItemDto(
     int CustomerId, string CustomerCode, string CustomerName, string Mobile,
-    int ActiveLoans, decimal TotalOutstanding, string Status
+    int ActiveLoans, decimal TotalOutstanding, string Status, string? LoanNumbers = null
 );
 
 public record CustomerDetailDto(
     int CustomerId, string CustomerCode, string CustomerName, string? Gender,
     DateTime? DateOfBirth, string Mobile, string? AlternateMobile, string? Address,
     string? City, string? State, string? Pincode, string? AadhaarNumber, string? PanNumber,
-    bool KycVerified, int ActiveLoans, decimal TotalOutstanding, int ClosedLoans, DateTime CreatedAt
+    bool KycVerified, int ActiveLoans, decimal TotalOutstanding, int ClosedLoans, DateTime CreatedAt,
+    string? PhotoPath = null, string? AadhaarDocPath = null, string? PanDocPath = null
 );
 
 // ---------- Jewel Types / Gold Rates / Schemes (Masters) ----------

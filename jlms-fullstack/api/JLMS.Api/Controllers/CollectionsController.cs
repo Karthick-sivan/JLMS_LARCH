@@ -30,14 +30,24 @@ public class CollectionsController : ControllerBase
             return BadRequest($"Loan is '{loan.Status}', outstanding figures only apply to Active loans.");
 
         var lastTxn = await _db.LoanTransactions.AsNoTracking()
-            .Where(t => t.LoanId == loanId && (t.TransactionType == "InterestCollection" || t.TransactionType == "Disbursement" || t.TransactionType == "Renewal"))
+          .Where(t => t.LoanId == loanId &&
+    (t.TransactionType == "InterestCollection" ||
+     t.TransactionType == "PrincipalCollection" ||
+     t.TransactionType == "Disbursement" ||
+     t.TransactionType == "Renewal"))
             .OrderByDescending(t => t.TransactionDate)
             .FirstOrDefaultAsync();
 
         var fromDate = lastTxn?.TransactionDate ?? loan.LoanDate ?? loan.CreatedAt;
         var today = DateTime.UtcNow;
 
-        var accruedInterest = _calc.CalculateAccruedInterest(loan.OutstandingPrincipal, loan.InterestRatePct, fromDate, today);
+        var newlyAccruedInterest = _calc.CalculateAccruedInterest(
+     loan.OutstandingPrincipal,
+     loan.InterestRatePct,
+     fromDate,
+     today);
+
+        var accruedInterest = loan.OutstandingInterest + newlyAccruedInterest;
 
         decimal penalty = 0;
         int overdueDays = 0;
@@ -73,11 +83,21 @@ public class CollectionsController : ControllerBase
 
         // Apply received amount: penalty first, then interest (typical collection priority)
         var lastTxn = await _db.LoanTransactions.AsNoTracking()
-            .Where(t => t.LoanId == loanId && (t.TransactionType == "InterestCollection" || t.TransactionType == "Disbursement" || t.TransactionType == "Renewal"))
+          .Where(t => t.LoanId == loanId &&
+    (t.TransactionType == "InterestCollection" ||
+     t.TransactionType == "PrincipalCollection" ||
+     t.TransactionType == "Disbursement" ||
+     t.TransactionType == "Renewal"))
             .OrderByDescending(t => t.TransactionDate).FirstOrDefaultAsync();
         var fromDate = lastTxn?.TransactionDate ?? loan.LoanDate ?? loan.CreatedAt;
 
-        var accruedInterest = _calc.CalculateAccruedInterest(loan.OutstandingPrincipal, loan.InterestRatePct, fromDate, DateTime.UtcNow);
+        var newlyAccruedInterest = _calc.CalculateAccruedInterest(
+            loan.OutstandingPrincipal,
+            loan.InterestRatePct,
+            fromDate,
+            DateTime.UtcNow);
+
+        var accruedInterest = loan.OutstandingInterest + newlyAccruedInterest;
 
         decimal penalty = 0;
         if (loan.MaturityDate.HasValue)
@@ -98,6 +118,13 @@ public class CollectionsController : ControllerBase
                 $"Amount exceeds outstanding dues. Total payable is ₹{totalDue:N2}.");
         }
 
+        if (!request.IsPartial &&
+            Math.Abs(request.AmountReceived - totalDue) > 0.01m)
+        {
+            return BadRequest(
+                $"Full payment required. Please pay ₹{totalDue:N2} or enable Partial Payment.");
+        }
+
         var remaining = request.AmountReceived;
         var penaltyCollected = Math.Min(remaining, penalty);
         remaining -= penaltyCollected;
@@ -106,6 +133,12 @@ public class CollectionsController : ControllerBase
 
         loan.OutstandingInterest = Math.Max(0, accruedInterest - interestCollected);
         loan.PenaltyAccrued = Math.Max(0, penalty - penaltyCollected);
+
+        // If full payment, clear all outstanding interest.
+        if (!request.IsPartial)
+        {
+            loan.OutstandingInterest = 0;
+        }
         loan.UpdatedAt = DateTime.UtcNow;
 
         var nextDue = (loan.MaturityDate ?? DateTime.UtcNow).Date;
