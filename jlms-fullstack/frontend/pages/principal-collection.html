@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +8,11 @@
 <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
 <link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .receipt-box { border:1px solid var(--n-200); border-radius:var(--radius-md); padding:18px; font-family:"Consolas",monospace; font-size:11.5px; background:#fdfdfd; }
+  .receipt-box .r-row { display:flex; justify-content:space-between; padding:3px 0; }
+  .receipt-divider { border-top:1px dashed var(--n-300); margin:8px 0; }
+</style>
 </head>
 <body>
 <div class="app-shell">
@@ -95,6 +101,19 @@ class="btn-jlms btn-jlms-primary btn-lg"><i class="bi bi-wallet2"></i> Receive P
             </div>
           </div>
         </div>
+
+        <div class="col-lg-4">
+          <div class="panel" id="receiptPanel" style="display:none;">
+            <div class="panel-head"><div class="h4">Receipt</div><span class="badge-jlms badge-success" id="receiptNoBadge"></span></div>
+            <div class="panel-body">
+              <div class="receipt-box" id="receiptBox"></div>
+              <div class="d-flex justify-content-end mt-3">
+                <!--<button class="btn-jlms btn-jlms-ghost" id="btnPrintActual"><i class="bi bi-printer"></i> Print</button> -->
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -104,6 +123,7 @@ class="btn-jlms btn-jlms-primary btn-lg"><i class="bi bi-wallet2"></i> Receive P
 <script src="js/jlms-shell.js"></script>
 <script src="js/api-client.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 jlmsInitShell();
 
@@ -114,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentLoan = null;
     let currentOutstanding = null;
     let currentReceiptNo = "";
+    let lastResponse = null;
 
     const txtLoanNumber = document.getElementById("txtLoanNumber");
     const txtPrincipalAmount = document.getElementById("txtPrincipalAmount");
@@ -340,12 +361,15 @@ btnPrint.disabled = true;
             // Success Banner
             //--------------------------------------------------
 
+            const newOutstanding = parseFloat(response.newOutstanding) || 0;
+            lastResponse = response;
+
             const success = document.getElementById("apiSuccessBanner");
 
             success.innerHTML =
                 `<strong>Principal collected successfully.</strong><br>
-                 Receipt No : ${response.receiptNo}<br>
-                 Outstanding Principal : ₹${Number(response.outstandingPrincipal).toLocaleString()}`;
+                 Receipt No : ${response.receiptNumber}<br>
+                 Outstanding Principal : ₹${newOutstanding.toLocaleString()}`;
 
             success.style.display = "block";
 
@@ -353,26 +377,25 @@ btnPrint.disabled = true;
             // Update Screen
             //--------------------------------------------------
 
-            currentOutstanding.outstandingPrincipal =
-                response.outstandingPrincipal;
+            currentOutstanding.outstandingPrincipal = newOutstanding;
 
             document.getElementById("lblOutstandingPrincipal").textContent =
-                "₹" + Number(response.outstandingPrincipal).toLocaleString();
+                "₹" + newOutstanding.toLocaleString();
 
             document.getElementById("lblCurrentOutstanding").textContent =
-                "₹" + Number(response.outstandingPrincipal).toLocaleString();
+                "₹" + newOutstanding.toLocaleString();
 
             document.getElementById("lblPaymentAmount").textContent =
                 "- ₹0";
 
             document.getElementById("lblRevisedOutstanding").textContent =
-                "₹" + Number(response.outstandingPrincipal).toLocaleString();
+                "₹" + newOutstanding.toLocaleString();
 
             //--------------------------------------------------
             // Recalculate Minimum Payment
             //--------------------------------------------------
 
-            let minimumPayment = response.outstandingPrincipal * 0.05;
+            let minimumPayment = currentOutstanding.outstandingPrincipal * 0.05;
 
             if (minimumPayment < 1000)
                 minimumPayment = 1000;
@@ -386,6 +409,34 @@ btnPrint.disabled = true;
 
             txtPrincipalAmount.value = "";
             txtReference.value = "";
+
+            btnPrint.disabled = false;
+
+            //--------------------------------------------------
+            // Show Receipt Panel
+            //--------------------------------------------------
+
+            document.getElementById("receiptNoBadge").innerHTML =
+                '<span class="dot"></span>' + response.receiptNumber;
+
+            document.getElementById("receiptBox").innerHTML = `
+              <div style="text-align:center; font-weight:700; font-size:13px;">JLMS RECEIPT</div>
+              <div style="text-align:center; color:var(--n-500); margin-bottom:8px;">Principal Part-Payment</div>
+              <div class="receipt-divider"></div>
+              <div class="r-row"><span>Receipt No.</span><span>${response.receiptNumber}</span></div>
+              <div class="r-row"><span>Date</span><span>${new Date(response.receiptDate).toLocaleString('en-IN')}</span></div>
+              <div class="r-row"><span>Loan No.</span><span>${response.loanNumber}</span></div>
+              <div class="r-row"><span>Customer</span><span>${response.customerName}</span></div>
+              <div class="receipt-divider"></div>
+              <div class="r-row"><span>Original Principal</span><span>₹${Number(response.originalPrincipal).toLocaleString('en-IN')}</span></div>
+              <div class="r-row"><span>Previous Outstanding</span><span>₹${Number(response.previousOutstanding).toLocaleString('en-IN')}</span></div>
+              <div class="r-row"><span>Principal Collected</span><span>₹${Number(response.principalCollected).toLocaleString('en-IN')}</span></div>
+              <div class="receipt-divider"></div>
+              <div class="r-row" style="font-weight:700;"><span>New Outstanding</span><span>₹${newOutstanding.toLocaleString('en-IN')}</span></div>
+              <div class="r-row"><span>Mode</span><span>${response.paymentMode}</span></div>
+              ${response.referenceNo ? `<div class="r-row"><span>Reference No.</span><span>${response.referenceNo}</span></div>` : ''}`;
+
+            document.getElementById("receiptPanel").style.display = "block";
 
         }
         catch (err) {
@@ -407,20 +458,60 @@ btnPrint.disabled = true;
     // PRINT RECEIPT
     //----------------------------------------------------------
 
-    btnPrint.addEventListener("click", () => {
+    function downloadReceipt() {
 
-        if (currentLoan == null) {
-
-            showApiError(new Error("Please search a loan first."));
+        if (!lastResponse) {
+            showApiError(new Error("No receipt available. Please receive a payment first."));
             return;
-
         }
 
-        alert(
-            "Receipt printing will be implemented in the next step."
-        );
+        const r = lastResponse;
+        const newOuts = parseFloat(r.newOutstanding) || 0;
+        const fileName = "Receipt-" + r.receiptNumber + ".pdf";
 
-    });
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "mm", format: "a5", orientation: "portrait" });
+
+        const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
+        let y = 20;
+
+        const line  = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: "right" }); y += 6; };
+        const divid = ()     => { doc.setDrawColor(180); doc.setLineDashPattern([1,1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
+
+        doc.setFont("courier", "bold");
+        doc.setFontSize(13);
+        doc.text("JLMS RECEIPT", lm + tw / 2, y, { align: "center" }); y += 6;
+        doc.setFont("courier", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(120);
+        doc.text("Principal Part-Payment", lm + tw / 2, y, { align: "center" }); y += 4;
+        doc.setTextColor(30);
+        divid();
+
+        doc.setFontSize(10);
+        line("Receipt No.", r.receiptNumber);
+        line("Date", new Date(r.receiptDate).toLocaleString("en-IN"));
+        line("Loan No.", r.loanNumber);
+        line("Customer", r.customerName);
+        divid();
+
+        line("Original Principal",  "Rs." + Number(r.originalPrincipal).toLocaleString("en-IN"));
+        line("Previous Outstanding","Rs." + Number(r.previousOutstanding).toLocaleString("en-IN"));
+        line("Principal Collected", "Rs." + Number(r.principalCollected).toLocaleString("en-IN"));
+        divid();
+
+        doc.setFont("courier", "bold");
+        line("New Outstanding", "Rs." + newOuts.toLocaleString("en-IN"));
+        doc.setFont("courier", "normal");
+        line("Mode", r.paymentMode);
+        if (r.referenceNo) line("Reference No.", r.referenceNo);
+
+        doc.save(fileName);
+
+    }
+
+    btnPrint.addEventListener("click", downloadReceipt);
+    document.getElementById("btnPrintActual").addEventListener("click", downloadReceipt);
 
 });
 </script>
