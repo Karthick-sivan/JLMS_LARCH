@@ -15,44 +15,81 @@
     <div id="jlmsTopbarMount"></div>
     <div class="page-content">
       <div class="page-header">
+        <div id="apiErrorBanner" class="api-error-banner"></div>
+        <div id="apiSuccessBanner" class="api-success-banner"></div>
         <div>
           <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Loan Scheme Master</span></div>
           <div class="h1">Loan Scheme Master</div>
         </div>
-        <div class="page-actions"><button class="btn-jlms btn-jlms-primary"><i class="bi bi-plus-lg"></i> New Scheme</button></div>
       </div>
 
       <div class="row g-3">
         <div class="col-lg-4">
           <div class="panel">
-            <div class="panel-head"><div class="h4">Scheme Details</div></div>
+            <div class="panel-head">
+              <div class="h4" id="formTitle">Add Scheme</div>
+            </div>
             <div class="panel-body">
-              <div class="field-group"><label class="field-label">Scheme Name<span class="req">*</span></label><input class="form-control-jlms" value="Gold Plus"></div>
-              <div class="field-group"><label class="field-label">Interest Rate (p.a.)<span class="req">*</span></label><div class="input-affix"><input value="12.00"><span class="affix suffix">%</span></div></div>
-              <div class="field-group"><label class="field-label">Tenure<span class="req">*</span></label><div class="input-affix"><input value="12"><span class="affix suffix">months</span></div></div>
-              <div class="field-group"><label class="field-label">Max LTV Ratio<span class="req">*</span></label><div class="input-affix"><input value="75"><span class="affix suffix">%</span></div></div>
-              <div class="field-group"><label class="field-label">Processing Fee</label><div class="input-affix"><span class="affix">₹</span><input value="750"></div></div>
-              <div class="field-group"><label class="field-label">Penalty Rate (per day, overdue)</label><div class="input-affix"><input value="0.05"><span class="affix suffix">%</span></div></div>
-              <div class="form-check-jlms mb-3"><input type="checkbox" checked id="schemeActive"><label for="schemeActive">Active</label></div>
+              <div class="field-group">
+                <label class="field-label">Scheme Name<span class="req">*</span></label>
+                <input id="txtSchemeName" class="form-control-jlms" placeholder="e.g. Gold Plus">
+              </div>
+              <div class="field-group">
+                <label class="field-label">Interest Rate (p.a.)<span class="req">*</span></label>
+                <div class="input-affix">
+                  <input id="txtInterestRate" type="number" step="0.01" min="0" placeholder="e.g. 12.00">
+                  <span class="affix suffix">%</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Tenure<span class="req">*</span></label>
+                <div class="input-affix">
+                  <input id="txtTenure" type="number" step="1" min="1" placeholder="e.g. 12">
+                  <span class="affix suffix">months</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Max LTV Ratio<span class="req">*</span></label>
+                <div class="input-affix">
+                  <input id="txtMaxLtv" type="number" step="0.01" min="0" max="100" placeholder="e.g. 75">
+                  <span class="affix suffix">%</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Processing Fee</label>
+                <div class="input-affix">
+                  <span class="affix">₹</span>
+                  <input id="txtProcessingFee" type="number" step="0.01" min="0" placeholder="e.g. 750">
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Penalty Rate (per day, overdue)</label>
+                <div class="input-affix">
+                  <input id="txtPenaltyRate" type="number" step="0.001" min="0" placeholder="e.g. 0.05">
+                  <span class="affix suffix">%</span>
+                </div>
+              </div>
+              <div class="form-check-jlms mb-3">
+                <input type="checkbox" id="chkActive" checked>
+                <label for="chkActive">Active</label>
+              </div>
               <div class="d-flex gap-2">
-                <button class="btn-jlms btn-jlms-ghost" style="flex:1; justify-content:center;">Clear</button>
-                <button class="btn-jlms btn-jlms-primary" style="flex:1; justify-content:center;"><i class="bi bi-save"></i> Save</button>
+                <button id="btnClear" class="btn-jlms btn-jlms-ghost" style="flex:1; justify-content:center;">Clear</button>
+                <button id="btnSave" class="btn-jlms btn-jlms-primary" style="flex:1; justify-content:center;"><i class="bi bi-save"></i> Save</button>
               </div>
             </div>
           </div>
         </div>
         <div class="col-lg-8">
           <div class="panel">
-            <div class="grid-toolbar"><span class="h4">Loan Schemes</span><div class="grid-search"><i class="bi bi-search"></i><input placeholder="Search scheme"></div></div>
+            <div class="grid-toolbar">
+              <span class="h4">Loan Schemes</span>
+              <div class="grid-search"><i class="bi bi-search"></i><input id="txtSearch" placeholder="Search scheme"></div>
+            </div>
             <div class="panel-body no-pad table-jlms-wrap">
               <table class="table-jlms">
                 <thead><tr><th>Scheme Name</th><th class="text-end">Interest %</th><th class="text-end">Tenure</th><th class="text-end">Max LTV</th><th class="text-end">Processing Fee</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
-                <tbody>
-                  <tr style="background:var(--navy-50);"><td class="cell-strong">Gold Plus</td><td class="text-end">12.00%</td><td class="text-end">12 mo</td><td class="text-end">75%</td><td class="text-end">₹750</td><td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td></tr>
-                  <tr><td class="cell-strong">Gold Saver</td><td class="text-end">10.00%</td><td class="text-end">6 mo</td><td class="text-end">70%</td><td class="text-end">₹500</td><td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td></tr>
-                  <tr><td class="cell-strong">Gold Express</td><td class="text-end">15.00%</td><td class="text-end">3 mo</td><td class="text-end">80%</td><td class="text-end">₹250</td><td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td></tr>
-                  <tr><td class="cell-strong">Gold Bullet</td><td class="text-end">13.50%</td><td class="text-end">12 mo</td><td class="text-end">70%</td><td class="text-end">₹600</td><td class="text-center"><span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span></td><td class="text-center"><i class="bi bi-pencil" style="color:var(--n-500); cursor:pointer;"></i></td></tr>
-                </tbody>
+                <tbody id="tblLoanSchemes"></tbody>
               </table>
             </div>
           </div>
@@ -64,6 +101,258 @@
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "loan-scheme-master";</script>
 <script src="js/jlms-shell.js"></script>
-<script>jlmsInitShell();</script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+
+let editingId = 0;
+let schemeList = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    Session.requireLogin();
+
+    //-------------------------------------------------------
+    // Controls
+    //-------------------------------------------------------
+
+    const txtSchemeName   = document.getElementById("txtSchemeName");
+    const txtInterestRate = document.getElementById("txtInterestRate");
+    const txtTenure       = document.getElementById("txtTenure");
+    const txtMaxLtv       = document.getElementById("txtMaxLtv");
+    const txtProcessingFee= document.getElementById("txtProcessingFee");
+    const txtPenaltyRate  = document.getElementById("txtPenaltyRate");
+    const chkActive       = document.getElementById("chkActive");
+
+    const btnSave  = document.getElementById("btnSave");
+    const btnClear = document.getElementById("btnClear");
+
+    const tblLoanSchemes   = document.getElementById("tblLoanSchemes");
+    const txtSearch        = document.getElementById("txtSearch");
+    const apiSuccessBanner = document.getElementById("apiSuccessBanner");
+
+    //-------------------------------------------------------
+    // Events
+    //-------------------------------------------------------
+
+    btnSave.addEventListener("click", saveLoanScheme);
+    btnClear.addEventListener("click", clearForm);
+
+    txtSearch.addEventListener("input", () => {
+        const q = txtSearch.value.toLowerCase();
+        renderTable(schemeList.filter(s => s.schemeName.toLowerCase().includes(q)));
+    });
+
+    loadLoanSchemes();
+
+    //-------------------------------------------------------
+    // Load
+    //-------------------------------------------------------
+
+    async function loadLoanSchemes() {
+
+        clearApiError();
+
+        try {
+
+            schemeList = await Api.getLoanSchemes(false);
+
+            renderTable(schemeList);
+
+        }
+        catch (err) {
+
+            showApiError(err);
+
+        }
+
+    }
+
+    //-------------------------------------------------------
+    // Render Table
+    //-------------------------------------------------------
+
+    function renderTable(data) {
+
+        tblLoanSchemes.innerHTML = "";
+
+        if (data.length === 0) {
+
+            tblLoanSchemes.innerHTML =
+                `<tr>
+                    <td colspan="7" class="text-center">
+                        No Loan Schemes Found
+                    </td>
+                </tr>`;
+
+            return;
+
+        }
+
+        data.forEach(item => {
+
+            const badge = item.isActive
+                ? `<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>`
+                : `<span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span>`;
+
+            tblLoanSchemes.innerHTML += `
+            <tr>
+                <td class="cell-strong">${item.schemeName}</td>
+                <td class="text-end">${Number(item.interestRatePct).toFixed(2)}%</td>
+                <td class="text-end">${item.tenureMonths} mo</td>
+                <td class="text-end">${Number(item.maxLtvPercent).toFixed(0)}%</td>
+                <td class="text-end">₹${Number(item.processingFee).toFixed(0)}</td>
+                <td class="text-center">${badge}</td>
+                <td class="text-center">
+                    <i class="bi bi-pencil edit-icon"
+                       data-id="${item.loanSchemeId}"
+                       style="cursor:pointer;color:var(--n-500)"></i>
+                </td>
+            </tr>
+            `;
+
+        });
+
+        document.querySelectorAll(".edit-icon").forEach(icon => {
+
+            icon.addEventListener("click", function () {
+
+                editLoanScheme(Number(this.dataset.id));
+
+            });
+
+        });
+
+    }
+
+    //-------------------------------------------------------
+    // Save / Update
+    //-------------------------------------------------------
+
+    async function saveLoanScheme() {
+
+        clearApiError();
+
+        const dto = {
+            schemeName:       txtSchemeName.value.trim(),
+            interestRatePct:  parseFloat(txtInterestRate.value),
+            tenureMonths:     parseInt(txtTenure.value),
+            maxLtvPercent:    parseFloat(txtMaxLtv.value),
+            processingFee:    parseFloat(txtProcessingFee.value) || 0,
+            penaltyRatePerDay:parseFloat(txtPenaltyRate.value) || 0,
+            isActive:         chkActive.checked
+        };
+
+        if (!dto.schemeName) {
+            showApiError(new Error("Please enter Scheme Name."));
+            return;
+        }
+
+        if (isNaN(dto.interestRatePct)) {
+            showApiError(new Error("Please enter Interest Rate."));
+            return;
+        }
+
+        if (isNaN(dto.tenureMonths) || dto.tenureMonths < 1) {
+            showApiError(new Error("Please enter a valid Tenure (months)."));
+            return;
+        }
+
+        if (isNaN(dto.maxLtvPercent)) {
+            showApiError(new Error("Please enter Max LTV Ratio."));
+            return;
+        }
+
+        btnSave.disabled = true;
+
+        try {
+
+            if (editingId === 0) {
+
+                await Api.createLoanScheme(dto);
+
+                apiSuccessBanner.innerHTML = "Loan Scheme created successfully.";
+
+            }
+            else {
+
+                await Api.updateLoanScheme(editingId, dto);
+
+                apiSuccessBanner.innerHTML = "Loan Scheme updated successfully.";
+
+            }
+
+            apiSuccessBanner.style.display = "block";
+
+            clearForm();
+
+            loadLoanSchemes();
+
+        }
+        catch (err) {
+
+            showApiError(err);
+
+        }
+        finally {
+
+            btnSave.disabled = false;
+
+        }
+
+    }
+
+    //-------------------------------------------------------
+    // Edit
+    //-------------------------------------------------------
+
+    function editLoanScheme(id) {
+
+        const item = schemeList.find(x => x.loanSchemeId === id);
+
+        if (!item) return;
+
+        editingId = id;
+
+        document.getElementById("formTitle").textContent = "Edit Scheme";
+
+        txtSchemeName.value    = item.schemeName;
+        txtInterestRate.value  = item.interestRatePct;
+        txtTenure.value        = item.tenureMonths;
+        txtMaxLtv.value        = item.maxLtvPercent;
+        txtProcessingFee.value = item.processingFee;
+        txtPenaltyRate.value   = item.penaltyRatePerDay;
+        chkActive.checked      = item.isActive;
+
+        btnSave.innerHTML = '<i class="bi bi-check2-circle"></i> Update';
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+    }
+
+    //-------------------------------------------------------
+    // Clear
+    //-------------------------------------------------------
+
+    function clearForm() {
+
+        editingId = 0;
+
+        document.getElementById("formTitle").textContent = "Add Scheme";
+
+        txtSchemeName.value    = "";
+        txtInterestRate.value  = "";
+        txtTenure.value        = "";
+        txtMaxLtv.value        = "";
+        txtProcessingFee.value = "";
+        txtPenaltyRate.value   = "";
+        chkActive.checked      = true;
+
+        btnSave.innerHTML = '<i class="bi bi-save"></i> Save';
+
+    }
+
+});
+</script>
 </body>
 </html>
