@@ -21,6 +21,8 @@
         </div>
       </div>
 
+      <div id="apiErrorBanner" style="display:none; background:#fdecea; color:#b3261e; padding:10px 14px; border-radius:6px; margin-bottom:12px;"></div>
+
       <div class="row g-3">
         <div class="col-lg-8">
           <div class="panel mb-3">
@@ -28,23 +30,23 @@
               <div class="row g-3 align-items-end">
                 <div class="col-md-9">
                   <label class="field-label">Loan Number<span class="req">*</span></label>
-                  <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input value="JL-20259233"></div>
+                  <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input id="loanNumberInput" placeholder="JL-XXXXXXXX"></div>
                 </div>
-                <div class="col-md-3"><button class="btn-jlms btn-jlms-outline" style="width:100%; justify-content:center;">Find</button></div>
+                <div class="col-md-3"><button id="findBtn" class="btn-jlms btn-jlms-outline" style="width:100%; justify-content:center;">Find</button></div>
               </div>
             </div>
           </div>
 
           <div class="panel mb-3">
-            <div class="panel-head"><div class="h4">Current Loan</div><span class="badge-jlms badge-warning"><span class="dot"></span>Matured</span></div>
+            <div class="panel-head"><div class="h4">Current Loan</div><span class="badge-jlms badge-warning"><span class="dot"></span><span id="loanStatusText">—</span></span></div>
             <div class="panel-body">
               <div class="row g-3">
-                <div class="col-md-4"><div class="text-caption">Customer</div><div class="cell-strong">Geetha Natarajan</div></div>
-                <div class="col-md-4"><div class="text-caption">Original Loan Date</div><div class="cell-strong">20 Jun 2025</div></div>
-                <div class="col-md-4"><div class="text-caption">Maturity Date</div><div class="cell-strong" style="color:var(--danger-700);">20 Jun 2026</div></div>
-                <div class="col-md-4"><div class="text-caption">Principal Outstanding</div><div class="cell-strong" style="font-size:15px;">₹1,80,000</div></div>
-                <div class="col-md-4"><div class="text-caption">Outstanding Interest</div><div class="cell-strong" style="font-size:15px; color:var(--navy-700);">₹21,600</div></div>
-                <div class="col-md-4"><div class="text-caption">Interest Rate</div><div class="cell-strong">12% p.a.</div></div>
+                <div class="col-md-4"><div class="text-caption">Customer</div><div id="customerName" class="cell-strong">—</div></div>
+                <div class="col-md-4"><div class="text-caption">Original Loan Date</div><div id="loanDate" class="cell-strong">—</div></div>
+                <div class="col-md-4"><div class="text-caption">Maturity Date</div><div id="maturityDate" class="cell-strong" style="color:var(--danger-700);">—</div></div>
+                <div class="col-md-4"><div class="text-caption">Principal Outstanding</div><div id="principalOutstanding" class="cell-strong" style="font-size:15px;">—</div></div>
+                <div class="col-md-4"><div class="text-caption">Outstanding Interest</div><div id="outstandingInterest" class="cell-strong" style="font-size:15px; color:var(--navy-700);">—</div></div>
+                <div class="col-md-4"><div class="text-caption">Interest Rate</div><div id="interestRate" class="cell-strong">—</div></div>
               </div>
             </div>
           </div>
@@ -55,28 +57,31 @@
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="field-label">Interest Settlement<span class="req">*</span></label>
-                  <select class="form-select-jlms"><option>Collect Full Outstanding Interest</option><option>Carry Forward Interest</option></select>
+                  <select id="settlementMode" class="form-select-jlms">
+                    <option value="CollectFull">Collect Full Outstanding Interest</option>
+                    <option value="CarryForward">Carry Forward Interest</option>
+                  </select>
                 </div>
                 <div class="col-md-4">
                   <label class="field-label">Renewal Charges</label>
-                  <div class="input-affix"><span class="affix">₹</span><input value="500"></div>
+                  <div class="input-affix"><span class="affix">₹</span><input id="renewalCharges" placeholder="Rs"></div>
                 </div>
                 <div class="col-md-4">
                   <label class="field-label">New Tenure<span class="req">*</span></label>
-                  <div class="input-affix"><input value="12"><span class="affix suffix">months</span></div>
+                  <div class="input-affix"><input id="newTenure" placeholder="Eg : 1"><span class="affix suffix">months</span></div>
                 </div>
               </div>
               <div class="divider-jlms"></div>
               <div class="summary-panel">
-                <div class="summary-row"><span class="label">Outstanding Interest to Collect</span><span class="value">₹21,600</span></div>
-                <div class="summary-row"><span class="label">Renewal Charges</span><span class="value">₹500</span></div>
-                <div class="summary-row total"><span class="label">Total Payable Now</span><span class="value">₹22,100</span></div>
-                <div class="summary-row" style="margin-top:8px;"><span class="label">New Maturity Date</span><span class="value gold">20 Jun 2027</span></div>
-                <div class="summary-row"><span class="label">Principal Carried Forward</span><span class="value">₹1,80,000</span></div>
+                <div class="summary-row"><span class="label">Outstanding Interest to Collect</span><span id="sumInterest" class="value">₹0</span></div>
+                <div class="summary-row"><span class="label">Renewal Charges</span><span id="sumCharges" class="value">₹0</span></div>
+                <div class="summary-row total"><span class="label">Total Payable Now</span><span id="sumTotal" class="value">₹0</span></div>
+                <div class="summary-row" style="margin-top:8px;"><span class="label">New Maturity Date</span><span id="sumNewMaturity" class="value gold">—</span></div>
+                <div class="summary-row"><span class="label">Principal Carried Forward</span><span id="sumPrincipal" class="value">₹0</span></div>
               </div>
               <div class="d-flex justify-content-end gap-2 mt-3">
-                <button class="btn-jlms btn-jlms-outline"><i class="bi bi-calculator"></i> Calculate</button>
-                <button class="btn-jlms btn-jlms-primary btn-lg"><i class="bi bi-arrow-repeat"></i> Renew Loan</button>
+                <button id="calcBtn" class="btn-jlms btn-jlms-outline"><i class="bi bi-calculator"></i> Calculate</button>
+                <button id="renewBtn" class="btn-jlms btn-jlms-primary btn-lg"><i class="bi bi-arrow-repeat"></i> Renew Loan</button>
               </div>
             </div>
           </div>
@@ -86,8 +91,103 @@
   </div>
 </div>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="js/api-client.js"></script>
 <script>window.JLMS_ACTIVE = "loan-renewal";</script>
 <script src="js/jlms-shell.js"></script>
 <script>jlmsInitShell();</script>
+<script>
+let currentLoan = null;
+let currentCalc = null;
+
+function money(n) {
+  return "₹" + Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+}
+
+function formatDate(d) {
+  return new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+async function findLoan() {
+  clearApiError();
+  const loanNumber = document.getElementById("loanNumberInput").value.trim();
+  if (!loanNumber) return alert("Enter a loan number.");
+
+  try {
+    const loan = await Api.getLoanByNumber(loanNumber);
+
+    if (loan.status !== "Active") {
+      alert(`Loan status is "${loan.status}". Renewal requires an Active loan.`);
+      return;
+    }
+
+    currentLoan = loan;
+    currentCalc = await Api.getClosureCalculation(loan.loanId);
+
+    document.getElementById("customerName").textContent = loan.customerName || "—";
+    document.getElementById("loanDate").textContent = loan.loanDate ? formatDate(loan.loanDate) : "—";
+    document.getElementById("maturityDate").textContent = loan.maturityDate ? formatDate(loan.maturityDate) : "—";
+    document.getElementById("interestRate").textContent = `${loan.interestRatePct}% p.a.`;
+    document.getElementById("loanStatusText").textContent = loan.status;
+    document.getElementById("principalOutstanding").textContent = money(currentCalc.outstandingPrincipal);
+    document.getElementById("outstandingInterest").textContent = money(currentCalc.outstandingInterest);
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+function calculate() {
+  if (!currentLoan || !currentCalc) return alert("Find a loan first.");
+
+  const settleMode = document.getElementById("settlementMode").value;
+  const charges = Number(document.getElementById("renewalCharges").value) || 0;
+  const tenureMonths = Number(document.getElementById("newTenure").value) || 0;
+
+  let totalPayable, principalCarried;
+  if (settleMode === "CollectFull") {
+    totalPayable = currentCalc.outstandingInterest + currentCalc.penalty + charges;
+    principalCarried = currentCalc.outstandingPrincipal;
+  } else {
+    totalPayable = currentCalc.penalty + charges;
+    principalCarried = currentCalc.outstandingPrincipal + currentCalc.outstandingInterest;
+  }
+
+  const newMaturity = new Date();
+  newMaturity.setMonth(newMaturity.getMonth() + tenureMonths);
+
+  document.getElementById("sumInterest").textContent =
+    settleMode === "CollectFull" ? money(currentCalc.outstandingInterest) : money(0) + " (carried forward)";
+  document.getElementById("sumCharges").textContent = money(charges);
+  document.getElementById("sumTotal").textContent = money(totalPayable);
+  document.getElementById("sumNewMaturity").textContent = formatDate(newMaturity);
+  document.getElementById("sumPrincipal").textContent = money(principalCarried);
+}
+
+async function renewLoan() {
+  clearApiError();
+  if (!currentLoan) return alert("Find a loan first.");
+
+  const user = Session.requireLogin();
+  if (!user) return;
+
+  const dto = {
+    interestSettlementMode: document.getElementById("settlementMode").value,
+    renewalCharges: Number(document.getElementById("renewalCharges").value) || 0,
+    newTenureMonths: Number(document.getElementById("newTenure").value) || 0,
+    processedByUserId: user.userId
+  };
+
+  try {
+    const result = await Api.renewLoan(currentLoan.loanId, dto);
+    alert(`Loan renewed. Receipt ${result.receiptNo}. New maturity: ${formatDate(result.newMaturityDate)}`);
+    await findLoan();
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+document.getElementById("findBtn")?.addEventListener("click", findLoan);
+document.getElementById("calcBtn")?.addEventListener("click", calculate);
+document.getElementById("renewBtn")?.addEventListener("click", renewLoan);
+</script>
 </body>
 </html>

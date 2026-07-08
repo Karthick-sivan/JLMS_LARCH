@@ -18,11 +18,17 @@
     <div id="jlmsTopbarMount"></div>
     <div class="page-content">
       <div class="page-header">
+
+        <div id="apiErrorBanner" class="api-error-banner"></div>
+        <div id="apiSuccessBanner" class="api-success-banner" style="display:none;"></div>
         <div>
           <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Jewel Release</span></div>
           <div class="h1">Jewel Release</div>
         </div>
-        <span class="badge-jlms badge-success" style="font-size:11px; padding:6px 12px;"><span class="dot"></span>Loan Closed — Ready for Release</span>
+<span id="loanStatusBadge"
+      class="badge-jlms"
+      style="font-size:11px; padding:6px 12px;">
+</span>
       </div>
 
       <div class="row g-3">
@@ -31,12 +37,17 @@
             <div class="panel-head"><div class="h4">Loan &amp; Customer Details</div></div>
             <div class="panel-body">
               <div class="row g-3">
-                <div class="col-md-4"><div class="text-caption">Loan Number</div><div class="cell-strong">JL-20260987</div></div>
-                <div class="col-md-4"><div class="text-caption">Customer</div><div class="cell-strong">Lakshmi Ramasamy</div></div>
-                <div class="col-md-4"><div class="text-caption">Closure Date</div><div class="cell-strong">20 Jun 2026</div></div>
-                <div class="col-md-4"><div class="text-caption">Customer Code</div><div class="cell-strong">CUS-007918</div></div>
-                <div class="col-md-4"><div class="text-caption">Mobile</div><div class="cell-strong">97654 32109</div></div>
-                <div class="col-md-4"><div class="text-caption">ID Verified</div><span class="badge-jlms badge-success"><span class="dot"></span>Aadhaar Matched</span></div>
+                <div class="col-md-4"><div class="text-caption">Loan Number</div><div class="cell-strong" id="loanNumber"></div></div>
+                <div class="col-md-4"><div class="text-caption">Customer</div><div class="cell-strong" id="customerName"></div></div>
+                <div class="col-md-4"><div class="text-caption">Closure Date</div><div class="cell-strong" id="closureDate"></div></div>
+                <div class="col-md-4"><div class="text-caption">Customer Code</div><div class="cell-strong" id="customerCode"></div></div>
+                <div class="col-md-4"><div class="text-caption">Mobile</div><div class="cell-strong" id="mobile"></div></div>
+                <div class="col-md-4">
+    <div class="text-caption">ID Verified</div>
+
+    <span id="kycBadge" class="badge-jlms"></span>
+
+</div>
               </div>
             </div>
           </div>
@@ -46,11 +57,8 @@
             <div class="panel-body no-pad table-jlms-wrap">
               <table class="table-jlms">
                 <thead><tr><th>Jewel Type</th><th class="text-center">Qty</th><th class="text-end">Net Wt (g)</th><th>Purity</th><th class="text-center">Condition Verified</th></tr></thead>
-                <tbody>
-                  <tr><td>Gold Chain</td><td class="text-center">1</td><td class="text-end">18.500</td><td>22K</td><td class="text-center"><i class="bi bi-check-circle-fill" style="color:var(--success-600);"></i></td></tr>
-                  <tr><td>Gold Earrings</td><td class="text-center">1</td><td class="text-end">14.000</td><td>22K</td><td class="text-center"><i class="bi bi-check-circle-fill" style="color:var(--success-600);"></i></td></tr>
-                  <tr><td>Gold Ring</td><td class="text-center">1</td><td class="text-end">10.000</td><td>22K</td><td class="text-center"><i class="bi bi-check-circle-fill" style="color:var(--success-600);"></i></td></tr>
-                </tbody>
+                <tbody id="tblJewels">
+</tbody>
               </table>
             </div>
           </div>
@@ -66,7 +74,9 @@
               <div class="sig-pad"><i class="bi bi-pen" style="font-size:20px;"></i><span style="font-size:11.5px;">Tap to capture signature</span></div>
               <div class="d-flex justify-content-end gap-2 mt-3">
                 <button class="btn-jlms btn-jlms-ghost"><i class="bi bi-printer"></i> Print Acknowledgement</button>
-                <button class="btn-jlms btn-jlms-primary btn-lg"><i class="bi bi-unlock"></i> Release Jewel</button>
+                <button
+id="btnRelease"
+class="btn-jlms btn-jlms-primary btn-lg"><i class="bi bi-unlock"></i> Release Jewel</button>
               </div>
             </div>
           </div>
@@ -76,12 +86,10 @@
           <div class="panel">
             <div class="panel-head"><div class="h4">Release Checklist</div></div>
             <div class="panel-body">
-              <div class="d-flex flex-column gap-2">
-                <div style="display:flex; gap:8px; align-items:flex-start;"><i class="bi bi-check-circle-fill" style="color:var(--success-600); margin-top:1px;"></i><span style="font-size:12.5px;">Loan fully closed, no dues pending</span></div>
-                <div style="display:flex; gap:8px; align-items:flex-start;"><i class="bi bi-check-circle-fill" style="color:var(--success-600); margin-top:1px;"></i><span style="font-size:12.5px;">Customer identity verified against original pledge</span></div>
-                <div style="display:flex; gap:8px; align-items:flex-start;"><i class="bi bi-check-circle-fill" style="color:var(--success-600); margin-top:1px;"></i><span style="font-size:12.5px;">Jewel items matched against appraisal photos</span></div>
-                <div style="display:flex; gap:8px; align-items:flex-start;"><i class="bi bi-circle" style="color:var(--n-400); margin-top:1px;"></i><span style="font-size:12.5px; color:var(--n-500);">Customer signature pending</span></div>
-              </div>
+             <div
+    id="releaseChecklist"
+    class="d-flex flex-column gap-2">
+</div>
             </div>
           </div>
         </div>
@@ -92,6 +100,255 @@
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "jewel-release";</script>
 <script src="js/jlms-shell.js"></script>
-<script>jlmsInitShell();</script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+
+let currentLoan = null;
+
+const apiSuccessBanner =
+    document.getElementById("apiSuccessBanner");
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    Session.requireLogin();
+
+    const params = new URLSearchParams(window.location.search);
+
+    const loanId = params.get("loanId");
+
+    if (!loanId) {
+
+        showApiError(new Error("Loan Id missing."));
+
+        return;
+
+    }
+    try {
+
+   currentLoan = await Api.getReleaseDetails(loanId);
+
+   const statusBadge = document.getElementById("loanStatusBadge");
+
+if (currentLoan.status === "Closed") {
+
+    statusBadge.className = "badge-jlms badge-success";
+    statusBadge.innerHTML =
+        '<span class="dot"></span>Loan Closed — Ready for Release';
+
+}
+else if (currentLoan.status === "Released") {
+
+    statusBadge.className = "badge-jlms badge-primary";
+    statusBadge.innerHTML =
+        '<span class="dot"></span>Jewels Already Released';
+
+}
+
+else {
+
+    statusBadge.className = "badge-jlms badge-danger";
+    statusBadge.innerHTML =
+        `<span class="dot"></span>${currentLoan.status}`;
+
+}
+
+    document.getElementById("loanNumber").textContent =
+    currentLoan.loanNumber;
+
+document.getElementById("customerName").textContent =
+    currentLoan.customer.customerName;
+
+document.getElementById("customerCode").textContent =
+    currentLoan.customer.customerCode;
+
+document.getElementById("mobile").textContent =
+    currentLoan.customer.mobile;
+
+document.getElementById("closureDate").textContent =
+    currentLoan.closedAt
+        ? new Date(currentLoan.closedAt).toLocaleDateString("en-IN")
+        : "";
+
+        const badge = document.getElementById("kycBadge");
+
+if (currentLoan.customer.kycVerified) {
+    badge.className = "badge-jlms badge-success";
+    badge.innerHTML = '<span class="dot"></span>Aadhaar Matched';
+}
+else {
+    badge.className = "badge-jlms badge-danger";
+    badge.innerHTML = '<span class="dot"></span>KYC Pending';
+}
+
+        const tbody = document.getElementById("tblJewels");
+
+tbody.innerHTML = "";
+
+currentLoan.jewelItems.forEach(item => {
+
+    tbody.innerHTML += `
+
+        <tr>
+
+            <td>${item.jewelTypeName}</td>
+
+            <td class="text-center">${item.quantity}</td>
+
+            <td class="text-end">${item.netWeightGrams}</td>
+
+            <td>${item.purity}</td>
+
+            <td class="text-center">
+
+                <i class="bi bi-check-circle-fill"
+                   style="color:var(--success-600);">
+                </i>
+
+            </td>
+
+        </tr>
+
+    `;
+
+});
+const checklist = document.getElementById("releaseChecklist");
+
+checklist.innerHTML = "";
+
+// Loan Closed
+checklist.innerHTML += `
+<div style="display:flex; gap:8px; align-items:flex-start;">
+    <i class="bi ${currentLoan.status === "Closed"
+        ? "bi-check-circle-fill"
+        : "bi-circle"}"
+       style="color:${currentLoan.status === "Closed"
+        ? "var(--success-600)"
+        : "var(--n-400)"}; margin-top:1px;">
+    </i>
+
+    <span style="font-size:12.5px;
+        color:${currentLoan.status === "Closed"
+        ? ""
+        : "var(--n-500)"};">
+        Loan fully closed, no dues pending
+    </span>
+</div>
+`;
+
+// KYC Verified
+checklist.innerHTML += `
+<div style="display:flex; gap:8px; align-items:flex-start;">
+    <i class="bi ${currentLoan.customer.kycVerified
+        ? "bi-check-circle-fill"
+        : "bi-circle"}"
+       style="color:${currentLoan.customer.kycVerified
+        ? "var(--success-600)"
+        : "var(--n-400)"}; margin-top:1px;">
+    </i>
+
+    <span style="font-size:12.5px;
+        color:${currentLoan.customer.kycVerified
+        ? ""
+        : "var(--n-500)"};">
+        Customer identity verified against original pledge
+    </span>
+</div>
+`;
+
+// Jewel Items
+checklist.innerHTML += `
+<div style="display:flex; gap:8px; align-items:flex-start;">
+    <i class="bi ${currentLoan.jewelItems.length > 0
+        ? "bi-check-circle-fill"
+        : "bi-circle"}"
+       style="color:${currentLoan.jewelItems.length > 0
+        ? "var(--success-600)"
+        : "var(--n-400)"}; margin-top:1px;">
+    </i>
+
+    <span style="font-size:12.5px;
+        color:${currentLoan.jewelItems.length > 0
+        ? ""
+        : "var(--n-500)"};">
+        Jewel items matched against appraisal records
+    </span>
+</div>
+`;
+
+// Signature (Static)
+checklist.innerHTML += `
+<div style="display:flex; gap:8px; align-items:flex-start;">
+    <i class="bi bi-circle"
+       style="color:var(--n-400); margin-top:1px;">
+    </i>
+
+    <span style="font-size:12.5px; color:var(--n-500);">
+        Customer signature pending
+    </span>
+</div>
+`;
+
+}
+
+
+catch (err) {
+
+    showApiError(err);
+    return;
+
+}
+
+apiSuccessBanner.style.display = "none";
+document.getElementById("btnRelease").addEventListener("click", async () => {
+
+    clearApiError();
+
+    if (!document.getElementById("confirmCheck").checked) {
+        showApiError(new Error("Please confirm that the customer has received the jewels."));
+        return;
+    }
+
+    const btn = document.getElementById("btnRelease");
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Releasing...';
+
+    try {
+
+        const user = Session.get();
+
+        await Api.releaseJewel(
+            currentLoan.loanId,
+            user.userId
+        );
+
+apiSuccessBanner.innerHTML = "Jewels released successfully.";
+apiSuccessBanner.style.display = "block";
+
+// Hide the Release button after successful release
+document.getElementById("btnRelease").style.display = "none";
+
+setTimeout(() => {
+
+    window.location.href = "dashboard.html";
+
+}, 1500);
+
+    }
+    catch (err) {
+
+        showApiError(err);
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-unlock"></i> Release Jewel';
+
+    }
+
+});
+
+
+});
+</script>
 </body>
 </html>
