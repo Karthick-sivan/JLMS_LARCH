@@ -102,8 +102,18 @@ const Api = {
   getGoldRateHistory: (days = 30) => apiRequest(`/gold-rates/history?days=${days}`),
   setTodayGoldRate: (dto) => apiRequest("/gold-rates", { method: "POST", body: dto }),
 
-  getLoanSchemes: (activeOnly = true) => apiRequest(`/loan-schemes?activeOnly=${activeOnly}`),
+getLoanSchemes: (activeOnly = false) => apiRequest(`/loan-schemes?activeOnly=${activeOnly}`),
   createLoanScheme: (dto) => apiRequest("/loan-schemes", { method: "POST", body: dto }),
+  updateLoanScheme: (id, dto) => apiRequest(`/loan-schemes/${id}`, { method: "PUT", body: dto }),
+
+
+    // ---- User Master ----
+  getUsers: () => apiRequest("/user-master"),
+  getUserMasterBranches: () => apiRequest("/user-master/branches"),
+  getUserMasterRoles: () => apiRequest("/user-master/roles"),
+  createUser: (dto) => apiRequest("/user-master", { method: "POST", body: dto }),
+  updateUser: (id, dto) => apiRequest(`/user-master/${id}`, { method: "PUT", body: dto }),
+  toggleUserStatus: (id) => apiRequest(`/user-master/${id}/toggle-status`, { method: "PATCH" }),
 
   // ---- Jewel Appraisal ----
   calculateAppraisal: (dto) => apiRequest("/jewel-appraisal/calculate", { method: "POST", body: dto }),
@@ -112,6 +122,8 @@ const Api = {
   createLoan: (dto) => apiRequest("/loans", { method: "POST", body: dto }),
   getLoans: (status) => apiRequest(`/loans${status ? "?status=" + status : ""}`),
   getLoanById: (id) => apiRequest(`/loans/${id}`),
+getReleaseDetails: (id) =>
+    apiRequest(`/loans/${id}/release-details`),
   getLoanByNumber: (loanNumber) => apiRequest(`/loans/by-number/${encodeURIComponent(loanNumber)}`),
   approveLoan: (id, dto) => apiRequest(`/loans/${id}/approve`, { method: "POST", body: dto }),
   disburseLoan: (id, dto) => apiRequest(`/loans/${id}/disburse`, { method: "POST", body: dto }),
@@ -156,6 +168,7 @@ function showApiError(err, containerSelector = "#apiErrorBanner") {
   el.textContent = err.message;
   el.style.display = "block";
 }
+
 function clearApiError(containerSelector = "#apiErrorBanner") {
   const el = document.querySelector(containerSelector);
   if (el) el.style.display = "none";

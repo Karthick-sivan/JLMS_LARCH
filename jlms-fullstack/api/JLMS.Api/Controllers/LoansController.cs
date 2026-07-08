@@ -96,6 +96,45 @@ public class LoansController : ControllerBase
         return Ok(loan);
     }
 
+    // GET /api/loans/5/release-details
+    [HttpGet("{id:int}/release-details")]
+    public async Task<ActionResult<object>> GetReleaseDetails(int id)
+    {
+        var loan = await _db.Loans
+            .AsNoTracking()
+            .Include(l => l.Customer)
+            .Include(l => l.JewelItems)
+                .ThenInclude(j => j.JewelType)
+            .FirstOrDefaultAsync(l => l.LoanId == id);
+
+        if (loan == null)
+            return NotFound();
+
+        return Ok(new
+        {
+            loan.LoanId,
+            loan.LoanNumber,
+            loan.Status,
+            loan.ClosedAt,
+
+            Customer = new
+            {
+                loan.Customer.CustomerCode,
+                loan.Customer.CustomerName,
+                loan.Customer.Mobile,
+                loan.Customer.KycVerified
+            },
+
+            JewelItems = loan.JewelItems.Select(j => new
+            {
+                j.JewelItemId,
+                JewelTypeName = j.JewelType.JewelTypeName,
+                j.Quantity,
+                j.NetWeightGrams,
+                j.Purity
+            })
+        });
+    }
     // POST /api/loans
     // Creates a Draft loan with jewel items, using the appraisal values supplied.
     [HttpPost]
