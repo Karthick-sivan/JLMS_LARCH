@@ -112,3 +112,46 @@ public record DashboardSummaryDto(
     int ActiveLoans, decimal OutstandingAmount, decimal TodaysCollections, decimal TodaysDisbursement,
     int OverdueLoans, int AuctionEligible, int RenewalsThisMonth, int ClosuresThisMonth
 );
+
+// ---------- User Master ----------
+public record UserMasterDto(
+    int UserId,
+    string EmployeeCode,
+    string FullName,
+    string Username,
+    int RoleId,
+    string RoleName,
+    int BranchId,
+    string BranchName,
+    string? Mobile,
+    string? Email,
+    bool IsActive,
+    DateTime CreatedAt
+);
+
+public record BranchOptionDto(int BranchId, string BranchName, string BranchCode);
+public record RoleOptionDto(int RoleId, string RoleName);
+
+public record UserCreateDto(
+    string EmployeeCode,
+    string FullName,
+    string Username,
+    string Password,
+    int RoleId,
+    int BranchId,
+    string? Mobile,
+    string? Email,
+    bool IsActive
+);
+
+public record UserUpdateDto(
+    string EmployeeCode,
+    string FullName,
+    string Username,
+    string? Password,
+    int RoleId,
+    int BranchId,
+    string? Mobile,
+    string? Email,
+    bool IsActive
+);

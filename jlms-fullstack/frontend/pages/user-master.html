@@ -1,96 +1,566 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>JLMS — User Master</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/jlms-core.css">
+    <meta charset="UTF-8">
+    <title>JLMS — User Master</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/jlms-core.css">
 </head>
 <body>
-<div class="app-shell">
-  <div id="jlmsSidebarMount"></div>
-  <div class="main-col">
-    <div id="jlmsTopbarMount"></div>
-    <div class="page-content">
-      <div class="page-header">
-        <div>
-          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">User Master</span></div>
-          <div class="h1">User Master</div>
-        </div>
-        <div class="page-actions"><button class="btn-jlms btn-jlms-primary"><i class="bi bi-person-plus"></i> New User</button></div>
-      </div>
+    <div class="app-shell">
+        <div id="jlmsSidebarMount"></div>
+        <div class="main-col">
+            <div id="jlmsTopbarMount"></div>
+            <div class="page-content">
+                <div class="page-header" style="flex-wrap: wrap; gap: 16px;">
+                    <div id="apiErrorBanner" class="api-error-banner" style="display:none; width: 100%;"></div>
+                    <div id="apiSuccessBanner" class="api-success-banner" style="display:none; width: 100%;"></div>
+                    <div>
+                        <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">User Master</span></div>
+                        <div class="h1">User Master</div>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn-jlms btn-jlms-primary" id="btnNewUser"><i class="bi bi-person-plus"></i> New User</button>
+                    </div>
+                </div>
 
-      <div class="panel">
-        <div class="grid-toolbar">
-          <div class="grid-toolbar-left">
-            <span class="h4">System Users</span>
-            <span class="badge-jlms badge-neutral">42 users</span>
-          </div>
-          <div class="grid-toolbar-left">
-            <select class="form-select-jlms" style="width:160px;"><option>All Roles</option><option>Branch Manager</option><option>Loan Officer</option><option>Cashier</option><option>Administrator</option></select>
-            <div class="grid-search"><i class="bi bi-search"></i><input placeholder="Search user"></div>
-          </div>
+                <div class="panel">
+                    <div class="grid-toolbar">
+                        <div class="grid-toolbar-left">
+                            <span class="h4">System Users</span>
+                            <span class="badge-jlms badge-neutral" id="txtUserCount">0 users</span>
+                        </div>
+                        <div class="grid-toolbar-left">
+                            <select class="form-select-jlms" id="ddlRoleFilter" style="width:160px;">
+                                <option value="">All Roles</option>
+                            </select>
+                            <div class="grid-search"><i class="bi bi-search"></i><input id="txtSearchUser" placeholder="Search user"></div>
+                        </div>
+                    </div>
+                    <div class="panel-body no-pad table-jlms-wrap">
+                        <table class="table-jlms">
+                            <thead><tr><th>Employee ID</th><th>Name</th><th>Role</th><th>Branch</th><th>Mobile</th><th class="text-center">Status</th><th class="text-center">Actions</th></tr></thead>
+                            <tbody id="tblUsers">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted-jlms" style="padding: 24px;">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="grid-footer">
+                        <span id="txtShowingText">Showing 0–0 of 0</span>
+                        <div class="pagination-jlms" id="paginationWrap"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="panel-body no-pad table-jlms-wrap">
-          <table class="table-jlms">
-            <thead><tr><th>Employee ID</th><th>Name</th><th>Role</th><th>Branch</th><th>Mobile</th><th class="text-center">Status</th><th class="text-center">Actions</th></tr></thead>
-            <tbody>
-              <tr>
-                <td class="cell-strong">EMP-1042</td>
-                <td><div style="display:flex; align-items:center; gap:8px;"><div class="avatar-sm">RK</div>Ravi Kumar</div></td>
-                <td><span class="badge-jlms badge-info"><span class="dot"></span>Branch Manager</span></td>
-                <td>Madurai Main</td><td>98765 11111</td>
-                <td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td>
-                <td class="text-center"><i class="bi bi-pencil" style="margin-right:10px;color:var(--n-500);cursor:pointer;"></i><i class="bi bi-shield-lock" style="color:var(--n-500);cursor:pointer;"></i></td>
-              </tr>
-              <tr>
-                <td class="cell-strong">EMP-1067</td>
-                <td><div style="display:flex; align-items:center; gap:8px;"><div class="avatar-sm">SM</div>Suresh M.</div></td>
-                <td><span class="badge-jlms badge-gold"><span class="dot"></span>Loan Officer</span></td>
-                <td>Madurai Main</td><td>98765 22222</td>
-                <td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td>
-                <td class="text-center"><i class="bi bi-pencil" style="margin-right:10px;color:var(--n-500);cursor:pointer;"></i><i class="bi bi-shield-lock" style="color:var(--n-500);cursor:pointer;"></i></td>
-              </tr>
-              <tr>
-                <td class="cell-strong">EMP-1089</td>
-                <td><div style="display:flex; align-items:center; gap:8px;"><div class="avatar-sm">PS</div>Priya S.</div></td>
-                <td><span class="badge-jlms badge-neutral"><span class="dot"></span>Cashier</span></td>
-                <td>Madurai Main</td><td>98765 33333</td>
-                <td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td>
-                <td class="text-center"><i class="bi bi-pencil" style="margin-right:10px;color:var(--n-500);cursor:pointer;"></i><i class="bi bi-shield-lock" style="color:var(--n-500);cursor:pointer;"></i></td>
-              </tr>
-              <tr>
-                <td class="cell-strong">EMP-1003</td>
-                <td><div style="display:flex; align-items:center; gap:8px;"><div class="avatar-sm">AJ</div>Anitha J.</div></td>
-                <td><span class="badge-jlms badge-danger"><span class="dot"></span>Administrator</span></td>
-                <td>Head Office</td><td>98765 44444</td>
-                <td class="text-center"><span class="badge-jlms badge-success"><span class="dot"></span>Active</span></td>
-                <td class="text-center"><i class="bi bi-pencil" style="margin-right:10px;color:var(--n-500);cursor:pointer;"></i><i class="bi bi-shield-lock" style="color:var(--n-500);cursor:pointer;"></i></td>
-              </tr>
-              <tr>
-                <td class="cell-strong">EMP-1121</td>
-                <td><div style="display:flex; align-items:center; gap:8px;"><div class="avatar-sm">VK</div>Vignesh K.</div></td>
-                <td><span class="badge-jlms badge-gold"><span class="dot"></span>Loan Officer</span></td>
-                <td>Trichy</td><td>98765 55555</td>
-                <td class="text-center"><span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span></td>
-                <td class="text-center"><i class="bi bi-pencil" style="margin-right:10px;color:var(--n-500);cursor:pointer;"></i><i class="bi bi-shield-lock" style="color:var(--n-500);cursor:pointer;"></i></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="grid-footer">
-          <span>Showing 1–5 of 42</span>
-          <div class="pagination-jlms"><div class="page-btn"><i class="bi bi-chevron-left"></i></div><div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">3</div><div class="page-btn"><i class="bi bi-chevron-right"></i></div></div>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script>window.JLMS_ACTIVE = "user-master";</script>
-<script src="js/jlms-shell.js"></script>
-<script>jlmsInitShell();</script>
+
+    <!-- User Modal -->
+    <div class="modal-jlms-backdrop" id="userModal" style="display:none;">
+        <div class="modal-jlms" style="width: 580px; max-width: 95%;">
+            <div class="modal-jlms-head">
+                <div class="h4" id="modalTitle">New User</div>
+                <i class="bi bi-x-lg" style="cursor:pointer; color:var(--n-500);" id="btnUserModalClose"></i>
+            </div>
+            <div class="modal-jlms-body" style="text-align: left; padding: 20px;">
+                <div id="modalErrorBanner" class="api-error-banner" style="display:none; margin-bottom: 16px;"></div>
+                <form id="userForm" onsubmit="return false;">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Employee Code <span class="req">*</span></label>
+                                <input id="txtEmployeeCode" class="form-control-jlms" placeholder="e.g. EMP-1042">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Full Name <span class="req">*</span></label>
+                                <input id="txtFullName" class="form-control-jlms" placeholder="e.g. Ravi Kumar">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Username <span class="req">*</span></label>
+                                <input id="txtUsername" class="form-control-jlms" placeholder="e.g. ravik">
+                            </div>
+                        </div>
+
+                        <!--<div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Password <span class="req" id="lblPasswordReq">*</span></label>
+                                <div style="position:relative;">
+                                    <input id="txtPassword" type="password" class="form-control-jlms" placeholder="Password" style="padding-right:38px;">
+                                    <i class="bi bi-eye-slash" id="togglePasswordIcon" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--n-500);"></i>
+                                </div>
+                                <small class="text-muted-jlms" id="txtPasswordHelp" style="display:none; font-size:11px; margin-top:2px;">Leave blank to keep current password</small>
+                            </div>
+                        </div>-->
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Password <span class="req" id="lblPasswordReq">*</span></label>
+                                <div style="position:relative;">
+                                    <input id="txtPassword" type="password" class="form-control-jlms" placeholder="Password" style="padding-right:38px;">
+                                    <i class="bi bi-eye-slash" id="togglePasswordIcon" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--n-500);"></i>
+                                </div>
+                                <small class="text-muted-jlms" id="txtPasswordHelp" style="display:none; font-size:11px; margin-top:2px;">Leave blank to keep current password</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Role <span class="req">*</span></label>
+                                <select id="ddlRole" class="form-select-jlms">
+                                    <!-- populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Branch <span class="req">*</span></label>
+                                <select id="ddlBranch" class="form-select-jlms">
+                                    <!-- populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Mobile</label>
+                                <input id="txtMobile" class="form-control-jlms" placeholder="e.g. 9876511111" type="tel" maxlength="10">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label">Email</label>
+                                <input id="txtEmail" type="email" class="form-control-jlms" placeholder="e.g. user@example.com">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check-jlms">
+                                <input type="checkbox" id="chkUserActive" checked>
+                                <label for="chkUserActive">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-jlms-foot">
+                <button class="btn-jlms btn-jlms-ghost" id="btnUserModalCancel">Cancel</button>
+                <button class="btn-jlms btn-jlms-primary" id="btnSaveUser"><i class="bi bi-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>window.JLMS_ACTIVE = "user-master";</script>
+    <script src="js/jlms-shell.js"></script>
+    <script src="js/api-client.js"></script>
+    <script>
+        jlmsInitShell();
+
+        let allUsers = [];
+        let filteredUsers = [];
+        let branchesList = [];
+        let rolesList = [];
+        let editingUserId = 0;
+        let currentPage = 1;
+        const pageSize = 10;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            Session.requireLogin();
+
+            // DOM Controls
+            const btnNewUser = document.getElementById("btnNewUser");
+            const userModal = document.getElementById("userModal");
+            const btnUserModalClose = document.getElementById("btnUserModalClose");
+            const btnUserModalCancel = document.getElementById("btnUserModalCancel");
+            const btnSaveUser = document.getElementById("btnSaveUser");
+
+            const txtEmployeeCode = document.getElementById("txtEmployeeCode");
+            const txtFullName = document.getElementById("txtFullName");
+            const txtUsername = document.getElementById("txtUsername");
+            const txtPassword = document.getElementById("txtPassword");
+            const lblPasswordReq = document.getElementById("lblPasswordReq");
+            const txtPasswordHelp = document.getElementById("txtPasswordHelp");
+            const ddlRole = document.getElementById("ddlRole");
+            const ddlBranch = document.getElementById("ddlBranch");
+            const txtMobile = document.getElementById("txtMobile");
+            const txtEmail = document.getElementById("txtEmail");
+            const chkUserActive = document.getElementById("chkUserActive");
+
+            const ddlRoleFilter = document.getElementById("ddlRoleFilter");
+            const txtSearchUser = document.getElementById("txtSearchUser");
+            const tblUsers = document.getElementById("tblUsers");
+            const txtUserCount = document.getElementById("txtUserCount");
+            const txtShowingText = document.getElementById("txtShowingText");
+            const paginationWrap = document.getElementById("paginationWrap");
+
+            const apiSuccessBanner = document.getElementById("apiSuccessBanner");
+            const apiErrorBanner = document.getElementById("apiErrorBanner");
+            const modalErrorBanner = document.getElementById("modalErrorBanner");
+
+            // Event Listeners
+            btnNewUser.addEventListener("click", openNewModal);
+            btnUserModalClose.addEventListener("click", closeUserModal);
+            btnUserModalCancel.addEventListener("click", closeUserModal);
+            btnSaveUser.addEventListener("click", saveUser);
+
+            ddlRoleFilter.addEventListener("change", () => {
+                currentPage = 1;
+                filterAndRender();
+            });
+
+            txtSearchUser.addEventListener("input", () => {
+                currentPage = 1;
+                filterAndRender();
+            });
+
+            // Mobile number live validation – red border until exactly 10 digits
+            txtMobile.addEventListener("input", () => {
+                const digits = txtMobile.value.replace(/\D/g, "");
+                // Keep only numeric characters
+                if (txtMobile.value !== digits) txtMobile.value = digits;
+                if (digits.length > 0 && digits.length < 10) {
+                    txtMobile.style.borderColor = "#e53e3e";
+                    txtMobile.style.boxShadow = "0 0 0 3px rgba(229,62,62,0.25)";
+                } else {
+                    txtMobile.style.borderColor = "";
+                    txtMobile.style.boxShadow = "";
+                }
+            });
+
+            // Initial Loading
+            await initPage();
+
+            async function initPage() {
+                try {
+                    clearApiError();
+
+                    // Load dropdown lists
+                    branchesList = await Api.getUserMasterBranches();
+                    rolesList = await Api.getUserMasterRoles();
+
+                    // Populate Role dropdowns
+                    ddlRole.innerHTML = rolesList.map(r => `<option value="${r.roleId}">${r.roleName}</option>`).join('');
+                    ddlRoleFilter.innerHTML = '<option value="">All Roles</option>' +
+                        rolesList.map(r => `<option value="${r.roleId}">${r.roleName}</option>`).join('');
+
+                    // Populate Branch dropdown
+                    ddlBranch.innerHTML = branchesList.map(b => `<option value="${b.branchId}">${b.branchName}</option>`).join('');
+
+                    // Load Users
+                    await loadUsers();
+                } catch (err) {
+                    showApiError(err);
+                }
+            }
+
+            async function loadUsers() {
+                try {
+                    allUsers = await Api.getUsers();
+                    filterAndRender();
+                } catch (err) {
+                    showApiError(err);
+                }
+            }
+
+            function filterAndRender() {
+                const selectedRole = ddlRoleFilter.value;
+                const searchQuery = txtSearchUser.value.trim().toLowerCase();
+
+                filteredUsers = allUsers.filter(u => {
+                    const matchesRole = !selectedRole || u.roleId == selectedRole;
+                    const matchesSearch = !searchQuery ||
+                        u.employeeCode.toLowerCase().includes(searchQuery) ||
+                        u.fullName.toLowerCase().includes(searchQuery) ||
+                        u.username.toLowerCase().includes(searchQuery) ||
+                        (u.mobile && u.mobile.toLowerCase().includes(searchQuery));
+                    return matchesRole && matchesSearch;
+                });
+
+                txtUserCount.textContent = `${filteredUsers.length} user${filteredUsers.length === 1 ? '' : 's'}`;
+
+                renderTable();
+            }
+
+            function initials(name) {
+                if (!name) return "";
+                return name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+            }
+
+            function getRoleBadgeClass(roleName) {
+                const name = roleName.toLowerCase();
+                if (name.includes("administrator")) return "badge-danger";
+                if (name.includes("manager")) return "badge-info";
+                if (name.includes("officer")) return "badge-gold";
+                return "badge-neutral";
+            }
+
+            function renderTable() {
+                tblUsers.innerHTML = "";
+
+                if (filteredUsers.length === 0) {
+                    tblUsers.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center text-muted-jlms" style="padding: 24px;">No users found.</td>
+                        </tr>
+                    `;
+                    txtShowingText.textContent = "Showing 0–0 of 0";
+                    paginationWrap.innerHTML = "";
+                    return;
+                }
+
+                const totalItems = filteredUsers.length;
+                const totalPages = Math.ceil(totalItems / pageSize);
+                if (currentPage > totalPages) currentPage = totalPages || 1;
+
+                const startIndex = (currentPage - 1) * pageSize;
+                const endIndex = Math.min(startIndex + pageSize, totalItems);
+                const pageItems = filteredUsers.slice(startIndex, endIndex);
+
+                txtShowingText.textContent = `Showing ${startIndex + 1}–${endIndex} of ${totalItems}`;
+
+                // Render rows
+                pageItems.forEach(u => {
+                    const statusBadge = u.isActive
+                        ? '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>'
+                        : '<span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span>';
+
+                    const roleClass = getRoleBadgeClass(u.roleName);
+
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td class="cell-strong">${u.employeeCode}</td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div class="avatar-sm">${initials(u.fullName)}</div>
+                                ${u.fullName}
+                            </div>
+                        </td>
+                        <td><span class="badge-jlms ${roleClass}"><span class="dot"></span>${u.roleName}</span></td>
+                        <td>${u.branchName}</td>
+                        <td>${u.mobile || '—'}</td>
+                        <td class="text-center">${statusBadge}</td>
+                        <td class="text-center">
+                            <i class="bi bi-pencil edit-btn" data-id="${u.userId}" style="margin-right:10px;color:var(--n-500);cursor:pointer;" title="Edit User"></i>
+                            <i class="bi ${u.isActive ? 'bi-shield-lock' : 'bi-shield-fill-check'} toggle-btn" data-id="${u.userId}" style="color:var(--n-500);cursor:pointer;" title="${u.isActive ? 'Deactivate User' : 'Activate User'}"></i>
+                        </td>
+                    `;
+                    tblUsers.appendChild(tr);
+                });
+
+                // Attach listeners
+                tblUsers.querySelectorAll(".edit-btn").forEach(btn => {
+                    btn.addEventListener("click", () => editUser(Number(btn.dataset.id)));
+                });
+                tblUsers.querySelectorAll(".toggle-btn").forEach(btn => {
+                    btn.addEventListener("click", () => toggleStatus(Number(btn.dataset.id)));
+                });
+
+                // Render Pagination
+                renderPagination(totalPages);
+            }
+
+            function renderPagination(totalPages) {
+                paginationWrap.innerHTML = "";
+                if (totalPages <= 1) return;
+
+                // Prev page button
+                const prevBtn = document.createElement("div");
+                prevBtn.className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
+                prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
+                if (currentPage > 1) {
+                    prevBtn.addEventListener("click", () => { currentPage--; renderTable(); });
+                }
+                paginationWrap.appendChild(prevBtn);
+
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageBtn = document.createElement("div");
+                    pageBtn.className = `page-btn ${currentPage === i ? 'active' : ''}`;
+                    pageBtn.textContent = i;
+                    pageBtn.addEventListener("click", () => { currentPage = i; renderTable(); });
+                    paginationWrap.appendChild(pageBtn);
+                }
+
+                // Next page button
+                const nextBtn = document.createElement("div");
+                nextBtn.className = `page-btn ${currentPage === totalPages ? 'disabled' : ''}`;
+                nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                if (currentPage < totalPages) {
+                    nextBtn.addEventListener("click", () => { currentPage++; renderTable(); });
+                }
+                paginationWrap.appendChild(nextBtn);
+            }
+
+            function openNewModal() {
+                editingUserId = 0;
+                document.getElementById("userForm").reset();
+                document.getElementById("modalTitle").textContent = "New User";
+
+                lblPasswordReq.style.display = "inline";
+                txtPasswordHelp.style.display = "none";
+
+                txtEmployeeCode.disabled = false;
+                txtUsername.disabled = false;
+
+                // Reset mobile validation state
+                txtMobile.style.borderColor = "";
+                txtMobile.style.boxShadow = "";
+
+                hideModalError();
+                userModal.style.display = "flex";
+            }
+            const togglePasswordIcon = document.getElementById("togglePasswordIcon");
+
+            togglePasswordIcon.addEventListener("click", () => {
+                const isHidden = txtPassword.type === "password";
+                txtPassword.type = isHidden ? "text" : "password";
+                togglePasswordIcon.classList.toggle("bi-eye-slash", !isHidden);
+                togglePasswordIcon.classList.toggle("bi-eye", isHidden);
+            });
+
+            function editUser(userId) {
+                const u = allUsers.find(x => x.userId === userId);
+                if (!u) return;
+
+                editingUserId = userId;
+                document.getElementById("modalTitle").textContent = "Edit User";
+
+                txtEmployeeCode.value = u.employeeCode;
+                txtEmployeeCode.disabled = true; // Typically Employee Code should not be edited
+                txtFullName.value = u.fullName;
+                txtUsername.value = u.username;
+                txtUsername.disabled = true; // Typically Username should not be edited
+                txtPassword.value = "";
+
+                lblPasswordReq.style.display = "none";
+                txtPasswordHelp.style.display = "block";
+
+                ddlRole.value = u.roleId;
+                ddlBranch.value = u.branchId;
+                txtMobile.value = u.mobile || "";
+                txtEmail.value = u.email || "";
+                chkUserActive.checked = u.isActive;
+
+                // Reset mobile validation state for edit
+                txtMobile.style.borderColor = "";
+                txtMobile.style.boxShadow = "";
+
+                hideModalError();
+                userModal.style.display = "flex";
+            }
+
+            function closeUserModal() {
+                userModal.style.display = "none";
+                // Reset mobile validation state
+                txtMobile.style.borderColor = "";
+                txtMobile.style.boxShadow = "";
+            }
+
+            async function saveUser() {
+                hideModalError();
+
+                const employeeCode = txtEmployeeCode.value.trim();
+                const fullName = txtFullName.value.trim();
+                const username = txtUsername.value.trim();
+                const password = txtPassword.value;
+                const roleId = Number(ddlRole.value);
+                const branchId = Number(ddlBranch.value);
+                const mobile = txtMobile.value.trim();
+                const email = txtEmail.value.trim();
+                const isActive = chkUserActive.checked;
+
+                // Validations
+                if (!employeeCode) return showModalError("Employee Code is required.");
+                if (!fullName) return showModalError("Full Name is required.");
+                if (!username) return showModalError("Username is required.");
+                if (editingUserId === 0 && !password) return showModalError("Password is required.");
+                if (!roleId) return showModalError("Role is required.");
+                if (!branchId) return showModalError("Branch is required.");
+                if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    return showModalError("Please enter a valid email address.");
+                }
+
+                const dto = {
+                    employeeCode,
+                    fullName,
+                    username,
+                    password: password || null,
+                    roleId,
+                    branchId,
+                    mobile: mobile || null,
+                    email: email || null,
+                    isActive
+                };
+
+                btnSaveUser.disabled = true;
+                try {
+                    if (editingUserId === 0) {
+                        await Api.createUser(dto);
+                        showSuccess("User created successfully.");
+                    } else {
+                        await Api.updateUser(editingUserId, dto);
+                        showSuccess("User updated successfully.");
+                    }
+                    closeUserModal();
+                    await loadUsers();
+                } catch (err) {
+                    showModalError(err.message || "Failed to save user.");
+                } finally {
+                    btnSaveUser.disabled = false;
+                }
+            }
+
+            async function toggleStatus(userId) {
+                clearApiError();
+                try {
+                    const res = await Api.toggleUserStatus(userId);
+                    const user = allUsers.find(u => u.userId === userId);
+                    if (user) {
+                        user.isActive = res.isActive;
+                        showSuccess(`User '${user.fullName}' status updated successfully.`);
+                        filterAndRender();
+                    }
+                } catch (err) {
+                    showApiError(err);
+                }
+            }
+
+            // Helper utilities for feedback banners
+            function showSuccess(msg) {
+                apiSuccessBanner.textContent = msg;
+                apiSuccessBanner.style.display = "block";
+                apiErrorBanner.style.display = "none";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+
+                setTimeout(() => {
+                    apiSuccessBanner.style.display = "none";
+                }, 5000);
+            }
+
+            function showApiError(err) {
+                apiErrorBanner.textContent = err.message || "An error occurred.";
+                apiErrorBanner.style.display = "block";
+                apiSuccessBanner.style.display = "none";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+
+            function clearApiError() {
+                apiErrorBanner.style.display = "none";
+                apiSuccessBanner.style.display = "none";
+            }
+
+            function showModalError(msg) {
+                modalErrorBanner.textContent = msg;
+                modalErrorBanner.style.display = "block";
+            }
+
+            function hideModalError() {
+                modalErrorBanner.style.display = "none";
+            }
+        });
+    </script>
 </body>
 </html>
