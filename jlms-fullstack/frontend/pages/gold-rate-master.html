@@ -26,9 +26,8 @@
 
 
                 <div class="row g-3 mb-3">
-                    <div class="col-md-4"><div class="kpi-card gold"><div class="kpi-top"><span class="kpi-label">22K Rate Today</span><div class="kpi-icon gold"><i class="bi bi-coin"></i></div></div><div class="kpi-value" id="lbl22K">₹0 / g</div><div class="kpi-foot" id="foot22K"><span class="text-muted-jlms">No previous rate yet</span></div></div></div>
-                    <div class="col-md-4"><div class="kpi-card navy"><div class="kpi-top"><span class="kpi-label">24K Rate Today</span><div class="kpi-icon navy"><i class="bi bi-coin"></i></div></div><div class="kpi-value" id="lbl24K">₹0 / g</div><div class="kpi-foot" id="foot24K"><span class="text-muted-jlms">No previous rate yet</span></div></div></div>
-                    <div class="col-md-4"><div class="kpi-card info"><div class="kpi-top"><span class="kpi-label">18K Rate Today</span><div class="kpi-icon info"><i class="bi bi-coin"></i></div></div><div class="kpi-value" id="lbl18K">₹0 / g</div><div class="kpi-foot" id="foot18K"><span class="text-muted-jlms">No previous rate yet</span></div></div></div>
+                    <div class="col-md-6"><div class="kpi-card gold"><div class="kpi-top"><span class="kpi-label">22K Rate Today</span><div class="kpi-icon gold"><i class="bi bi-coin"></i></div></div><div class="kpi-value" id="lbl22K">₹0 / g</div><div class="kpi-foot" id="foot22K"><span class="text-muted-jlms">No previous rate yet</span></div></div></div>
+                    <div class="col-md-6"><div class="kpi-card info"><div class="kpi-top"><span class="kpi-label">Silver Rate Today</span><div class="kpi-icon info"><i class="bi bi-gem"></i></div></div><div class="kpi-value" id="lblSilver">₹0 / g</div><div class="kpi-foot" id="footSilver"><span class="text-muted-jlms">No previous rate yet</span></div></div></div>
                 </div>
 
                 <div class="row g-3">
@@ -37,9 +36,11 @@
                             <div class="panel-head"><div class="h4">Update Today's Rate</div></div>
                             <div class="panel-body">
                                 <div class="field-group"><label class="field-label">Effective Date</label><input class="form-control-jlms" id="effectiveDate" disabled></div>
-                                <div class="field-group"><label class="field-label">24K Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rate24K"></div></div>
                                 <div class="field-group"><label class="field-label">22K Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rate22K"></div></div>
-                                <div class="field-group"><label class="field-label">18K Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rate18K"></div></div>
+                                <div class="field-group"><label class="field-label">Silver Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rateSilver"></div></div>
+                                <!-- Hidden fields kept for API payload -->
+                                <input type="hidden" id="rate24K">
+                                <input type="hidden" id="rate18K">
                                 <button id="btnSaveRate" class="btn-jlms btn-jlms-primary" style="width:100%; justify-content:center;"><i class="bi bi-save"></i> Update Rate</button>
                             </div>
                         </div>
@@ -47,11 +48,10 @@
                     <div class="col-lg-8">
                         <div class="panel mb-3">
                             <div class="panel-head" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                                <div class="h4" id="trendChartTitle">Rate Trend — 22K (Last 30 Days)</div>
-                                <div class="btn-group btn-group-sm" role="group" id="karatFilterGroup">
-                                    <button type="button" class="btn btn-outline-secondary karat-filter-btn active" data-karat="22K">22K</button>
-                                    <button type="button" class="btn btn-outline-secondary karat-filter-btn" data-karat="24K">24K</button>
-                                    <button type="button" class="btn btn-outline-secondary karat-filter-btn" data-karat="18K">18K</button>
+                                <div class="h4">Rate Trend — 22K &amp; Silver (Last 30 Days)</div>
+                                <div style="display:flex; gap:16px; align-items:center; font-size:13px;">
+                                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#D4AF37;margin-right:5px;"></span>22K Gold</span>
+                                    <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#7B8EA0;margin-right:5px;"></span>Silver</span>
                                 </div>
                             </div>
                             <div class="panel-body"><canvas id="goldRateChart" height="160"></canvas></div>
@@ -63,9 +63,9 @@
                     <div class="panel-head"><div class="h4">Rate History</div></div>
                     <div class="panel-body no-pad table-jlms-wrap">
                         <table class="table-jlms">
-                            <thead><tr><th>Effective Date</th><th class="text-end">24K Rate</th><th class="text-end">22K Rate</th><th class="text-end">18K Rate</th><th>Updated By</th></tr></thead>
+                            <thead><tr><th>Effective Date</th><th class="text">22K Rate</th><th class="text">Silver Rate</th></tr></thead>
                             <tbody id="historyBody">
-                                <tr><td colspan="5" class="text-muted-jlms">Loading history…</td></tr>
+                                <tr><td colspan="3" class="text-muted-jlms">Loading history…</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -85,12 +85,10 @@
 
         let goldRateChart = null;
         let historyCache = [];       // most recent history rows, ascending (oldest -> newest)
-        let currentKarat = '22K';    // which line is shown in the trend chart
 
-        const KARAT_COLORS = {
-            '24K': { border: '#1F3B73', bg: 'rgba(31,59,115,0.1)' },
-            '22K': { border: '#D4AF37', bg: 'rgba(212,175,55,0.1)' },
-            '18K': { border: '#2E86C1', bg: 'rgba(46,134,193,0.1)' }
+        const CHART_COLORS = {
+            '22K':   { border: '#D4AF37', bg: 'rgba(212,175,55,0.08)' },
+            'Silver':{ border: '#7B8EA0', bg: 'rgba(123,142,160,0.08)' }
         };
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -124,23 +122,20 @@
 
                 const rate = await Api.getTodayGoldRate();
 
-                document.getElementById('rate24K').value =
-                    rate.rate24K ?? '';
+                // Visible fields
+                document.getElementById('rate22K').value    = rate.rate22K ?? '';
+                document.getElementById('rateSilver').value = rate.silverRate ?? '';
 
-                document.getElementById('rate22K').value =
-                    rate.rate22K ?? '';
+                // Hidden fields (still sent to API)
+                document.getElementById('rate24K').value = rate.rate24K ?? '';
+                document.getElementById('rate18K').value = rate.rate18K ?? '';
 
-                document.getElementById('rate18K').value =
-                    rate.rate18K ?? '';
-
-                document.getElementById('lbl24K').innerHTML =
-                    '₹' + formatCurrency(rate.rate24K ?? 0) + ' / g';
-
+                // KPI tiles
                 document.getElementById('lbl22K').innerHTML =
                     '₹' + formatCurrency(rate.rate22K ?? 0) + ' / g';
 
-                document.getElementById('lbl18K').innerHTML =
-                    '₹' + formatCurrency(rate.rate18K ?? 0) + ' / g';
+                document.getElementById('lblSilver').innerHTML =
+                    '₹' + formatCurrency(rate.silverRate ?? 0) + ' / g';
 
             }
             catch (err) {
@@ -220,52 +215,74 @@
                     `<span class="text-muted-jlms">No change (${compareLabel})</span>`;
             }
         }
-        function renderChart(rowsAscending, karat) {
+        function renderChart(rowsAscending) {
 
-            karat = karat || currentKarat;
+            const labels     = rowsAscending.map(r => formatDate(r.effectiveDate));
+            const data22K    = rowsAscending.map(r => Number(r.rate22K));
+            const dataSilver = rowsAscending.map(r => Number(r.silverRate));
 
-            const labels = rowsAscending.map(r => formatDate(r.effectiveDate));
-            const field = 'rate' + karat; // rate24K / rate22K / rate18K
-            const data = rowsAscending.map(r => Number(r[field]));
-            const color = KARAT_COLORS[karat] || KARAT_COLORS['22K'];
-
-            document.getElementById('trendChartTitle').textContent =
-                `Rate Trend — ${karat} (Last 30 Days)`;
+            const c22    = CHART_COLORS['22K'];
+            const cSilv  = CHART_COLORS['Silver'];
 
             if (goldRateChart) {
                 goldRateChart.data.labels = labels;
-                goldRateChart.data.datasets[0].data = data;
-                goldRateChart.data.datasets[0].borderColor = color.border;
-                goldRateChart.data.datasets[0].backgroundColor = color.bg;
+                goldRateChart.data.datasets[0].data = data22K;
+                goldRateChart.data.datasets[1].data = dataSilver;
                 goldRateChart.update();
                 return;
             }
 
             goldRateChart = new Chart(document.getElementById('goldRateChart'), {
-
                 type: 'line',
-
                 data: {
                     labels: labels,
-
-                    datasets: [{
-                        data: data,
-                        borderColor: color.border,
-                        backgroundColor: color.bg,
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 0,
-                        borderWidth: 2
-                    }]
+                    datasets: [
+                        {
+                            label: '22K Gold',
+                            data: data22K,
+                            borderColor: c22.border,
+                            backgroundColor: c22.bg,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0,
+                            borderWidth: 2,
+                            yAxisID: 'yGold'
+                        },
+                        {
+                            label: 'Silver',
+                            data: dataSilver,
+                            borderColor: cSilv.border,
+                            backgroundColor: cSilv.bg,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0,
+                            borderWidth: 2,
+                            yAxisID: 'ySilver'
+                        }
+                    ]
                 },
-
                 options: {
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: ₹${ctx.parsed.y.toLocaleString('en-IN', {minimumFractionDigits:2,maximumFractionDigits:2})} / g`
+                            }
+                        }
                     },
                     scales: {
-                        y: {
-                            grid: { color: '#EDEFF2' }
+                        yGold: {
+                            type: 'linear',
+                            position: 'left',
+                            grid: { color: '#EDEFF2' },
+                            ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }
+                        },
+                        ySilver: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }
                         },
                         x: {
                             grid: { display: false },
@@ -291,65 +308,38 @@
                     html += `
                 <tr>
                     <td class="cell-strong">${formatDate(r.effectiveDate)}</td>
-                    <td class="text-end">₹${formatCurrency(r.rate24K)}</td>
-                    <td class="text-end">₹${formatCurrency(r.rate22K)}</td>
-                    <td class="text-end">₹${formatCurrency(r.rate18K)}</td>
-                    <td>${r.updatedBy || 'System (API)'}</td>
+                    <td class="text">₹${formatCurrency(r.rate22K)}</td>
+                    <td class="text">₹${formatCurrency(r.silverRate)}</td>
+                    
                 </tr>`;
                 });
 
                 document.getElementById('historyBody').innerHTML =
-                    html || '<tr><td colspan="5" class="text-muted-jlms">No rate history yet.</td></tr>';
+                    html || '<tr><td colspan="3" class="text-muted-jlms">No rate history yet.</td></tr>';
 
                 // Chart wants oldest -> newest for a left-to-right trend line
                 const rowsAscending = [...rowsDescending].reverse();
                 historyCache = rowsAscending;
-                renderChart(rowsAscending, currentKarat);
+                renderChart(rowsAscending);
 
-                // "vs yesterday" trend uses the two most recent entries
-                //if (rowsDescending.length >= 2) {
-                //    const today = rowsDescending[0];
-                //    const prev = rowsDescending[1];
-                //    renderTrend('foot24K', today.rate24K, prev.rate24K);
-                //    renderTrend('foot22K', today.rate22K, prev.rate22K);
-                //    renderTrend('foot18K', today.rate18K, prev.rate18K);
-                //} else {
-                //    renderTrend('foot24K', null, null);
-                //    renderTrend('foot22K', null, null);
-                //    renderTrend('foot18K', null, null);
-                //}
+                // "vs yesterday" trend — 22K and Silver tiles only
                 if (rowsDescending.length >= 2) {
                     const today = rowsDescending[0];
-                    const prev = rowsDescending[1];
-                    renderTrend('foot24K', today.rate24K, prev.rate24K, today.effectiveDate, prev.effectiveDate);
-                    renderTrend('foot22K', today.rate22K, prev.rate22K, today.effectiveDate, prev.effectiveDate);
-                    renderTrend('foot18K', today.rate18K, prev.rate18K, today.effectiveDate, prev.effectiveDate);
+                    const prev  = rowsDescending[1];
+                    renderTrend('foot22K',   today.rate22K,   prev.rate22K,   today.effectiveDate, prev.effectiveDate);
+                    renderTrend('footSilver', today.silverRate, prev.silverRate, today.effectiveDate, prev.effectiveDate);
                 } else {
-                    renderTrend('foot24K', null, null);
-                    renderTrend('foot22K', null, null);
-                    renderTrend('foot18K', null, null);
+                    renderTrend('foot22K',   null, null);
+                    renderTrend('footSilver', null, null);
                 }
 
             }
             catch (err) {
                 console.log(err);
                 document.getElementById('historyBody').innerHTML =
-                    '<tr><td colspan="5" class="text-muted-jlms">Unable to load history.</td></tr>';
+                    '<tr><td colspan="3" class="text-muted-jlms">Unable to load history.</td></tr>';
             }
         }
-
-        document.addEventListener('click', function (e) {
-
-            const btn = e.target.closest('.karat-filter-btn');
-            if (!btn) return;
-
-            currentKarat = btn.getAttribute('data-karat');
-
-            document.querySelectorAll('.karat-filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            renderChart(historyCache, currentKarat);
-        });
 
         document.addEventListener('click', async function (e) {
 
@@ -357,33 +347,37 @@
 
                 clearApiError();
 
-                const r24 = parseFloat(document.getElementById('rate24K').value);
-                const r22 = parseFloat(document.getElementById('rate22K').value);
-                const r18 = parseFloat(document.getElementById('rate18K').value);
+                const r22   = parseFloat(document.getElementById('rate22K').value);
+                const rSilv = parseFloat(document.getElementById('rateSilver').value);
 
-                if (isNaN(r24) || isNaN(r22) || isNaN(r18)) {
-                    showApiError({ message: 'Please enter valid numeric rates for 24K, 22K and 18K.' });
+                if (isNaN(r22) || isNaN(rSilv)) {
+                    showApiError({ message: 'Please enter valid numeric rates for 22K and Silver.' });
                     return;
                 }
+
+                // Derive 24K and 18K from 22K using standard purity ratios
+                const r24 = parseFloat((r22 * 24 / 22).toFixed(2));
+                const r18 = parseFloat((r22 * 18 / 22).toFixed(2));
+
+                // Keep hidden fields in sync for reference
+                document.getElementById('rate24K').value = r24;
+                document.getElementById('rate18K').value = r18;
 
                 try {
 
                     await Api.setTodayGoldRate({
-
-                        effectiveDate:
-                            document.getElementById('effectiveDate').value,
-
+                        effectiveDate: document.getElementById('effectiveDate').value,
                         rate24K: r24,
                         rate22K: r22,
-                        rate18K: r18
-
+                        rate18K: r18,
+                        silverRate: rSilv
                     });
 
                     const success =
                         document.getElementById('apiSuccessBanner');
 
                     success.innerHTML =
-                        'Gold Rate Updated Successfully';
+                        'Gold &amp; Silver Rate Updated Successfully';
 
                     success.style.display = 'block';
 

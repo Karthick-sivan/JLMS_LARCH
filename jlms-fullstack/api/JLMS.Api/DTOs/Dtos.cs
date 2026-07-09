@@ -65,8 +65,8 @@ public record CustomerDetailDto(
 public record JewelTypeDto(int JewelTypeId, string JewelTypeName, string Category, string? DefaultPurity, decimal WastagePercent, bool IsActive);
 public record JewelTypeCreateDto(string JewelTypeName, string Category, string? DefaultPurity, decimal WastagePercent, bool IsActive);
 
-public record GoldRateDto(int GoldRateId, DateTime EffectiveDate, decimal Rate24K, decimal Rate22K, decimal Rate18K);
-public record GoldRateCreateDto(decimal Rate24K, decimal Rate22K, decimal Rate18K);
+public record GoldRateDto(int GoldRateId, DateTime EffectiveDate, decimal Rate24K, decimal Rate22K, decimal Rate18K, decimal SilverRate);
+public record GoldRateCreateDto(decimal Rate24K, decimal Rate22K, decimal Rate18K, decimal SilverRate);
 
 public record LoanSchemeDto(int LoanSchemeId, string SchemeName, decimal InterestRatePct, int TenureMonths, decimal MaxLtvPercent, decimal ProcessingFee, decimal PenaltyRatePerDay, bool IsActive);
 public record LoanSchemeCreateDto(string SchemeName, decimal InterestRatePct, int TenureMonths, decimal MaxLtvPercent, decimal ProcessingFee, decimal PenaltyRatePerDay, bool IsActive);
@@ -117,6 +117,15 @@ public record DashboardSummaryDto(
     int OverdueLoans, int AuctionEligible, int RenewalsThisMonth, int ClosuresThisMonth
 );
 
+public record CollectionTrendPointDto(DateTime CollectionDate, decimal TotalCollected);
+
+public record LoanDueRowDto(
+    string LoanNumber,
+    string CustomerName,
+    decimal OutstandingPrincipal,
+    DateTime MaturityDate,
+    bool IsOverdue
+);
 // ---------- User Master ----------
 public record UserMasterDto(
     int UserId,
@@ -158,4 +167,95 @@ public record UserUpdateDto(
     string? Mobile,
     string? Email,
     bool IsActive
+);
+
+// ---------- Outstanding Reports ----------
+public record OutstandingReportRowDto(
+    int LoanId,
+    string LoanNumber,
+    string CustomerName,
+    string CustomerCode,
+    string CustomerMobile,
+    string SchemeName,
+    DateTime? LoanDate,
+    DateTime? MaturityDate,
+    decimal LoanAmount,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    //decimal PenaltyAccrued,
+    decimal TotalOutstanding,
+    int DaysOverdue,
+    string Status
+);
+
+public record OutstandingReportPagedDto(
+    List<OutstandingReportRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    decimal TotalLoanAmount,
+    decimal TotalOutstandingPrincipal,
+    decimal TotalOutstandingInterest,
+    //decimal TotalPenalty,
+    decimal GrandTotalOutstanding
+);
+
+
+//// ---------- Collection Reports ----------
+//public record CollectionReportRowDto(
+//    int LoanId,
+//    string LoanNumber,
+//    string CustomerName,
+//    string CustomerCode,
+//    string CustomerMobile,
+//    string SchemeName,
+//    DateTime? LoanDate,
+//    DateTime? MaturityDate,
+//    decimal LoanAmount,
+//    decimal OutstandingPrincipal,
+//    decimal OutstandingInterest,
+//    //decimal PenaltyAccrued,
+//    decimal TotalOutstanding,
+//    int DaysOverdue,
+//    string Status
+//);
+
+//public record CollectionReportPagedDto(
+//    List<CollectionReportRowDto> Items,
+//    int TotalCount,
+//    int Page,
+//    int PageSize,
+//    decimal TotalLoanAmount,
+//    decimal TotalOutstandingPrincipal,
+//    decimal TotalOutstandingInterest,
+//    //decimal TotalPenalty,
+//    decimal GrandTotalOutstanding
+//);
+
+// ---------- Collection Reports ----------
+public record CollectionReportRowDto(
+    int TransactionId,
+    int LoanId,
+    string LoanNumber,
+    string CustomerName,
+    string CustomerCode,
+    string CustomerMobile,
+    string SchemeName,
+    DateTime TransactionDate,
+    string TransactionType,
+    decimal LoanAmount,
+    decimal PrincipalAmount,
+    decimal InterestAmount,
+    decimal TotalAmount,
+    decimal BalanceAmount
+);
+
+public record CollectionReportPagedDto(
+    List<CollectionReportRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    decimal TotalPrincipalCollected,
+    decimal TotalInterestCollected,
+    decimal GrandTotalCollected
 );

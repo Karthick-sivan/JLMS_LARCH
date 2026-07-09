@@ -1,4 +1,4 @@
-/* ============================================================
+/* =================================customer aster===========================
    JLMS API Client
    ============================================================
    Set API_BASE_URL to match where your ASP.NET Core API is
@@ -92,28 +92,13 @@ const Api = {
   // ---- Masters ----
   getJewelTypes: (activeOnly = true) => apiRequest(`/jewel-types?activeOnly=${activeOnly}`),
   createJewelType: (dto) => apiRequest("/jewel-types", { method: "POST", body: dto }),
-  updateJewelType: (id, dto) =>
-    apiRequest(`/jewel-types/${id}`, {
-        method: "PUT",
-        body: dto
-    }),
 
   getTodayGoldRate: () => apiRequest("/gold-rates/today"),
   getGoldRateHistory: (days = 30) => apiRequest(`/gold-rates/history?days=${days}`),
   setTodayGoldRate: (dto) => apiRequest("/gold-rates", { method: "POST", body: dto }),
 
-getLoanSchemes: (activeOnly = false) => apiRequest(`/loan-schemes?activeOnly=${activeOnly}`),
+  getLoanSchemes: (activeOnly = true) => apiRequest(`/loan-schemes?activeOnly=${activeOnly}`),
   createLoanScheme: (dto) => apiRequest("/loan-schemes", { method: "POST", body: dto }),
-  updateLoanScheme: (id, dto) => apiRequest(`/loan-schemes/${id}`, { method: "PUT", body: dto }),
-
-
-    // ---- User Master ----
-  getUsers: () => apiRequest("/user-master"),
-  getUserMasterBranches: () => apiRequest("/user-master/branches"),
-  getUserMasterRoles: () => apiRequest("/user-master/roles"),
-  createUser: (dto) => apiRequest("/user-master", { method: "POST", body: dto }),
-  updateUser: (id, dto) => apiRequest(`/user-master/${id}`, { method: "PUT", body: dto }),
-  toggleUserStatus: (id) => apiRequest(`/user-master/${id}/toggle-status`, { method: "PATCH" }),
 
   // ---- Jewel Appraisal ----
   calculateAppraisal: (dto) => apiRequest("/jewel-appraisal/calculate", { method: "POST", body: dto }),
@@ -122,8 +107,6 @@ getLoanSchemes: (activeOnly = false) => apiRequest(`/loan-schemes?activeOnly=${a
   createLoan: (dto) => apiRequest("/loans", { method: "POST", body: dto }),
   getLoans: (status) => apiRequest(`/loans${status ? "?status=" + status : ""}`),
   getLoanById: (id) => apiRequest(`/loans/${id}`),
-getReleaseDetails: (id) =>
-    apiRequest(`/loans/${id}/release-details`),
   getLoanByNumber: (loanNumber) => apiRequest(`/loans/by-number/${encodeURIComponent(loanNumber)}`),
   approveLoan: (id, dto) => apiRequest(`/loans/${id}/approve`, { method: "POST", body: dto }),
   disburseLoan: (id, dto) => apiRequest(`/loans/${id}/disburse`, { method: "POST", body: dto }),
@@ -142,8 +125,30 @@ getReleaseDetails: (id) =>
   // ---- Dashboard ----
   getDashboardSummary: () => apiRequest("/dashboard/summary"),
   getCollectionsToday: () => apiRequest("/dashboard/collections-today"),
-  getLoansDueToday: () => apiRequest("/dashboard/loans-due-today")
+  getLoansDueToday: () => apiRequest("/dashboard/loans-due-today"),
+  getCollectionTrend: (days = 14) => apiRequest(`/dashboard/collection-trend?days=${days}`),
+    // ---- Outstanding Reports ----
+  getOutstandingReport: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""))
+    ).toString();
+    return apiRequest(`/outstanding-reports${qs ? "?" + qs : ""}`);
+  },
+  searchCustomersForReport: (q) => apiRequest(`/outstanding-reports/customer-search?q=${encodeURIComponent(q)}`),
+
+// ---- Collection Reports ----
+getCollectionReport: (params = {}) => {
+    const qs = new URLSearchParams(
+        Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""))
+    ).toString();
+    return apiRequest(`/collection-reports${qs ? "?" + qs : ""}`);
+},
+    searchCustomersForReport: (q) => apiRequest(`/collection-reports/customer-search?q=${encodeURIComponent(q)}`),
+    getLoansByCustomer: (customerId) => apiRequest(`/collection-reports/loans-by-customer?customerId=${customerId}`)
+  
 };
+
+
 
 /* Simple session helper — stores the logged-in user in sessionStorage
    so other pages know who's "logged in" during this test session. */
@@ -168,7 +173,6 @@ function showApiError(err, containerSelector = "#apiErrorBanner") {
   el.textContent = err.message;
   el.style.display = "block";
 }
-
 function clearApiError(containerSelector = "#apiErrorBanner") {
   const el = document.querySelector(containerSelector);
   if (el) el.style.display = "none";

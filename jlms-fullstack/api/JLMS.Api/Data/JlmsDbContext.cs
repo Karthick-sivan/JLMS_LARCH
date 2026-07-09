@@ -97,11 +97,17 @@ public class JlmsDbContext : DbContext
             .HasForeignKey(ji => ji.LoanId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        //modelBuilder.Entity<LoanTransaction>()
+        //    .HasOne<Loan>()
+        //    .WithMany(l => l.Transactions)
+        //    .HasForeignKey(t => t.LoanId)
+        //    .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<LoanTransaction>()
-            .HasOne<Loan>()
-            .WithMany(l => l.Transactions)
-            .HasForeignKey(t => t.LoanId)
-            .OnDelete(DeleteBehavior.Restrict);
+.HasOne(t => t.Loan)
+.WithMany(l => l.Transactions)
+.HasForeignKey(t => t.LoanId)
+.OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)

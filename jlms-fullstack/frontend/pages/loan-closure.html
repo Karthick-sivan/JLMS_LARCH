@@ -67,6 +67,12 @@
                 <div class="summary-row"><span class="label">Penalty</span><span class="value danger" id="sumPenalty">₹0</span></div>
                 <div class="summary-row total"><span class="label">Total Closure Amount</span><span class="value" id="sumTotal">₹0</span></div>
               </div>
+              <div id="partialPaymentWarning" style="display:none; margin-top:12px; padding:10px 14px;
+                  background:var(--bg-warning); border:1px solid var(--border-warning);
+                  border-radius:var(--radius); font-size:1rem; color:rgb(150, 3, 3);">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                Outstanding balance remains. Complete the full payment before closing this loan.
+              </div>
               <div class="d-flex justify-content-end gap-2 mt-3">
                 <button class="btn-jlms btn-jlms-primary btn-lg" id="btnClose"><i class="bi bi-x-circle"></i> Close Loan</button>
               </div>
@@ -135,6 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('sumInterest').textContent = '₹' + Number(currentCalc.outstandingInterest).toLocaleString('en-IN');
       document.getElementById('sumPenalty').textContent = '₹' + Number(currentCalc.penalty).toLocaleString('en-IN');
       document.getElementById('sumTotal').textContent = '₹' + Number(currentCalc.totalClosureAmount).toLocaleString('en-IN');
+      const hasOutstanding = Number(currentCalc.totalClosureAmount) > 0;
+      document.getElementById('btnClose').disabled = hasOutstanding;
+      document.getElementById('partialPaymentWarning').style.display = hasOutstanding ? 'block' : 'none';
       document.getElementById('closurePanel').style.display = 'block';
     } catch (err) {
       document.getElementById('detailPanel').style.display = 'none';

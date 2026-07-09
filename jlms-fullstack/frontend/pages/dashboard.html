@@ -64,28 +64,21 @@
 
       <!-- KPI ROW 2 -->
       <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
           <div class="kpi-card danger">
             <div class="kpi-top"><span class="kpi-label">Overdue Loans</span><div class="kpi-icon danger"><i class="bi bi-exclamation-circle"></i></div></div>
             <div class="kpi-value" id="kpiOverdue">0</div>
             <div class="kpi-foot"><span class="text-muted-jlms">Past maturity date</span></div>
           </div>
         </div>
-        <div class="col-xl-3 col-md-6">
-          <div class="kpi-card warning">
-            <div class="kpi-top"><span class="kpi-label">Auction Eligible</span><div class="kpi-icon warning"><i class="bi bi-hammer"></i></div></div>
-            <div class="kpi-value" id="kpiAuction">0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Eligible or notice sent</span></div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
           <div class="kpi-card navy">
             <div class="kpi-top"><span class="kpi-label">Renewals This Month</span><div class="kpi-icon navy"><i class="bi bi-arrow-repeat"></i></div></div>
             <div class="kpi-value" id="kpiRenewals">0</div>
             <div class="kpi-foot"><span class="text-muted-jlms">Since start of month</span></div>
           </div>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
           <div class="kpi-card success">
             <div class="kpi-top"><span class="kpi-label">Closures This Month</span><div class="kpi-icon success"><i class="bi bi-check2-circle"></i></div></div>
             <div class="kpi-value" id="kpiClosures">0</div>
@@ -96,23 +89,17 @@
 
       <!-- CHARTS -->
       <div class="row g-3 mb-4">
-        <div class="col-lg-7">
+        <div class="col-lg-12">
           <div class="panel h-100">
             <div class="panel-head">
               <div class="h4"><i class="bi bi-graph-up-arrow" style="color:var(--navy-700);"></i> Collection Trend — Last 14 Days</div>
-              <div class="tab-strip" style="border-bottom:none;">
-                <div class="tab-item active" style="padding:4px 10px;">14D</div>
-                <div class="tab-item" style="padding:4px 10px;">30D</div>
-                <div class="tab-item" style="padding:4px 10px;">90D</div>
+              <div class="tab-strip" style="border-bottom:none;" id="trendRangeTabs">
+                <div class="tab-item active" data-days="14" style="padding:4px 10px; cursor:pointer;">14D</div>
+                <div class="tab-item" data-days="30" style="padding:4px 10px; cursor:pointer;">30D</div>
+                <div class="tab-item" data-days="90" style="padding:4px 10px; cursor:pointer;">90D</div>
               </div>
             </div>
             <div class="panel-body"><canvas id="collectionTrendChart" height="230"></canvas></div>
-          </div>
-        </div>
-        <div class="col-lg-5">
-          <div class="panel h-100">
-            <div class="panel-head"><div class="h4"><i class="bi bi-bar-chart" style="color:var(--navy-700);"></i> Branch Performance</div></div>
-            <div class="panel-body"><canvas id="branchPerfChart" height="230"></canvas></div>
           </div>
         </div>
       </div>
@@ -201,7 +188,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('kpiCollections').textContent = formatCurrency(summary.todaysCollections);
     document.getElementById('kpiDisbursement').textContent = formatCurrency(summary.todaysDisbursement);
     document.getElementById('kpiOverdue').textContent = summary.overdueLoans.toLocaleString('en-IN');
-    document.getElementById('kpiAuction').textContent = summary.auctionEligible.toLocaleString('en-IN');
     document.getElementById('kpiRenewals').textContent = summary.renewalsThisMonth.toLocaleString('en-IN');
     document.getElementById('kpiClosures').textContent = summary.closuresThisMonth.toLocaleString('en-IN');
   } catch (err) {
@@ -252,26 +238,45 @@ document.addEventListener('DOMContentLoaded', async () => {
       `<tr><td colspan="5" class="text-center text-muted-jlms" style="padding:24px;">Could not load: ${err.message}</td></tr>`;
   }
 
-  // ---- Charts (placeholder until enough history exists) ----
-  const ctx1 = document.getElementById('collectionTrendChart');
-  new Chart(ctx1, {
-    type: 'line',
-    data: { labels: [], datasets: [{ label: 'Collections (₹)', data: [], borderColor: '#1E3A8A', backgroundColor: 'rgba(30,58,138,0.08)', fill: true, tension: 0.35 }] },
-    options: {
-      plugins: { legend: { display: false } },
-      scales: { y: { grid: { color: '#EDEFF2' } }, x: { grid: { display: false } } }
+  // ---- Collection trend chart ----
+  let trendChart = null;
+
+  async function loadCollectionTrend(days) {
+    try {
+      const trend = await Api.getCollectionTrend(days);
+      const labels = trend.map(p => new Date(p.collectionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }));
+      const values = trend.map(p => p.totalCollected);
+
+      if (trendChart) {
+        trendChart.data.labels = labels;
+        trendChart.data.datasets[0].data = values;
+        trendChart.update();
+        return;
+      }
+
+      const ctx1 = document.getElementById('collectionTrendChart');
+      trendChart = new Chart(ctx1, {
+        type: 'line',
+        data: { labels, datasets: [{ label: 'Collections (₹)', data: values, borderColor: '#1E3A8A', backgroundColor: 'rgba(30,58,138,0.08)', fill: true, tension: 0.35 }] },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { grid: { color: '#EDEFF2' } }, x: { grid: { display: false } } }
+        }
+      });
+    } catch (err) {
+      console.error('Could not load collection trend:', err.message);
     }
+  }
+
+  document.querySelectorAll('#trendRangeTabs .tab-item').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#trendRangeTabs .tab-item').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      loadCollectionTrend(Number(tab.dataset.days));
+    });
   });
 
-  const ctx2 = document.getElementById('branchPerfChart');
-  new Chart(ctx2, {
-    type: 'bar',
-    data: { labels: [], datasets: [{ label: 'Disbursement (₹)', data: [], backgroundColor: '#1E3A8A' }] },
-    options: {
-      plugins: { legend: { position: 'bottom' } },
-      scales: { y: { grid: { color: '#EDEFF2' } }, x: { grid: { display: false } } }
-    }
-  });
+  loadCollectionTrend(14);
 });
 </script>
 </body>

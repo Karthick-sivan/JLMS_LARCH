@@ -16,23 +16,24 @@ const JLMS_MENU = [
   ]},
   { section: "Transactions", items: [
     { id: "customer-registration", icon: "bi-person-plus", label: "Customer Registration", href: "customer-registration.html" },
-    { id: "jewel-appraisal", icon: "bi-search", label: "Jewel Appraisal", href: "jewel-appraisal.html" },
+    // { id: "jewel-appraisal", icon: "bi-search", label: "Jewel Appraisal", href: "jewel-appraisal.html" },
     { id: "new-loan", icon: "bi-file-earmark-plus", label: "New Loan", href: "new-loan.html" },
     { id: "loan-approval", icon: "bi-check2-square", label: "Loan Approval", href: "loan-approval.html" },
-    { id: "loan-disbursement", icon: "bi-cash-coin", label: "Loan Disbursement", href: "loan-disbursement.html" },
-    { id: "interest-collection", icon: "bi-percent", label: "Interest Collection", href: "interest-collection.html" },
-    { id: "principal-collection", icon: "bi-wallet2", label: "Principal Collection", href: "principal-collection.html" },
-    { id: "loan-renewal", icon: "bi-arrow-repeat", label: "Loan Renewal", href: "loan-renewal.html" },
-    { id: "loan-closure", icon: "bi-x-circle", label: "Loan Closure", href: "loan-closure.html" },
-    { id: "jewel-release", icon: "bi-unlock", label: "Jewel Release", href: "jewel-release.html" },
+    // { id: "loan-disbursement", icon: "bi-cash-coin", label: "Loan Disbursement", href: "loan-disbursement.html" },
+    // { id: "interest-collection", icon: "bi-percent", label: "Interest Collection", href: "interest-collection.html" },
+    // { id: "principal-collection", icon: "bi-wallet2", label: "Principal Collection", href: "principal-collection.html" },
+    // { id: "loan-renewal", icon: "bi-arrow-repeat", label: "Loan Renewal", href: "loan-renewal.html" },
+    // { id: "loan-closure", icon: "bi-x-circle", label: "Loan Closure", href: "loan-closure.html" },
+    // { id: "jewel-release", icon: "bi-unlock", label: "Jewel Release", href: "jewel-release.html" },
      { id: "loan-operations", icon: "bi-unlock", label: "Loan Operations", href: "loan-operations.html" },
 
 
     // { id: "auction-management", icon: "bi-hammer", label: "Auction Management", href: "auction-management.html" }
   ]},
-  { section: "Reports", items: [
-    { id: "report-center", icon: "bi-bar-chart-line", label: "Report Center", href: "report-center.html" }
+{ section: "Reports", items: [
+      { id: "report-center", icon: "bi-bar-chart-line", label: "Report Center", href: "outstanding-reports.html" }
   ]},
+
   { section: "Administration", items: [
     { id: "roles", icon: "bi-shield-lock", label: "Roles", href: "roles.html" },
     { id: "permissions", icon: "bi-key", label: "Permissions", href: "permissions.html" },

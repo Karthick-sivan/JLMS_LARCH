@@ -24,8 +24,9 @@
       <div id="apiErrorBanner" class="api-error-banner"></div>
       <div id="apiSuccessBanner" class="api-success-banner"></div>
 
-      <div class="row g-3 justify-content-center">
+      <div class="row g-3">
         <div class="col-lg-7">
+          <!--
           <div class="panel mb-3">
             <div class="panel-head"><div class="h4">Find Approved Loan</div></div>
             <div class="panel-body">
@@ -34,12 +35,59 @@
                   <label class="field-label">Loan Number</label>
                   <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input id="loanNumberInput" placeholder="e.g. JL-20260001"></div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                   <button class="btn-jlms btn-jlms-outline" id="btnFind" style="width:100%; justify-content:center;">Find Loan</button>
+                </div>
+                <div class="col-md-2">
+                  <button class="btn-jlms btn-jlms-outline" id="btnBrowseAll" style="width:100%; justify-content:center;"><i class="bi bi-grid"></i> Browse all</button>
                 </div>
               </div>
             </div>
           </div>
+        -->
+          <div class="panel mb-3" id="lookupPanel">
+            <div class="panel-head">
+              <div class="h4" id="lookupTitle">Approved Loans</div>
+              <span class="text-caption" id="lookupCount"></span>
+            </div>
+            <div class="panel-body">
+              <div class="d-flex gap-2 mb-3">
+                <div class="input-affix flex-grow-1">
+                  <span class="affix"><i class="bi bi-filter"></i></span>
+                  <input id="gridSearchInput" placeholder="Filter by Loan No. or Customer Name...">
+                </div>
+                <button class="btn-jlms btn-jlms-outline" id="btnBrowseAll" style="white-space: nowrap;">
+                  <i class="bi bi-grid"></i> Browse all
+                </button>
+              </div>
+              
+              <div id="lookupLoading" class="text-caption" style="display:none;">Loading loans...</div>
+              <div id="lookupEmpty" class="text-caption" style="display:none;">No loans found.</div>
+              <div class="table-responsive" id="lookupTableWrap">
+                <table class="table table-hover align-middle">
+                  <thead>
+                    <tr>
+                      <th>Loan No.</th>
+                      <th>Customer</th>
+                      <th>Loan Date</th>
+                      <th class="text-end">Loan Amount</th>
+                      <th class="text-end">Net Disburse</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="lookupTableBody"></tbody>
+                </table>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="text-caption">Clicking "Select" fills the loan details above and enables disbursement</div>
+                <div class="d-flex align-items-center gap-2" id="lookupPagination"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div style="position:sticky; top:1rem;">
 
           <div class="panel mb-3" id="detailPanel" style="display:none;">
             <div class="panel-head">
@@ -79,6 +127,8 @@
               </div>
             </div>
           </div>
+
+          </div>
         </div>
       </div>
     </div>
@@ -92,6 +142,11 @@
 jlmsInitShell();
 let currentLoan = null;
 let selectedPaymentMode = 'Cash';
+let lookupShowAll = false;
+let allLookupData = [];
+let lookupData = [];
+let lookupPage = 1;
+const LOOKUP_PAGE_SIZE = 8;
 
 document.addEventListener('DOMContentLoaded', () => {
   Session.requireLogin();
@@ -103,36 +158,42 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedPaymentMode = pill.dataset.value;
     });
   });
-
-  document.getElementById('btnFind').addEventListener('click', async () => {
-    clearApiError();
-    document.getElementById('apiSuccessBanner').style.display = 'none';
+/*
+  document.getElementById('btnFind').addEventListener('click', () => {
     const loanNumber = document.getElementById('loanNumberInput').value.trim();
     if (!loanNumber) { showApiError(new Error('Enter a loan number to search.')); return; }
+    findLoanByNumber(loanNumber);
+  });
+*/
+  document.getElementById('btnBrowseAll').addEventListener('click', (e) => {
+    lookupShowAll = !lookupShowAll;
+    e.currentTarget.innerHTML = lookupShowAll
+      ? '<i class="bi bi-grid"></i> Approved only'
+      : '<i class="bi bi-grid"></i> Browse all';
+    loadLookupGrid();
+  });
 
-    try {
-      const loan = await Api.getLoanByNumber(loanNumber);
-      currentLoan = loan;
-
-      document.getElementById('detailPanel').style.display = 'block';
-      document.getElementById('detLoanNo').textContent = loan.loanNumber;
-      document.getElementById('detCustomer').textContent = loan.customerName;
-      document.getElementById('statusBadge').innerHTML = `<span class="dot"></span>${loan.status}`;
-      document.getElementById('sumLoanAmount').textContent = '₹' + Number(loan.loanAmount).toLocaleString('en-IN');
-      document.getElementById('sumFee').textContent = '− ₹' + Number(loan.processingFee).toLocaleString('en-IN');
-      document.getElementById('sumNet').textContent = '₹' + (Number(loan.loanAmount) - Number(loan.processingFee)).toLocaleString('en-IN');
-
-      if (loan.status === 'Approved') {
-        document.getElementById('paymentPanel').style.display = 'block';
-      } else {
-        document.getElementById('paymentPanel').style.display = 'none';
-        showApiError(new Error(`Loan status is '${loan.status}'. Only 'Approved' loans can be disbursed.`));
-      }
-    } catch (err) {
-      document.getElementById('detailPanel').style.display = 'none';
-      document.getElementById('paymentPanel').style.display = 'none';
-      showApiError(err);
+  document.getElementById('gridSearchInput').addEventListener('input', (e) => {
+    const term = e.target.value.trim().toLowerCase();
+    
+    if (!term) {
+      lookupData = [...allLookupData];
+    } else {
+      lookupData = allLookupData.filter(loan => 
+        (loan.loanNumber && loan.loanNumber.toLowerCase().includes(term)) ||
+        (loan.customerName && loan.customerName.toLowerCase().includes(term))
+      );
     }
+    
+    lookupPage = 1; // Reset to page 1 on search
+    
+    // Update the counter
+    const countLabel = lookupShowAll ? 'total' : 'pending disbursement';
+    document.getElementById('lookupCount').textContent = term 
+      ? `${lookupData.length} ${countLabel} (Filtered)` 
+      : `${lookupData.length} ${countLabel}`;
+      
+    renderLookupPage();
   });
 
   document.getElementById('btnDisburse').addEventListener('click', async () => {
@@ -152,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
       successEl.innerHTML = `Loan <strong>${receipt.loanNumber}</strong> disbursed successfully. Receipt: <strong>${receipt.receiptNumber}</strong>. Net amount paid: ₹${Number(receipt.totalReceived).toLocaleString('en-IN')}.`;
       successEl.style.display = 'block';
       document.getElementById('paymentPanel').style.display = 'none';
+      loadLookupGrid();
     } catch (err) {
       showApiError(err);
     } finally {
@@ -159,7 +221,132 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.innerHTML = '<i class="bi bi-cash-coin"></i> Disburse Loan';
     }
   });
+
+  loadLookupGrid();
 });
+
+async function findLoanByNumber(loanNumber) {
+  clearApiError();
+  document.getElementById('apiSuccessBanner').style.display = 'none';
+  try {
+    const loan = await Api.getLoanByNumber(loanNumber);
+    currentLoan = loan;
+
+    document.getElementById('detailPanel').style.display = 'block';
+    document.getElementById('detLoanNo').textContent = loan.loanNumber;
+    document.getElementById('detCustomer').textContent = loan.customerName;
+    document.getElementById('statusBadge').innerHTML = `<span class="dot"></span>${loan.status}`;
+    document.getElementById('sumLoanAmount').textContent = '₹' + Number(loan.loanAmount).toLocaleString('en-IN');
+    document.getElementById('sumFee').textContent = '− ₹' + Number(loan.processingFee).toLocaleString('en-IN');
+    document.getElementById('sumNet').textContent = '₹' + (Number(loan.loanAmount) - Number(loan.processingFee)).toLocaleString('en-IN');
+
+    if (loan.status === 'Approved') {
+      document.getElementById('paymentPanel').style.display = 'block';
+    } else {
+      document.getElementById('paymentPanel').style.display = 'none';
+      showApiError(new Error(`Loan status is '${loan.status}'. Only 'Approved' loans can be disbursed.`));
+    }
+  } catch (err) {
+    document.getElementById('detailPanel').style.display = 'none';
+    document.getElementById('paymentPanel').style.display = 'none';
+    showApiError(err);
+  }
+}
+
+async function loadLookupGrid() {
+  const loading = document.getElementById('lookupLoading');
+  const empty = document.getElementById('lookupEmpty');
+  const title = document.getElementById('lookupTitle');
+  const count = document.getElementById('lookupCount');
+
+  title.textContent = lookupShowAll ? 'All Loans' : 'Approved Loans';
+  document.getElementById('lookupTableBody').innerHTML = '';
+  document.getElementById('lookupPagination').innerHTML = '';
+  empty.style.display = 'none';
+  count.textContent = '';
+  loading.style.display = 'block';
+
+  try {
+    allLookupData = await Api.getLoans(lookupShowAll ? null : 'Approved');
+
+    const searchTerm = document.getElementById('gridSearchInput').value.trim().toLowerCase();
+    lookupData = searchTerm 
+      ? allLookupData.filter(l => 
+          (l.loanNumber && l.loanNumber.toLowerCase().includes(searchTerm)) || 
+          (l.customerName && l.customerName.toLowerCase().includes(searchTerm))
+        )
+      : [...allLookupData];
+
+
+    lookupPage = 1;
+    loading.style.display = 'none';
+
+    if (!lookupData || lookupData.length === 0) { empty.style.display = 'block'; return; }
+
+    count.textContent = lookupShowAll ? `${lookupData.length} total` : `${lookupData.length} pending disbursement`;
+    renderLookupPage();
+  } catch (err) {
+    loading.style.display = 'none';
+    showApiError(err);
+  }
+}
+
+function renderLookupPage() {
+  const tbody = document.getElementById('lookupTableBody');
+  const totalPages = Math.max(1, Math.ceil(lookupData.length / LOOKUP_PAGE_SIZE));
+  if (lookupPage > totalPages) lookupPage = totalPages;
+  const start = (lookupPage - 1) * LOOKUP_PAGE_SIZE;
+  const pageItems = lookupData.slice(start, start + LOOKUP_PAGE_SIZE);
+
+  tbody.innerHTML = '';
+  pageItems.forEach(loan => {
+    const tr = document.createElement('tr');
+    const netCell = loan.status === 'Approved'
+      ? '₹' + Number(loan.loanAmount).toLocaleString('en-IN')
+      : `<span class="badge-jlms">${loan.status}</span>`;
+    tr.innerHTML = `
+      <td class="cell-strong">${loan.loanNumber}</td>
+      <td>${loan.customerName}</td>
+      <td>${loan.loanDate ? new Date(loan.loanDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}</td>
+      <td class="text-end">₹${Number(loan.loanAmount).toLocaleString('en-IN')}</td>
+      <td class="text-end">${netCell}</td>
+      <td class="text-end"><button class="btn-jlms btn-jlms-outline btn-sm select-loan-btn">Select</button></td>`;
+    tr.querySelector('.select-loan-btn').addEventListener('click', () => {
+      //document.getElementById('loanNumberInput').value = loan.loanNumber;
+      findLoanByNumber(loan.loanNumber);
+    });
+    tbody.appendChild(tr);
+  });
+
+  renderLookupPagination(totalPages);
+}
+
+function renderLookupPagination(totalPages) {
+  const el = document.getElementById('lookupPagination');
+  el.innerHTML = '';
+  if (totalPages <= 1) return;
+
+  const mkBtn = (label, page, disabled, active) => {
+    const b = document.createElement('button');
+    b.className = 'btn-jlms btn-jlms-outline btn-sm' + (active ? ' active' : '');
+    b.style.minWidth = '2.2rem';
+    b.textContent = label;
+    b.disabled = disabled;
+    b.addEventListener('click', () => { lookupPage = page; renderLookupPage(); });
+    return b;
+  };
+
+  el.appendChild(mkBtn('‹', lookupPage - 1, lookupPage === 1, false));
+  for (let p = 1; p <= totalPages; p++) {
+    el.appendChild(mkBtn(String(p), p, false, p === lookupPage));
+  }
+  el.appendChild(mkBtn('›', lookupPage + 1, lookupPage === totalPages, false));
+
+  const pageLabel = document.createElement('span');
+  pageLabel.className = 'text-caption';
+  pageLabel.textContent = `Page ${lookupPage} of ${totalPages}`;
+  el.insertBefore(pageLabel, el.firstChild);
+}
 </script>
 </body>
 </html>

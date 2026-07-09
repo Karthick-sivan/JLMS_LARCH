@@ -82,6 +82,7 @@ public class GoldRate
     public decimal Rate24K { get; set; }
     public decimal Rate22K { get; set; }
     public decimal Rate18K { get; set; }
+    public decimal SilverRate { get; set; }
     public int? UpdatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
 }
@@ -184,6 +185,8 @@ public class LoanTransaction
     public int? BranchId { get; set; }
     public string? Remarks { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public Loan Loan { get; set; } = null!;
 }
 
 public class JewelRelease
