@@ -70,8 +70,8 @@ public class GoldRatesController : ControllerBase
             .OrderByDescending(r => r.EffectiveDate)
             .FirstOrDefaultAsync();
 
-        if (rate == null) return NotFound("No gold rate has been set yet. Please add one via Gold Rate Master.");
-        return Ok(new GoldRateDto(rate.GoldRateId, rate.EffectiveDate, rate.Rate24K, rate.Rate22K, rate.Rate18K));
+        if (rate == null) return NotFound("No gold/silver rate has been set yet. Please add one via Gold/Silver Rate Master.");
+        return Ok(new GoldRateDto(rate.GoldRateId, rate.EffectiveDate, rate.Rate24K, rate.Rate22K, rate.Rate18K, rate.SilverRate));
     }
 
     // GET /api/gold-rates/history?days=30
@@ -83,7 +83,7 @@ public class GoldRatesController : ControllerBase
             .Where(r => r.EffectiveDate >= cutoff)
             .OrderByDescending(r => r.EffectiveDate)
             .ToListAsync();
-        return Ok(rates.Select(r => new GoldRateDto(r.GoldRateId, r.EffectiveDate, r.Rate24K, r.Rate22K, r.Rate18K)));
+        return Ok(rates.Select(r => new GoldRateDto(r.GoldRateId, r.EffectiveDate, r.Rate24K, r.Rate22K, r.Rate18K, r.SilverRate)));
     }
 
     // POST /api/gold-rates  (upserts today's rate)
@@ -98,8 +98,9 @@ public class GoldRatesController : ControllerBase
             existing.Rate24K = dto.Rate24K;
             existing.Rate22K = dto.Rate22K;
             existing.Rate18K = dto.Rate18K;
+            existing.SilverRate = dto.SilverRate;
             await _db.SaveChangesAsync();
-            return Ok(new GoldRateDto(existing.GoldRateId, existing.EffectiveDate, existing.Rate24K, existing.Rate22K, existing.Rate18K));
+            return Ok(new GoldRateDto(existing.GoldRateId, existing.EffectiveDate, existing.Rate24K, existing.Rate22K, existing.Rate18K, existing.SilverRate));
         }
 
         var entity = new GoldRate
@@ -108,11 +109,12 @@ public class GoldRatesController : ControllerBase
             Rate24K = dto.Rate24K,
             Rate22K = dto.Rate22K,
             Rate18K = dto.Rate18K,
+            SilverRate = dto.SilverRate,
             CreatedAt = DateTime.UtcNow
         };
         _db.GoldRates.Add(entity);
         await _db.SaveChangesAsync();
-        return Ok(new GoldRateDto(entity.GoldRateId, entity.EffectiveDate, entity.Rate24K, entity.Rate22K, entity.Rate18K));
+        return Ok(new GoldRateDto(entity.GoldRateId, entity.EffectiveDate, entity.Rate24K, entity.Rate22K, entity.Rate18K, entity.SilverRate));
     }
 }
 

@@ -59,11 +59,42 @@ public class DashboardController : ControllerBase
             .Join(_db.Loans, t => t.LoanId, l => l.LoanId, (t, l) => new { t, l })
             .Join(_db.Customers, x => x.l.CustomerId, c => c.CustomerId, (x, c) => new
             {
-                x.l.LoanNumber, c.CustomerName, x.t.TotalAmount, x.t.PaymentMode, x.t.TransactionDate
+                x.l.LoanNumber,
+                c.CustomerName,
+                x.t.TotalAmount,
+                x.t.PaymentMode,
+                x.t.TransactionDate
             })
             .Take(20)
             .ToListAsync();
         return Ok(items);
+    }
+
+    // GET /api/dashboard/collection-trend?days=14
+    // Day-wise total collections (interest + principal + closures) for the last N days,
+    // zero-filled for days with no activity.
+    [HttpGet("collection-trend")]
+    public async Task<ActionResult> GetCollectionTrend([FromQuery] int days = 14)
+    {
+        var today = DateTime.UtcNow.Date;
+        var startDate = today.AddDays(-(days - 1));
+
+        var raw = await _db.LoanTransactions.AsNoTracking()
+            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "PrincipalCollection" || t.TransactionType == "Closure")
+                        && t.TransactionDate.Date >= startDate)
+            .GroupBy(t => t.TransactionDate.Date)
+            .Select(g => new { Date = g.Key, Total = g.Sum(t => t.TotalAmount) })
+            .ToListAsync();
+
+        var lookup = raw.ToDictionary(r => r.Date, r => r.Total);
+
+        var result = new List<object>();
+        for (var d = startDate; d <= today; d = d.AddDays(1))
+        {
+            result.Add(new { CollectionDate = d, TotalCollected = lookup.TryGetValue(d, out var total) ? total : 0m });
+        }
+
+        return Ok(result);
     }
 
     [HttpGet("loans-due-today")]
@@ -77,8 +108,11 @@ public class DashboardController : ControllerBase
             .Take(20)
             .Select(l => new
             {
-                l.LoanNumber, CustomerName = l.Customer!.CustomerName, l.OutstandingPrincipal,
-                l.MaturityDate, IsOverdue = l.MaturityDate < today
+                l.LoanNumber,
+                CustomerName = l.Customer!.CustomerName,
+                l.OutstandingPrincipal,
+                l.MaturityDate,
+                IsOverdue = l.MaturityDate < today
             })
             .ToListAsync();
         return Ok(loans);
