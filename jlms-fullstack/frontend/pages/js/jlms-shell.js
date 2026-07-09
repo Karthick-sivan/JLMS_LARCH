@@ -25,7 +25,10 @@ const JLMS_MENU = [
     { id: "loan-renewal", icon: "bi-arrow-repeat", label: "Loan Renewal", href: "loan-renewal.html" },
     { id: "loan-closure", icon: "bi-x-circle", label: "Loan Closure", href: "loan-closure.html" },
     { id: "jewel-release", icon: "bi-unlock", label: "Jewel Release", href: "jewel-release.html" },
-    { id: "auction-management", icon: "bi-hammer", label: "Auction Management", href: "auction-management.html" }
+     { id: "loan-operations", icon: "bi-unlock", label: "Loan Operations", href: "loan-operations.html" },
+
+
+    // { id: "auction-management", icon: "bi-hammer", label: "Auction Management", href: "auction-management.html" }
   ]},
   { section: "Reports", items: [
     { id: "report-center", icon: "bi-bar-chart-line", label: "Report Center", href: "report-center.html" }
