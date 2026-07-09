@@ -401,6 +401,7 @@
               <div class="info-row"><div class="info-label">Customer Name</div><div class="info-value" id="closeCustomerName">-</div></div>
               <div class="info-row"><div class="info-label">Loan No</div><div class="info-value" id="closeLoanNo">-</div></div>
               <div class="info-row"><div class="info-label">Loan Scheme</div><div class="info-value" id="closeScheme">-</div></div>
+              <div class="info-row"><div class="info-label">Total Amount Paid</div><div class="info-value" id="closeTotalPaid">-</div></div>
               <div class="info-row"><div class="info-label">Mobile</div><div class="info-value" id="closeMobile">-</div></div>
             </div>
           </div>
@@ -415,9 +416,11 @@
             </tbody>
           </table>
 
-          <label class="field-label">Amount Entered (₹)</label>
+          <!-- <label class="field-label">Amount Entered (₹)</label>
           <input type="number" class="form-control-jlms" id="closeAmountEntered" placeholder="Enter exact grand total to enable closure" min="0" step="0.01">
-          <div class="validation-msg" id="closeValidationMsg">Entered amount must exactly match the Grand Total. Partial payments cannot close the loan.</div>
+          <div class="validation-msg" id="closeValidationMsg">Entered amount must exactly match the Grand Total. Partial payments cannot close the loan.</div> -->
+
+          <div class="validation-msg" id="closeValidationMsg" style="font-size: 0.95rem">The Grand Total must be ₹0.00 to close this loan. Please collect pending payments first.</div>
 
           <!-- Receipt (shown after a successful closure) -->
           <div class="receipt-section" id="closureReceiptSection" style="display:none;">
@@ -1146,6 +1149,7 @@ async function openClosureModal(loanId) {
     document.getElementById('closeCustomerName').textContent = loan.customerName;
     document.getElementById('closeLoanNo').textContent = loan.loanNo;
     document.getElementById('closeScheme').textContent = loan.loanScheme;
+    document.getElementById('closeTotalPaid').textContent = inr(loan.totalAmountPaid);
     document.getElementById('closeMobile').textContent = loan.mobile;
 
     document.getElementById('closeOutPrincipal').textContent = inr(loan.outstandingPrincipal);
@@ -1154,9 +1158,18 @@ async function openClosureModal(loanId) {
     document.getElementById('closeOtherCharges').textContent = inr(otherCharges);
     document.getElementById('closeGrandTotal').textContent = inr(grandTotal);
 
-    document.getElementById('closeAmountEntered').value = '';
-    document.getElementById('closeAmountEntered').disabled = false;
-    document.getElementById('closeValidationMsg').classList.remove('show');
+    // document.getElementById('closeAmountEntered').value = '';
+    // document.getElementById('closeAmountEntered').disabled = false;
+    // document.getElementById('closeValidationMsg').classList.remove('show');
+
+    // document.getElementById('closureLoadingState').style.display = 'none';
+    if (grandTotal === 0) {
+      document.getElementById('btnCloseLoan').disabled = false;
+      document.getElementById('closeValidationMsg').classList.remove('show');
+    } else {
+      document.getElementById('btnCloseLoan').disabled = true;
+      document.getElementById('closeValidationMsg').classList.add('show');
+    }
 
     document.getElementById('closureLoadingState').style.display = 'none';
     document.getElementById('closureContent').style.display = 'block';
@@ -1165,21 +1178,21 @@ async function openClosureModal(loanId) {
   }
 }
 
-document.getElementById('closeAmountEntered').addEventListener('input', () => {
-  if (!activeClosureLoan) return;
-  const entered = parseFloat(document.getElementById('closeAmountEntered').value) || 0;
-  const matches = Math.abs(entered - activeClosureLoan.grandTotal) < 0.01;
-  const btn = document.getElementById('btnCloseLoan');
-  const msg = document.getElementById('closeValidationMsg');
+// document.getElementById('closeAmountEntered').addEventListener('input', () => {
+//   if (!activeClosureLoan) return;
+//   const entered = parseFloat(document.getElementById('closeAmountEntered').value) || 0;
+//   const matches = Math.abs(entered - activeClosureLoan.grandTotal) < 0.01;
+//   const btn = document.getElementById('btnCloseLoan');
+//   const msg = document.getElementById('closeValidationMsg');
 
-  if (entered > 0 && !matches) {
-    msg.classList.add('show');
-    btn.disabled = true;
-  } else {
-    msg.classList.remove('show');
-    btn.disabled = !matches;
-  }
-});
+//   if (entered > 0 && !matches) {
+//     msg.classList.add('show');
+//     btn.disabled = true;
+//   } else {
+//     msg.classList.remove('show');
+//     btn.disabled = !matches;
+//   }
+// });
 
 let lastClosureReceipt = null;
 
@@ -1207,7 +1220,7 @@ document.getElementById('btnCloseLoan').addEventListener('click', () => {
       lastClosureReceipt = response;
       showApiSuccess(`Loan ${loanNo} has been closed successfully.`);
 
-      document.getElementById('closeAmountEntered').disabled = true;
+      // document.getElementById('closeAmountEntered').disabled = true;
       btn.style.display = 'none';
       document.getElementById('btnClosureCancel').textContent = 'Done';
       document.getElementById('btnPrintClosureReceipt').disabled = false;
