@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Outstanding Reports</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="View and filter outstanding loan balances across all active loans in JLMS.">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .report-cat-item {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px; font-size:12.5px; font-weight:600;
+    color:var(--n-700); cursor:pointer;
+    border-left:3px solid transparent; transition:background .15s;
+  }
+  .report-cat-item:hover  { background:var(--n-50); }
+  .report-cat-item.active { background:var(--navy-50); color:var(--navy-700); border-left-color:var(--navy-700); }
+  .report-cat-item .count { margin-left:auto; font-size:10.5px; background:var(--n-150); color:var(--n-600); padding:1px 7px; border-radius:10px; }
+  .report-cat-item.active .count { background:var(--navy-100); color:var(--navy-700); }
+
+  #filterCustomer:disabled { opacity:0.6; }
+
+  .summary-cards { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+  .summary-card  { flex:1; min-width:160px; background:#fff; border:1px solid #eef0f3; border-radius:10px; padding:14px 16px; box-shadow:0 1px 4px rgba(0,0,0,.04); }
+  .summary-card .sc-label { font-size:11.5px; color:#9aa4b2; font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .summary-card .sc-value { font-size:18px; font-weight:700; color:#1e2a3a; }
+  .summary-card.accent-orange .sc-value { color:#d97706; }
+  .summary-card.accent-red    .sc-value { color:#dc2626; }
+  .summary-card.accent-navy   .sc-value { color:var(--navy-700,#0d3b66); }
+
+  .state-panel { text-align:center; padding:52px 20px; color:#9aa4b2; }
+  .state-panel i { font-size:2.8rem; display:block; margin-bottom:12px; }
+  .state-panel p { font-size:14px; margin:0; }
+
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spin { display:inline-block; animation:spin .8s linear infinite; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+
+      <div class="page-header">
+        <div>
+          <div class="breadcrumb-jlms">
+            <a href="dashboard.html">Home</a><span class="sep">/</span>
+            <a href="report-center.html">Report Center</a><span class="sep">/</span>
+            <span class="current">Outstanding Reports</span>
+          </div>
+          <div class="h1">Outstanding Reports</div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <!-- Left: categories -->
+        <div class="col-lg-3">
+          <div class="panel">
+            <div class="panel-head"><div class="h4">Report Categories</div></div>
+            <div class="panel-body" style="padding:6px 0;">
+                <!--<div class="report-cat-item" onclick="location.href='report-center.html'"><i class="bi bi-person-vcard"></i> Customer Reports <span class="count">4</span></div>-->
+                <!--<div class="report-cat-item" onclick="location.href='report-center.html'"><i class="bi bi-folder2-open"></i> Active Loan Report <span class="count">1</span></div>-->
+                <div class="report-cat-item active"><i class="bi bi-graph-down"></i> Outstanding Reports </div>
+                <!--<div class="report-cat-item"><i class="bi bi-cash-coin"></i> Collection Reports </div>-->
+                <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i class="bi bi-cash-coin"></i> Collection Reports </div>
+                <!--<div class="report-cat-item"><i class="bi bi-arrow-repeat"></i> Renewal Report <span class="count">2</span></div>
+    <div class="report-cat-item"><i class="bi bi-check2-circle"></i> Closure Report <span class="count">2</span></div>
+    <div class="report-cat-item"><i class="bi bi-hammer"></i> Auction Reports <span class="count">3</span></div>
+    <div class="report-cat-item"><i class="bi bi-clipboard-data"></i> Audit Reports <span class="count">6</span></div>-->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: filters + grid -->
+        <div class="col-lg-9">
+
+          <!-- Filters -->
+          <div class="panel mb-3">
+            <div class="panel-head"><div class="h4">Outstanding Reports — Filters</div></div>
+            <div class="panel-body">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                  <label class="field-label" for="filterFromDate">From Date</label>
+                  <input id="filterFromDate" type="date" class="form-control-jlms">
+                </div>
+                <div class="col-md-3">
+                  <label class="field-label" for="filterToDate">To Date</label>
+                  <input id="filterToDate" type="date" class="form-control-jlms">
+                </div>
+                <div class="col-md-4">
+                  <label class="field-label" for="filterCustomer">Customer</label>
+                  <select id="filterCustomer" class="form-select-jlms" disabled>
+                    <option value="">Loading customers…</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary" style="width:100%;justify-content:center;">
+                    <i class="bi bi-funnel"></i> Apply Filters
+                  </button>
+                </div>
+              </div>
+              <div id="apiErrorBanner" class="mt-3" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:8px;padding:10px 14px;font-size:13px;"></div>
+            </div>
+          </div>
+
+          <!-- Summary cards -->
+          <div class="summary-cards" id="summaryCards" style="display:none;">
+            <div class="summary-card"><div class="sc-label">Total Records</div><div class="sc-value" id="scTotalRecords">—</div></div>
+            <div class="summary-card accent-navy"><div class="sc-label">Loan Amount</div><div class="sc-value" id="scLoanAmount">—</div></div>
+            <div class="summary-card accent-navy"><div class="sc-label">Outstanding Principal</div><div class="sc-value" id="scOutPrincipal">—</div></div>
+            <div class="summary-card accent-orange"><div class="sc-label">Outstanding Interest</div><div class="sc-value" id="scOutInterest">—</div></div>
+            <!--<div class="summary-card accent-red"><div class="sc-label">Penalty</div><div class="sc-value" id="scPenalty">—</div></div>-->
+            <div class="summary-card accent-red"><div class="sc-label">Grand Total Outstanding</div><div class="sc-value" id="scGrandTotal">—</div></div>
+          </div>
+
+          <!-- Results grid -->
+          <div class="panel">
+            <div class="grid-toolbar">
+              <div class="grid-toolbar-left">
+                <span class="h4">Results</span>
+                <span class="badge-jlms badge-neutral" id="recordsBadge" style="display:none;"></span>
+              </div>
+              <div class="grid-toolbar-left">
+                <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportPdf"   onclick="exportPdf()"    style="display:none;"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
+                <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportExcel" onclick="exportExcel()"  style="display:none;"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                <button class="btn-jlms btn-jlms-outline btn-sm" id="btnPrint"       onclick="printReport()"  style="display:none;"><i class="bi bi-printer"></i> Print</button>
+              </div>
+            </div>
+            <div class="panel-body no-pad table-jlms-wrap">
+              <table class="table-jlms" id="outstandingTable">
+                <thead>
+                  <tr>
+                    <th>Loan No.</th>
+                    <th>Customer</th>
+                    <th>Scheme</th>
+                    <th class="text-end">Loan Amt</th>
+                    <th class="text-end">Out. Principal</th>
+                    <th class="text-end">Out. Interest</th>
+                    <!--<th class="text-end">Penalty</th>-->
+                    <th class="text-end">Total Outstanding</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="outstandingTableBody">
+                  <tr><td colspan="8">
+                    <div class="state-panel">
+                      <i class="bi bi-arrow-repeat spin"></i>
+                      <p>Loading outstanding report…</p>
+                    </div>
+                  </td></tr>
+                </tbody>
+                <tfoot id="outstandingTableFoot" style="display:none;">
+                  <tr>
+                    <td colspan="3"><strong>Page Total</strong></td>
+                    <td class="text-end" id="footLoanAmt">—</td>
+                    <td class="text-end" id="footOutPrincipal">—</td>
+                    <td class="text-end" id="footOutInterest">—</td>
+                    <!--<td class="text-end" id="footPenalty">—</td>-->
+                    <td class="text-end" id="footGrandTotal">—</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div class="grid-footer" id="paginationFooter" style="display:none;">
+              <span id="paginationInfo" style="color:#6b7280;font-size:0.85rem;"></span>
+              <div class="pagination-jlms" id="paginationControls"></div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /row -->
+    </div>
+  </div>
+</div>
+
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "outstanding-reports";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+
+/* ════════════════════════════════════════════════════════════════
+   Outstanding Reports – Page Logic
+   ════════════════════════════════════════════════════════════════
+
+   Behaviour:
+   • On page load  → shows ALL outstanding loans (no filters).
+   • Apply Filters → queries with whatever the user has set.
+   • Pagination    → remembers the last-applied filters.
+   ════════════════════════════════════════════════════════════════ */
+
+// ── State ──────────────────────────────────────────────────────
+let currentPage   = 1;
+const PAGE_SIZE   = 25;
+let lastResult    = null;
+let activeFilters = {};   // {} = no filter; updated when Apply is clicked
+
+// ── DOM refs ───────────────────────────────────────────────────
+const elFromDate   = document.getElementById("filterFromDate");
+const elToDate     = document.getElementById("filterToDate");
+const elCustomer   = document.getElementById("filterCustomer");
+const elApply      = document.getElementById("btnApplyFilters");
+const elTBody      = document.getElementById("outstandingTableBody");
+const elTFoot      = document.getElementById("outstandingTableFoot");
+const elBadge      = document.getElementById("recordsBadge");
+const elSummary    = document.getElementById("summaryCards");
+const elPaginFoot  = document.getElementById("paginationFooter");
+const elPaginInfo  = document.getElementById("paginationInfo");
+const elPaginCtrls = document.getElementById("paginationControls");
+
+// ── Default date values (set for UI convenience, NOT applied on load) ──
+(function () {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  elFromDate.value = `${y}-${m}-01`;
+  elToDate.value   = `${y}-${m}-${d}`;
+})();
+
+// ── Helpers ────────────────────────────────────────────────────
+function fmt(n) {
+  if (n == null) return "—";
+  return "₹" + Number(n).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function fmtDate(dt) {
+  if (!dt) return "—";
+  return new Date(dt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function statusBadge(status, daysOverdue) {
+  let cls = "badge-success", label = status;
+  if (status === "Overdue") { cls = "badge-danger"; label = daysOverdue > 0 ? `Overdue (${daysOverdue}d)` : "Overdue"; }
+  else if (status === "Due") { cls = "badge-warning"; }
+  return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
+}
+
+function setExportBtnsVisible(v) {
+  ["btnExportPdf", "btnExportExcel", "btnPrint"].forEach(id => {
+    document.getElementById(id).style.display = v ? "" : "none";
+  });
+}
+
+// ── Customer Dropdown ──────────────────────────────────────────
+async function loadCustomerDropdown() {
+  try {
+    const data      = await Api.searchCustomers({ pageSize: 200 });
+    const customers = data.items || [];
+    elCustomer.innerHTML = `<option value="">All Customers</option>`;
+    customers.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value       = c.customerId;
+      opt.textContent = `${c.customerName} (${c.customerCode})`;
+      elCustomer.appendChild(opt);
+    });
+  } catch { /* silent – default "All Customers" option stays */ }
+  elCustomer.disabled = false;
+}
+
+// ── Load Report ────────────────────────────────────────────────
+// filters = {} → no filter (all data)
+// filters = { fromDate, toDate, customerId } → filtered data
+async function loadReport(filters) {
+  clearApiError();
+  const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
+
+  elTBody.innerHTML = `<tr><td colspan="9"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
+  elTFoot.style.display     = "none";
+  elPaginFoot.style.display = "none";
+  elBadge.style.display     = "none";
+  elSummary.style.display   = "none";
+  setExportBtnsVisible(false);
+
+  try {
+    const data = await Api.getOutstandingReport(params);
+    lastResult = data;
+    renderGrid(data);
+  } catch (err) {
+    showApiError(err);
+    elTBody.innerHTML = `<tr><td colspan="9"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;display:block;margin-bottom:12px;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
+  }
+}
+
+// ── Apply Filters button ───────────────────────────────────────
+elApply.addEventListener("click", () => {
+  currentPage   = 1;
+  activeFilters = {
+    fromDate:   elFromDate.value  || undefined,
+    toDate:     elToDate.value    || undefined,
+    customerId: elCustomer.value  || undefined
+  };
+  loadReport(activeFilters);
+});
+
+// ── Render Grid ────────────────────────────────────────────────
+function renderGrid(data) {
+  const { items, totalCount, page, pageSize,
+          totalLoanAmount, totalOutstandingPrincipal, totalOutstandingInterest,
+          totalPenalty, grandTotalOutstanding } = data;
+
+  document.getElementById("scTotalRecords").textContent = totalCount.toLocaleString("en-IN");
+  document.getElementById("scLoanAmount").textContent   = fmt(totalLoanAmount);
+  document.getElementById("scOutPrincipal").textContent = fmt(totalOutstandingPrincipal);
+  document.getElementById("scOutInterest").textContent  = fmt(totalOutstandingInterest);
+  //document.getElementById("scPenalty").textContent      = fmt(totalPenalty);
+  document.getElementById("scGrandTotal").textContent   = fmt(grandTotalOutstanding);
+  elSummary.style.display = "flex";
+
+  elBadge.textContent   = `${totalCount.toLocaleString("en-IN")} records`;
+  elBadge.style.display = "";
+  setExportBtnsVisible(totalCount > 0);
+
+  if (!items || items.length === 0) {
+    elTBody.innerHTML = `<tr><td colspan="9"><div class="state-panel"><i class="bi bi-inbox"></i><p>No outstanding loans found for the selected filters.</p></div></td></tr>`;
+    elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
+    return;
+  }
+
+  let pgLoan = 0, pgPrinc = 0, pgInt = 0, pgPen = 0, pgTotal = 0;
+  const rows = items.map(row => {
+    pgLoan  += row.loanAmount           || 0;
+    pgPrinc += row.outstandingPrincipal || 0;
+    pgInt   += row.outstandingInterest  || 0;
+    //pgPen   += row.penaltyAccrued       || 0;
+    pgTotal += row.totalOutstanding     || 0;
+    return `<tr>
+      <td class="cell-link" title="Loan Date: ${fmtDate(row.loanDate)} | Maturity: ${fmtDate(row.maturityDate)}">${row.loanNumber}</td>
+      <td>
+        <div style="font-weight:600;">${row.customerName}</div>
+        <div style="font-size:11px;color:#9aa4b2;">${row.customerCode} · ${row.customerMobile}</div>
+      </td>
+      <td>${row.schemeName}</td>
+      <td class="text-end">${fmt(row.loanAmount)}</td>
+      <td class="text-end">${fmt(row.outstandingPrincipal)}</td>
+      <td class="text-end">${fmt(row.outstandingInterest)}</td>
+      
+      <td class="text-end cell-strong">${fmt(row.totalOutstanding)}</td>
+      <td>${statusBadge(row.status, row.daysOverdue)}</td>
+    </tr>`;
+  });
+
+  elTBody.innerHTML = rows.join("");
+
+  document.getElementById("footLoanAmt").textContent      = fmt(pgLoan);
+  document.getElementById("footOutPrincipal").textContent = fmt(pgPrinc);
+  document.getElementById("footOutInterest").textContent  = fmt(pgInt);
+  //document.getElementById("footPenalty").textContent      = fmt(pgPen);
+  document.getElementById("footGrandTotal").textContent   = fmt(pgTotal);
+  elTFoot.style.display = "";
+
+  renderPagination(totalCount, page, pageSize);
+}
+
+// ── Pagination ─────────────────────────────────────────────────
+function renderPagination(totalCount, page, pageSize) {
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const from = (page - 1) * pageSize + 1;
+  const to   = Math.min(page * pageSize, totalCount);
+  elPaginInfo.textContent = `Showing ${from}–${to} of ${totalCount.toLocaleString("en-IN")}`;
+
+  let html = `<div class="page-btn${page === 1 ? " disabled" : ""}" onclick="goPage(${page - 1})"><i class="bi bi-chevron-left"></i></div>`;
+  let sp = Math.max(1, page - 2), ep = Math.min(totalPages, sp + 4);
+  if (ep - sp < 4) sp = Math.max(1, ep - 4);
+  for (let p = sp; p <= ep; p++)
+    html += `<div class="page-btn${p === page ? " active" : ""}" onclick="goPage(${p})">${p}</div>`;
+  html += `<div class="page-btn${page === totalPages ? " disabled" : ""}" onclick="goPage(${page + 1})"><i class="bi bi-chevron-right"></i></div>`;
+  elPaginCtrls.innerHTML    = html;
+  elPaginFoot.style.display = "";
+}
+
+function goPage(p) {
+  if (p < 1 || !lastResult) return;
+  if (p > Math.ceil(lastResult.totalCount / PAGE_SIZE)) return;
+  currentPage = p;
+  loadReport(activeFilters);  // reuse last-applied filters across pages
+}
+
+// ── Export / Print ─────────────────────────────────────────────
+function exportExcel() {
+  const rows   = Array.from(document.querySelectorAll("#outstandingTable tbody tr"))
+    .filter(r => !r.querySelector(".state-panel"))
+    .map(r => Array.from(r.cells).map(c => c.innerText.trim()).join("\t")).join("\n");
+  const header = ["Loan No.","Customer","Scheme","Loan Amt","Out. Principal","Out. Interest","Penalty","Total Outstanding","Status"].join("\t");
+  const blob   = new Blob([header + "\n" + rows], { type: "text/tab-separated-values" });
+  const a      = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `Outstanding_Report_${new Date().toISOString().slice(0,10)}.xls`;
+  a.click();
+}
+
+function exportPdf() {
+  alert("PDF export requires a server-side PDF library. This feature is planned for a future release.");
+}
+
+function printReport() {
+  const tbl = document.getElementById("outstandingTable").outerHTML;
+  const win = window.open("", "_blank");
+  win.document.write(`<!DOCTYPE html><html><head><title>Outstanding Report</title>
+    <style>body{font-family:Arial,sans-serif;font-size:12px;}
+    table{border-collapse:collapse;width:100%;}
+    th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;}
+    th{background:#f0f0f0;font-weight:700;}.text-end{text-align:right;}
+    </style></head><body>
+    <h2 style="margin-bottom:6px;">Outstanding Report</h2>
+    <p style="color:#666;margin-bottom:14px;">Generated: ${new Date().toLocaleString("en-IN")}</p>
+    ${tbl}</body></html>`);
+  win.document.close(); win.print();
+}
+
+// ── Init: fires both in parallel on page open ──────────────────
+// loadReport({}) = no filters → shows ALL outstanding loans immediately.
+// loadCustomerDropdown() populates the dropdown in the background.
+loadCustomerDropdown();
+loadReport({});
+</script>
+</body>
+</html>
