@@ -48,7 +48,7 @@ public class ClosureController : ControllerBase
 
     // POST /api/loans/5/close
     [HttpPost("close")]
-    public async Task<ActionResult<ReceiptDto>> CloseLoan(int loanId, [FromBody] ClosureRequestDto request)
+    public async Task<ActionResult<ReceiptDto>> CloseLoan(int loanId, [FromForm] ClosureRequestWithPhotoDto request)
     {
         var loan = await _db.Loans.Include(l => l.Customer).FirstOrDefaultAsync(l => l.LoanId == loanId);
         if (loan == null) return NotFound();
@@ -58,6 +58,20 @@ public class ClosureController : ControllerBase
         if (calcResult.Result is not OkObjectResult ok || ok.Value is not ClosureCalculationDto calc)
             return BadRequest("Could not calculate closure amount.");
 
+        // Save closure photo to Uploads/Closure/
+        string? closePhotoPath = null;
+        if (request.ClosePhoto != null && request.ClosePhoto.Length > 0)
+        {
+            var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+            var folder = Path.Combine(uploadsRoot, "Closure");
+            Directory.CreateDirectory(folder);
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(request.ClosePhoto.FileName);
+            var filePath = Path.Combine(folder, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+                await request.ClosePhoto.CopyToAsync(stream);
+            closePhotoPath = Path.Combine("Closure", fileName).Replace("\\", "/");
+        }
+
         loan.Status = "Closed";
         loan.OutstandingPrincipal = 0;
         loan.OutstandingInterest = 0;
@@ -65,6 +79,7 @@ public class ClosureController : ControllerBase
         loan.ClosedBy = request.ProcessedByUserId;
         loan.ClosedAt = DateTime.UtcNow;
         loan.UpdatedAt = DateTime.UtcNow;
+        loan.ClosePhotoPath = closePhotoPath;
 
         var seq = await _db.LoanTransactions.CountAsync() + 1;
         var receiptNo = _calc.GenerateReceiptNumber(seq);

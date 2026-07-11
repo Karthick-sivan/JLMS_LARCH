@@ -22,7 +22,7 @@
   .btn-icon-jlms.text-danger:hover { background: rgba(192, 57, 43, 0.08); }
   .btn-icon-jlms.text-success:hover { background: rgba(39, 141, 71, 0.08); }
 
-  .loan-no-cell { font-weight: 600; color: var(--jlms-primary, #0d3b66); }
+  .loan-no-cell { font-weight: 600; color: var(--jlms-primary, #0d3b66);width: 100px; min-width: 100px; }
 
   .pagination-bar {
     display: flex;
@@ -58,7 +58,7 @@
   .info-card-title {
     font-weight: 600;
     font-size: 0.85rem;
-    color: #6b7280;
+    color: #374151;
     text-transform: uppercase;
     letter-spacing: .03em;
     margin-bottom: 10px;
@@ -68,7 +68,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px 20px;
   }
-  .info-row .info-label { font-size: 0.78rem; color: #6b7280; margin-bottom: 2px; }
+  .info-row .info-label { font-size: 0.78rem; color: #374151; margin-bottom: 2px; }
   .info-row .info-value { font-size: 0.9rem; color: #1f2937; font-weight: 600; }
 
   .calc-table {
@@ -80,15 +80,15 @@
   .calc-table tr.calc-total td { border-bottom: none; border-top: 2px solid #dbe1e8; padding-top: 10px; font-size: 0.98rem; }
   .calc-table tr.calc-total td:last-child { color: var(--jlms-primary, #0d3b66); }
   .calc-table tr.calc-warn td { color: #c0392b; }
-  .calc-table tr.calc-info td { color: #8a93a3; font-style: italic; }
-  .calc-table tr.calc-info td:last-child { color: #8a93a3; font-weight: 600; }
+  .calc-table tr.calc-info td { color: #4b5563; font-style: italic; }
+  .calc-table tr.calc-info td:last-child { color: #4b5563; font-weight: 600; }
 
   .calc-section-divider {
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: .04em;
     text-transform: uppercase;
-    color: #9aa3b2;
+    color: #374151;
     padding: 10px 4px 4px;
     border-bottom: 1px dashed #e5e9ef;
   }
@@ -117,7 +117,7 @@
     padding: 10px 12px;
     background: #fff;
   }
-  .alloc-box .alloc-label { font-size: 0.75rem; color: #6b7280; }
+  .alloc-box .alloc-label { font-size: 0.75rem; color: #374151; }
   .alloc-box .alloc-value { font-size: 1rem; font-weight: 700; color: #1f2937; }
   .alloc-box.alloc-highlight { background: #eef5ff; border-color: #cfe0f7; }
   .alloc-box.alloc-highlight .alloc-value { color: var(--jlms-primary, #0d3b66); }
@@ -269,6 +269,7 @@
           <table class="table-jlms">
             <thead>
               <tr>
+                <th class="text-center">Actions</th>
                 <th>Loan No</th>
                 <th>Customer Name</th>
                 <th>Loan Scheme</th>
@@ -278,10 +279,9 @@
                 <th class="text-end">Outstanding Interest</th>
                 <th class="text-end">Total Outstanding</th>
                 <th class="text-end">Total Amount Paid</th>
-                <th>Loan Status</th>
-                <th>Loan Date</th>
+                <th style="display: none;">Loan Status</th>
+                <th style="width: 100px; min-width: 100px;">Loan Date</th>
                 <th>Maturity Date</th>
-                <th class="text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="resultsBody">
@@ -416,7 +416,7 @@
 
 <!-- ============ Loan Closure Modal ============ -->
 <div class="modal fade" id="closureModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Close Loan — <span id="closeLoanNoLabel">-</span></h5>
@@ -426,16 +426,44 @@
         <div class="text-center text-muted-jlms" style="padding:30px;" id="closureLoadingState">Loading loan details...</div>
 
         <div id="closureContent" style="display:none;">
-          <div class="info-card mb-3">
+           <div class="info-card mb-3">
             <div class="info-card-title">Customer Details</div>
-            <div class="info-grid">
-              <div class="info-row"><div class="info-label">Customer Name</div><div class="info-value" id="closeCustomerName">-</div></div>
-              <div class="info-row"><div class="info-label">Loan No</div><div class="info-value" id="closeLoanNo">-</div></div>
-              <div class="info-row"><div class="info-label">Loan Scheme</div><div class="info-value" id="closeScheme">-</div></div>
-              <div class="info-row"><div class="info-label">Total Amount Paid</div><div class="info-value" id="closeTotalPaid">-</div></div>
-              <div class="info-row"><div class="info-label">Mobile</div><div class="info-value" id="closeMobile">-</div></div>
+            <div class="row g-0">
+
+              <!-- Column 1: Customer Name + Loan Scheme + Mobile -->
+              <div class="col-md-4" style="padding-right:16px;">
+                <div class="info-row mb-2"><div class="info-label">Customer Name</div><div class="info-value" id="closeCustomerName">-</div></div>
+                <div class="info-row mb-2"><div class="info-label">Loan Scheme</div><div class="info-value" id="closeScheme">-</div></div>
+                <div class="info-row"><div class="info-label">Mobile</div><div class="info-value" id="closeMobile">-</div></div>
+              </div>
+
+              <!-- Column 2: Loan No + Total Amount Paid -->
+              <div class="col-md-4" style="padding-right:16px;border-left:1px solid #eef0f3;padding-left:16px;">
+                <div class="info-row mb-2"><div class="info-label">Loan No</div><div class="info-value" id="closeLoanNo">-</div></div>
+                <div class="info-row"><div class="info-label">Total Amount Paid</div><div class="info-value" id="closeTotalPaid">-</div></div>
+              </div>
+
+              <!-- Column 3: Photo preview + Capture button -->
+              <div class="col-md-4" style="border-left:1px solid #eef0f3;padding-left:16px;">
+                <div class="info-label mb-1"><i class="bi bi-camera"></i> Customer Photo <span style="color:#c0392b;font-size:0.7rem;">(required)</span></div>
+                <div id="closurePhotoPreview"
+                     style="border:1.5px dashed #d7dce3;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:26px;overflow:hidden;margin-bottom:6px;">
+                  <i class="bi bi-person-circle"></i>
+                </div>
+                <button type="button" class="btn btn-outline-success btn-sm w-100" id="btnCaptureClosurePhoto">
+                  <i class="bi bi-camera"></i> Capture Photo
+                </button>
+                <input type="file" id="closurePhotoFile" accept=".jpg,.jpeg,.png" hidden>
+                <button type="button" class="btn btn-outline-primary btn-sm w-100 mt-1 d-none" id="btnUploadClosurePhoto">
+                  <i class="bi bi-upload"></i> Upload Photo
+                </button>
+              </div>
+
             </div>
           </div>
+
+          <div class="validation-msg" id="closurePhotoMsg">A customer photo is required to close the loan.</div>
+
 
           <table class="calc-table mb-2">
             <tbody>
@@ -445,6 +473,28 @@
               <tr class="calc-total"><td>Grand Total</td><td id="closeGrandTotal">-</td></tr>
             </tbody>
           </table>
+
+          <!-- Customer Photo at Closure
+          <div class="section-label mt-3"><i class="bi bi-camera"></i> Customer Photo at Closure <span style="font-size:0.75rem;color:#6b7280;font-weight:400;">(required)</span></div>
+          <div class="row g-2 align-items-start mb-2">
+            <div class="col-md-4">
+              <div id="closurePhotoPreview"
+                  style="border:1.5px dashed #d7dce3;border-radius:8px;height:90px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:28px;overflow:hidden;">
+                <i class="bi bi-person-circle"></i>
+              </div>
+            </div>
+            <div class="col-md-8 d-grid gap-2">
+              <button type="button" class="btn btn-outline-success" id="btnCaptureClosurePhoto">
+                <i class="bi bi-camera"></i> Capture Photo
+              </button>
+              <button type="button" class="btn btn-outline-primary d-none" id="btnUploadClosurePhoto">
+                <i class="bi bi-upload"></i> Upload Photo
+              </button>
+              <input type="file" id="closurePhotoFile" accept=".jpg,.jpeg,.png" hidden>
+            </div>
+          </div>
+          <div class="validation-msg" id="closurePhotoMsg">A customer photo is required to close the loan.</div> -->
+
 
           <div class="validation-msg" id="closeValidationMsg" style="font-size: 0.95rem">The Grand Total must be ₹0.00 to close this loan. Please collect pending payments first.</div>
 
@@ -531,6 +581,28 @@
         <button type="button" class="btn-jlms btn-jlms-outline" id="btnExportLedgerPdf"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
         <button type="button" class="btn-jlms btn-jlms-outline" id="btnPrintLedger"><i class="bi bi-printer"></i> Print</button>
         <button type="button" class="btn-jlms btn-jlms-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Camera modal for closure photo capture -->
+<div class="modal fade" id="closureCameraModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Capture Customer Photo — Closure</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <video id="closureCameraVideo" autoplay playsinline style="width:100%;border-radius:10px;"></video>
+        <canvas id="closureCameraCanvas" style="display:none;"></canvas>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" id="btnTakeClosurePhoto">
+          <i class="bi bi-camera-fill"></i> Capture
+        </button>
       </div>
     </div>
   </div>
@@ -656,18 +728,6 @@ async function runSearch(page = 1) {
       const isClosed = l.status === 'Closed';
       return `
       <tr>
-        <td class="loan-no-cell">${l.loanNo}</td>
-        <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
-        <td>${l.loanScheme}</td>
-        <td class="text-end">${inr(l.principal)}</td>
-        <td class="text-end">${inr(l.overallInterest)}</td>
-        <td class="text-end">${inr(l.outstandingPrincipal)}</td>
-        <td class="text-end">${inr(l.outstandingInterest)}</td>
-        <td class="text-end cell-strong">${inr(l.totalOutstanding)}</td>
-        <td class="text-end">${inr(l.totalAmountPaid)}</td>
-        <td>${statusBadge(l.status)}</td>
-        <td>${fmtDate(l.loanDate)}</td>
-        <td>${fmtDate(l.maturityDate)}</td>
         <td class="text-center actions-cell">
           <div class="action-icons-row">
             <button class="btn-icon-jlms" title="Collect Payment" ${isClosed ? 'disabled' : ''} onclick="openPaymentModal(${l.loanId})">
@@ -681,6 +741,18 @@ async function runSearch(page = 1) {
             </button>
           </div>
         </td>
+        <td class="loan-no-cell">${l.loanNo}</td>
+        <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
+        <td>${l.loanScheme}</td>
+        <td class="text-end">${inr(l.principal)}</td>
+        <td class="text-end">${inr(l.overallInterest)}</td>
+        <td class="text-end">${inr(l.outstandingPrincipal)}</td>
+        <td class="text-end">${inr(l.outstandingInterest)}</td>
+        <td class="text-end cell-strong">${inr(l.totalOutstanding)}</td>
+        <td class="text-end">${inr(l.totalAmountPaid)}</td>
+        <td style="display: none;">${statusBadge(l.status)}</td>
+        <td>${fmtDate(l.loanDate)}</td>
+        <td>${fmtDate(l.maturityDate)}</td>
       </tr>`;
     }).join('');
 
@@ -968,6 +1040,8 @@ document.getElementById('paymentModal').addEventListener('hidden.bs.modal', () =
 /* ============================ Closure modal ============================ */
 
 let activeClosureLoan = null;
+let closureCapturedPhoto = null;
+let closureCameraStream = null;
 
 async function openClosureModal(loanId) {
   const modalEl = document.getElementById('closureModal');
@@ -983,6 +1057,12 @@ async function openClosureModal(loanId) {
   document.getElementById('btnClosureCancel').textContent = 'Cancel';
   lastClosureReceipt = null;
   activeClosureLoan = null;
+
+  // Reset closure photo
+  closureCapturedPhoto = null;
+  document.getElementById('closurePhotoFile').value = '';
+  document.getElementById('closurePhotoPreview').innerHTML = '<i class="bi bi-person-circle"></i>';
+  document.getElementById('closurePhotoMsg').classList.remove('show');
 
   modal.show();
 
@@ -1019,8 +1099,68 @@ async function openClosureModal(loanId) {
 
 let lastClosureReceipt = null;
 
+// Closure camera — open
+document.getElementById('btnCaptureClosurePhoto').addEventListener('click', async () => {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Camera is not supported in this browser.'); return;
+    }
+    closureCameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    document.getElementById('closureCameraVideo').srcObject = closureCameraStream;
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).show();
+  } catch { alert('Unable to access camera.'); }
+});
+
+// Closure camera — capture
+document.getElementById('btnTakeClosurePhoto').addEventListener('click', () => {
+  const video = document.getElementById('closureCameraVideo');
+  const canvas = document.getElementById('closureCameraCanvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  canvas.toBlob(blob => {
+    if (!blob) { alert('Unable to capture photo.'); return; }
+    closureCapturedPhoto = new File([blob], 'ClosurePhoto.jpg', { type: 'image/jpeg' });
+    document.getElementById('closurePhotoFile').value = '';
+    document.getElementById('closurePhotoPreview').innerHTML =
+      `<img src="${URL.createObjectURL(blob)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+  }, 'image/jpeg');
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).hide();
+  if (closureCameraStream) { closureCameraStream.getTracks().forEach(t => t.stop()); closureCameraStream = null; }
+});
+
+// Closure camera — stop stream when modal dismissed without capturing
+document.getElementById('closureCameraModal').addEventListener('hidden.bs.modal', () => {
+  if (closureCameraStream) { closureCameraStream.getTracks().forEach(t => t.stop()); closureCameraStream = null; }
+});
+
+// Closure photo — file upload
+document.getElementById('btnUploadClosurePhoto').addEventListener('click', () => {
+  document.getElementById('closurePhotoFile').click();
+});
+document.getElementById('closurePhotoFile').addEventListener('change', function () {
+  const file = this.files[0]; if (!file) return;
+  closureCapturedPhoto = null;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('closurePhotoPreview').innerHTML =
+      `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+  };
+  reader.readAsDataURL(file);
+});
+
 document.getElementById('btnCloseLoan').addEventListener('click', () => {
   if (!activeClosureLoan) return;
+
+  // Validate photo — require either a captured or uploaded file
+  const uploadedFile = document.getElementById('closurePhotoFile').files[0];
+  const photoFile = uploadedFile || closureCapturedPhoto;
+  if (!photoFile) {
+    document.getElementById('closurePhotoMsg').classList.add('show');
+    return;
+  }
+  document.getElementById('closurePhotoMsg').classList.remove('show');
+
   const loanNo = activeClosureLoan.loanNo;
   const confirmed = window.confirm(`Confirm closure of loan ${loanNo}? This action cannot be undone.`);
   if (!confirmed) return;
@@ -1029,13 +1169,12 @@ document.getElementById('btnCloseLoan').addEventListener('click', () => {
   btn.disabled = true;
   btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Closing...';
 
-  const payload = {
-    paymentMode: 'Cash',
-    referenceNo: null,
-    processedByUserId: (Session.get() && Session.get().userId) || 1
-  };
+  const formData = new FormData();
+  formData.append('PaymentMode', 'Cash');
+  formData.append('ProcessedByUserId', String((Session.get() && Session.get().userId) || 1));
+  formData.append('ClosePhoto', photoFile);
 
-  Api.closeLoanOperations(activeClosureLoan.loanId, payload)
+  Api.closeLoanOperationsWithPhoto(activeClosureLoan.loanId, formData)
     .then((response) => {
       lastClosureReceipt = response;
       showApiSuccess(`Loan ${loanNo} has been closed successfully.`);

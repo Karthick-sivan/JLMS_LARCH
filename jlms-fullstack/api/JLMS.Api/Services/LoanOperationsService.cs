@@ -321,7 +321,7 @@ public class LoanOperationsService
             grandTotal, grandTotal <= 0.009m);
     }
 
-    public async Task<LoanOperationsClosureResponseDto> CloseLoanAsync(int loanId, LoanOperationsClosureRequestDto request)
+    public async Task<LoanOperationsClosureResponseDto> CloseLoanAsync(int loanId, LoanOperationsClosureRequestDto request, string? closePhotoPath = null)
     {
         await using var dbTransaction = await _db.Database.BeginTransactionAsync();
         try
@@ -344,6 +344,7 @@ public class LoanOperationsService
             loan.ClosedAt = DateTime.UtcNow;
             loan.ClosedBy = request.ProcessedByUserId;
             loan.UpdatedAt = DateTime.UtcNow;
+            loan.ClosePhotoPath = closePhotoPath;
 
             var sequence = await _db.LoanTransactions.CountAsync() + 1;
             var receiptNumber = _calc.GenerateReceiptNumber(sequence, "CLS");
