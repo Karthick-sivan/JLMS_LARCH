@@ -83,9 +83,12 @@ public record AppraisalResultDto(
 );
 
 // ---------- New Loan ----------
+// AllowExceedEligible: when true (the "Don't validate" checkbox on New Loan), the server
+// skips the RequestedLoanAmount > EligibleAmount check. Defaults to false so existing
+// callers that don't send this field keep the old, validated behavior.
 public record NewLoanRequestDto(
     int CustomerId, int LoanSchemeId, List<JewelItemInputDto> JewelItems,
-    decimal RequestedLoanAmount, string? Remarks
+    decimal RequestedLoanAmount, string? Remarks, bool AllowExceedEligible = false
 );
 
 public record LoanSummaryDto(
@@ -93,6 +96,15 @@ public record LoanSummaryDto(
     decimal MarketValue, decimal EligibleAmount, decimal LoanAmount,
     decimal OutstandingPrincipal, decimal OutstandingInterest,
     DateTime? LoanDate, DateTime? MaturityDate
+);
+
+// ---------- New Loan creation response (includes created jewel item ids so the
+// front end can attach photos to the right item right after creation) ----------
+public record NewLoanJewelItemRefDto(int JewelItemId, int JewelTypeId);
+public record NewLoanResponseDto(
+    int LoanId, string LoanNumber, string Status,
+    decimal MarketValue, decimal EligibleAmount, decimal LoanAmount, decimal OverallInterest,
+    List<NewLoanJewelItemRefDto> JewelItems
 );
 
 // ---------- Approval / Disbursement ----------
@@ -199,38 +211,6 @@ public record OutstandingReportPagedDto(
     //decimal TotalPenalty,
     decimal GrandTotalOutstanding
 );
-
-
-//// ---------- Collection Reports ----------
-//public record CollectionReportRowDto(
-//    int LoanId,
-//    string LoanNumber,
-//    string CustomerName,
-//    string CustomerCode,
-//    string CustomerMobile,
-//    string SchemeName,
-//    DateTime? LoanDate,
-//    DateTime? MaturityDate,
-//    decimal LoanAmount,
-//    decimal OutstandingPrincipal,
-//    decimal OutstandingInterest,
-//    //decimal PenaltyAccrued,
-//    decimal TotalOutstanding,
-//    int DaysOverdue,
-//    string Status
-//);
-
-//public record CollectionReportPagedDto(
-//    List<CollectionReportRowDto> Items,
-//    int TotalCount,
-//    int Page,
-//    int PageSize,
-//    decimal TotalLoanAmount,
-//    decimal TotalOutstandingPrincipal,
-//    decimal TotalOutstandingInterest,
-//    //decimal TotalPenalty,
-//    decimal GrandTotalOutstanding
-//);
 
 // ---------- Collection Reports ----------
 public record CollectionReportRowDto(
@@ -413,6 +393,15 @@ public record LoanOperationsClosureResponseDto(
     string LoanStatus
 );
 
+
+public class ClosureRequestWithPhotoDto
+{
+    public string PaymentMode { get; set; } = "Cash";
+    public string? ReferenceNo { get; set; }
+    public int ProcessedByUserId { get; set; }
+    public IFormFile? ClosePhoto { get; set; }
+}
+
 // ---------------------------- Ledger ------------------------------------------
 
 public record LoanOperationsLedgerRowDto(
@@ -447,4 +436,14 @@ public record LoanOperationsLedgerResponseDto(
     decimal TotalInterestCollected,
     decimal TotalPrincipalCollected,
     decimal CurrentOutstanding
+);
+
+public record SubmitForApprovalRequestDto(int SubmittedByUserId);
+
+public record SubmitForApprovalResponseDto(
+    int LoanId, string LoanNumber, string Status, string CustomerName,
+    int ApprovedByUserId, DateTime ApprovedAt, string ReceiptNumber, DateTime DisbursedAt,
+    DateTime? LoanDate, DateTime? MaturityDate, decimal LoanAmount, decimal ProcessingFee,
+    decimal NetDisbursedAmount, decimal OutstandingPrincipal, decimal OutstandingInterest,
+    string PaymentMode
 );

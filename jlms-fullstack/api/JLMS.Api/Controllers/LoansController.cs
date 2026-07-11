@@ -63,7 +63,9 @@ public class LoansController : ControllerBase
 
         return Ok(new
         {
-            loan.LoanId, loan.LoanNumber, loan.Status,
+            loan.LoanId,
+            loan.LoanNumber,
+            loan.Status,
             CustomerName = loan.Customer?.CustomerName,
             CustomerCode = loan.Customer?.CustomerCode,
             CustomerMobile = loan.Customer?.Mobile,
@@ -71,13 +73,27 @@ public class LoansController : ControllerBase
             SchemeName = loan.LoanScheme?.SchemeName,
             loan.LoanDate,
             LastPaymentDate = lastPayment,
-            loan.MaturityDate, loan.InterestRatePct, loan.TenureMonths,
-            loan.MarketValue, loan.EligibleAmount, loan.LoanAmount, loan.ProcessingFee,
-            loan.OutstandingPrincipal, loan.OutstandingInterest, loan.PenaltyAccrued,
+            loan.MaturityDate,
+            loan.InterestRatePct,
+            loan.TenureMonths,
+            loan.MarketValue,
+            loan.EligibleAmount,
+            loan.LoanAmount,
+            loan.ProcessingFee,
+            loan.OutstandingPrincipal,
+            loan.OutstandingInterest,
+            loan.PenaltyAccrued,
             JewelItems = loan.JewelItems.Select(ji => new
             {
-                ji.JewelItemId, JewelTypeName = ji.JewelType?.JewelTypeName, ji.Quantity,
-                ji.GrossWeightGrams, ji.StoneWeightGrams, ji.NetWeightGrams, ji.Purity, ji.MarketValue
+                ji.JewelItemId,
+                JewelTypeName = ji.JewelType?.JewelTypeName,
+                ji.Quantity,
+                ji.GrossWeightGrams,
+                ji.StoneWeightGrams,
+                ji.NetWeightGrams,
+                ji.Purity,
+                ji.MarketValue,
+                HasPhoto = !string.IsNullOrEmpty(ji.PhotoPath)
             })
         });
     }
@@ -135,12 +151,185 @@ public class LoansController : ControllerBase
             })
         });
     }
+
+    // POST /api/loans/5/submit-for-approval
+    // Combines: validate -> approve -> disburse -> ledger entry, in one transaction.
+    // Final status is "Active" (loan is now live and accruing interest).
+    // Payment mode is hardcoded to "Cash" since this flow no longer collects it.
+    [HttpPost("{id:int}/submit-for-approval")]
+    public async Task<ActionResult<SubmitForApprovalResponseDto>> SubmitForApproval(
+        int id, [FromBody] SubmitForApprovalRequestDto request)
+    {
+        const string HardcodedPaymentMode = "Cash";
+
+        await using var tx = await _db.Database.BeginTransactionAsync();
+        try
+        {
+            // ---- Step 1: Atomic "claim" — prevents duplicate approval/disbursement
+            // if the button is clicked twice or the request is retried. This UPDATE
+            // takes a row lock immediately; a concurrent duplicate call blocks until
+            // this transaction finishes, then its WHERE no longer matches (status
+            // already moved on) so it affects 0 rows.
+            var claimed = await _db.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE Loans
+                SET Status = 'Processing', UpdatedAt = GETUTCDATE()
+                WHERE LoanId = {id} AND Status IN ('Draft', 'PendingApproval')");
+
+            if (claimed == 0)
+            {
+                var existing = await _db.Loans.AsNoTracking().FirstOrDefaultAsync(l => l.LoanId == id);
+                await tx.RollbackAsync();
+
+                if (existing == null)
+                    return NotFound($"Loan {id} not found.");
+
+                if (existing.Status == "Active")
+                    // Duplicate click after success — return existing result instead of erroring.
+                    return Ok(await BuildSubmitResponse(id));
+
+                return Conflict($"Loan {id} cannot be submitted for approval. Current status: {existing.Status}.");
+            }
+
+            // ---- Step 2: Load full loan graph ----
+            var loan = await _db.Loans
+                .Include(l => l.Customer)
+                .Include(l => l.LoanScheme)
+                .Include(l => l.JewelItems)
+                .FirstOrDefaultAsync(l => l.LoanId == id);
+
+            if (loan == null)
+            {
+                await tx.RollbackAsync();
+                return NotFound($"Loan {id} not found.");
+            }
+
+            // ---- Step 3: Validate ----
+            var errors = ValidateLoanForSubmission(loan);
+            if (errors.Count > 0)
+            {
+                await tx.RollbackAsync();
+                return BadRequest(new { Errors = errors });
+            }
+
+            var now = DateTime.UtcNow;
+
+            // ---- Step 4: Approve ----
+            loan.SubmittedBy = request.SubmittedByUserId;
+            loan.SubmittedAt = now;
+            loan.ApprovedBy = request.SubmittedByUserId;
+            loan.ApprovedAt = now;
+
+            // ---- Step 5: Disburse ----
+            var today = now.Date;
+            var maturity = today.AddMonths(loan.TenureMonths);
+            var netDisbursement = loan.LoanAmount - loan.ProcessingFee;
+
+            loan.LoanDate = today;
+            loan.MaturityDate = maturity;
+            loan.DisbursedBy = request.SubmittedByUserId;
+            loan.DisbursedAt = now;
+            loan.UpdatedAt = now;
+            loan.Status = "Active"; // loan is now live and accruing interest
+
+            var seq = await _db.LoanTransactions.CountAsync() + 1;
+            var receiptNo = _calc.GenerateReceiptNumber(seq);
+            while (await _db.LoanTransactions.AnyAsync(t => t.ReceiptNumber == receiptNo))
+            {
+                seq++;
+                receiptNo = _calc.GenerateReceiptNumber(seq);
+            }
+
+            var txn = new LoanTransaction
+            {
+                LoanId = loan.LoanId,
+                TransactionType = "Disbursement",
+                ReceiptNumber = receiptNo,
+                TransactionDate = now,
+                PrincipalAmount = loan.LoanAmount,
+                InterestAmount = 0,
+                PenaltyAmount = 0,
+                ChargesAmount = loan.ProcessingFee,
+                TotalAmount = netDisbursement,
+                PaymentMode = HardcodedPaymentMode,
+                ReferenceNo = null,
+                BalancePrincipalAfter = loan.OutstandingPrincipal,
+                ProcessedBy = request.SubmittedByUserId,
+                BranchId = loan.BranchId,
+                Remarks = "Auto-approved and disbursed via Submit for Approval",
+                CreatedAt = now
+            };
+            _db.LoanTransactions.Add(txn);
+
+            _db.AuditLogs.Add(new AuditLog
+            {
+                EventTime = now,
+                UserId = request.SubmittedByUserId,
+                ModuleName = "LoanApproval",
+                ActionDescription = $"Submit-for-approval: approved and disbursed loan {loan.LoanNumber} in a single step.",
+                RecordReference = loan.LoanNumber
+            });
+
+            await _db.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return Ok(await BuildSubmitResponse(loan.LoanId));
+        }
+        catch
+        {
+            await tx.RollbackAsync();
+            throw;
+        }
+    }
+
+    private List<string> ValidateLoanForSubmission(Loan loan)
+    {
+        var errors = new List<string>();
+
+        if (loan.JewelItems == null || loan.JewelItems.Count == 0)
+            errors.Add("Loan has no jewel items on record.");
+
+        if (loan.LoanAmount <= 0)
+            errors.Add("Loan amount must be greater than zero.");
+
+        if (loan.Customer == null)
+            errors.Add("Loan is not linked to a valid customer.");
+
+        if (loan.LoanScheme == null || !loan.LoanScheme.IsActive)
+            errors.Add("Loan scheme is missing or inactive.");
+
+        if (loan.TenureMonths <= 0)
+            errors.Add("Loan tenure is invalid.");
+
+        return errors;
+    }
+
+    private async Task<SubmitForApprovalResponseDto> BuildSubmitResponse(int loanId)
+    {
+        var loan = await _db.Loans.AsNoTracking()
+            .Include(l => l.Customer)
+            .FirstAsync(l => l.LoanId == loanId);
+
+        var txn = await _db.LoanTransactions.AsNoTracking()
+            .Where(t => t.LoanId == loanId && t.TransactionType == "Disbursement")
+            .OrderByDescending(t => t.TransactionDate)
+            .FirstOrDefaultAsync();
+
+        return new SubmitForApprovalResponseDto(
+            loan.LoanId, loan.LoanNumber, loan.Status, loan.Customer?.CustomerName ?? "",
+            loan.ApprovedBy ?? 0, loan.ApprovedAt ?? DateTime.MinValue,
+            txn?.ReceiptNumber ?? "", loan.DisbursedAt ?? DateTime.MinValue,
+            loan.LoanDate, loan.MaturityDate, loan.LoanAmount, loan.ProcessingFee,
+            txn?.TotalAmount ?? 0, loan.OutstandingPrincipal, loan.OutstandingInterest,
+            txn?.PaymentMode ?? ""
+        );
+    }
+
     // POST /api/loans
-    // Creates a Draft loan with jewel items, using the appraisal values supplied.
-    // POST /api/loans
-    // Creates a Draft loan with jewel items, using the appraisal values supplied.
+    // Creates a Draft/PendingApproval loan with jewel items, using the appraisal values supplied.
+    // Returns the created jewel item ids (same order as request.JewelItems) so the front end
+    // can immediately upload a photo against each jewel item.
     [HttpPost]
-    public async Task<ActionResult> Create([FromBody] NewLoanRequestDto request)
+    public async Task<ActionResult<NewLoanResponseDto>> Create([FromBody] NewLoanRequestDto request)
     {
         var customer = await _db.Customers.FindAsync(request.CustomerId);
         if (customer == null) return BadRequest("Customer not found.");
@@ -192,8 +381,9 @@ public class LoansController : ControllerBase
 
         var eligibleAmount = _calc.CalculateEligibleAmount(totalMarketValue, scheme.MaxLtvPercent);
 
-        if (request.RequestedLoanAmount > eligibleAmount)
-            return BadRequest($"Requested amount ₹{request.RequestedLoanAmount:N2} exceeds eligible amount ₹{eligibleAmount:N2} for this scheme's LTV.");
+        // Skip the LTV cap only when the caller explicitly checked "Don't validate" on the New Loan screen.
+        if (!request.AllowExceedEligible && request.RequestedLoanAmount > eligibleAmount)
+            return BadRequest($"Requested amount ₹{request.RequestedLoanAmount:N2} exceeds eligible amount ₹{eligibleAmount:N2} for this scheme's LTV. Check 'Don't validate — allow amount to exceed eligible' to override.");
 
         var sequence = await _db.Loans.CountAsync() + 1;
         var loanNumber = _calc.GenerateLoanNumber(sequence);
@@ -233,16 +423,155 @@ public class LoansController : ControllerBase
         _db.Loans.Add(loan);
         await _db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = loan.LoanId }, new
-        {
+        return CreatedAtAction(nameof(GetById), new { id = loan.LoanId }, new NewLoanResponseDto(
             loan.LoanId,
             loan.LoanNumber,
             loan.Status,
             loan.MarketValue,
             loan.EligibleAmount,
             loan.LoanAmount,
-            loan.OverallInterest
-        });
+            loan.OverallInterest,
+            jewelItemEntities.Select(ji => new NewLoanJewelItemRefDto(ji.JewelItemId, ji.JewelTypeId)).ToList()
+        ));
+    }
+
+    // POST /api/loans/jewel-items/5/photo
+    // Uploads/replaces the photo for a single jewel item. Retained for other screens
+    // that still work per-jewel-item; the New Loan screen no longer uses this endpoint
+    // (it now captures one combined photo per loan — see POST /api/loans/{id}/photo).
+    [HttpPost("jewel-items/{jewelItemId:int}/photo")]
+    public async Task<ActionResult> UploadJewelItemPhoto(int jewelItemId, IFormFile photo)
+    {
+        if (photo == null || photo.Length == 0)
+            return BadRequest(new { message = "No file uploaded." });
+
+        var jewelItem = await _db.JewelItems.FindAsync(jewelItemId);
+        if (jewelItem == null)
+            return NotFound(new { message = "Jewel item not found." });
+
+        var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        var jewelPhotosDir = Path.Combine(uploadsRoot, "JewelPhotos");
+        Directory.CreateDirectory(jewelPhotosDir);
+
+        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(photo.FileName);
+        var filePath = Path.Combine(jewelPhotosDir, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await photo.CopyToAsync(stream);
+        }
+
+        jewelItem.PhotoPath = Path.Combine("JewelPhotos", fileName).Replace("\\", "/");
+        await _db.SaveChangesAsync();
+
+        return Ok(new { jewelItem.JewelItemId, jewelItem.PhotoPath });
+    }
+
+    // GET /api/loans/jewel-items/5/photo            -> inline (for the lightbox / thumbnail)
+    // GET /api/loans/jewel-items/5/photo?download=true -> forces attachment download
+    [HttpGet("jewel-items/{jewelItemId:int}/photo")]
+    public async Task<IActionResult> GetJewelItemPhoto(int jewelItemId, [FromQuery] bool download = false)
+    {
+        var jewelItem = await _db.JewelItems.AsNoTracking()
+            .FirstOrDefaultAsync(j => j.JewelItemId == jewelItemId);
+
+        if (jewelItem == null)
+            return NotFound(new { message = "Jewel item not found." });
+        if (string.IsNullOrEmpty(jewelItem.PhotoPath))
+            return NotFound(new { message = "No photo uploaded for this jewel item." });
+
+        var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        var fullPath = Path.GetFullPath(Path.Combine(uploadsRoot, jewelItem.PhotoPath));
+
+        // Guard against path traversal - resolved path must stay inside Uploads.
+        if (!fullPath.StartsWith(Path.GetFullPath(uploadsRoot), StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { message = "Invalid photo path." });
+
+        if (!System.IO.File.Exists(fullPath))
+            return NotFound(new { message = "File missing on server." });
+
+        var contentType = GetContentType(fullPath);
+        var bytes = await System.IO.File.ReadAllBytesAsync(fullPath);
+
+        if (download)
+            return File(bytes, contentType, $"JewelItem-{jewelItemId}{Path.GetExtension(fullPath)}");
+
+        return File(bytes, contentType);
+    }
+
+    // POST /api/loans/5/photo
+    // Uploads/replaces the SINGLE combined photo covering all jewel items on this loan.
+    // Used by the New Loan screen (Step 3), which now captures one photo via the
+    // customer's webcam instead of one photo per jewel item. View-only on the New Loan
+    // screen — no download action is exposed there.
+    [HttpPost("{id:int}/photo")]
+    public async Task<ActionResult> UploadLoanPhoto(int id, IFormFile photo)
+    {
+        if (photo == null || photo.Length == 0)
+            return BadRequest(new { message = "No file uploaded." });
+
+        var loan = await _db.Loans.FindAsync(id);
+        if (loan == null)
+            return NotFound(new { message = "Loan not found." });
+
+        var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        var loanPhotosDir = Path.Combine(uploadsRoot, "LoanPhotos");
+        Directory.CreateDirectory(loanPhotosDir);
+
+        var extension = Path.GetExtension(photo.FileName);
+        if (string.IsNullOrWhiteSpace(extension)) extension = ".jpg";
+        var fileName = Guid.NewGuid().ToString() + extension;
+        var filePath = Path.Combine(loanPhotosDir, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await photo.CopyToAsync(stream);
+        }
+
+        loan.GroupPhotoPath = Path.Combine("LoanPhotos", fileName).Replace("\\", "/");
+        loan.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        return Ok(new { loan.LoanId, loan.GroupPhotoPath });
+    }
+
+    // GET /api/loans/5/photo
+    // Streams the single combined jewel-items photo for the loan (inline only).
+    [HttpGet("{id:int}/photo")]
+    public async Task<IActionResult> GetLoanPhoto(int id)
+    {
+        var loan = await _db.Loans.AsNoTracking().FirstOrDefaultAsync(l => l.LoanId == id);
+        if (loan == null)
+            return NotFound(new { message = "Loan not found." });
+        if (string.IsNullOrEmpty(loan.GroupPhotoPath))
+            return NotFound(new { message = "No photo uploaded for this loan." });
+
+        var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        var fullPath = Path.GetFullPath(Path.Combine(uploadsRoot, loan.GroupPhotoPath));
+
+        if (!fullPath.StartsWith(Path.GetFullPath(uploadsRoot), StringComparison.OrdinalIgnoreCase))
+            return BadRequest(new { message = "Invalid photo path." });
+
+        if (!System.IO.File.Exists(fullPath))
+            return NotFound(new { message = "File missing on server." });
+
+        var contentType = GetContentType(fullPath);
+        var bytes = await System.IO.File.ReadAllBytesAsync(fullPath);
+        return File(bytes, contentType);
+    }
+
+    private static string GetContentType(string path)
+    {
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+        return ext switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".gif" => "image/gif",
+            ".webp" => "image/webp",
+            ".pdf" => "application/pdf",
+            _ => "application/octet-stream"
+        };
     }
 
     // POST /api/loans/5/approve
