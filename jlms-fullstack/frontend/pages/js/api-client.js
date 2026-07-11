@@ -110,6 +110,7 @@ const Api = {
   getLoanByNumber: (loanNumber) => apiRequest(`/loans/by-number/${encodeURIComponent(loanNumber)}`),
   approveLoan: (id, dto) => apiRequest(`/loans/${id}/approve`, { method: "POST", body: dto }),
   disburseLoan: (id, dto) => apiRequest(`/loans/${id}/disburse`, { method: "POST", body: dto }),
+  submitForApproval: (id, dto) => apiRequest(`/loans/${id}/submit-for-approval`, { method: "POST", body: dto }),
 
   // ---- Collections ----
   getOutstanding: (loanId) => apiRequest(`/loans/${loanId}/outstanding`),
@@ -174,6 +175,22 @@ getLoanOperationsClosureDetails: (loanId) =>
 
 closeLoanOperations: (loanId, dto) =>
   apiRequest(`/loan-operations/${loanId}/close`, { method: "POST", body: dto }),
+
+closeLoanOperationsWithPhoto: async (loanId, formData) => {
+  const response = await fetch(`
+${API_BASE_URL}/loan-operations/${loanId}/close`, {
+    method: "POST",
+    body: formData   // multipart — browser sets Content-Type + boundary automatically
+  });
+  const text = await response.text();
+  let data = null;
+  if (text) { try { data = JSON.parse(text); } catch { data = text; } }
+  if (!response.ok) {
+    const message = (data && (data.title || data.message || data.detail)) || data || "Unable to close loan.";
+    throw new ApiError(typeof message === "string" ? message : JSON.stringify(message), response.status);
+  }
+  return data;
+},
 
 getLoanOperationsLedger: (loanId, page = 1, pageSize = 10) =>
   apiRequest(`/loan-operations/${loanId}/ledger?page=${page}&pageSize=${pageSize}`)

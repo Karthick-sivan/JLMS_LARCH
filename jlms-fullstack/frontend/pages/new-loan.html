@@ -10,6 +10,77 @@
 <style>
   .appraisal-table input { width:100%; border:1px solid var(--n-200); border-radius:3px; padding:5px 7px; font-size:12px; text-align:right; }
   .appraisal-table select { width:100%; min-width:140px; border:1px solid var(--n-200); border-radius:3px; padding:5px 6px; font-size:11.5px; }
+
+  .customer-photo-box {
+    width:100%; height:150px; border:1px dashed var(--n-300); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    background:var(--n-50); cursor:default;
+  }
+  .customer-photo-box.has-photo { cursor:pointer; border-style:solid; }
+  .customer-photo-box img { width:100%; height:100%; object-fit:cover; }
+  .customer-photo-placeholder { color:var(--n-400); text-align:center; font-size:11.5px; }
+  .customer-photo-placeholder i { font-size:28px; display:block; margin-bottom:4px; }
+
+  /* ---- Customer detail card: darker, label-above-value, address gets its own full-width row ---- */
+  .customer-detail-card {
+    display:none;
+    padding:16px 18px;
+    background:var(--navy-50);
+    border:1px solid var(--navy-100);
+    border-radius:8px;
+    margin-top:10px;
+  }
+  .customer-detail-card .cdc-name {
+    font-size:16px;
+    font-weight:700;
+    color:#151b26;
+    margin-top:3px;
+    margin-bottom:12px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--navy-100);
+  }
+  .customer-detail-card .cdc-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px 20px;
+  }
+  .customer-detail-card .cdc-field {
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    min-width:0;
+  }
+  .customer-detail-card .cdc-field-full {
+    grid-column:1 / -1;
+  }
+  .customer-detail-card .cdc-label {
+    font-size:10.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#5b6474;
+  }
+  .customer-detail-card .cdc-value {
+    font-size:13.5px;
+    font-weight:600;
+    color:#12161f;
+    line-height:1.4;
+    word-break:break-word;
+  }
+
+  .webcam-box {
+    width:100%; min-height:220px; border:1px dashed var(--n-300); border-radius:8px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    background:var(--n-50); position:relative;
+  }
+  .webcam-box.has-photo { border-style:solid; }
+  .webcam-box video, .webcam-box img { width:100%; height:220px; object-fit:cover; display:block; }
+  .webcam-placeholder { color:var(--n-400); text-align:center; font-size:11.5px; padding:16px; }
+  .webcam-placeholder i { font-size:30px; display:block; margin-bottom:6px; }
+  .webcam-captured-badge {
+    position:absolute; top:8px; right:8px; background:#1a7f4e; color:#fff;
+    font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:10px;
+  }
 </style>
 </head>
 <body>
@@ -33,16 +104,62 @@
 
           <fieldset class="section-fieldset" style="background:#fff; padding-top:18px;">
             <legend>Step 1 — Select Customer</legend>
-            <div class="row g-3 align-items-end">
-              <div class="col-md-7">
+            <div class="row g-3">
+              <div class="col-md-8">
                 <label class="field-label">Search customer by name, mobile, or code<span class="req">*</span></label>
                 <input type="text" class="form-control-jlms" id="customerSearchInput" placeholder="Start typing to search...">
                 <div id="customerSearchResults" style="border:1px solid var(--n-200); border-radius:6px; margin-top:4px; max-height:180px; overflow-y:auto; display:none; background:#fff; position:relative; z-index:10;"></div>
+
+                <div id="selectedCustomerCard" class="customer-detail-card">
+                  <span class="cdc-label">Customer Name</span>
+                  <div class="cdc-name" id="selCustName"></div>
+                  <div class="cdc-grid">
+                    <div class="cdc-field">
+                      <span class="cdc-label">Code</span>
+                      <span class="cdc-value" id="selCustCode"></span>
+                    </div>
+                    <div class="cdc-field">
+                      <span class="cdc-label">Mobile</span>
+                      <span class="cdc-value" id="selCustMobile"></span>
+                    </div>
+                    <div class="cdc-field">
+                      <span class="cdc-label">Alt. Mobile</span>
+                      <span class="cdc-value" id="selCustAltMobile"></span>
+                    </div>
+                    <div class="cdc-field">
+                      <span class="cdc-label">Active Loans</span>
+                      <span class="cdc-value" id="selCustActiveLoans"></span>
+                    </div>
+                    <div class="cdc-field">
+                      <span class="cdc-label">City</span>
+                      <span class="cdc-value" id="selCustCity"></span>
+                    </div>
+                    <div class="cdc-field">
+                      <span class="cdc-label">State</span>
+                      <span class="cdc-value" id="selCustState"></span>
+                    </div>
+                    <div class="cdc-field">
+                      <span class="cdc-label">Aadhaar No</span>
+                      <span class="cdc-value" id="selCustAadhaar"></span>
+                    </div>
+                    <div class="cdc-field">
+                      <span class="cdc-label">PAN No</span>
+                      <span class="cdc-value" id="selCustPan"></span>
+                    </div>
+                    <div class="cdc-field cdc-field-full">
+                      <span class="cdc-label">Address</span>
+                      <span class="cdc-value" id="selCustAddress"></span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="col-md-5">
-                <div id="selectedCustomerCard" style="display:none; padding:10px 14px; background:var(--navy-50); border:1px solid var(--navy-100); border-radius:6px;">
-                  <div class="cell-strong" id="selCustName"></div>
-                  <div class="text-caption" id="selCustMeta"></div>
+              <div class="col-md-4">
+                <label class="field-label">Customer Photo</label>
+                <div class="customer-photo-box" id="customerPhotoBox">
+                  <div class="customer-photo-placeholder" id="customerPhotoPlaceholder">
+                    <i class="bi bi-person-circle"></i>
+                    No customer selected
+                  </div>
                 </div>
               </div>
             </div>
@@ -62,7 +179,31 @@
           </fieldset>
 
           <fieldset class="section-fieldset" style="background:#fff;">
-            <legend>Step 3 — Loan Terms</legend>
+            <legend>Step 3 — Jewel Items Photo (Web Capture)</legend>
+            <div class="text-caption mb-2">Capture a single photo covering all the jewel items listed above using your webcam. This one photo is attached to the loan and uploads right after it is created.</div>
+            <div class="row g-3">
+              <div class="col-md-7">
+                <div class="webcam-box" id="webcamBox">
+                  <video id="webcamVideo" autoplay playsinline muted style="display:none;"></video>
+                  <img id="capturedPhotoPreview" style="display:none;" alt="Captured jewel items photo">
+                  <div class="webcam-placeholder" id="webcamPlaceholder">
+                    <i class="bi bi-camera-video"></i>
+                    Camera not started
+                  </div>
+                  <span class="webcam-captured-badge" id="webcamCapturedBadge" style="display:none;">Captured</span>
+                </div>
+                <canvas id="captureCanvas" style="display:none;"></canvas>
+              </div>
+              <div class="col-md-5 d-flex flex-column gap-2 justify-content-center">
+                <button type="button" class="btn-jlms btn-jlms-outline" id="btnStartCamera"><i class="bi bi-camera-video"></i> Start Camera</button>
+                <button type="button" class="btn-jlms btn-jlms-primary" id="btnCapturePhoto" disabled><i class="bi bi-camera"></i> Capture Photo</button>
+                <button type="button" class="btn-jlms btn-jlms-outline" id="btnRetakePhoto" style="display:none;"><i class="bi bi-arrow-counterclockwise"></i> Retake</button>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="section-fieldset" style="background:#fff;">
+            <legend>Step 4 — Loan Terms</legend>
             <div class="row g-3">
               <div class="col-md-4">
                 <label class="field-label">Loan Scheme<span class="req">*</span></label>
@@ -90,6 +231,12 @@
                 <div class="summary-row"><span class="label">Scheme Max LTV</span><span class="value" id="sumLtv">—</span></div>
                 <div class="summary-row total"><span class="label">Eligible Amount</span><span class="value" id="sumEligible">₹0</span></div>
               </div>
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="chkAllowExceed">
+                <label class="form-check-label" for="chkAllowExceed" style="font-size:11.5px; line-height:1.4;">
+                  Don't validate — allow requested amount to exceed eligible amount
+                </label>
+              </div>
             </div>
           </div>
           <div class="d-flex flex-column gap-2">
@@ -97,6 +244,25 @@
             <button class="btn-jlms btn-jlms-primary btn-lg" id="btnSubmitLoan" style="width:100%; justify-content:center;"><i class="bi bi-send-check"></i> Submit for Approval</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox modal for customer photo -->
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="lightboxTitle">Photo</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="lightboxImg" src="" alt="Photo" style="max-width:100%; max-height:70vh; border-radius:6px;">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-jlms btn-jlms-outline" id="lightboxDownloadBtn"><i class="bi bi-download"></i> Download</button>
+        <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -113,6 +279,11 @@ let selectedCustomer = null;
 let jewelTypesCache = [];
 let schemesCache = [];
 let itemRowCount = 0;
+
+// ---------------- Webcam capture (single combined jewel-items photo) ----------------
+let webcamStream = null;
+let capturedPhotoBlob = null;
+let capturedPhotoUrl = null;
 
 function jewelRowHtml(rowId) {
   const options = jewelTypesCache.map(jt => `<option value="${jt.jewelTypeId}" data-purity="${jt.defaultPurity || ''}">${jt.jewelTypeName}</option>`).join('');
@@ -135,7 +306,9 @@ function addJewelRow() {
 }
 
 function wireRow(tr) {
-  tr.querySelector('.removeRowBtn').addEventListener('click', () => tr.remove());
+  tr.querySelector('.removeRowBtn').addEventListener('click', () => {
+    tr.remove();
+  });
   tr.querySelector('.jewelTypeSelect').addEventListener('change', (e) => {
     const purity = e.target.selectedOptions[0].dataset.purity;
     if (purity) tr.querySelector('.purityInput').value = purity;
@@ -143,7 +316,7 @@ function wireRow(tr) {
 }
 
 function collectJewelItems() {
-  const rows = document.querySelectorAll('#jewelItemsBody tr');
+  const rows = document.querySelectorAll('#jewelItemsBody tr[data-row-id]');
   const items = [];
   rows.forEach(tr => {
     const jewelTypeId = parseInt(tr.querySelector('.jewelTypeSelect').value, 10);
@@ -181,14 +354,14 @@ async function searchCustomersLive(query) {
   if (!query || query.length < 2) { resultsBox.style.display = 'none'; return; }
   try {
     const searchResult = await Api.searchCustomers({ search: query });
-const mobileResult = await Api.searchCustomers({ mobile: query });
+    const mobileResult = await Api.searchCustomers({ mobile: query });
 
-const rows = searchResult.items || [];
-const mobileRows = mobileResult.items || [];
+    const rows = searchResult.items || [];
+    const mobileRows = mobileResult.items || [];
 
-const merged = [...rows, ...mobileRows].filter(
-  (r, i, arr) => arr.findIndex(x => x.customerId === r.customerId) === i
-);
+    const merged = [...rows, ...mobileRows].filter(
+      (r, i, arr) => arr.findIndex(x => x.customerId === r.customerId) === i
+    );
 
     if (merged.length === 0) {
       resultsBox.innerHTML = '<div style="padding:10px 14px; color:var(--n-500); font-size:12px;">No matching customers. <a href="customer-registration.html">Register a new customer</a>.</div>';
@@ -201,11 +374,9 @@ const merged = [...rows, ...mobileRows].filter(
       resultsBox.querySelectorAll('.customerResultRow').forEach(row => {
         row.addEventListener('click', () => {
           selectedCustomer = { id: parseInt(row.dataset.id, 10), name: row.dataset.name, code: row.dataset.code, mobile: row.dataset.mobile };
-          document.getElementById('selCustName').textContent = selectedCustomer.name;
-          document.getElementById('selCustMeta').textContent = `${selectedCustomer.code} · ${selectedCustomer.mobile}`;
-          document.getElementById('selectedCustomerCard').style.display = 'block';
           document.getElementById('customerSearchInput').value = selectedCustomer.name;
           resultsBox.style.display = 'none';
+          loadSelectedCustomerDetails(selectedCustomer.id);
         });
       });
     }
@@ -214,6 +385,160 @@ const merged = [...rows, ...mobileRows].filter(
     showApiError(err);
   }
 }
+
+async function loadSelectedCustomerDetails(customerId) {
+  const card = document.getElementById('selectedCustomerCard');
+  try {
+    const c = await fetch(`${API_BASE_URL}/customers/${customerId}`).then(r => {
+      if (!r.ok) throw new Error('Failed to load customer details.');
+      return r.json();
+    });
+
+    document.getElementById('selCustName').textContent = c.customerName;
+    document.getElementById('selCustCode').textContent = c.customerCode;
+    document.getElementById('selCustMobile').textContent = c.mobile || '—';
+    document.getElementById('selCustAltMobile').textContent = c.alternateMobile || '—';
+    document.getElementById('selCustAddress').textContent = c.address || '—';
+    document.getElementById('selCustCity').textContent = c.city || '—';
+    document.getElementById('selCustState').textContent = c.state || '—';
+    document.getElementById('selCustAadhaar').textContent = c.aadhaarNumber || '—';
+    document.getElementById('selCustPan').textContent = c.panNumber || '—';
+    document.getElementById('selCustActiveLoans').textContent = c.activeLoans;
+    card.style.display = 'block';
+
+    renderCustomerPhoto(customerId, c.customerName);
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+function renderCustomerPhoto(customerId, customerName) {
+  const box = document.getElementById('customerPhotoBox');
+  const photoUrl = `${API_BASE_URL}/customers/${customerId}/documents/photo`;
+  const probeImg = new Image();
+  probeImg.onload = () => {
+    box.innerHTML = `<img src="${photoUrl}" alt="Customer photo">`;
+    box.classList.add('has-photo');
+    box.onclick = () => openLightbox(photoUrl, `${customerName} — Photo`);
+  };
+  probeImg.onerror = () => {
+    box.innerHTML = `<div class="customer-photo-placeholder"><i class="bi bi-person-circle"></i>No photo on file</div>`;
+    box.classList.remove('has-photo');
+    box.onclick = null;
+  };
+  probeImg.src = photoUrl;
+}
+
+// ---------------- Step 3: single web-captured jewel items photo ----------------
+
+async function startWebcam() {
+  clearApiError();
+  try {
+    webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+  } catch (err) {
+    try {
+      webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    } catch (err2) {
+      showApiError(new Error('Could not access the camera. Please allow camera permission and try again.'));
+      return;
+    }
+  }
+
+  const video = document.getElementById('webcamVideo');
+  video.srcObject = webcamStream;
+  video.style.display = 'block';
+  document.getElementById('webcamPlaceholder').style.display = 'none';
+  document.getElementById('capturedPhotoPreview').style.display = 'none';
+  document.getElementById('webcamCapturedBadge').style.display = 'none';
+  document.getElementById('webcamBox').classList.remove('has-photo');
+
+  document.getElementById('btnStartCamera').style.display = 'none';
+  document.getElementById('btnCapturePhoto').disabled = false;
+  document.getElementById('btnRetakePhoto').style.display = 'none';
+}
+
+function stopWebcam() {
+  if (webcamStream) {
+    webcamStream.getTracks().forEach(t => t.stop());
+    webcamStream = null;
+  }
+}
+
+function capturePhoto() {
+  const video = document.getElementById('webcamVideo');
+  const canvas = document.getElementById('captureCanvas');
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  canvas.toBlob((blob) => {
+    if (!blob) {
+      showApiError(new Error('Could not capture photo. Please try again.'));
+      return;
+    }
+    if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
+    capturedPhotoBlob = blob;
+    capturedPhotoUrl = URL.createObjectURL(blob);
+
+    const preview = document.getElementById('capturedPhotoPreview');
+    preview.src = capturedPhotoUrl;
+    preview.style.display = 'block';
+    document.getElementById('webcamVideo').style.display = 'none';
+    document.getElementById('webcamCapturedBadge').style.display = 'inline-block';
+    document.getElementById('webcamBox').classList.add('has-photo');
+
+    stopWebcam();
+    document.getElementById('btnCapturePhoto').disabled = true;
+    document.getElementById('btnStartCamera').style.display = 'none';
+    document.getElementById('btnRetakePhoto').style.display = 'inline-flex';
+  }, 'image/jpeg', 0.9);
+}
+
+function retakePhoto() {
+  if (capturedPhotoUrl) { URL.revokeObjectURL(capturedPhotoUrl); capturedPhotoUrl = null; }
+  capturedPhotoBlob = null;
+
+  document.getElementById('capturedPhotoPreview').style.display = 'none';
+  document.getElementById('webcamCapturedBadge').style.display = 'none';
+  document.getElementById('webcamBox').classList.remove('has-photo');
+  document.getElementById('webcamPlaceholder').style.display = 'block';
+  document.getElementById('btnRetakePhoto').style.display = 'none';
+  document.getElementById('btnStartCamera').style.display = 'inline-flex';
+  document.getElementById('btnCapturePhoto').disabled = true;
+
+  startWebcam();
+}
+
+// ---------------- Lightbox helpers (customer photo) ----------------
+
+function openLightbox(url, title) {
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightboxTitle').textContent = title || 'Photo';
+  document.getElementById('lightboxDownloadBtn').onclick = () => downloadImage(url, (title || 'photo').replace(/\s+/g, '-') + '.jpg');
+  const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+  modal.show();
+}
+
+async function downloadImage(url, filename) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('Download failed.');
+    const blob = await resp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+// ---------------- Valuation ----------------
 
 async function calculateValuation() {
   clearApiError();
@@ -232,7 +557,9 @@ async function calculateValuation() {
       const eligible = result.totalMarketValue * (scheme.maxLtvPercent / 100);
       document.getElementById('sumLtv').textContent = scheme.maxLtvPercent + '%';
       document.getElementById('sumEligible').textContent = '₹' + Math.round(eligible).toLocaleString('en-IN');
-      document.getElementById('requestedAmount').max = Math.round(eligible);
+      if (!document.getElementById('chkAllowExceed').checked) {
+        document.getElementById('requestedAmount').max = Math.round(eligible);
+      }
     }
     return result;
   } catch (err) {
@@ -245,6 +572,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   Session.requireLogin();
   document.getElementById('btnAddItem').addEventListener('click', addJewelRow);
   document.getElementById('btnCalculate').addEventListener('click', calculateValuation);
+
+  document.getElementById('btnStartCamera').addEventListener('click', startWebcam);
+  document.getElementById('btnCapturePhoto').addEventListener('click', capturePhoto);
+  document.getElementById('btnRetakePhoto').addEventListener('click', retakePhoto);
+
+  document.getElementById('chkAllowExceed').addEventListener('change', (e) => {
+    document.getElementById('requestedAmount').removeAttribute('max');
+    if (!e.target.checked) calculateValuation();
+  });
 
   let searchDebounce;
   document.getElementById('customerSearchInput').addEventListener('input', (e) => {
@@ -271,27 +607,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     const items = collectJewelItems();
     if (items.length === 0) { showApiError(new Error('Add at least one jewel item.')); return; }
 
+    const allowExceedEligible = document.getElementById('chkAllowExceed').checked;
+
+    // Client-side pre-check against the last calculated eligible amount, purely to save a round trip.
+    if (!allowExceedEligible) {
+      const eligibleText = document.getElementById('sumEligible').textContent.replace(/[₹,]/g, '');
+      const eligibleAmount = parseFloat(eligibleText);
+      if (eligibleAmount > 0 && requestedAmount > eligibleAmount) {
+        showApiError(new Error(`Requested amount exceeds the eligible amount of ₹${eligibleAmount.toLocaleString('en-IN')}. Check "Don't validate" to override, or lower the amount.`));
+        return;
+      }
+    }
+
+    const currentUser = Session.get();
+    if (!currentUser || !currentUser.userId) {
+      showApiError(new Error('Your session is missing user info. Please log out and log in again.'));
+      return;
+    }
+
     const btn = document.getElementById('btnSubmitLoan');
+    if (btn.dataset.busy === '1') return;
+    btn.dataset.busy = '1';
     btn.disabled = true;
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Submitting...';
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating loan...';
     try {
-      const result = await Api.createLoan({
+      const loan = await Api.createLoan({
         customerId: selectedCustomer.id,
         loanSchemeId: schemeId,
         jewelItems: items,
         requestedLoanAmount: requestedAmount,
-        remarks: document.getElementById('loanRemarks').value.trim() || null
+        remarks: document.getElementById('loanRemarks').value.trim() || null,
+        allowExceedEligible: allowExceedEligible
       });
+
+      // Upload the single web-captured jewel-items photo now that we have a real LoanId.
+      if (capturedPhotoBlob && loan.loanId) {
+        try {
+          const fd = new FormData();
+          fd.append('photo', capturedPhotoBlob, 'jewel-items-capture.jpg');
+          await fetch(`${API_BASE_URL}/loans/${loan.loanId}/photo`, { method: 'POST', body: fd });
+        } catch (uploadErr) {
+          console.error('Loan photo upload failed for loan', loan.loanId, uploadErr);
+        }
+      }
+
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Approving & disbursing...';
+
+      const result = await Api.submitForApproval(loan.loanId, {
+        submittedByUserId: currentUser.userId
+      });
+
       const successEl = document.getElementById('apiSuccessBanner');
-      successEl.innerHTML = `Loan <strong>${result.loanNumber}</strong> created and submitted for approval. Go to <a href="loan-approval.html">Loan Approval</a> to approve it.`;
+      successEl.innerHTML = `
+        Loan <strong>${result.loanNumber}</strong> approved and disbursed.<br>
+        Receipt <strong>${result.receiptNumber}</strong> &middot;
+        Net disbursed ₹${Number(result.netDisbursedAmount).toLocaleString('en-IN')} &middot;
+        Status: <strong>${result.status}</strong>`;
       successEl.style.display = 'block';
-      btn.innerHTML = '<i class="bi bi-check-lg"></i> Submitted';
+      btn.innerHTML = '<i class="bi bi-check-lg"></i> Disbursed';
     } catch (err) {
       showApiError(err);
       btn.disabled = false;
+      btn.dataset.busy = '0';
       btn.innerHTML = '<i class="bi bi-send-check"></i> Submit for Approval';
     }
   });
+});
+
+window.addEventListener('beforeunload', () => {
+  stopWebcam();
+  if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
 });
 </script>
 </body>

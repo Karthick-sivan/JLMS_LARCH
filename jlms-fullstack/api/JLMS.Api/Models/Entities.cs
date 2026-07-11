@@ -121,6 +121,9 @@ public class Loan
     public decimal LoanAmount { get; set; }
     public decimal ProcessingFee { get; set; }
 
+    public int? SubmittedBy { get; set; }
+    public DateTime? SubmittedAt { get; set; }
+
     // NEW — fixed at loan creation: Principal x InterestRatePct / 100.
     // Never changes for the life of the loan. This is the customer's total
     // agreed scheme interest (Rule 4).
@@ -129,6 +132,11 @@ public class Loan
     public decimal OutstandingPrincipal { get; set; }
     public decimal OutstandingInterest { get; set; }
     public decimal PenaltyAccrued { get; set; }
+
+    // NEW — single web-captured photo covering ALL jewel items for this loan
+    // (Step 3 on New Loan screen now captures one combined photo instead of
+    // one photo per jewel item). Relative path under wwwroot-style Uploads folder.
+    public string? GroupPhotoPath { get; set; }
 
     public string Status { get; set; } = "Draft";
     public string? Remarks { get; set; }
@@ -143,6 +151,7 @@ public class Loan
 
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public string? ClosePhotoPath { get; set; }
 
     public ICollection<JewelItem> JewelItems { get; set; } = new List<JewelItem>();
     public ICollection<LoanTransaction> Transactions { get; set; } = new List<LoanTransaction>();
