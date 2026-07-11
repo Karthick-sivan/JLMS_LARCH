@@ -86,13 +86,43 @@ public class LoanOperationsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
     }
 
+    //// POST /api/loan-operations/5/close
+    //[HttpPost("{loanId:int}/close")]
+    //public async Task<ActionResult<LoanOperationsClosureResponseDto>> CloseLoan(int loanId, [FromForm] LoanOperationsClosureRequestDto request)
+    //{
+    //    try
+    //    {
+    //        return Ok(await _service.CloseLoanAsync(loanId, request));
+    //    }
+    //    catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+    //    catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
+    //}
     // POST /api/loan-operations/5/close
     [HttpPost("{loanId:int}/close")]
-    public async Task<ActionResult<LoanOperationsClosureResponseDto>> CloseLoan(int loanId, [FromBody] LoanOperationsClosureRequestDto request)
+    public async Task<ActionResult<LoanOperationsClosureResponseDto>> CloseLoan(int loanId, [FromForm] ClosureRequestWithPhotoDto request)
     {
         try
         {
-            return Ok(await _service.CloseLoanAsync(loanId, request));
+            string? closePhotoPath = null;
+            if (request.ClosePhoto != null && request.ClosePhoto.Length > 0)
+            {
+                var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+                var folder = Path.Combine(uploadsRoot, "Closure");
+                Directory.CreateDirectory(folder);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(request.ClosePhoto.FileName);
+                var filePath = Path.Combine(folder, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                    await request.ClosePhoto.CopyToAsync(stream);
+                closePhotoPath = Path.Combine("Closure", fileName).Replace("\\", "/");
+            }
+
+            var closeRequest = new LoanOperationsClosureRequestDto(
+                request.PaymentMode,
+                request.ReferenceNo,
+                request.ProcessedByUserId
+            );
+
+            return Ok(await _service.CloseLoanAsync(loanId, closeRequest, closePhotoPath));
         }
         catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
         catch (InvalidOperationException ex) { return BadRequest(ex.Message); }
