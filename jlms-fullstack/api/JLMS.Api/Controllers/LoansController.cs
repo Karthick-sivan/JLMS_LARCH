@@ -137,6 +137,8 @@ public class LoansController : ControllerBase
     }
     // POST /api/loans
     // Creates a Draft loan with jewel items, using the appraisal values supplied.
+    // POST /api/loans
+    // Creates a Draft loan with jewel items, using the appraisal values supplied.
     [HttpPost]
     public async Task<ActionResult> Create([FromBody] NewLoanRequestDto request)
     {
@@ -201,6 +203,11 @@ public class LoansController : ControllerBase
             loanNumber = _calc.GenerateLoanNumber(sequence);
         }
 
+        // Rule 4: Overall Interest = Principal x Interest%, fixed once at creation.
+        // Outstanding Interest starts EQUAL to Overall Interest — not zero — so the
+        // grid and payment screens show the correct figure from day one.
+        var overallInterest = Math.Round(request.RequestedLoanAmount * scheme.InterestRatePct / 100m, 2, MidpointRounding.AwayFromZero);
+
         var loan = new Loan
         {
             LoanNumber = loanNumber,
@@ -213,8 +220,9 @@ public class LoansController : ControllerBase
             EligibleAmount = eligibleAmount,
             LoanAmount = request.RequestedLoanAmount,
             ProcessingFee = scheme.ProcessingFee,
+            OverallInterest = overallInterest,
             OutstandingPrincipal = request.RequestedLoanAmount,
-            OutstandingInterest = 0,
+            OutstandingInterest = overallInterest,
             PenaltyAccrued = 0,
             Status = "PendingApproval",
             Remarks = request.Remarks,
@@ -227,7 +235,13 @@ public class LoansController : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { id = loan.LoanId }, new
         {
-            loan.LoanId, loan.LoanNumber, loan.Status, loan.MarketValue, loan.EligibleAmount, loan.LoanAmount
+            loan.LoanId,
+            loan.LoanNumber,
+            loan.Status,
+            loan.MarketValue,
+            loan.EligibleAmount,
+            loan.LoanAmount,
+            loan.OverallInterest
         });
     }
 
@@ -240,7 +254,7 @@ public class LoansController : ControllerBase
         if (loan.Status != "PendingApproval")
             return BadRequest($"Loan is currently '{loan.Status}' and cannot be approved/rejected.");
 
-        loan.Status = decision.Approved ? "Approved" : "Rejected";
+        loan.Status = decision.Approved ? "Active" : "Rejected";
         loan.ApprovedBy = decision.ApprovedByUserId;
         loan.ApprovedAt = DateTime.UtcNow;
         if (!string.IsNullOrWhiteSpace(decision.Remarks))

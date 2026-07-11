@@ -144,9 +144,42 @@ getCollectionReport: (params = {}) => {
     return apiRequest(`/collection-reports${qs ? "?" + qs : ""}`);
 },
     searchCustomersForReport: (q) => apiRequest(`/collection-reports/customer-search?q=${encodeURIComponent(q)}`),
-    getLoansByCustomer: (customerId) => apiRequest(`/collection-reports/loans-by-customer?customerId=${customerId}`)
+    getLoansByCustomer: (customerId) => apiRequest(`/collection-reports/loans-by-customer?customerId=${customerId}`),
   
+    /* ============================================================
+   Add these methods INSIDE the existing `Api = { ... }` object
+   in api-client.js (e.g. right after the "Collections" section).
+   Nothing existing in Api is modified — this is purely additive.
+   ============================================================ */
+
+// ---- Loan Operations (new, independent merged page) ----
+getLoanOperationsGrid: (params = {}) => {
+  const qs = new URLSearchParams(
+    Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""))
+  ).toString();
+  return apiRequest(`/loan-operations/grid${qs ? "?" + qs : ""}`);
+},
+
+getLoanOperationsPaymentDetails: (loanId, asOfDate) =>
+  apiRequest(`/loan-operations/${loanId}/payment-details${asOfDate ? "?asOfDate=" + asOfDate : ""}`),
+
+getLoanOperationsInterestPreview: (loanId, asOfDate) =>
+  apiRequest(`/loan-operations/${loanId}/interest-preview${asOfDate ? "?asOfDate=" + asOfDate : ""}`),
+
+saveLoanOperationsPayment: (loanId, dto) =>
+  apiRequest(`/loan-operations/${loanId}/payment`, { method: "POST", body: dto }),
+
+getLoanOperationsClosureDetails: (loanId) =>
+  apiRequest(`/loan-operations/${loanId}/closure-details`),
+
+closeLoanOperations: (loanId, dto) =>
+  apiRequest(`/loan-operations/${loanId}/close`, { method: "POST", body: dto }),
+
+getLoanOperationsLedger: (loanId, page = 1, pageSize = 10) =>
+  apiRequest(`/loan-operations/${loanId}/ledger?page=${page}&pageSize=${pageSize}`)
+
 };
+
 
 
 
