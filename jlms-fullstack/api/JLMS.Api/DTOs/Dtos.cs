@@ -259,3 +259,192 @@ public record CollectionReportPagedDto(
     decimal TotalInterestCollected,
     decimal GrandTotalCollected
 );
+// ============================================================================
+// Loan Operations — DTOs
+// ============================================================================
+
+// ---------------------------- Grid ----------------------------------------
+
+public record LoanOperationsGridQueryDto(
+    string? LoanNo,
+    string? CustomerName,
+    string? Mobile,
+    string? Aadhaar,
+    string? Pan,
+    string? Scheme,
+    string? Status,
+    DateTime? FromDate,
+    DateTime? ToDate,
+    int Page = 1,
+    int PageSize = 10,
+    string? SortBy = null,
+    string? SortDir = "asc"
+);
+
+public record LoanOperationsGridRowDto(
+    int LoanId,
+    string LoanNo,
+    string CustomerName,
+    string LoanScheme,           // formatted: "Gold Loan Standard (12% - 12 Months)"
+    decimal Principal,
+    decimal OverallInterest,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal TotalOutstanding,
+    decimal TotalAmountPaid,
+    decimal AnnualInterestRate,
+    string Status,
+    DateTime? LoanDate,
+    DateTime? MaturityDate
+);
+
+public record LoanOperationsGridResultDto(
+    List<LoanOperationsGridRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize
+);
+
+// ---------------------------- Interest snapshot -----------------------------
+
+public record LoanOperationsInterestCalculationDto(
+    decimal OverallInterest,
+    decimal InterestPaidToDate,
+    decimal OutstandingInterest,      // authoritative: OverallInterest - InterestPaidToDate
+    decimal OutstandingPrincipal,
+    decimal MaxPayable,               // authoritative: OutstandingInterest + OutstandingPrincipal
+    DateTime AsOfDate,
+
+    // ---- INFO-ONLY reference figures below. NOT charged, NOT part of
+    // MaxPayable, NOT added to OutstandingInterest. Display purposes only. ----
+    DateTime LastInterestReferenceDate,
+    int NoOfDaysInfoOnly,
+    decimal DailyInterestRateInfoOnly,
+    decimal DailyInterestAmountInfoOnly,
+    decimal AccruedInterestInfoOnly
+);
+
+public record LoanOperationsPaymentDetailsDto(
+    int LoanId,
+    string LoanNo,
+    string Status,
+    string CustomerName,
+    string CustomerCode,
+    string? Aadhaar,
+    string? Pan,
+    string? Mobile,
+    string? Address,
+    string LoanScheme,           // formatted display string
+    decimal AnnualInterestRate,
+    DateTime? LoanDate,
+    DateTime? MaturityDate,
+    decimal Principal,
+    decimal OverallInterest,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal TotalOutstanding,
+    DateTime? LastPaymentDate,
+    string BranchName,
+    string? CreatedByName,
+    LoanOperationsInterestCalculationDto InterestCalculation
+);
+
+// ---------------------------- Payment save ----------------------------------
+
+public record LoanOperationsPaymentRequestDto(
+    DateTime PaymentDate,
+    string PaymentMode,
+    string? ReferenceNo,
+    decimal AmountReceived,
+    int ProcessedByUserId
+);
+
+public record LoanOperationsPaymentResponseDto(
+    bool Success,
+    string ReceiptNumber,
+    string TransactionId,
+    DateTime TransactionDate,
+    string LoanNo,
+    string CustomerName,
+    string PaymentMode,
+    decimal AmountReceived,
+    decimal InterestPaid,
+    decimal PrincipalPaid,
+    decimal RemainingInterest,
+    decimal RemainingPrincipal,
+    decimal CurrentOutstanding,
+    decimal CurrentInterest,
+    string LoanStatus
+);
+
+// ---------------------------- Closure ----------------------------------------
+
+public record LoanOperationsClosureDetailsDto(
+    int LoanId,
+    string LoanNo,
+    string CustomerName,
+    string? Mobile,
+    string LoanScheme,           // formatted display string
+    decimal TotalAmountPaid,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal OtherCharges,
+    decimal GrandTotal,
+    bool IsClosable
+);
+
+public record LoanOperationsClosureRequestDto(
+    string PaymentMode,
+    string? ReferenceNo,
+    int ProcessedByUserId
+);
+
+public record LoanOperationsClosureResponseDto(
+    bool Success,
+    string ReceiptNumber,
+    DateTime TransactionDate,
+    string LoanNo,
+    string CustomerName,
+    string LoanScheme,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal OtherCharges,
+    decimal GrandTotal,
+    string LoanStatus
+);
+
+// ---------------------------- Ledger ------------------------------------------
+
+public record LoanOperationsLedgerRowDto(
+    DateTime Date,
+    string TransactionType,
+    string Description,
+    decimal Debit,
+    decimal Credit,
+    decimal PrincipalBalance,
+    decimal InterestBalance,
+    decimal RunningBalance,
+    string? ReceiptNumber,
+    string? UserName,
+    string? Remarks
+);
+
+public record LoanOperationsLedgerResponseDto(
+    int LoanId,
+    string LoanNo,
+    string CustomerName,
+    string LoanScheme,           // formatted display string
+    DateTime? LoanDate,
+    DateTime? MaturityDate,
+    decimal Principal,
+    decimal OverallInterest,
+    decimal AnnualInterestRate,
+    string Status,
+    List<LoanOperationsLedgerRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    decimal TotalInterestCollected,
+    decimal TotalPrincipalCollected,
+    decimal CurrentOutstanding
+);

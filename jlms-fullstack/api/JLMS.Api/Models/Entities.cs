@@ -121,6 +121,11 @@ public class Loan
     public decimal LoanAmount { get; set; }
     public decimal ProcessingFee { get; set; }
 
+    // NEW — fixed at loan creation: Principal x InterestRatePct / 100.
+    // Never changes for the life of the loan. This is the customer's total
+    // agreed scheme interest (Rule 4).
+    public decimal OverallInterest { get; set; }
+
     public decimal OutstandingPrincipal { get; set; }
     public decimal OutstandingInterest { get; set; }
     public decimal PenaltyAccrued { get; set; }

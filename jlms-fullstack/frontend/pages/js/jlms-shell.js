@@ -19,7 +19,7 @@ const JLMS_MENU = [
     // { id: "jewel-appraisal", icon: "bi-search", label: "Jewel Appraisal", href: "jewel-appraisal.html" },
     { id: "new-loan", icon: "bi-file-earmark-plus", label: "New Loan", href: "new-loan.html" },
     { id: "loan-approval", icon: "bi-check2-square", label: "Loan Approval", href: "loan-approval.html" },
-    // { id: "loan-disbursement", icon: "bi-cash-coin", label: "Loan Disbursement", href: "loan-disbursement.html" },
+    { id: "loan-disbursement", icon: "bi-cash-coin", label: "Loan Disbursement", href: "loan-disbursement.html" },
     // { id: "interest-collection", icon: "bi-percent", label: "Interest Collection", href: "interest-collection.html" },
     // { id: "principal-collection", icon: "bi-wallet2", label: "Principal Collection", href: "principal-collection.html" },
     // { id: "loan-renewal", icon: "bi-arrow-repeat", label: "Loan Renewal", href: "loan-renewal.html" },

@@ -30,7 +30,11 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<JlmsDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("JlmsDb")));
 
+
 builder.Services.AddScoped<LoanCalculationService>();
+
+builder.Services.AddScoped<LoanOperationsCalculationHelper>();
+builder.Services.AddScoped<LoanOperationsService>();
 
 // ---------- CORS ----------
 // Allows the static HTML/JS frontend (opened from file:// or a local dev
