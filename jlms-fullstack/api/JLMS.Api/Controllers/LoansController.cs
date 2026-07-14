@@ -601,7 +601,8 @@ public class LoansController : ControllerBase
         if (loan.Customer == null) return BadRequest(new { message = "Loan has no linked customer." });
 
         var bytes = _receiptService.GenerateReceipt(loan);
-        return File(bytes, "application/pdf", $"Receipt-{loan.LoanNumber}.pdf");
+        Response.Headers["Content-Disposition"] = $"inline; filename=Receipt-{loan.LoanNumber}.pdf";
+        return File(bytes, "application/pdf");
     }
 
     // POST /api/loans/5/approve
