@@ -7,13 +7,7 @@ const JLMS_MENU = [
   { section: "", items: [
     { id: "dashboard", icon: "bi-speedometer2", label: "Dashboard", href: "dashboard.html" }
   ]},
-  { section: "Masters", items: [
-    { id: "customer-master", icon: "bi-person-vcard", label: "Customer Master", href: "customer-registration.html" },
-    { id: "jewel-type-master", icon: "bi-gem", label: "Jewel Type Master", href: "jewel-type-master.html" },
-    { id: "gold-rate-master", icon: "bi-graph-up-arrow", label: "Gold Rate Master", href: "gold-rate-master.html" },
-    { id: "loan-scheme-master", icon: "bi-journal-text", label: "Loan Scheme Master", href: "loan-scheme-master.html" },
-    { id: "user-master", icon: "bi-people", label: "User Master", href: "user-master.html" }
-  ]},
+
   { section: "Transactions", items: [
     { id: "customer-registration", icon: "bi-person-plus", label: "Customer Registration", href: "customer-registration.html" },
     // { id: "jewel-appraisal", icon: "bi-search", label: "Jewel Appraisal", href: "jewel-appraisal.html" },
@@ -29,6 +23,13 @@ const JLMS_MENU = [
 
 
     // { id: "auction-management", icon: "bi-hammer", label: "Auction Management", href: "auction-management.html" }
+  ]},
+    { section: "Masters", items: [
+    { id: "customer-master", icon: "bi-person-vcard", label: "Customer Master", href: "customer-registration.html" },
+    { id: "jewel-type-master", icon: "bi-gem", label: "Jewel Type Master", href: "jewel-type-master.html" },
+    { id: "gold-rate-master", icon: "bi-graph-up-arrow", label: "Gold Rate Master", href: "gold-rate-master.html" },
+    { id: "loan-scheme-master", icon: "bi-journal-text", label: "Loan Scheme Master", href: "loan-scheme-master.html" },
+    { id: "user-master", icon: "bi-people", label: "User Master", href: "user-master.html" }
   ]},
 { section: "Reports", items: [
       { id: "report-center", icon: "bi-bar-chart-line", label: "Report Center", href: "outstanding-reports.html" }

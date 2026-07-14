@@ -16,7 +16,7 @@ public class CollectionReportsController : ControllerBase
         _db = db;
     }
 
-    private static readonly string[] CollectionTypes = { "PrincipalCollection", "InterestCollection" };
+    private static readonly string[] CollectionTypes = { "PrincipalCollection", "InterestCollection", "LoanOpsPayment" };
 
     // GET /api/collection-reports?fromDate=2026-01-01&toDate=2026-12-31&customerId=5&page=1&pageSize=25
     [HttpGet]
