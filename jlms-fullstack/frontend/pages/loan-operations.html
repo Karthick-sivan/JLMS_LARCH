@@ -1440,7 +1440,7 @@ async function loadLedgerPage(page) {
       // Rows 0-2 are always: Disbursement, Processing Fee Debited, Processing
    // Fee Collected (see LoanOperationsService.GetLedgerAsync) — none of
    // these map to a real collectable transaction, so no receipt to print.
-        const hideDownload = idx < 3;
+        const hideDownload = !e.canDownloadReceipt;
         const receiptCell = hideDownload
         ? `<td class="text-center"></td>`
         : `<td class="text-center">
