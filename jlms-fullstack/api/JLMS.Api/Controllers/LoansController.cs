@@ -13,11 +13,13 @@ public class LoansController : ControllerBase
 {
     private readonly JlmsDbContext _db;
     private readonly LoanCalculationService _calc;
+    private readonly LoanReceiptPdfService _receiptService;
 
-    public LoansController(JlmsDbContext db, LoanCalculationService calc)
+    public LoansController(JlmsDbContext db, LoanCalculationService calc, LoanReceiptPdfService receiptService)
     {
         _db = db;
         _calc = calc;
+        _receiptService = receiptService;
     }
 
     // GET /api/loans?status=Active
@@ -572,6 +574,23 @@ public class LoansController : ControllerBase
             ".pdf" => "application/pdf",
             _ => "application/octet-stream"
         };
+    }
+
+    // GET /api/loans/5/receipt-pdf
+    [HttpGet("{id:int}/receipt-pdf")]
+    public async Task<IActionResult> GetReceiptPdf(int id)
+    {
+        var loan = await _db.Loans
+            .Include(l => l.Customer)
+            .Include(l => l.LoanScheme)
+            .Include(l => l.JewelItems).ThenInclude(ji => ji.JewelType)
+            .FirstOrDefaultAsync(l => l.LoanId == id);
+
+        if (loan == null) return NotFound(new { message = "Loan not found." });
+        if (loan.Customer == null) return BadRequest(new { message = "Loan has no linked customer." });
+
+        var bytes = _receiptService.GenerateReceipt(loan);
+        return File(bytes, "application/pdf", $"Receipt-{loan.LoanNumber}.pdf");
     }
 
     // POST /api/loans/5/approve
