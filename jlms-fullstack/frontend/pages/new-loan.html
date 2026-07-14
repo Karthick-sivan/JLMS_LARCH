@@ -86,17 +86,218 @@
   .customer-list-row:hover { background:var(--n-50); }
 
 
-    /* Two-column layout: left scrolls with the page, right column pins in place */
+    /* Two-column layout: both columns scroll with the page */
     .row.g-3 {
         align-items: flex-start; /* stop bootstrap from stretching columns to equal height */
     }
 
-    .col-lg-3 {
-        position: sticky;
-        top: calc(var(--jlms-topbar-h, 64px) + 16px); /* clear the fixed topbar, then 16px gap */
-        align-self: flex-start;
-        max-height: calc(100vh - var(--jlms-topbar-h, 64px) - 32px);
-        overflow-y: auto;
+    @media (min-width: 992px) {
+        .sticky-sidebar {
+            position: sticky;
+            top: calc(var(--topbar-h) + 12px);
+        }
+        .sticky-sidebar .panel {
+            margin-bottom: 10px !important;
+        }
+        .sticky-sidebar .panel-body {
+            padding: 12px 15px !important;
+        }
+        .sticky-sidebar .panel-head {
+            padding: 10px 15px !important;
+        }
+        .sticky-sidebar .summary-row {
+            padding: 4px 0 !important;
+        }
+        .sticky-sidebar .summary-row.total {
+            margin-top: 4px !important;
+            padding-top: 6px !important;
+        }
+        .sticky-sidebar .d-flex.flex-column.gap-2 {
+            gap: 6px !important;
+        }
+    }
+
+    /* Premium Requested Loan Amount Panel */
+    .requested-amount-panel {
+        border: 1px solid var(--n-200);
+        border-left: 4px solid var(--gold-600) !important;
+        background: linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
+        transition: all 0.3s ease;
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+    .requested-amount-panel:focus-within {
+        border-color: var(--navy-500);
+        box-shadow: var(--shadow-md);
+    }
+    .badge-percent {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--navy-700);
+        background: rgba(30,58,138,0.06);
+        padding: 2px 7px;
+        border-radius: 12px;
+        border: 1px solid rgba(30,58,138,0.12);
+        transition: all 0.2s ease;
+    }
+    .badge-percent.warning {
+        color: var(--warning-700);
+        background: var(--warning-100);
+        border-color: rgba(217,154,20,0.3);
+    }
+    .badge-percent.danger {
+        color: var(--danger-700);
+        background: var(--danger-100);
+        border-color: rgba(212,40,40,0.3);
+    }
+    .premium-amount-input-wrap {
+        display: flex;
+        align-items: center;
+        border-bottom: 2px solid var(--n-200);
+        padding-bottom: 4px;
+        margin-top: 6px;
+        transition: border-color 0.2s ease;
+    }
+    .premium-amount-input-wrap:focus-within {
+        border-color: var(--navy-700);
+    }
+    .premium-amount-input-wrap .currency-symbol {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--navy-900);
+        margin-right: 6px;
+        user-select: none;
+    }
+    .premium-amount-input-wrap input {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--navy-900);
+        border: none;
+        background: transparent;
+        width: 100%;
+        outline: none;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+    }
+    .premium-amount-input-wrap input::placeholder {
+        color: var(--n-300);
+    }
+    /* Remove number arrows */
+    .premium-amount-input-wrap input::-webkit-outer-spin-button,
+    .premium-amount-input-wrap input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .premium-amount-input-wrap input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    /* Range Slider Styling */
+    .premium-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--n-200);
+        outline: none;
+        margin: 8px 0;
+        transition: background 0.2s ease;
+    }
+    .premium-slider:not(:disabled) {
+        background: linear-gradient(to right, var(--gold-600) 0%, var(--gold-600) var(--slider-val, 0%), var(--n-200) var(--slider-val, 0%), var(--n-200) 100%);
+    }
+    .premium-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--gold-600);
+        cursor: pointer;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        transition: transform 0.1s ease, background-color 0.2s ease;
+    }
+    .premium-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        background: var(--gold-700);
+    }
+    .premium-slider:disabled::-webkit-slider-thumb {
+        background: var(--n-300);
+        border-color: var(--n-150);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    .premium-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--gold-600);
+        cursor: pointer;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        transition: transform 0.1s ease;
+    }
+    .premium-slider:disabled::-moz-range-thumb {
+        background: var(--n-300);
+        border-color: var(--n-150);
+        cursor: not-allowed;
+    }
+
+    /* Preset Buttons styling */
+    .btn-preset {
+        flex: 1;
+        border: 1px solid var(--n-200);
+        background: #fff;
+        color: var(--n-700);
+        font-size: 10px;
+        font-weight: 700;
+        padding: 5px 2px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        text-align: center;
+    }
+    .btn-preset:hover:not(:disabled) {
+        background: var(--navy-50);
+        color: var(--navy-700);
+        border-color: var(--navy-300);
+    }
+    .btn-preset.active:not(:disabled) {
+        background: var(--navy-700);
+        color: #fff;
+        border-color: var(--navy-700);
+    }
+    .btn-preset:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: var(--n-50);
+        border-color: var(--n-200);
+    }
+    .limit-status-info {
+        font-size: 11px;
+        color: var(--n-600);
+        font-weight: 500;
+        line-height: 1.4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 4px;
+        border-radius: 4px;
+        background: rgba(0,0,0,0.02);
+        transition: all 0.2s ease;
+    }
+    .limit-status-info.text-success {
+        background: rgba(34,139,76,0.06);
+    }
+    .limit-status-info.text-warning {
+        background: rgba(217,154,20,0.06);
+    }
+    .limit-status-info.text-danger {
+        background: rgba(212,40,40,0.06);
     }
 </style>
 </head>
@@ -106,15 +307,15 @@
   <div class="main-col">
     <div id="jlmsTopbarMount"></div>
     <div class="page-content">
-        <div class="page-header">
+        <!--<div class="page-header">
             <div>
-                <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">New Loan</span></div>
+                <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">New Loan</span></div>-->
                 <!--<div class="h1">New Loan Creation</div>-->
-            </div>
+            <!--</div>
             <div class="page-actions">
                 <button class="btn-jlms btn-jlms-outline" id="btnRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
             </div>
-        </div>
+        </div>-->
 
       <div id="apiErrorBanner" class="api-error-banner"></div>
       <div id="apiSuccessBanner" class="api-success-banner"></div>
@@ -243,7 +444,7 @@
 
         </div>
 
-        <div class="col-lg-3">
+        <div class="col-lg-3 sticky-sidebar">
           <div class="panel mb-3">
             <div class="panel-head"><div class="h4">Loan Summary</div></div>
             <div class="panel-body">
@@ -266,9 +467,36 @@
           </div>
           <div class="d-flex flex-column gap-2">
             <button class="btn-jlms btn-jlms-outline" id="btnCalculate" style="width:100%; justify-content:center;"><i class="bi bi-calculator"></i> Calculate Valuation</button>
-            <div id="requestedAmountWrap">
-              <label class="field-label">Requested Loan Amount<span class="req">*</span></label>
-              <div class="input-affix"><span class="affix">₹</span><input type="number" id="requestedAmount" placeholder="Up to eligible amount" style="width:100%;"></div>
+            <div class="panel requested-amount-panel" id="requestedAmountWrap">
+              <div class="panel-body" style="padding: 14px 16px;">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <label class="field-label mb-0" style="font-weight: 700; color: var(--navy-800); font-size: 11.5px;">Requested Loan Amount <span class="req">*</span></label>
+                  <span id="requestedAmountPercent" class="badge-percent">0% of Max</span>
+                </div>
+                
+                <div class="premium-amount-input-wrap">
+                  <span class="currency-symbol">₹</span>
+                  <input type="number" id="requestedAmount" placeholder="0" autocomplete="off">
+                </div>
+
+                <!-- Slider -->
+                <div class="slider-wrap mt-2">
+                  <input type="range" id="requestedAmountSlider" min="0" max="100" value="0" class="premium-slider" disabled>
+                </div>
+
+                <!-- Preset Options -->
+                <div class="d-flex justify-content-between gap-1 mt-2">
+                  <button type="button" class="btn-preset" data-pct="25" disabled>25%</button>
+                  <button type="button" class="btn-preset" data-pct="50" disabled>50%</button>
+                  <button type="button" class="btn-preset" data-pct="75" disabled>75%</button>
+                  <button type="button" class="btn-preset" data-pct="100" disabled>100% (Max)</button>
+                </div>
+
+                <!-- Limit Warning/Status -->
+                <div id="limitStatusText" class="limit-status-info mt-2 text-center text-muted-jlms">
+                  <i class="bi bi-info-circle"></i> Add jewel items &amp; calculate valuation first
+                </div>
+              </div>
             </div>
             <button class="btn-jlms btn-jlms-primary btn-lg" id="btnSubmitLoan" style="width:100%; justify-content:center;"><i class="bi bi-send-check"></i> Submit for Approval</button>
           </div>
@@ -636,6 +864,87 @@ async function downloadImage(url, filename) {
 
 // ---------------- Loan Summary: scheme-driven fields ----------------
 
+function getCurrentEligibleAmount() {
+  if (!lastAppraisalResult) return 0;
+  const schemeSelect = document.getElementById('schemeSelect');
+  if (!schemeSelect) return 0;
+  const schemeId = parseInt(schemeSelect.value, 10);
+  const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
+  if (!scheme) return 0;
+  return Math.round(lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100));
+}
+
+function updateRequestedAmountWidget() {
+  const input = document.getElementById('requestedAmount');
+  const slider = document.getElementById('requestedAmountSlider');
+  const pctBadge = document.getElementById('requestedAmountPercent');
+  const statusText = document.getElementById('limitStatusText');
+  const chkAllowExceed = document.getElementById('chkAllowExceed');
+
+  const eligible = getCurrentEligibleAmount();
+  const value = parseFloat(input.value) || 0;
+  const presetButtons = document.querySelectorAll('.btn-preset');
+
+  if (eligible <= 0) {
+    slider.disabled = true;
+    slider.value = 0;
+    slider.style.setProperty('--slider-val', '0%');
+    pctBadge.textContent = '0% of Max';
+    pctBadge.className = 'badge-percent text-muted-jlms';
+    statusText.innerHTML = '<i class="bi bi-info-circle"></i> Add jewel items &amp; calculate valuation first';
+    statusText.className = 'limit-status-info mt-2 text-center text-muted-jlms';
+    presetButtons.forEach(btn => {
+      btn.disabled = true;
+      btn.classList.remove('active');
+    });
+    return;
+  }
+
+  // Enable slider & presets
+  slider.disabled = false;
+  presetButtons.forEach(btn => btn.disabled = false);
+
+  // Set slider value based on percentage of eligible amount
+  const pct = Math.round((value / eligible) * 100);
+  const cappedPct = Math.min(pct, 100);
+  slider.value = cappedPct;
+  slider.style.setProperty('--slider-val', cappedPct + '%');
+
+  // Update badge
+  pctBadge.textContent = pct + '% of Max';
+
+  // Highlight active preset button if the current value matches exactly a preset percentage
+  presetButtons.forEach(btn => {
+    const btnPct = parseInt(btn.dataset.pct, 10);
+    if (value > 0 && Math.abs(pct - btnPct) < 1) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  if (value === 0) {
+    pctBadge.className = 'badge-percent text-muted-jlms';
+    statusText.innerHTML = `<i class="bi bi-wallet2 text-primary"></i> Max Eligible: <strong>₹${eligible.toLocaleString('en-IN')}</strong>`;
+    statusText.className = 'limit-status-info mt-2 text-center text-muted-jlms';
+  } else if (value <= eligible) {
+    pctBadge.className = 'badge-percent';
+    statusText.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Within eligible limit (Max: ₹${eligible.toLocaleString('en-IN')})`;
+    statusText.className = 'limit-status-info text-success mt-2 text-center';
+  } else {
+    // value > eligible
+    if (chkAllowExceed.checked) {
+      pctBadge.className = 'badge-percent warning';
+      statusText.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Exceeds limit by <strong>₹${(value - eligible).toLocaleString('en-IN')}</strong> (Override active)`;
+      statusText.className = 'limit-status-info text-warning mt-2 text-center';
+    } else {
+      pctBadge.className = 'badge-percent danger';
+      statusText.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> Exceeds eligible limit of <strong>₹${eligible.toLocaleString('en-IN')}</strong>`;
+      statusText.className = 'limit-status-info text-danger mt-2 text-center';
+    }
+  }
+}
+
 function applySchemeToSummary() {
   const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
   const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
@@ -652,6 +961,7 @@ function applySchemeToSummary() {
       document.getElementById('requestedAmount').max = Math.round(eligible);
     }
   }
+  updateRequestedAmountWidget();
 }
 
 // ---------------- Valuation ----------------
@@ -729,7 +1039,7 @@ function resetFormForNewLoan() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     Session.requireLogin();
-    document.getElementById('btnRefresh').addEventListener('click', () => location.reload());
+    //document.getElementById('btnRefresh').addEventListener('click', () => location.reload());
   document.getElementById('btnAddItem').addEventListener('click', addJewelRow);
   document.getElementById('btnCalculate').addEventListener('click', calculateValuation);
 
@@ -749,6 +1059,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('chkAllowExceed').addEventListener('change', (e) => {
     document.getElementById('requestedAmount').removeAttribute('max');
     if (!e.target.checked) calculateValuation();
+    updateRequestedAmountWidget();
+  });
+
+  // Requested Amount Widget setup
+  const requestedAmtInput = document.getElementById('requestedAmount');
+  const requestedAmtSlider = document.getElementById('requestedAmountSlider');
+
+  requestedAmtInput.addEventListener('input', updateRequestedAmountWidget);
+
+  requestedAmtSlider.addEventListener('input', () => {
+    const eligible = getCurrentEligibleAmount();
+    if (eligible > 0) {
+      const pct = parseInt(requestedAmtSlider.value, 10);
+      requestedAmtInput.value = Math.round(eligible * (pct / 100));
+      updateRequestedAmountWidget();
+    }
+  });
+
+  document.querySelectorAll('.btn-preset').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const eligible = getCurrentEligibleAmount();
+      if (eligible > 0) {
+        const pct = parseInt(e.currentTarget.dataset.pct, 10);
+        requestedAmtInput.value = Math.round(eligible * (pct / 100));
+        updateRequestedAmountWidget();
+      }
+    });
   });
 
   let searchDebounce;
@@ -837,11 +1174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         submittedByUserId: currentUser.userId
       });
 
-     const successEl = document.getElementById('apiSuccessBanner');
-successEl.innerHTML = `Loan <strong>${result.loanNumber}</strong> approved and disbursed. ` +
-  `<a href="${API_BASE_URL}/loans/${result.loanId}/receipt-pdf" target="_blank" ` +
-  `class="btn-jlms btn-jlms-outline btn-sm ms-2"><i class="bi bi-file-earmark-pdf"></i> Download Receipt</a>`;
-successEl.style.display = 'block';
+      window.open(`${API_BASE_URL}/loans/${result.loanId}/receipt-pdf`, '_blank');
       resetFormForNewLoan();
 
       btn.innerHTML = '<i class="bi bi-send-check"></i> Submit for Approval';
