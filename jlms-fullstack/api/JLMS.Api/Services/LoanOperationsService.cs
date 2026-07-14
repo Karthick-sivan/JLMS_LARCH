@@ -425,7 +425,7 @@ public class LoanOperationsService
                 rows.Add(new LoanOperationsLedgerRowDto(
                     t.TransactionId, t.TransactionDate, t.TransactionType, "Loan disbursed to customer",
                     t.PrincipalAmount, 0, principalBal, interestBal, principalBal + interestBal,
-                    t.ReceiptNumber, userName, t.Remarks));
+                    t.ReceiptNumber, userName, t.Remarks,false));
 
                 // 2. Add Processing Fee Rows (if a fee exists on this loan)
                 if (loan.ProcessingFee > 0m)
@@ -445,7 +445,8 @@ public class LoanOperationsService
                         principalBal + interestBal + fee, // Temporarily increases total running balance
                         t.ReceiptNumber,
                         userName,
-                        "Processing fee charged at initiation"
+                        "Processing fee charged at initiation",
+                        false
                     ));
 
                     // Row B: Credit Processing Fee (Upfront Collection)
@@ -461,7 +462,8 @@ public class LoanOperationsService
                         principalBal + interestBal, // Resets total running balance back
                         t.ReceiptNumber,
                         userName,
-                        "Processing fee collected upfront"
+                        "Processing fee collected upfront",
+                        false
                     ));
                 }
                 continue;
@@ -474,7 +476,7 @@ public class LoanOperationsService
             rows.Add(new LoanOperationsLedgerRowDto(
                 t.TransactionId, t.TransactionDate, t.TransactionType, DescribeTransaction(t),
                 0, creditAmount, principalBal, interestBal, principalBal + interestBal,
-                t.ReceiptNumber, userName, t.Remarks));
+                t.ReceiptNumber, userName, t.Remarks,true));
         }
 
         var totalCount = rows.Count;

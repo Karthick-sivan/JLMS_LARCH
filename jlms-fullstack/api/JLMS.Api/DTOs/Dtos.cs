@@ -380,7 +380,8 @@ public record LoanOperationsLedgerRowDto(
     decimal RunningBalance,
     string? ReceiptNumber,
     string? UserName,
-    string? Remarks
+    string? Remarks,
+    bool CanDownloadReceipt
 );
 
 
