@@ -462,7 +462,7 @@ public record LoanOperationsPaymentDetailsDto(
 );
 
 // ---------- Customers: lightweight list for the "browse customers" picker ----------
-public record CustomerActiveListItemDto(int CustomerId, string CustomerCode, string CustomerName);
+public record CustomerActiveListItemDto(int CustomerId, string CustomerCode, string CustomerName,string Mobile);
 
 
 
@@ -547,4 +547,37 @@ public record ClosedLoanReportPagedDto(
     decimal TotalPrincipalCollected,
     decimal TotalInterestCollected,
     decimal GrandTotalCollected
+);
+
+// ---- Payment Receipt PDF ----
+// Sourced from LoanOperationsPaymentResponseDto fields (already returned to frontend)
+public record PaymentReceiptPdfDto(
+    string ReceiptNumber,
+    string LoanNo,
+    string CustomerName,
+    string? Mobile,
+    DateTime TransactionDate,
+    string PaymentMode,
+    string? LoanScheme,
+    DateTime? MaturityDate,
+    decimal InterestPaid,
+    decimal PrincipalPaid,
+    decimal AmountReceived,
+    decimal RemainingInterest,
+    decimal RemainingPrincipal
+);
+
+// ---- Closure Receipt PDF ----
+// Sourced from LoanOperationsClosureResponseDto fields (already returned to frontend)
+public record ClosureReceiptPdfDto(
+    string ReceiptNumber,
+    string LoanNo,
+    string CustomerName,
+    string? Mobile,
+    string? LoanScheme,
+    DateTime TransactionDate,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal OtherCharges,
+    decimal GrandTotal
 );

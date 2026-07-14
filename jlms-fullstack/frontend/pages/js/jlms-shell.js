@@ -25,7 +25,7 @@ const JLMS_MENU = [
     // { id: "auction-management", icon: "bi-hammer", label: "Auction Management", href: "auction-management.html" }
   ]},
     { section: "Masters", items: [
-    { id: "customer-master", icon: "bi-person-vcard", label: "Customer Master", href: "customer-registration.html" },
+    //{ id: "customer-master", icon: "bi-person-vcard", label: "Customer Master", href: "customer-registration.html" },
     { id: "jewel-type-master", icon: "bi-gem", label: "Jewel Type Master", href: "jewel-type-master.html" },
     { id: "gold-rate-master", icon: "bi-graph-up-arrow", label: "Gold Rate Master", href: "gold-rate-master.html" },
     { id: "loan-scheme-master", icon: "bi-journal-text", label: "Loan Scheme Master", href: "loan-scheme-master.html" },
@@ -66,9 +66,7 @@ function jlmsBuildSidebar() {
   });
   html += `
       </nav>
-      <div class="sidebar-foot" id="sidebarToggleBtn">
-        <i class="bi bi-chevron-left" id="sidebarToggleIcon"></i>
-      </div>
+     
     </aside>`;
   return html;
 }
@@ -85,11 +83,7 @@ function jlmsBuildTopbar(pageTitle, breadcrumbs) {
     <header class="jlms-topbar">
       <div class="topbar-left">
         <div class="sidebar-toggle-btn" id="mobileSidebarToggle"><i class="bi bi-list"></i></div>
-        <div class="global-search">
-          <i class="bi bi-search"></i>
-          <input type="text" placeholder="Search customer, loan no, mobile...">
-          <span class="kbd-hint">Ctrl K</span>
-        </div>
+        
       </div>
       <div class="topbar-right">
         <div class="branch-pill"><i class="bi bi-building"></i> Madurai Main Branch</div>
@@ -108,28 +102,26 @@ function jlmsBuildTopbar(pageTitle, breadcrumbs) {
 }
 
 function jlmsInitShell(pageTitle, breadcrumbs) {
-  document.addEventListener('DOMContentLoaded', () => {
-    const sidebarMount = document.getElementById('jlmsSidebarMount');
-    const topbarMount = document.getElementById('jlmsTopbarMount');
-    if (sidebarMount) sidebarMount.outerHTML = jlmsBuildSidebar();
-    if (topbarMount) topbarMount.outerHTML = jlmsBuildTopbar(pageTitle, breadcrumbs);
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebarMount = document.getElementById('jlmsSidebarMount');
+        const topbarMount = document.getElementById('jlmsTopbarMount');
+        if (sidebarMount) sidebarMount.outerHTML = jlmsBuildSidebar();
+        if (topbarMount) topbarMount.outerHTML = jlmsBuildTopbar(pageTitle, breadcrumbs);
 
-    const toggleBtn = document.getElementById('sidebarToggleBtn');
-    const sidebar = document.getElementById('jlmsSidebar');
-    const icon = document.getElementById('sidebarToggleIcon');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        document.body.classList.toggle('sidebar-collapsed');
-        icon.classList.toggle('bi-chevron-left');
-        icon.classList.toggle('bi-chevron-right');
-      });
-    }
-    const mobileToggle = document.getElementById('mobileSidebarToggle');
-    if (mobileToggle) {
-      mobileToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
-      });
-    }
-  });
+        const sidebar = document.getElementById('jlmsSidebar');
+        const topToggle = document.getElementById('mobileSidebarToggle');
+
+        if (topToggle) {
+            topToggle.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    // mobile: slide sidebar in/out
+                    sidebar.classList.toggle('mobile-open');
+                } else {
+                    // desktop: collapse/expand
+                    sidebar.classList.toggle('collapsed');
+                    document.body.classList.toggle('sidebar-collapsed');
+                }
+            });
+        }
+    });
 }

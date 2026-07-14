@@ -67,7 +67,10 @@ public class LoanCalculationService
         return (asOfDate.Date - dueDate.Date).Days;
     }
 
-    public string GenerateLoanNumber(int sequence) => $"JL-{DateTime.UtcNow:yyyy}{sequence:D4}";
+    //public string GenerateLoanNumber(int sequence) => $"JL-{DateTime.UtcNow:yyyy}{sequence:D4}";
+
+    public string GenerateLoanNumber(int sequence, string branchCode)
+        => $"{branchCode}-JL-{DateTime.UtcNow:yyyy}{sequence:D4}";
     public string GenerateReceiptNumber(long sequence) => $"RC-{sequence:D5}";
     public string GenerateCustomerCode(int sequence) => $"CUS-{sequence:D6}";
 }

@@ -79,7 +79,7 @@ public class CustomersController : ControllerBase
     {
         var customers = await _db.Customers.AsNoTracking()
             .OrderBy(c => c.CustomerName)
-            .Select(c => new CustomerActiveListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName))
+            .Select(c => new CustomerActiveListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Mobile))
             .ToListAsync();
 
         return Ok(customers);
@@ -162,13 +162,17 @@ public class CustomersController : ControllerBase
         if (string.IsNullOrWhiteSpace(dto.CustomerName) || string.IsNullOrWhiteSpace(dto.Mobile))
             return BadRequest("CustomerName and Mobile are required.");
 
+        var branchId = dto.BranchId ?? 1;
+        var branch = await _db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.BranchId == branchId);
+        if (branch == null) return BadRequest("Branch not found.");
+
         var nextSeq = await _db.Customers.CountAsync() + 1;
-        var code = $"CUS-{nextSeq:D6}";
+        var code = $"{branch.BranchCode}-CUS-{nextSeq:D6}";
 
         while (await _db.Customers.AnyAsync(c => c.CustomerCode == code))
         {
             nextSeq++;
-            code = $"CUS-{nextSeq:D6}";
+            code = $"{branch.BranchCode}-CUS-{nextSeq:D6}";
         }
 
         // Create upload folders if they don't exist
