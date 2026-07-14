@@ -35,7 +35,8 @@ builder.Services.AddScoped<LoanCalculationService>();
 
 builder.Services.AddScoped<LoanOperationsCalculationHelper>();
 builder.Services.AddScoped<LoanOperationsService>();
-
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+builder.Services.AddScoped<LoanReceiptPdfService>();
 // ---------- CORS ----------
 // Allows the static HTML/JS frontend (opened from file:// or a local dev
 // server on any port) to call this API during testing.

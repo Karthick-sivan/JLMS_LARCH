@@ -70,7 +70,20 @@ public class CustomersController : ControllerBase
 
         return Ok(new PagedResultDto<CustomerListItemDto>(result, totalCount, page, pageSize));
     }
+    // GET /api/customers/active
+    // Lightweight list (Code + Name only) for the "browse all customers" picker on New Loan.
+    // NOTE: Customer model has no IsActive flag today, so "active" = all registered customers.
+    // If/when a status flag is added to the Customer model, filter here (.Where(c => c.IsActive)).
+    [HttpGet("active")]
+    public async Task<ActionResult<List<CustomerActiveListItemDto>>> GetActiveCustomers()
+    {
+        var customers = await _db.Customers.AsNoTracking()
+            .OrderBy(c => c.CustomerName)
+            .Select(c => new CustomerActiveListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName))
+            .ToListAsync();
 
+        return Ok(customers);
+    }
     // GET /api/customers/5
     [HttpGet("{id:int}")]
     public async Task<ActionResult<CustomerDetailDto>> GetById(int id)
