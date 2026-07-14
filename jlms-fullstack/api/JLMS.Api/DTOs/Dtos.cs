@@ -369,6 +369,7 @@ public class ClosureRequestWithPhotoDto
 // ---------------------------- Ledger ------------------------------------------
 
 public record LoanOperationsLedgerRowDto(
+    int TransactionId,
     DateTime Date,
     string TransactionType,
     string Description,
