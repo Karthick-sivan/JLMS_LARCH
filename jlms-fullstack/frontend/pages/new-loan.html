@@ -84,6 +84,20 @@
 
   /* ---- Customer browse (Eye icon) modal ---- */
   .customer-list-row:hover { background:var(--n-50); }
+
+
+    /* Two-column layout: left scrolls with the page, right column pins in place */
+    .row.g-3 {
+        align-items: flex-start; /* stop bootstrap from stretching columns to equal height */
+    }
+
+    .col-lg-3 {
+        position: sticky;
+        top: calc(var(--jlms-topbar-h, 64px) + 16px); /* clear the fixed topbar, then 16px gap */
+        align-self: flex-start;
+        max-height: calc(100vh - var(--jlms-topbar-h, 64px) - 32px);
+        overflow-y: auto;
+    }
 </style>
 </head>
 <body>
@@ -92,12 +106,15 @@
   <div class="main-col">
     <div id="jlmsTopbarMount"></div>
     <div class="page-content">
-      <div class="page-header">
-        <div>
-          <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">New Loan</span></div>
-          <div class="h1">New Loan Creation</div>
+        <div class="page-header">
+            <div>
+                <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">New Loan</span></div>
+                <!--<div class="h1">New Loan Creation</div>-->
+            </div>
+            <div class="page-actions">
+                <button class="btn-jlms btn-jlms-outline" id="btnRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+            </div>
         </div>
-      </div>
 
       <div id="apiErrorBanner" class="api-error-banner"></div>
       <div id="apiSuccessBanner" class="api-success-banner"></div>
@@ -272,12 +289,13 @@
       <div class="modal-body">
         <input type="text" class="form-control-jlms mb-2" id="customerListFilter" placeholder="Filter by code or name...">
         <div class="table-jlms-wrap" style="max-height:360px; overflow-y:auto;">
-          <table class="table-jlms">
-            <thead><tr><th>Customer Code</th><th>Customer Name</th></tr></thead>
-            <tbody id="customerListModalBody">
-              <tr><td colspan="2" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td></tr>
-            </tbody>
-          </table>
+            <table class="table-jlms">
+                <!--<thead><tr><th>Customer Code</th><th>Customer Name</th></tr></thead>-->
+                <thead><tr><th>Customer Code</th><th>Customer Name</th><th>Mobile</th></tr></thead>
+                <tbody id="customerListModalBody">
+                    <tr><td colspan="3" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td></tr>
+                </tbody>
+            </table>
         </div>
       </div>
     </div>
@@ -308,8 +326,9 @@
 <script src="js/jlms-shell.js"></script>
 <script src="js/api-client.js"></script>
 <script>
-jlmsInitShell();
+    jlmsInitShell();
 
+   
 let selectedCustomer = null;
 let jewelTypesCache = [];
 let schemesCache = [];
@@ -439,27 +458,26 @@ async function openCustomerListModal() {
     showApiError(err);
   }
 }
-
-function renderCustomerListModal(list) {
-  const tbody = document.getElementById('customerListModalBody');
-  if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted-jlms" style="padding:16px;">No active customers found.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = list.map(c => `
-    <tr class="customer-list-row" data-id="${c.customerId}" data-code="${c.customerCode}" data-name="${c.customerName}" style="cursor:pointer;">
-      <td>${c.customerCode}</td><td>${c.customerName}</td>
+    function renderCustomerListModal(list) {
+        const tbody = document.getElementById('customerListModalBody');
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted-jlms" style="padding:16px;">No active customers found.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = list.map(c => `
+    <tr class="customer-list-row" data-id="${c.customerId}" data-code="${c.customerCode}" data-name="${c.customerName}" data-mobile="${c.mobile || ''}" style="cursor:pointer;">
+      <td>${c.customerCode}</td><td>${c.customerName}</td><td>${c.mobile || '—'}</td>
     </tr>`).join('');
-  tbody.querySelectorAll('.customer-list-row').forEach(row => {
-    row.addEventListener('click', () => {
-      selectedCustomer = { id: parseInt(row.dataset.id, 10), name: row.dataset.name, code: row.dataset.code };
-      document.getElementById('customerSearchInput').value = `${selectedCustomer.code} - ${selectedCustomer.name}`;
-      const modalEl = document.getElementById('customerListModal');
-      bootstrap.Modal.getInstance(modalEl)?.hide();
-      loadSelectedCustomerDetails(selectedCustomer.id);
-    });
-  });
-}
+        tbody.querySelectorAll('.customer-list-row').forEach(row => {
+            row.addEventListener('click', () => {
+                selectedCustomer = { id: parseInt(row.dataset.id, 10), name: row.dataset.name, code: row.dataset.code, mobile: row.dataset.mobile };
+                document.getElementById('customerSearchInput').value = `${selectedCustomer.code} - ${selectedCustomer.name}`;
+                const modalEl = document.getElementById('customerListModal');
+                bootstrap.Modal.getInstance(modalEl)?.hide();
+                loadSelectedCustomerDetails(selectedCustomer.id);
+            });
+        });
+    }
 
 async function loadSelectedCustomerDetails(customerId) {
   const card = document.getElementById('selectedCustomerCard');
@@ -710,7 +728,8 @@ function resetFormForNewLoan() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  Session.requireLogin();
+    Session.requireLogin();
+    document.getElementById('btnRefresh').addEventListener('click', () => location.reload());
   document.getElementById('btnAddItem').addEventListener('click', addJewelRow);
   document.getElementById('btnCalculate').addEventListener('click', calculateValuation);
 
@@ -719,11 +738,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btnRetakePhoto').addEventListener('click', retakePhoto);
 
   document.getElementById('btnBrowseCustomers').addEventListener('click', openCustomerListModal);
-  document.getElementById('customerListFilter').addEventListener('input', (e) => {
-    const q = e.target.value.trim().toLowerCase();
-    renderCustomerListModal(activeCustomersCache.filter(c =>
-      c.customerCode.toLowerCase().includes(q) || c.customerName.toLowerCase().includes(q)));
-  });
+    document.getElementById('customerListFilter').addEventListener('input', (e) => {
+        const q = e.target.value.trim().toLowerCase();
+        renderCustomerListModal(activeCustomersCache.filter(c =>
+            c.customerCode.toLowerCase().includes(q) ||
+            c.customerName.toLowerCase().includes(q) ||
+            (c.mobile || '').toLowerCase().includes(q)));
+    });
 
   document.getElementById('chkAllowExceed').addEventListener('change', (e) => {
     document.getElementById('requestedAmount').removeAttribute('max');

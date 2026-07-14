@@ -387,14 +387,24 @@ public class LoansController : ControllerBase
         if (!request.AllowExceedEligible && request.RequestedLoanAmount > eligibleAmount)
             return BadRequest($"Requested amount ₹{request.RequestedLoanAmount:N2} exceeds eligible amount ₹{eligibleAmount:N2} for this scheme's LTV. Check 'Don't validate — allow amount to exceed eligible' to override.");
 
+        //var sequence = await _db.Loans.CountAsync() + 1;
+        //var loanNumber = _calc.GenerateLoanNumber(sequence);
+        //while (await _db.Loans.AnyAsync(l => l.LoanNumber == loanNumber))
+        //{
+        //    sequence++;
+        //    loanNumber = _calc.GenerateLoanNumber(sequence);
+        //}
+        var branchId = customer.BranchId ?? 1;
+        var branch = await _db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.BranchId == branchId);
+        if (branch == null) return BadRequest("Branch not found.");
+
         var sequence = await _db.Loans.CountAsync() + 1;
-        var loanNumber = _calc.GenerateLoanNumber(sequence);
+        var loanNumber = _calc.GenerateLoanNumber(sequence, branch.BranchCode);
         while (await _db.Loans.AnyAsync(l => l.LoanNumber == loanNumber))
         {
             sequence++;
-            loanNumber = _calc.GenerateLoanNumber(sequence);
+            loanNumber = _calc.GenerateLoanNumber(sequence, branch.BranchCode);
         }
-
         // Rule 4: Overall Interest = Principal x Interest%, fixed once at creation.
         // Outstanding Interest starts EQUAL to Overall Interest — not zero — so the
         // grid and payment screens show the correct figure from day one.
@@ -405,7 +415,8 @@ public class LoansController : ControllerBase
             LoanNumber = loanNumber,
             CustomerId = request.CustomerId,
             LoanSchemeId = request.LoanSchemeId,
-            BranchId = customer.BranchId ?? 1,
+            BranchId = branchId,
+            //BranchId = customer.BranchId ?? 1,
             InterestRatePct = scheme.InterestRatePct,
             TenureMonths = scheme.TenureMonths,
             MarketValue = totalMarketValue,
