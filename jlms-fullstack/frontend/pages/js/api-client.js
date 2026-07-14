@@ -231,8 +231,64 @@ ${API_BASE_URL}/loan-operations/${loanId}/close`, {
   return data;
 },
 
+// Payment receipt — POST receipt data, get PDF blob back
+async downloadPaymentReceiptPdf(receiptData) {
+  return this._fetchBlob('/loan-operations/payment-receipt-pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(receiptData)
+  });
+},
+
+// Closure receipt — POST closure data, get PDF blob back
+async downloadClosureReceiptPdf(receiptData) {
+  return this._fetchBlob('/loan-operations/closure-receipt-pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(receiptData)
+  });
+},
+
+// Ledger row receipt — GET by transactionId, server does DB lookup
+async downloadTransactionReceiptPdf(transactionId) {
+  return this._fetchBlob(
+    `/loan-operations/transaction-receipt-pdf/${transactionId}`
+  );
+},
+
+// Shared blob fetch helper — mirrors apiRequest's error handling but
+// resolves to a Blob (PDF bytes) instead of parsed JSON.
+async _fetchBlob(path, options = {}) {
+  let res;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, options);
+  } catch (networkErr) {
+    throw new ApiError(
+      `Could not reach the API at ${API_BASE_URL}. Is the ASP.NET Core project running? (${networkErr.message})`,
+      0
+    );
+  }
+  if (!res.ok) {
+    let message = `PDF download failed (${res.status})`;
+    try {
+      const text = await res.text();
+      if (text) {
+        try {
+          const data = JSON.parse(text);
+          message = (data && (data.title || data.message || data.detail)) || message;
+        } catch { message = text; }
+      }
+    } catch { /* ignore — fall back to generic message */ }
+    throw new ApiError(message, res.status);
+  }
+  return res.blob();
+},
+
+
 getLoanOperationsLedger: (loanId, page = 1, pageSize = 10) =>
   apiRequest(`/loan-operations/${loanId}/ledger?page=${page}&pageSize=${pageSize}`)
+
+
 
 };
 
