@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using JLMS.Api.Data;
 using JLMS.Api.DTOs;
 using JLMS.Api.Services;
 
@@ -16,10 +18,22 @@ namespace JLMS.Api.Controllers;
 public class LoanOperationsController : ControllerBase
 {
     private readonly LoanOperationsService _service;
+    private readonly JlmsDbContext _db;
+    private readonly LoanReceiptPdfService _pdfService;
 
-    public LoanOperationsController(LoanOperationsService service)
+    //public LoanOperationsController(LoanOperationsService service)
+    //{
+    //    _service = service;
+    //}
+
+    public LoanOperationsController(
+        LoanOperationsService service,
+        JlmsDbContext db,
+        LoanReceiptPdfService pdfService)
     {
         _service = service;
+        _db = db;
+        _pdfService = pdfService;
     }
 
     // GET /api/loan-operations/grid
@@ -137,5 +151,63 @@ public class LoanOperationsController : ControllerBase
             return Ok(await _service.GetLedgerAsync(loanId, page, pageSize));
         }
         catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+    }
+
+    // Inject LoanReceiptPdfService and DbContext in the constructor
+    
+
+    // POST /api/loan-operations/payment-receipt-pdf
+    // Body: PaymentReceiptPdfDto (matches fields of LoanOperationsPaymentResponseDto)
+    [HttpPost("payment-receipt-pdf")]
+    public IActionResult DownloadPaymentReceiptPdf([FromBody] PaymentReceiptPdfDto dto)
+    {
+        var bytes = _pdfService.GeneratePaymentReceipt(dto);
+        return File(bytes, "application/pdf", $"Receipt-{dto.ReceiptNumber}.pdf");
+    }
+
+    // POST /api/loan-operations/closure-receipt-pdf
+    // Body: ClosureReceiptPdfDto (matches fields of LoanOperationsClosureResponseDto)
+    [HttpPost("closure-receipt-pdf")]
+    public IActionResult DownloadClosureReceiptPdf([FromBody] ClosureReceiptPdfDto dto)
+    {
+        var bytes = _pdfService.GenerateClosureReceipt(dto);
+        return File(bytes, "application/pdf", $"Closure-Receipt-{dto.ReceiptNumber}.pdf");
+    }
+
+    // GET /api/loan-operations/transaction-receipt-pdf/{transactionId}
+    // Ledger row download — server looks up the transaction to build the receipt
+    [HttpGet("transaction-receipt-pdf/{transactionId:int}")]
+    public async Task<IActionResult> DownloadTransactionReceiptPdf(int transactionId)
+    {
+        var txn = await _db.LoanTransactions
+            .Include(t => t.Loan)
+                .ThenInclude(l => l.Customer)
+            .Include(t => t.Loan)
+                .ThenInclude(l => l.LoanScheme)
+            .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
+
+        if (txn == null) return NotFound();
+
+        // Map LoanTransaction → PaymentReceiptPdfDto
+        // InterestAmount and PrincipalAmount are stored on the transaction entity
+        var dto = new PaymentReceiptPdfDto(
+            ReceiptNumber: txn.ReceiptNumber ?? txn.TransactionId.ToString(),
+            LoanNo: txn.Loan.LoanNumber,
+            CustomerName: txn.Loan.Customer!.CustomerName,
+            Mobile: txn.Loan.Customer.Mobile,
+            TransactionDate: txn.TransactionDate,
+            PaymentMode: txn.PaymentMode ?? "-",
+            LoanScheme: txn.Loan.LoanScheme?.SchemeName,
+            MaturityDate: txn.Loan.MaturityDate,
+            InterestPaid: txn.InterestAmount,
+            PrincipalPaid: txn.PrincipalAmount,
+            AmountReceived: txn.TotalAmount,
+            RemainingInterest: txn.Loan.OutstandingInterest,   // balance at time of ledger view
+            RemainingPrincipal: txn.Loan.OutstandingPrincipal
+        );
+
+        var bytes = _pdfService.GeneratePaymentReceipt(dto);
+        return File(bytes, "application/pdf",
+            $"Receipt-{dto.ReceiptNumber}-{dto.LoanNo}.pdf");
     }
 }

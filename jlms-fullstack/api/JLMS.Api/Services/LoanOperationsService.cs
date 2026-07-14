@@ -208,7 +208,7 @@ public class LoanOperationsService
             loan.Customer.CustomerName, loan.Customer.CustomerCode,
             loan.Customer.AadhaarNumber, loan.Customer.PanNumber, loan.Customer.Mobile, loan.Customer.Address,
             FormatScheme(loan), loan.InterestRatePct,
-            loan.LoanScheme?.ProcessingFee ?? 0m, 
+            loan.ProcessingFee, 
             loan.LoanDate, loan.MaturityDate,
             loan.LoanAmount, loan.OverallInterest, loan.OutstandingPrincipal, loan.OutstandingInterest,
             Round2(loan.OutstandingPrincipal + loan.OutstandingInterest),
@@ -319,7 +319,7 @@ public class LoanOperationsService
         return new LoanOperationsClosureDetailsDto(
             loan.LoanId, loan.LoanNumber, loan.Customer?.CustomerName ?? "", loan.Customer?.Mobile,
             FormatScheme(loan),
-            loan.LoanScheme?.ProcessingFee ?? 0m, totalAmountPaid,
+            loan.ProcessingFee, totalAmountPaid,
             loan.OutstandingPrincipal, loan.OutstandingInterest, otherCharges,
             grandTotal, grandTotal <= 0.009m);
     }
@@ -423,9 +423,47 @@ public class LoanOperationsService
                 interestBal = loan.OverallInterest;
 
                 rows.Add(new LoanOperationsLedgerRowDto(
-                    t.TransactionDate, t.TransactionType, "Loan disbursed to customer",
+                    t.TransactionId, t.TransactionDate, t.TransactionType, "Loan disbursed to customer",
                     t.PrincipalAmount, 0, principalBal, interestBal, principalBal + interestBal,
                     t.ReceiptNumber, userName, t.Remarks));
+
+                // 2. Add Processing Fee Rows (if a fee exists on this loan)
+                if (loan.ProcessingFee > 0m)
+                {
+                    var fee = loan.ProcessingFee;
+
+                    // Row A: Debit Processing Fee (Charges Debited)
+                    rows.Add(new LoanOperationsLedgerRowDto(
+                        t.TransactionId, 
+                        t.TransactionDate,
+                        "Charges",
+                        "Processing Fee Debited",
+                        fee,
+                        0m,
+                        principalBal,
+                        interestBal,
+                        principalBal + interestBal + fee, // Temporarily increases total running balance
+                        t.ReceiptNumber,
+                        userName,
+                        "Processing fee charged at initiation"
+                    ));
+
+                    // Row B: Credit Processing Fee (Upfront Collection)
+                    rows.Add(new LoanOperationsLedgerRowDto(
+                        t.TransactionId, 
+                        t.TransactionDate,
+                        "Charges",
+                        "Processing Fee Collected",
+                        0m,
+                        fee,
+                        principalBal,
+                        interestBal,
+                        principalBal + interestBal, // Resets total running balance back
+                        t.ReceiptNumber,
+                        userName,
+                        "Processing fee collected upfront"
+                    ));
+                }
                 continue;
             }
 
@@ -434,7 +472,7 @@ public class LoanOperationsService
             principalBal = Math.Max(0m, Round2(principalBal - t.PrincipalAmount));
 
             rows.Add(new LoanOperationsLedgerRowDto(
-                t.TransactionDate, t.TransactionType, DescribeTransaction(t),
+                t.TransactionId, t.TransactionDate, t.TransactionType, DescribeTransaction(t),
                 0, creditAmount, principalBal, interestBal, principalBal + interestBal,
                 t.ReceiptNumber, userName, t.Remarks));
         }
@@ -450,7 +488,7 @@ public class LoanOperationsService
         return new LoanOperationsLedgerResponseDto(
             loan.LoanId, loan.LoanNumber, loan.Customer?.CustomerName ?? "", FormatScheme(loan),
             loan.LoanDate, loan.MaturityDate, loan.LoanAmount, loan.OverallInterest, loan.InterestRatePct,
-            loan.LoanScheme?.ProcessingFee ?? 0m, loan.Status,
+            loan.ProcessingFee, loan.Status,
             pagedRows, totalCount, safePage, safePageSize,
             totalInterestCollected, totalPrincipalCollected,
             Round2(loan.OutstandingPrincipal + loan.OutstandingInterest));
