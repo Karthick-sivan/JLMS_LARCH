@@ -95,10 +95,24 @@ const Api = {
 
   getTodayGoldRate: () => apiRequest("/gold-rates/today"),
   getGoldRateHistory: (days = 30) => apiRequest(`/gold-rates/history?days=${days}`),
-  setTodayGoldRate: (dto) => apiRequest("/gold-rates", { method: "POST", body: dto }),
+    setTodayGoldRate: (dto) => apiRequest("/gold-rates", { method: "POST", body: dto }),
 
-  getLoanSchemes: (activeOnly = true) => apiRequest(`/loan-schemes?activeOnly=${activeOnly}`),
-  createLoanScheme: (dto) => apiRequest("/loan-schemes", { method: "POST", body: dto }),
+    // ---- User Master ----
+    getUsers: () => apiRequest("/user-master"),
+    getUserMasterBranches: () => apiRequest("/user-master/branches"),
+    getUserMasterRoles: () => apiRequest("/user-master/roles"),
+    createUser: (dto) => apiRequest("/user-master", { method: "POST", body: dto }),
+    updateUser: (id, dto) => apiRequest(`/user-master/${id}`, { method: "PUT", body: dto }),
+    toggleUserStatus: (id) => apiRequest(`/user-master/${id}/toggle-status`, { method: "PATCH" }),
+
+  //getLoanSchemes: (activeOnly = true) => apiRequest(`/loan-schemes?activeOnly=${activeOnly}`),
+  //createLoanScheme: (dto) => apiRequest("/loan-schemes", { method: "POST", body: dto }),
+
+
+
+    getLoanSchemes: (activeOnly = false) => apiRequest(`/loan-schemes?activeOnly=${activeOnly}`),
+    createLoanScheme: (dto) => apiRequest("/loan-schemes", { method: "POST", body: dto }),
+    updateLoanScheme: (id, dto) => apiRequest(`/loan-schemes/${id}`, { method: "PUT", body: dto }),
 
   // ---- Jewel Appraisal ----
   calculateAppraisal: (dto) => apiRequest("/jewel-appraisal/calculate", { method: "POST", body: dto }),
@@ -152,6 +166,31 @@ getCollectionReport: (params = {}) => {
    in api-client.js (e.g. right after the "Collections" section).
    Nothing existing in Api is modified — this is purely additive.
    ============================================================ */
+
+
+
+    // ---- Active Loans Report ----
+    getActiveLoansReport: (params = {}) => {
+        const qs = new URLSearchParams(
+            Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""))
+        ).toString();
+        return apiRequest(`/active-loans-report${qs ? "?" + qs : ""}`);
+    },
+    searchCustomersForActiveReport: (q) => apiRequest(`/active-loans-report/customer-search?q=${encodeURIComponent(q)}`),
+
+    // ---- Closed Loans Report ----
+    getClosedLoansReport: (params = {}) => {
+        const qs = new URLSearchParams(
+            Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""))
+        ).toString();
+        return apiRequest(`/closed-loans-report${qs ? "?" + qs : ""}`);
+    },
+    searchCustomersForClosedReport: (q) => apiRequest(`/closed-loans-report/customer-search?q=${encodeURIComponent(q)}`),
+
+    // ---- Branches (used by report filter dropdowns — adjust path if your actual
+    // branches endpoint differs; I couldn't see a BranchesController in what you shared) ----
+    getBranches: () => apiRequest(`/branches`),
+
 
 // ---- Loan Operations (new, independent merged page) ----
 getLoanOperationsGrid: (params = {}) => {

@@ -304,30 +304,6 @@ public record LoanOperationsInterestCalculationDto(
     decimal AccruedInterestInfoOnly
 );
 
-public record LoanOperationsPaymentDetailsDto(
-    int LoanId,
-    string LoanNo,
-    string Status,
-    string CustomerName,
-    string CustomerCode,
-    string? Aadhaar,
-    string? Pan,
-    string? Mobile,
-    string? Address,
-    string LoanScheme,           // formatted display string
-    decimal AnnualInterestRate,
-    DateTime? LoanDate,
-    DateTime? MaturityDate,
-    decimal Principal,
-    decimal OverallInterest,
-    decimal OutstandingPrincipal,
-    decimal OutstandingInterest,
-    decimal TotalOutstanding,
-    DateTime? LastPaymentDate,
-    string BranchName,
-    string? CreatedByName,
-    LoanOperationsInterestCalculationDto InterestCalculation
-);
 
 // ---------------------------- Payment save ----------------------------------
 
@@ -359,19 +335,7 @@ public record LoanOperationsPaymentResponseDto(
 
 // ---------------------------- Closure ----------------------------------------
 
-public record LoanOperationsClosureDetailsDto(
-    int LoanId,
-    string LoanNo,
-    string CustomerName,
-    string? Mobile,
-    string LoanScheme,           // formatted display string
-    decimal TotalAmountPaid,
-    decimal OutstandingPrincipal,
-    decimal OutstandingInterest,
-    decimal OtherCharges,
-    decimal GrandTotal,
-    bool IsClosable
-);
+
 
 public record LoanOperationsClosureRequestDto(
     string PaymentMode,
@@ -418,6 +382,20 @@ public record LoanOperationsLedgerRowDto(
     string? Remarks
 );
 
+
+public record SubmitForApprovalRequestDto(int SubmittedByUserId);
+
+public record SubmitForApprovalResponseDto(
+    int LoanId, string LoanNumber, string Status, string CustomerName,
+    int ApprovedByUserId, DateTime ApprovedAt, string ReceiptNumber, DateTime DisbursedAt,
+    DateTime? LoanDate, DateTime? MaturityDate, decimal LoanAmount, decimal ProcessingFee,
+    decimal NetDisbursedAmount, decimal OutstandingPrincipal, decimal OutstandingInterest,
+    string PaymentMode
+);
+
+
+
+
 public record LoanOperationsLedgerResponseDto(
     int LoanId,
     string LoanNo,
@@ -428,6 +406,7 @@ public record LoanOperationsLedgerResponseDto(
     decimal Principal,
     decimal OverallInterest,
     decimal AnnualInterestRate,
+    decimal ProcessingFee,
     string Status,
     List<LoanOperationsLedgerRowDto> Items,
     int TotalCount,
@@ -438,12 +417,134 @@ public record LoanOperationsLedgerResponseDto(
     decimal CurrentOutstanding
 );
 
-public record SubmitForApprovalRequestDto(int SubmittedByUserId);
 
-public record SubmitForApprovalResponseDto(
-    int LoanId, string LoanNumber, string Status, string CustomerName,
-    int ApprovedByUserId, DateTime ApprovedAt, string ReceiptNumber, DateTime DisbursedAt,
-    DateTime? LoanDate, DateTime? MaturityDate, decimal LoanAmount, decimal ProcessingFee,
-    decimal NetDisbursedAmount, decimal OutstandingPrincipal, decimal OutstandingInterest,
-    string PaymentMode
+
+public record LoanOperationsClosureDetailsDto(
+    int LoanId,
+    string LoanNo,
+    string CustomerName,
+    string? Mobile,
+    string LoanScheme,           // formatted display string
+    decimal ProcessingFee,
+    decimal TotalAmountPaid,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal OtherCharges,
+    decimal GrandTotal,
+    bool IsClosable
+);
+
+
+public record LoanOperationsPaymentDetailsDto(
+    int LoanId,
+    string LoanNo,
+    string Status,
+    string CustomerName,
+    string CustomerCode,
+    string? Aadhaar,
+    string? Pan,
+    string? Mobile,
+    string? Address,
+    string LoanScheme,           // formatted display string
+    decimal AnnualInterestRate,
+    decimal ProcessingFee,
+    DateTime? LoanDate,
+    DateTime? MaturityDate,
+    decimal Principal,
+    decimal OverallInterest,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal TotalOutstanding,
+    DateTime? LastPaymentDate,
+    string BranchName,
+    string? CreatedByName,
+    LoanOperationsInterestCalculationDto InterestCalculation
+);
+
+// ---------- Customers: lightweight list for the "browse customers" picker ----------
+public record CustomerActiveListItemDto(int CustomerId, string CustomerCode, string CustomerName);
+
+
+
+
+// ---------- Active Loans Report ----------
+public record ActiveLoanReportRowDto(
+    int LoanId,
+    string LoanNumber,
+    string CustomerCode,
+    string CustomerName,
+    string Mobile,
+    string SchemeDisplay,          // "SchemeName (X% - Y Months)"
+    DateTime? LoanDate,
+    DateTime? MaturityDate,
+    string JewelTypes,             // distinct jewel type names, comma joined
+    decimal GrossWeight,
+    decimal NetWeight,
+    string Purity,                 // distinct purities, comma joined
+    decimal PrincipalAmount,
+    decimal OverallInterest,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal TotalOutstanding,
+    DateTime? LastPaymentDate,
+    int DaysOverdue,
+    string Status,                 // derived: Active / Due / Overdue
+    string BranchName
+);
+
+public record ActiveLoanReportPagedDto(
+    List<ActiveLoanReportRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    int TotalActiveLoans,
+    decimal TotalPrincipal,
+    decimal TotalOverallInterest,
+    decimal TotalOutstandingPrincipal,
+    decimal TotalOutstandingInterest,
+    decimal GrandOutstanding
+);
+
+// ---------- Closed Loans Report ----------
+public record ClosedLoanReportRowDto(
+    int LoanId,
+    string LoanNumber,
+    string CustomerCode,
+    string CustomerName,
+    string Mobile,
+    string SchemeDisplay,
+    DateTime? LoanDate,
+    DateTime? MaturityDate,
+    DateTime? ClosureDate,
+    int LoanDurationDays,
+    string JewelTypes,
+    decimal GrossWeight,
+    decimal NetWeight,
+    string Purity,
+    decimal PrincipalAmount,
+    decimal OverallInterest,
+    decimal TotalInterestCollected,
+    decimal TotalPrincipalCollected,
+    decimal TotalAmountCollected,
+    decimal ClosureCharges,
+    decimal FinalSettlementAmount,
+    string? PaymentMode,
+    string? ReferenceNo,
+    string? ClosedByName,
+    string BranchName,
+    string? ClosureReceiptNo,
+    string Status,
+    string? Remarks
+);
+
+public record ClosedLoanReportPagedDto(
+    List<ClosedLoanReportRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    int TotalClosedLoans,
+    decimal TotalPrincipalDisbursed,
+    decimal TotalPrincipalCollected,
+    decimal TotalInterestCollected,
+    decimal GrandTotalCollected
 );
