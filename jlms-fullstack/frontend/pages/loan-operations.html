@@ -271,6 +271,7 @@
               <tr>
                 <th class="text-center">Actions</th>
                 <th>Loan No</th>
+                <th style="width: 100px; min-width: 100px;">Loan Date</th>
                 <th>Customer Name</th>
                 <th>Loan Scheme</th>
                 <th class="text-end">Principal Amount</th>
@@ -280,7 +281,7 @@
                 <th class="text-end">Total Outstanding</th>
                 <th class="text-end">Total Amount Paid</th>
                 <th style="display: none;">Loan Status</th>
-                <th style="width: 100px; min-width: 100px;">Loan Date</th>
+                
                 <th>Maturity Date</th>
               </tr>
             </thead>
@@ -311,7 +312,7 @@
 
 <!-- ============ Payment Modal ============ -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Collect Payment — <span id="payLoanNoLabel">-</span></h5>
@@ -321,7 +322,11 @@
         <div class="text-center text-muted-jlms" style="padding:30px;" id="paymentLoadingState">Loading loan details...</div>
 
         <div id="paymentContent" style="display:none;">
+          <div class="row g-4">
+
           <!-- Customer section -->
+          <div class="col-lg-5 border-end d-flex flex-column">
+
           <div class="info-card mb-3">
             <div class="info-card-title">Customer &amp; Loan Details</div>
             <div class="info-grid">
@@ -331,6 +336,7 @@
               <div class="info-row"><div class="info-label">PAN</div><div class="info-value" id="payPan">-</div></div>
               <div class="info-row"><div class="info-label">Mobile</div><div class="info-value" id="payMobile">-</div></div>
               <div class="info-row"><div class="info-label">Loan Scheme</div><div class="info-value" id="payScheme">-</div></div>
+              <div class="info-row"><div class="info-label">Processing Fee</div><div class="info-value" id="payProcessingFee">-</div></div>
               <div class="info-row"><div class="info-label">Principal</div><div class="info-value" id="payPrincipal">-</div></div>
               <div class="info-row"><div class="info-label">Overall Interest</div><div class="info-value" id="payOverallInterest">-</div></div>
               <div class="info-row"><div class="info-label">Outstanding Principal</div><div class="info-value" id="payOutPrincipal">-</div></div>
@@ -340,8 +346,21 @@
             </div>
           </div>
 
+          <!-- Receipt (shown after a successful save) -->
+          
+          <div class="receipt-section" id="paymentReceiptSection" style="display:none;">
+            <div class="receipt-section-title">
+              <span class="h4">Receipt</span>
+              <span class="badge-jlms badge-success" id="paymentReceiptNoBadge"></span>
+            </div>
+            <div class="receipt-box" id="paymentReceiptBox"></div>
+          </div>
+
+          </div>
+
+          <div class="col-lg-7">
           <!-- Interest calculation -->
-          <div class="section-label"><i class="bi bi-calculator"></i> Interest Calculation</div>
+          <div class="section-label mt-0"><i class="bi bi-calculator"></i> Interest Calculation</div>
           <table class="calc-table mb-3">
             <tbody>
               <tr><td>Overall Interest</td><td id="calcOverallInterest">-</td></tr>
@@ -395,15 +414,10 @@
             <div class="alloc-value" id="allocBalanceAfter">₹0.00</div>
           </div>
 
-          <!-- Receipt (shown after a successful save) -->
-          <div class="receipt-section" id="paymentReceiptSection" style="display:none;">
-            <div class="receipt-section-title">
-              <span class="h4">Receipt</span>
-              <span class="badge-jlms badge-success" id="paymentReceiptNoBadge"></span>
-            </div>
-            <div class="receipt-box" id="paymentReceiptBox"></div>
+          
           </div>
         </div>
+      </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal" id="btnPaymentCancel">Cancel</button>
@@ -434,7 +448,8 @@
               <div class="col-md-4" style="padding-right:16px;">
                 <div class="info-row mb-2"><div class="info-label">Customer Name</div><div class="info-value" id="closeCustomerName">-</div></div>
                 <div class="info-row mb-2"><div class="info-label">Loan Scheme</div><div class="info-value" id="closeScheme">-</div></div>
-                <div class="info-row"><div class="info-label">Mobile</div><div class="info-value" id="closeMobile">-</div></div>
+                <div class="info-row mt-2"><div class="info-label">Processing Fee</div><div class="info-value" id="closeProcessingFee">-</div></div>                
+                <div class="info-row mt-2"><div class="info-label">Mobile</div><div class="info-value" id="closeMobile">-</div></div>
               </div>
 
               <!-- Column 2: Loan No + Total Amount Paid -->
@@ -457,12 +472,14 @@
                 <button type="button" class="btn btn-outline-primary btn-sm w-100 mt-1 d-none" id="btnUploadClosurePhoto">
                   <i class="bi bi-upload"></i> Upload Photo
                 </button>
+
+                <div class="validation-msg" id="closurePhotoMsg" style="font-size: 0.9rem; margin-top: 8px; text-align: center;">A customer photo is required to close the loan.</div>
               </div>
 
             </div>
           </div>
 
-          <div class="validation-msg" id="closurePhotoMsg">A customer photo is required to close the loan.</div>
+          
 
 
           <table class="calc-table mb-2">
@@ -534,6 +551,7 @@
               <div class="info-row"><div class="info-label">Customer</div><div class="info-value" id="ledgerCustomer">-</div></div>
               <div class="info-row"><div class="info-label">Scheme</div><div class="info-value" id="ledgerScheme">-</div></div>
               <div class="info-row"><div class="info-label">Loan Date</div><div class="info-value" id="ledgerLoanDate">-</div></div>
+              <div class="info-row"><div class="info-label">Processing Fee</div><div class="info-value" id="ledgerProcessingFee">-</div></div>              
               <div class="info-row"><div class="info-label">Maturity Date</div><div class="info-value" id="ledgerMaturityDate">-</div></div>
               <div class="info-row"><div class="info-label">Principal</div><div class="info-value" id="ledgerPrincipal">-</div></div>
               <div class="info-row"><div class="info-label">Overall Interest</div><div class="info-value" id="ledgerOverallInterest">-</div></div>
@@ -549,7 +567,7 @@
                   <th>Date</th><th>Txn Type</th><th>Description</th>
                   <th class="text-end">Debit</th><th class="text-end">Credit</th>
                   <th class="text-end">Principal Balance</th><th class="text-end">Interest Balance</th>
-                  <th class="text-end">Running Balance</th><th>Receipt No</th><th>User</th>
+                  <th class="text-end">Running Balance</th><th style="display: none;">Receipt No</th><th style="display: none;">User</th>
                 </tr>
               </thead>
               <tbody id="ledgerBody"></tbody>
@@ -649,7 +667,11 @@ function inr(n) {
 function fmtDate(d) {
   if (!d) return '-';
   const dt = new Date(d);
-  return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const day = String(dt.getDate()).padStart(2, '0');
+  const month = String(dt.getMonth() + 1).padStart(2, '0');
+  const year = dt.getFullYear();
+  return `${day}-${month}-${year}`;
+  //return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function statusBadge(status) {
@@ -708,7 +730,8 @@ async function runSearch(page = 1) {
   const params = {
     loanNo: f.loanNo, customerName: f.customerName, mobile: f.mobile,
     aadhaar: f.aadhaar, pan: f.pan, scheme: f.scheme, status: f.status,
-    fromDate: f.fromDate, toDate: f.toDate, page: currentPage, pageSize
+    fromDate: f.fromDate, toDate: f.toDate, page: currentPage, pageSize,
+    sortDir: 'desc',sortBy: 'loandate'
   };
 
   try {
@@ -742,6 +765,7 @@ async function runSearch(page = 1) {
           </div>
         </td>
         <td class="loan-no-cell">${l.loanNo}</td>
+        <td>${fmtDate(l.loanDate)}</td>
         <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
         <td>${l.loanScheme}</td>
         <td class="text-end">${inr(l.principal)}</td>
@@ -751,7 +775,7 @@ async function runSearch(page = 1) {
         <td class="text-end cell-strong">${inr(l.totalOutstanding)}</td>
         <td class="text-end">${inr(l.totalAmountPaid)}</td>
         <td style="display: none;">${statusBadge(l.status)}</td>
-        <td>${fmtDate(l.loanDate)}</td>
+        
         <td>${fmtDate(l.maturityDate)}</td>
       </tr>`;
     }).join('');
@@ -834,6 +858,7 @@ async function openPaymentModal(loanId) {
     document.getElementById('payPan').textContent = details.pan || '-';
     document.getElementById('payMobile').textContent = details.mobile || '-';
     document.getElementById('payScheme').textContent = details.loanScheme;
+    document.getElementById('payProcessingFee').textContent = inr(details.processingFee);
     document.getElementById('payPrincipal').textContent = inr(details.principal);
     document.getElementById('payOverallInterest').textContent = inr(details.overallInterest);
     document.getElementById('payOutPrincipal').textContent = inr(details.outstandingPrincipal);
@@ -975,7 +1000,7 @@ document.getElementById('btnSavePayment').addEventListener('click', async () => 
       <div class="r-row"><span>Remaining Interest</span><span>${inr(response.remainingInterest)}</span></div>
       <div class="r-row"><span>Remaining Principal</span><span>${inr(response.remainingPrincipal)}</span></div>
       <div class="r-row"><span>Mode</span><span>${response.paymentMode}</span></div>`;
-    document.getElementById('paymentReceiptSection').style.display = 'block';
+    //document.getElementById('paymentReceiptSection').style.display = 'block';
   } catch (err) {
     showApiError(err);
     btn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Payment';
@@ -983,6 +1008,67 @@ document.getElementById('btnSavePayment').addEventListener('click', async () => 
   }
 });
 
+// function downloadPaymentReceipt() {
+//   if (!lastPaymentReceipt) {
+//     showApiError(new Error('No receipt available. Please save a payment first.'));
+//     return;
+//   }
+//   const r = lastPaymentReceipt;
+//   const fileName = `Receipt-${r.receiptNumber}.pdf`;
+
+//   const { jsPDF } = window.jspdf;
+//   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
+
+//   const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
+//   let y = 20;
+
+//   const line = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: 'right' }); y += 6; };
+//   const divid = () => { doc.setDrawColor(180); doc.setLineDashPattern([1, 1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
+
+
+//   // --- ADDED COMPANY HEADER ---
+//   doc.setFont('courier', 'bold');
+//   doc.setFontSize(16);
+//   doc.text('SRI SARAVANA BANKERS', lm + tw / 2, y, { align: 'center' }); y += 6;
+  
+//   doc.setFont('courier', 'normal');
+//   doc.setFontSize(10);
+//   doc.text('3/39, Mangulam Main Road, Poosaripatti', lm + tw / 2, y, { align: 'center' }); y += 5;
+//   doc.text('Madurai - 625122 | Ph: 9943155324', lm + tw / 2, y, { align: 'center' }); y += 6;
+//   // ----------------------------
+
+//   doc.setFont('courier', 'bold');
+//   doc.setFontSize(12);
+//   doc.text('LOAN PAYMENT RECEIPT', lm + tw / 2, y, { align: 'center' }); y += 4;
+//   doc.setTextColor(30);
+//   divid();
+
+//   doc.setFontSize(10);
+//   line('Receipt No.', r.receiptNumber);
+//   line('Date', new Date(r.receiptDate || r.transactionDate).toLocaleString('en-IN'));
+//   line('Loan No.', r.loanNo);
+//   line('Customer', r.customerName);
+//   divid();
+
+//   line('Interest Paid', 'Rs.' + Number(r.interestPaid).toLocaleString('en-IN'));
+//   line('Principal Paid', 'Rs.' + Number(r.principalPaid).toLocaleString('en-IN'));
+//   doc.setFont('courier', 'bold');
+//   line('Amount Received', 'Rs.' + Number(r.amountReceived).toLocaleString('en-IN'));
+//   doc.setFont('courier', 'normal');
+//   divid();
+
+//   line('Remaining Interest', 'Rs.' + Number(r.remainingInterest).toLocaleString('en-IN'));
+//   line('Remaining Principal', 'Rs.' + Number(r.remainingPrincipal).toLocaleString('en-IN'));
+//   line('Mode', r.paymentMode);
+
+//   doc.save(fileName);
+// }
+
+// document.getElementById('btnPrintPaymentReceipt').addEventListener('click', downloadPaymentReceipt);
+
+// document.getElementById('paymentModal').addEventListener('hidden.bs.modal', () => {
+//   runSearch(currentPage);
+// });
 function downloadPaymentReceipt() {
   if (!lastPaymentReceipt) {
     showApiError(new Error('No receipt available. Please save a payment first.'));
@@ -994,43 +1080,97 @@ function downloadPaymentReceipt() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
 
-  const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
-  let y = 20;
+  // 1. Outer Border
+  doc.setLineWidth(0.3);
+  doc.rect(5, 5, 138, 140); 
 
-  const line = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: 'right' }); y += 6; };
-  const divid = () => { doc.setDrawColor(180); doc.setLineDashPattern([1, 1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
-
-  doc.setFont('courier', 'bold');
-  doc.setFontSize(13);
-  doc.text('JLMS RECEIPT', lm + tw / 2, y, { align: 'center' }); y += 6;
-  doc.setFont('courier', 'normal');
+  // --- Top Header Section ---
   doc.setFontSize(9);
-  doc.setTextColor(120);
-  doc.text('Loan Payment', lm + tw / 2, y, { align: 'center' }); y += 4;
-  doc.setTextColor(30);
-  divid();
+  doc.text('Sri Masangkaruppar Thunai', 70, 10, { align: 'center' }); // Shifted center left
+  
+  // Logo Placeholder Box
+  doc.rect(8, 13, 20, 20);
+  doc.setFontSize(8);
+  doc.text('LOGO', 13, 24);
 
-  doc.setFontSize(10);
-  line('Receipt No.', r.receiptNumber);
-  line('Date', new Date(r.receiptDate || r.transactionDate).toLocaleString('en-IN'));
-  line('Loan No.', r.loanNo);
-  line('Customer', r.customerName);
-  divid();
+  // Bank Details (Shifted left to make room for receipt details)
+  const centerAlignX = 58; // Moved from 63 to 58
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13); // Reduced from 14
+  doc.text('SRI SARAVANA BANKERS', centerAlignX, 17, { align: 'center' });
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Government Approved', centerAlignX, 21, { align: 'center' });
+  doc.text('PBL. No. 01/2021 - 2022, Date: 16.07.2021', centerAlignX, 25, { align: 'center' });
+  doc.text('3/39, Mangulam Main Road, Poosaripatti', centerAlignX, 29, { align: 'center' });
+  doc.text('Madurai - 625122', centerAlignX, 33, { align: 'center' });
+  doc.text('Ph: 9943155324', centerAlignX, 37, { align: 'center' });
 
-  line('Interest Paid', 'Rs.' + Number(r.interestPaid).toLocaleString('en-IN'));
-  line('Principal Paid', 'Rs.' + Number(r.principalPaid).toLocaleString('en-IN'));
-  doc.setFont('courier', 'bold');
-  line('Amount Received', 'Rs.' + Number(r.amountReceived).toLocaleString('en-IN'));
-  doc.setFont('courier', 'normal');
-  divid();
+  // Receipt Details (Top Right - Pushed further right)
+  doc.setFontSize(7.5); 
+  doc.text('Receipt No', 95, 17); doc.text(`: ${r.receiptNumber}`, 109, 17);
+  doc.text('Loan No', 95, 22); doc.text(`: ${r.loanNo}`, 109, 22);
+  
+  // Format date to remove seconds and save space
+  const formattedDate = new Date(r.transactionDate).toLocaleString('en-IN', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  doc.setFont('helvetica', 'bold');
+  doc.text('Date', 95, 28); doc.text(`: ${formattedDate}`, 105, 28); // Shifted colon slightly left to fit the time
+  doc.setFont('helvetica', 'normal');
 
-  line('Remaining Interest', 'Rs.' + Number(r.remainingInterest).toLocaleString('en-IN'));
-  line('Remaining Principal', 'Rs.' + Number(r.remainingPrincipal).toLocaleString('en-IN'));
-  line('Mode', r.paymentMode);
+  // Divider
+  doc.setLineWidth(0.1);
+  doc.line(5, 41, 143, 41);
+
+  // --- Customer Details Section ---
+  doc.setFontSize(9);
+  doc.text(`Customer Name : ${r.customerName}`, 8, 47);
+  const mobile = activePaymentLoan ? activePaymentLoan.mobile : '';
+  doc.text(`Phone         : ${mobile || 'N/A'}`, 8, 53);
+
+  doc.line(5, 60, 143, 60);
+
+  // --- Payment Details Section ---
+  doc.setFont('helvetica', 'bold');
+  doc.text('Payment Details', 8, 66);
+  doc.setFont('helvetica', 'normal');
+
+  // Left Column
+  doc.text('Interest Paid', 8, 74); doc.text(`: Rs. ${Number(r.interestPaid).toLocaleString('en-IN')}`, 40, 74);
+  doc.text('Principal Paid', 8, 80); doc.text(`: Rs. ${Number(r.principalPaid).toLocaleString('en-IN')}`, 40, 80);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Amount Received', 8, 88); doc.text(`: Rs. ${Number(r.amountReceived).toLocaleString('en-IN')}`, 40, 88);
+  doc.setFont('helvetica', 'normal');
+
+  // Right Column
+  doc.text('Remaining Interest', 72, 74); doc.text(`: Rs. ${Number(r.remainingInterest).toLocaleString('en-IN')}`, 108, 74);
+  doc.text('Remaining Principal', 72, 80); doc.text(`: Rs. ${Number(r.remainingPrincipal).toLocaleString('en-IN')}`, 108, 80);
+  doc.text('Payment Mode', 72, 88); doc.text(`: ${r.paymentMode}`, 108, 88);
+
+  doc.line(5, 95, 143, 95);
+
+  // --- Footer Section ---
+  doc.setFontSize(9);
+  doc.text('Customer Signature /', 8, 114);
+  doc.text('Thumb Impression', 8, 118);
+  
+  doc.text('For Sri Saravana Bankers', 95, 118);
+
+  // Terms and conditions
+  doc.setFontSize(8);
+  doc.setTextColor(200, 0, 0); // Set text to red
+  doc.text('Office Hours : 7 AM to 8 PM all days.', 8, 126);
+  
+  doc.setTextColor(0, 0, 0); // Set text back to black
+  doc.text('Keep this receipt safe. Renew the receipt once every 6 months.', 8, 131);
+  doc.text('Failure to return the pledged item within 1 year and 7 days will result in auction.', 8, 136);
 
   doc.save(fileName);
 }
-
 document.getElementById('btnPrintPaymentReceipt').addEventListener('click', downloadPaymentReceipt);
 
 document.getElementById('paymentModal').addEventListener('hidden.bs.modal', () => {
@@ -1074,6 +1214,7 @@ async function openClosureModal(loanId) {
     document.getElementById('closeCustomerName').textContent = details.customerName;
     document.getElementById('closeLoanNo').textContent = details.loanNo;
     document.getElementById('closeScheme').textContent = details.loanScheme;
+    document.getElementById('closeProcessingFee').textContent = inr(details.processingFee);
     document.getElementById('closeTotalPaid').textContent = inr(details.totalAmountPaid);
     document.getElementById('closeMobile').textContent = details.mobile || '-';
 
@@ -1200,7 +1341,7 @@ document.getElementById('btnCloseLoan').addEventListener('click', () => {
         <div class="receipt-divider"></div>
         <div class="r-row" style="font-weight:700;"><span>Grand Total Paid</span><span>${inr(response.grandTotal)}</span></div>
         <div class="r-row"><span>Status</span><span>Closed</span></div>`;
-      document.getElementById('closureReceiptSection').style.display = 'block';
+      //document.getElementById('closureReceiptSection').style.display = 'block';
     })
     .catch(err => {
       showApiError(err);
@@ -1209,6 +1350,60 @@ document.getElementById('btnCloseLoan').addEventListener('click', () => {
     });
 });
 
+// function downloadClosureReceipt() {
+//   if (!lastClosureReceipt) {
+//     showApiError(new Error('No receipt available. Please close a loan first.'));
+//     return;
+//   }
+//   const r = lastClosureReceipt;
+//   const fileName = `Closure-Receipt-${r.receiptNumber}.pdf`;
+
+//   const { jsPDF } = window.jspdf;
+//   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
+
+//   const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
+//   let y = 20;
+
+//   const line = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: 'right' }); y += 6; };
+//   const divid = () => { doc.setDrawColor(180); doc.setLineDashPattern([1, 1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
+
+//   // --- ADDED COMPANY HEADER ---
+//   doc.setFont('courier', 'bold');
+//   doc.setFontSize(16);
+//   doc.text('SRI SARAVANA BANKERS', lm + tw / 2, y, { align: 'center' }); y += 6;
+  
+//   doc.setFont('courier', 'normal');
+//   doc.setFontSize(10);
+//   doc.text('3/39, Mangulam Main Road, Poosaripatti', lm + tw / 2, y, { align: 'center' }); y += 5;
+//   doc.text('Madurai - 625122 | Ph: 9943155324', lm + tw / 2, y, { align: 'center' }); y += 6;
+//   // ----------------------------
+
+//   doc.setFont('courier', 'bold');
+//   doc.setFontSize(12);
+//   doc.text('LOAN CLOSURE RECEIPT', lm + tw / 2, y, { align: 'center' }); y += 4;
+//   doc.setTextColor(30);
+//   divid();
+
+//   doc.setFontSize(10);
+//   line('Receipt No.', r.receiptNumber);
+//   line('Date', new Date(r.receiptDate || r.transactionDate).toLocaleString('en-IN'));
+//   line('Loan No.', r.loanNo);
+//   line('Customer', r.customerName);
+//   line('Loan Scheme', r.loanScheme);
+//   divid();
+
+//   line('Outstanding Principal', 'Rs.' + Number(r.outstandingPrincipal).toLocaleString('en-IN'));
+//   line('Outstanding Interest', 'Rs.' + Number(r.outstandingInterest).toLocaleString('en-IN'));
+//   line('Other Charges', 'Rs.' + Number(r.otherCharges).toLocaleString('en-IN'));
+//   divid();
+
+//   doc.setFont('courier', 'bold');
+//   line('Grand Total Paid', 'Rs.' + Number(r.grandTotal).toLocaleString('en-IN'));
+//   doc.setFont('courier', 'normal');
+//   line('Status', 'Closed');
+
+//   doc.save(fileName);
+// }
 function downloadClosureReceipt() {
   if (!lastClosureReceipt) {
     showApiError(new Error('No receipt available. Please close a loan first.'));
@@ -1220,43 +1415,124 @@ function downloadClosureReceipt() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
 
-  const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
-  let y = 20;
+  // 1. Outer Border
+  doc.setLineWidth(0.3);
+  doc.rect(5, 5, 138, 140); 
 
-  const line = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: 'right' }); y += 6; };
-  const divid = () => { doc.setDrawColor(180); doc.setLineDashPattern([1, 1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
-
-  doc.setFont('courier', 'bold');
-  doc.setFontSize(13);
-  doc.text('JLMS RECEIPT', lm + tw / 2, y, { align: 'center' }); y += 6;
-  doc.setFont('courier', 'normal');
+  // --- Top Header Section ---
   doc.setFontSize(9);
-  doc.setTextColor(120);
-  doc.text('Loan Closure', lm + tw / 2, y, { align: 'center' }); y += 4;
-  doc.setTextColor(30);
-  divid();
+  doc.text('Sri Masangkaruppar Thunai', 70, 10, { align: 'center' });
+  
+  // Logo Placeholder Box
+  doc.rect(8, 13, 20, 20);
+  doc.setFontSize(8);
+  doc.text('LOGO', 13, 24);
 
-  doc.setFontSize(10);
-  line('Receipt No.', r.receiptNumber);
-  line('Date', new Date(r.receiptDate || r.transactionDate).toLocaleString('en-IN'));
-  line('Loan No.', r.loanNo);
-  line('Customer', r.customerName);
-  line('Loan Scheme', r.loanScheme);
-  divid();
+  // Bank Details (Shifted left to make room for receipt details)
+  const centerAlignX = 58; 
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13); // Reduced from 14
+  doc.text('SRI SARAVANA BANKERS', centerAlignX, 17, { align: 'center' });
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Government Approved', centerAlignX, 21, { align: 'center' });
+  doc.text('PBL. No. 01/2021 - 2022, Date: 16.07.2021', centerAlignX, 25, { align: 'center' });
+  doc.text('3/39, Mangulam Main Road, Poosaripatti', centerAlignX, 29, { align: 'center' });
+  doc.text('Madurai - 625122', centerAlignX, 33, { align: 'center' });
+  doc.text('Ph: 9943155324', centerAlignX, 37, { align: 'center' });
 
-  line('Outstanding Principal', 'Rs.' + Number(r.outstandingPrincipal).toLocaleString('en-IN'));
-  line('Outstanding Interest', 'Rs.' + Number(r.outstandingInterest).toLocaleString('en-IN'));
-  line('Other Charges', 'Rs.' + Number(r.otherCharges).toLocaleString('en-IN'));
-  divid();
+  // Loan Details (Top Right - Pushed further right)
+  doc.setFontSize(7.5); 
+  doc.text('Loan No', 95, 17); doc.text(`: ${r.loanNo}`, 109, 17);
+  doc.text('Amount', 95, 22); doc.text(`: Rs. ${r.outstandingPrincipal}`, 109, 22);
+  const loanDate = activeClosureLoan && activeClosureLoan.loanDate ? fmtDate(activeClosureLoan.loanDate) : new Date(r.transactionDate).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  doc.text('Loan Date', 95, 27); doc.text(`: ${loanDate}`, 109, 27);
+  
+  const formattedClosedDate = new Date(r.transactionDate).toLocaleDateString('en-IN', {
+    day: '2-digit', month: '2-digit', year: 'numeric'
+  });
+  doc.setFont('helvetica', 'bold');
+  doc.text('Closed Date', 95, 33); doc.text(`: ${formattedClosedDate}`, 111, 33);
+  doc.setFont('helvetica', 'normal');
 
-  doc.setFont('courier', 'bold');
-  line('Grand Total Paid', 'Rs.' + Number(r.grandTotal).toLocaleString('en-IN'));
-  doc.setFont('courier', 'normal');
-  line('Status', 'Closed');
+  // Divider
+  doc.setLineWidth(0.1);
+  doc.line(5, 41, 143, 41);
+
+  // --- Customer Details Section ---
+  doc.setFontSize(9);
+  doc.text(`Customer Name : ${r.customerName}`, 8, 47);
+  const mobile = activeClosureLoan ? activeClosureLoan.mobile : '';
+  doc.text(`Phone         : ${mobile || 'N/A'}`, 8, 53);
+  
+  /* ---  ---
+  doc.text(`Address       : Madurai - 625301`, 8, 59);
+  */
+
+  doc.line(5, 60, 143, 60);
+
+  // --- Items & Photos Section ---
+  doc.setFontSize(8);
+  
+  /* --- ---
+  doc.text('Item Photo', 11, 65);
+  doc.rect(8, 68, 22, 22); // Box for item photo
+
+  // Items Table Header
+  doc.setFont('helvetica', 'bold');
+  doc.text('S.No', 42, 73);
+  doc.text('Item', 60, 73);
+  doc.text('Weight', 85, 73);
+  doc.setFont('helvetica', 'normal');
+  
+  // Items Table Row
+  doc.text('1', 44, 81);
+  doc.text('Gold Ring', 60, 81); 
+  doc.text('2.0g', 87, 81);
+
+  doc.text('Customer Photo', 112, 65);
+  doc.rect(113, 68, 22, 22); // Box for customer photo
+  */
+ // --- Closure Financials & Details Section ---
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Closure Summary', 8, 66);
+  doc.setFont('helvetica', 'normal');
+
+  // Left Column: Financials
+  doc.setFontSize(9);
+  doc.text('Outstanding Principal', 8, 74); doc.text(`: Rs. ${Number(r.outstandingPrincipal).toLocaleString('en-IN')}`, 45, 74);
+  doc.text('Outstanding Interest', 8, 80); doc.text(`: Rs. ${Number(r.outstandingInterest).toLocaleString('en-IN')}`, 45, 80);
+  doc.text('Other Charges', 8, 86); doc.text(`: Rs. ${Number(r.otherCharges).toLocaleString('en-IN')}`, 45, 86);
+  
+  doc.setFont('helvetica', 'bold');
+  doc.text('Grand Total Paid', 8, 94); doc.text(`: Rs. ${Number(r.grandTotal).toLocaleString('en-IN')}`, 45, 94);
+  doc.setFont('helvetica', 'normal');
+
+  doc.text('Customer Photo', 115, 66);
+  doc.rect(115, 69, 22, 22); // Box for customer photo
+
+  doc.line(5, 95, 143, 95);
+
+  // --- Footer Section ---
+  doc.setFontSize(9);
+  doc.text('Customer Signature /', 8, 114);
+  doc.text('Thumb Impression', 8, 118);
+  
+  doc.text('For Sri Saravana Bankers', 95, 118);
+
+  // Terms and conditions
+  doc.setFontSize(8);
+  doc.setTextColor(200, 0, 0); // Set text to red
+  doc.text('Office Hours : 7 AM to 8 PM all days.', 8, 126);
+  
+  doc.setTextColor(0, 0, 0); // Set text back to black
+  doc.text('Keep this receipt safe. Renew the receipt once every 6 months.', 8, 131);
+  doc.text('Failure to return the pledged item within 1 year and 7 days will result in auction.', 8, 136);
 
   doc.save(fileName);
 }
-
 document.getElementById('btnPrintClosureReceipt').addEventListener('click', downloadClosureReceipt);
 
 document.getElementById('closureModal').addEventListener('hidden.bs.modal', () => {
@@ -1296,6 +1572,7 @@ async function loadLedgerPage(page) {
     document.getElementById('ledgerLoanNoLabel').textContent = result.loanNo;
     document.getElementById('ledgerCustomer').textContent = result.customerName;
     document.getElementById('ledgerScheme').textContent = result.loanScheme;
+    document.getElementById('ledgerProcessingFee').textContent = inr(result.processingFee);
     document.getElementById('ledgerLoanDate').textContent = fmtDate(result.loanDate);
     document.getElementById('ledgerMaturityDate').textContent = fmtDate(result.maturityDate);
     document.getElementById('ledgerPrincipal').textContent = inr(result.principal);
@@ -1313,8 +1590,8 @@ async function loadLedgerPage(page) {
         <td class="text-end">${inr(e.principalBalance)}</td>
         <td class="text-end">${inr(e.interestBalance)}</td>
         <td class="text-end cell-strong">${inr(e.runningBalance)}</td>
-        <td>${e.receiptNumber || '-'}</td>
-        <td>${e.userName || '-'}</td>
+        <td style="display: none;">${e.receiptNumber || '-'}</td>
+        <td style="display: none;">${e.userName || '-'}</td>
       </tr>`).join('');
 
     document.getElementById('ledgerTotalInterest').textContent = inr(result.totalInterestCollected);

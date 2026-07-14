@@ -207,7 +207,9 @@ public class LoanOperationsService
             loan.LoanId, loan.LoanNumber, loan.Status,
             loan.Customer.CustomerName, loan.Customer.CustomerCode,
             loan.Customer.AadhaarNumber, loan.Customer.PanNumber, loan.Customer.Mobile, loan.Customer.Address,
-            FormatScheme(loan), loan.InterestRatePct, loan.LoanDate, loan.MaturityDate,
+            FormatScheme(loan), loan.InterestRatePct,
+            loan.LoanScheme?.ProcessingFee ?? 0m, 
+            loan.LoanDate, loan.MaturityDate,
             loan.LoanAmount, loan.OverallInterest, loan.OutstandingPrincipal, loan.OutstandingInterest,
             Round2(loan.OutstandingPrincipal + loan.OutstandingInterest),
             lastPaymentDate, branchName, createdByName, interestCalc);
@@ -316,7 +318,8 @@ public class LoanOperationsService
 
         return new LoanOperationsClosureDetailsDto(
             loan.LoanId, loan.LoanNumber, loan.Customer?.CustomerName ?? "", loan.Customer?.Mobile,
-            FormatScheme(loan), totalAmountPaid,
+            FormatScheme(loan),
+            loan.LoanScheme?.ProcessingFee ?? 0m, totalAmountPaid,
             loan.OutstandingPrincipal, loan.OutstandingInterest, otherCharges,
             grandTotal, grandTotal <= 0.009m);
     }
@@ -446,7 +449,8 @@ public class LoanOperationsService
 
         return new LoanOperationsLedgerResponseDto(
             loan.LoanId, loan.LoanNumber, loan.Customer?.CustomerName ?? "", FormatScheme(loan),
-            loan.LoanDate, loan.MaturityDate, loan.LoanAmount, loan.OverallInterest, loan.InterestRatePct, loan.Status,
+            loan.LoanDate, loan.MaturityDate, loan.LoanAmount, loan.OverallInterest, loan.InterestRatePct,
+            loan.LoanScheme?.ProcessingFee ?? 0m, loan.Status,
             pagedRows, totalCount, safePage, safePageSize,
             totalInterestCollected, totalPrincipalCollected,
             Round2(loan.OutstandingPrincipal + loan.OutstandingInterest));
