@@ -32,28 +32,22 @@
 
       <!-- KPI ROW 1 -->
       <div class="row g-3 mb-3">
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
           <div class="kpi-card">
             <div class="kpi-top"><span class="kpi-label">Active Loans</span><div class="kpi-icon navy"><i class="bi bi-folder2-open"></i></div></div>
             <div class="kpi-value" id="kpiActiveLoans">0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Live from database</span></div>
+            <div class="kpi-foot"><span class="text-muted-jlms"></span></div>
           </div>
         </div>
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
           <div class="kpi-card gold">
             <div class="kpi-top"><span class="kpi-label">Outstanding Amount</span><div class="kpi-icon gold"><i class="bi bi-cash-stack"></i></div></div>
             <div class="kpi-value" id="kpiOutstanding">₹0</div>
             <div class="kpi-foot"><span class="text-muted-jlms">Sum of active principal</span></div>
           </div>
         </div>
-        <div class="col-xl-3 col-md-6">
-          <div class="kpi-card success">
-            <div class="kpi-top"><span class="kpi-label">Today's Collections</span><div class="kpi-icon success"><i class="bi bi-graph-up"></i></div></div>
-            <div class="kpi-value" id="kpiCollections">₹0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Interest + principal + closures</span></div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
+       
+        <div class="col-xl-4 col-md-6">
           <div class="kpi-card info">
             <div class="kpi-top"><span class="kpi-label">Today's Disbursement</span><div class="kpi-icon info"><i class="bi bi-send-check"></i></div></div>
             <div class="kpi-value" id="kpiDisbursement">₹0</div>
@@ -63,7 +57,14 @@
       </div>
 
       <!-- KPI ROW 2 -->
-      <div class="row g-3 mb-4">
+      <div class="row g-3 mb-3">
+         <div class="col-xl-4 col-md-6">
+          <div class="kpi-card success">
+            <div class="kpi-top"><span class="kpi-label">Today's Collections</span><div class="kpi-icon success"><i class="bi bi-graph-up"></i></div></div>
+            <div class="kpi-value" id="kpiCollections">₹0</div>
+            <div class="kpi-foot"><span class="text-muted-jlms">Interest + principal + closures</span></div>
+          </div>
+        </div>
         <div class="col-xl-4 col-md-6">
           <div class="kpi-card danger">
             <div class="kpi-top"><span class="kpi-label">Overdue Loans</span><div class="kpi-icon danger"><i class="bi bi-exclamation-circle"></i></div></div>
@@ -71,13 +72,14 @@
             <div class="kpi-foot"><span class="text-muted-jlms">Past maturity date</span></div>
           </div>
         </div>
-        <div class="col-xl-4 col-md-6">
+        
+        <!-- <div class="col-xl-4 col-md-6">
           <div class="kpi-card navy">
             <div class="kpi-top"><span class="kpi-label">Renewals This Month</span><div class="kpi-icon navy"><i class="bi bi-arrow-repeat"></i></div></div>
             <div class="kpi-value" id="kpiRenewals">0</div>
             <div class="kpi-foot"><span class="text-muted-jlms">Since start of month</span></div>
           </div>
-        </div>
+        </div> -->
         <div class="col-xl-4 col-md-6">
           <div class="kpi-card success">
             <div class="kpi-top"><span class="kpi-label">Closures This Month</span><div class="kpi-icon success"><i class="bi bi-check2-circle"></i></div></div>
@@ -99,7 +101,7 @@
                 <div class="tab-item" data-days="90" style="padding:4px 10px; cursor:pointer;">90D</div>
               </div>
             </div>
-            <div class="panel-body"><canvas id="collectionTrendChart" height="230"></canvas></div>
+            <div class="panel-body" style="height: 220px;"><canvas id="collectionTrendChart"></canvas></div>
           </div>
         </div>
       </div>
@@ -113,10 +115,10 @@
               <a href="new-loan.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-file-earmark-plus"></i></div><div class="qa-label">New Loan</div></div></a>
             </div>
             <div class="col-6 col-md-3">
-              <a href="interest-collection.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-percent"></i></div><div class="qa-label">Interest Collection</div></div></a>
+              <a href="loan-operations.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-percent"></i></div><div class="qa-label">Loan operations</div></div></a>
             </div>
             <div class="col-6 col-md-3">
-              <a href="loan-closure.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-x-circle"></i></div><div class="qa-label">Loan Closure</div></div></a>
+              <a href="loan-operations.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-x-circle"></i></div><div class="qa-label">Loan Scheme</div></div></a>
             </div>
             <div class="col-6 col-md-3">
               <a href="customer-search.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-search"></i></div><div class="qa-label">Customer Search</div></div></a>
@@ -188,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('kpiCollections').textContent = formatCurrency(summary.todaysCollections);
     document.getElementById('kpiDisbursement').textContent = formatCurrency(summary.todaysDisbursement);
     document.getElementById('kpiOverdue').textContent = summary.overdueLoans.toLocaleString('en-IN');
-    document.getElementById('kpiRenewals').textContent = summary.renewalsThisMonth.toLocaleString('en-IN');
+    // document.getElementById('kpiRenewals').textContent = summary.renewalsThisMonth.toLocaleString('en-IN');
     document.getElementById('kpiClosures').textContent = summary.closuresThisMonth.toLocaleString('en-IN');
   } catch (err) {
     showApiError(err);
@@ -259,6 +261,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         type: 'line',
         data: { labels, datasets: [{ label: 'Collections (₹)', data: values, borderColor: '#1E3A8A', backgroundColor: 'rgba(30,58,138,0.08)', fill: true, tension: 0.35 }] },
         options: {
+          maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: { y: { grid: { color: '#EDEFF2' } }, x: { grid: { display: false } } }
         }

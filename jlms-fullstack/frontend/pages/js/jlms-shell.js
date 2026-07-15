@@ -89,7 +89,6 @@ function jlmsBuildTopbar(pageTitle, breadcrumbs) {
       <div class="topbar-right">
         <div class="branch-pill"><i class="bi bi-building"></i> Madurai Main Branch</div>
         <div class="icon-btn"><i class="bi bi-bell"></i><span class="dot"></span></div>
-        <div class="icon-btn"><i class="bi bi-question-circle"></i></div>
         <div class="user-chip">
           <div class="user-avatar">RK</div>
           <div class="user-meta">
