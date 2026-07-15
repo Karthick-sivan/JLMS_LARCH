@@ -119,7 +119,7 @@ public class LoansController : ControllerBase
     public async Task<ActionResult<object>> GetReleaseDetails(int id)
     {
         var loan = await _db.Loans
-            .AsNoTracking()
+            .AsNoTracking() 
             .Include(l => l.Customer)
             .Include(l => l.JewelItems)
                 .ThenInclude(j => j.JewelType)
