@@ -46,16 +46,15 @@
     <div id="jlmsTopbarMount"></div>
     <div class="page-content">
 
-      <div class="page-header">
+      <!-- <div class="page-header">
         <div>
           <div class="breadcrumb-jlms">
             <a href="dashboard.html">Home</a><span class="sep">/</span>
             <a href="report-center.html">Report Center</a><span class="sep">/</span>
             <span class="current">Active Loans Report</span>
           </div>
-          <!-- <div class="h1">Active Loans Report</div> -->
         </div>
-      </div>
+      </div> -->
 
       <div class="row g-3">
         <!-- Left: categories -->
@@ -79,7 +78,7 @@
             <div class="panel-head"><div class="h4">Active Loans — Filters</div></div>
             <div class="panel-body">
               <div class="row g-3 align-items-end">
-                <div class="col-md-2">
+                <div class="col-md-3">
                   <label class="field-label" for="fLoanNo">Loan Number</label>
                   <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="LN-...">
                 </div>
@@ -87,14 +86,14 @@
                   <label class="field-label" for="fCustomerName">Customer Name</label>
                   <input id="fCustomerName" type="text" class="form-control-jlms" placeholder="Name">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                   <label class="field-label" for="fMobile">Mobile</label>
                   <input id="fMobile" type="text" class="form-control-jlms" placeholder="10-digit">
                 </div>
-                <div class="col-md-2">
+                <!-- <div class="col-md-2">
                   <label class="field-label" for="fAadhaar">Aadhaar</label>
                   <input id="fAadhaar" type="text" class="form-control-jlms" placeholder="XXXX-XXXX">
-                </div>
+                </div> -->
                 <div class="col-md-3">
                   <label class="field-label" for="fScheme">Loan Scheme</label>
                   <select id="fScheme" class="form-select-jlms"><option value="">All Schemes</option></select>
@@ -113,11 +112,11 @@
                   <label class="field-label" for="fToDate">To Date</label>
                   <input id="fToDate" type="date" class="form-control-jlms">
                 </div>
-                <div class="col-md-2">
+                <!-- <div class="col-md-2">
                   <label class="field-label" for="fBranch">Branch</label>
                   <select id="fBranch" class="form-select-jlms"><option value="">All Branches</option></select>
-                </div>
-                <div class="col-md-2">
+                </div> -->
+                <!-- <div class="col-md-2">
                   <label class="field-label" for="fStatus">Status</label>
                   <select id="fStatus" class="form-select-jlms">
                     <option value="">All</option>
@@ -125,7 +124,7 @@
                     <option value="Due">Due</option>
                     <option value="Overdue">Overdue</option>
                   </select>
-                </div>
+                </div> -->
                 <div class="col-md-2">
                   <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary" style="width:100%;justify-content:center;">
                     <i class="bi bi-funnel"></i> Apply
@@ -162,7 +161,7 @@
               <table class="table-jlms" id="reportTable">
                 <thead>
                   <tr>
-                    <th>S.No</th><th>Loan No</th><th>Cust. Code</th><th>Customer Name</th><th>Mobile</th>
+                    <th>S.No</th><th>Loan No</th><th>Customer</th><th>Mobile</th>
                     <th>Loan Scheme</th><th>Loan Date</th><th>Maturity Date</th><th>Jewel Type</th>
                     <th class="text-end">Gross Wt (g)</th><th class="text-end">Net Wt (g)</th><th>Purity</th>
                     <th class="text-end">Principal</th><th class="text-end">Overall Interest</th>
@@ -172,11 +171,11 @@
                   </tr>
                 </thead>
                 <tbody id="tableBody">
-                  <tr><td colspan="21"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading active loans…</p></div></td></tr>
+                  <tr><td colspan="20"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading active loans…</p></div></td></tr>
                 </tbody>
                 <tfoot id="tableFoot" style="display:none;">
                   <tr>
-                    <td colspan="12"><strong>Page Total</strong></td>
+                    <td colspan="11"><strong>Page Total</strong></td>
                     <td class="text-end" id="footOverallInterest">—</td>
                     <td class="text-end" id="footOutPrincipal">—</td>
                     <td class="text-end" id="footOutInterest">—</td>
@@ -199,6 +198,7 @@
 </div>
 
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>window.JLMS_ACTIVE = "active-loans-report";</script>
 <script src="js/jlms-shell.js"></script>
 <script src="js/api-client.js"></script>
@@ -206,11 +206,21 @@
 jlmsInitShell();
 
 let currentPage   = 1;
-const PAGE_SIZE   = 25;
+const PAGE_SIZE   = 5;
 let lastResult    = null;
 let activeFilters = {};
 
 const el = (id) => document.getElementById(id);
+
+(function () {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const today = `${y}-${m}-${d}`;
+  el("fFromDate").value = today;
+  el("fToDate").value   = today;
+})();
 const elTBody = el("tableBody"), elTFoot = el("tableFoot"), elBadge = el("recordsBadge"),
       elSummary = el("summaryCards"), elPaginFoot = el("paginationFooter"),
       elPaginInfo = el("paginationInfo"), elPaginCtrls = el("paginationControls");
@@ -251,7 +261,7 @@ async function loadDropdowns() {
 async function loadReport(filters) {
   clearApiError();
   const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
-  elTBody.innerHTML = `<tr><td colspan="21"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
+  elTBody.innerHTML = `<tr><td colspan="20"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
   elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
   elBadge.style.display = "none"; elSummary.style.display = "none";
   setExportBtnsVisible(false);
@@ -262,7 +272,7 @@ async function loadReport(filters) {
     renderGrid(data);
   } catch (err) {
     showApiError(err);
-    elTBody.innerHTML = `<tr><td colspan="21"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
+    elTBody.innerHTML = `<tr><td colspan="20"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
   }
 }
 
@@ -301,7 +311,7 @@ function renderGrid(data) {
   setExportBtnsVisible(totalCount > 0);
 
   if (!items || items.length === 0) {
-    elTBody.innerHTML = `<tr><td colspan="21"><div class="state-panel"><i class="bi bi-inbox"></i><p>No active loans found for the selected filters.</p></div></td></tr>`;
+    elTBody.innerHTML = `<tr><td colspan="20"><div class="state-panel"><i class="bi bi-inbox"></i><p>No active loans found for the selected filters.</p></div></td></tr>`;
     elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
     return;
   }
@@ -314,8 +324,7 @@ function renderGrid(data) {
     return `<tr>
       <td>${startNo + i}</td>
       <td class="nowrap" title="Maturity: ${fmtDate(r.maturityDate)}">${r.loanNumber}</td>
-      <td>${r.customerCode}</td>
-      <td>${r.customerName}</td>
+      <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
       <td>${r.mobile}</td>
       <td>${r.schemeDisplay}</td>
       <td>${fmtDate(r.loanDate)}</td>
@@ -368,17 +377,64 @@ function goPage(p) {
 }
 
 function exportExcel() {
-  const rows = Array.from(document.querySelectorAll("#reportTable tbody tr"))
-    .filter(r => !r.querySelector(".state-panel"))
-    .map(r => Array.from(r.cells).map(c => c.innerText.trim()).join("\t")).join("\n");
-  const header = ["S.No","Loan No","Cust. Code","Customer Name","Mobile","Loan Scheme","Loan Date","Maturity Date",
-    "Jewel Type","Gross Wt","Net Wt","Purity","Principal","Overall Interest","Out. Principal","Out. Interest",
-    "Total Outstanding","Last Payment","Days Overdue","Status","Branch"].join("\t");
-  const blob = new Blob([header + "\n" + rows], { type: "text/tab-separated-values" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `Active_Loans_Report_${new Date().toISOString().slice(0,10)}.xls`;
-  a.click();
+  if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
+
+  const header = ["S.No","Loan No","Customer","Mobile","Loan Scheme","Loan Date","Maturity Date",
+    "Jewel Type","Gross Wt (g)","Net Wt (g)","Purity","Principal","Overall Interest",
+    "Out. Principal","Out. Interest","Total Outstanding","Last Payment","Days Overdue","Status","Branch"];
+
+  const startNo = (lastResult.page - 1) * lastResult.pageSize + 1;
+  const rows = lastResult.items.map((r, i) => [
+    startNo + i,
+    r.loanNumber,
+    `${r.customerName} (${r.customerCode})`,
+    r.mobile,
+    r.schemeDisplay,
+    fmtDate(r.loanDate),
+    fmtDate(r.maturityDate),
+    r.jewelTypes || "—",
+    r.grossWeight || 0,
+    r.netWeight || 0,
+    r.purity || "—",
+    r.principalAmount || 0,
+    r.overallInterest || 0,
+    r.outstandingPrincipal || 0,
+    r.outstandingInterest || 0,
+    r.totalOutstanding || 0,
+    fmtDate(r.lastPaymentDate),
+    r.daysOverdue || 0,
+    r.status,
+    r.branchName || "—"
+  ]);
+
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+
+  // Currency columns: Principal(L), Overall Interest(M), Out.Principal(N), Out.Interest(O), Total Outstanding(P)
+  const currencyFmt = '₹#,##,##0';
+  ["L","M","N","O","P"].forEach(col => {
+    for (let r = 2; r <= rows.length + 1; r++) {
+      const cell = ws[`${col}${r}`];
+      if (cell) cell.z = currencyFmt;
+    }
+  });
+
+  // Weight columns as 2-decimal numbers
+  ["I","J"].forEach(col => {
+    for (let r = 2; r <= rows.length + 1; r++) {
+      const cell = ws[`${col}${r}`];
+      if (cell) cell.z = '0.00';
+    }
+  });
+
+  ws["!cols"] = [
+    { wch: 6 }, { wch: 16 }, { wch: 26 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 12 },
+    { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 8 }, { wch: 14 }, { wch: 14 },
+    { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 12 }, { wch: 8 }, { wch: 10 }, { wch: 14 }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Active Loans");
+  XLSX.writeFile(wb, `Active_Loans_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
 function printReport() {
@@ -396,8 +452,15 @@ function printReport() {
   win.document.close(); win.print();
 }
 
+// loadDropdowns();
+// loadReport({});
+
+activeFilters = {
+  fromDate: el("fFromDate").value || undefined,
+  toDate:   el("fToDate").value   || undefined
+};
 loadDropdowns();
-loadReport({});
+loadReport(activeFilters);
 </script>
 </body>
 </html>

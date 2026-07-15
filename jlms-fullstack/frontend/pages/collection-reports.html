@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>JLMS — Collection Reports</title>
@@ -22,29 +23,29 @@
             transition: background .15s;
         }
 
-            .report-cat-item:hover {
-                background: var(--n-50);
-            }
+        .report-cat-item:hover {
+            background: var(--n-50);
+        }
 
-            .report-cat-item.active {
-                background: var(--navy-50);
-                color: var(--navy-700);
-                border-left-color: var(--navy-700);
-            }
+        .report-cat-item.active {
+            background: var(--navy-50);
+            color: var(--navy-700);
+            border-left-color: var(--navy-700);
+        }
 
-            .report-cat-item .count {
-                margin-left: auto;
-                font-size: 10.5px;
-                background: var(--n-150);
-                color: var(--n-600);
-                padding: 1px 7px;
-                border-radius: 10px;
-            }
+        .report-cat-item .count {
+            margin-left: auto;
+            font-size: 10.5px;
+            background: var(--n-150);
+            color: var(--n-600);
+            padding: 1px 7px;
+            border-radius: 10px;
+        }
 
-            .report-cat-item.active .count {
-                background: var(--navy-100);
-                color: var(--navy-700);
-            }
+        .report-cat-item.active .count {
+            background: var(--navy-100);
+            color: var(--navy-700);
+        }
 
         #filterCustomer:disabled {
             opacity: 0.6;
@@ -64,35 +65,35 @@
             border: 1px solid #eef0f3;
             border-radius: 10px;
             padding: 14px 16px;
-            box-shadow: 0 1px 4px rgba(0,0,0,.04);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
         }
 
-            .summary-card .sc-label {
-                font-size: 11.5px;
-                color: #9aa4b2;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: .04em;
-                margin-bottom: 4px;
-            }
+        .summary-card .sc-label {
+            font-size: 11.5px;
+            color: #9aa4b2;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 4px;
+        }
 
-            .summary-card .sc-value {
-                font-size: 18px;
-                font-weight: 700;
-                color: #1e2a3a;
-            }
+        .summary-card .sc-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e2a3a;
+        }
 
-            .summary-card.accent-orange .sc-value {
-                color: #d97706;
-            }
+        .summary-card.accent-orange .sc-value {
+            color: #d97706;
+        }
 
-            .summary-card.accent-red .sc-value {
-                color: #dc2626;
-            }
+        .summary-card.accent-red .sc-value {
+            color: #dc2626;
+        }
 
-            .summary-card.accent-navy .sc-value {
-                color: var(--navy-700,#0d3b66);
-            }
+        .summary-card.accent-navy .sc-value {
+            color: var(--navy-700, #0d3b66);
+        }
 
         .state-panel {
             text-align: center;
@@ -100,16 +101,16 @@
             color: #9aa4b2;
         }
 
-            .state-panel i {
-                font-size: 2.8rem;
-                display: block;
-                margin-bottom: 12px;
-            }
+        .state-panel i {
+            font-size: 2.8rem;
+            display: block;
+            margin-bottom: 12px;
+        }
 
-            .state-panel p {
-                font-size: 14px;
-                margin: 0;
-            }
+        .state-panel p {
+            font-size: 14px;
+            margin: 0;
+        }
 
         @keyframes spin {
             to {
@@ -123,13 +124,14 @@
         }
     </style>
 </head>
+
 <body>
     <div class="app-shell">
         <div id="jlmsSidebarMount"></div>
         <div class="main-col">
             <div id="jlmsTopbarMount"></div>
             <div class="page-content">
-
+<!-- 
                 <div class="page-header">
                     <div>
                         <div class="breadcrumb-jlms">
@@ -137,24 +139,29 @@
                             <a href="report-center.html">Report Center</a><span class="sep">/</span>
                             <span class="current">Collection Reports</span>
                         </div>
-                        <!-- <div class="h1">Collection Reports</div> -->
                     </div>
-                </div>
+                </div> -->
 
                 <div class="row g-3">
                     <!-- Left: categories -->
                     <div class="col-lg-3">
                         <div class="panel">
-                            <div class="panel-head"><div class="h4">Report Categories</div></div>
+                            <div class="panel-head">
+                                <div class="h4">Report Categories</div>
+                            </div>
                             <div class="panel-body" style="padding:6px 0;">
                                 <!--<div class="report-cat-item" onclick="location.href='report-center.html'"><i class="bi bi-person-vcard"></i> Customer Reports <span class="count">4</span></div>-->
                                 <!--<div class="report-cat-item" onclick="location.href='report-center.html'"><i class="bi bi-folder2-open"></i> Active Loan Report <span class="count">1</span></div>-->
                                 <!--<div class="report-cat-item active"><i class="bi bi-graph-down"></i> Outstanding Reports </div>
                                 <div class="report-cat-item"><i class="bi bi-cash-coin"></i> Collection Reports </div>-->
-                                <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i class="bi bi-folder2-open"></i> Active Loans Report </div>
-                                <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i class="bi bi-graph-down"></i> Outstanding Reports </div>
-                                <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> Collection Reports </div>
-                                <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i class="bi bi-check2-circle"></i> Closed Loans Report</div>
+                                <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i
+                                        class="bi bi-folder2-open"></i> Active Loans Report </div>
+                                <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i
+                                        class="bi bi-graph-down"></i> Outstanding Reports </div>
+                                <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> Collection Reports
+                                </div>
+                                <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i
+                                        class="bi bi-check2-circle"></i> Closed Loans Report</div>
                                 <!--<div class="report-cat-item"><i class="bi bi-arrow-repeat"></i> Renewal Report <span class="count">2</span></div>
                                 <div class="report-cat-item"><i class="bi bi-check2-circle"></i> Closure Report <span class="count">2</span></div>
                                 <div class="report-cat-item"><i class="bi bi-hammer"></i> Auction Reports <span class="count">3</span></div>
@@ -168,7 +175,9 @@
 
                         <!-- Filters -->
                         <div class="panel mb-3">
-                            <div class="panel-head"><div class="h4">Collection Reports — Filters</div></div>
+                            <div class="panel-head">
+                                <div class="h4">Collection Reports — Filters</div>
+                            </div>
                             <div class="panel-body">
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-2">
@@ -192,21 +201,36 @@
                                         </select>
                                     </div>
                                     <div class="col-md-2">
-                                        <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary" style="width:100%;justify-content:center;">
+                                        <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary"
+                                            style="width:100%;justify-content:center;">
                                             <i class="bi bi-funnel"></i> Apply Filters
                                         </button>
                                     </div>
                                 </div>
-                                <div id="apiErrorBanner" class="mt-3" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:8px;padding:10px 14px;font-size:13px;"></div>
+                                <div id="apiErrorBanner" class="mt-3"
+                                    style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:8px;padding:10px 14px;font-size:13px;">
+                                </div>
                             </div>
                         </div>
 
                         <!-- Summary cards -->
                         <div class="summary-cards" id="summaryCards" style="display:none;">
-                            <div class="summary-card"><div class="sc-label">Total Records</div><div class="sc-value" id="scTotalRecords">—</div></div>
-                            <div class="summary-card accent-navy"><div class="sc-label">Principal Collected</div><div class="sc-value" id="scPrincipal">—</div></div>
-                            <div class="summary-card accent-orange"><div class="sc-label">Interest Collected</div><div class="sc-value" id="scInterest">—</div></div>
-                            <div class="summary-card accent-red"><div class="sc-label">Total Collected</div><div class="sc-value" id="scGrandTotal">—</div></div>
+                            <div class="summary-card">
+                                <div class="sc-label">Total Records</div>
+                                <div class="sc-value" id="scTotalRecords">—</div>
+                            </div>
+                            <div class="summary-card accent-navy">
+                                <div class="sc-label">Principal Collected</div>
+                                <div class="sc-value" id="scPrincipal">—</div>
+                            </div>
+                            <div class="summary-card accent-orange">
+                                <div class="sc-label">Interest Collected</div>
+                                <div class="sc-value" id="scInterest">—</div>
+                            </div>
+                            <div class="summary-card accent-red">
+                                <div class="sc-label">Total Collected</div>
+                                <div class="sc-value" id="scGrandTotal">—</div>
+                            </div>
                         </div>
 
                         <!-- Results grid -->
@@ -214,12 +238,19 @@
                             <div class="grid-toolbar">
                                 <div class="grid-toolbar-left">
                                     <span class="h4">Results</span>
-                                    <span class="badge-jlms badge-neutral" id="recordsBadge" style="display:none;"></span>
+                                    <span class="badge-jlms badge-neutral" id="recordsBadge"
+                                        style="display:none;"></span>
                                 </div>
                                 <div class="grid-toolbar-left">
-                                    <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportPdf" onclick="exportPdf()" style="display:none;"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
-                                    <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportExcel" onclick="exportExcel()" style="display:none;"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
-                                    <button class="btn-jlms btn-jlms-outline btn-sm" id="btnPrint" onclick="printReport()" style="display:none;"><i class="bi bi-printer"></i> Print</button>
+                                    <!-- <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportPdf"
+                                        onclick="exportPdf()" style="display:none;"><i
+                                            class="bi bi-file-earmark-pdf"></i> Export PDF</button> -->
+                                    <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportExcel"
+                                        onclick="exportExcel()" style="display:none;"><i
+                                            class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                                    <button class="btn-jlms btn-jlms-outline btn-sm" id="btnPrint"
+                                        onclick="printReport()" style="display:none;"><i class="bi bi-printer"></i>
+                                        Print</button>
                                 </div>
                             </div>
                             <div class="panel-body no-pad table-jlms-wrap">
@@ -271,11 +302,11 @@
             </div>
         </div>
     </div>
-
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script>window.JLMS_ACTIVE = "collection-reports";</script>
-    <script src="js/jlms-shell.js"></script>
-    <script src="js/api-client.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>window.JLMS_ACTIVE = "collection-reports";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
     <script>
         jlmsInitShell();
 
@@ -291,7 +322,7 @@
 
         // ── State ──────────────────────────────────────────────────────
         let currentPage = 1;
-        const PAGE_SIZE = 25;
+        const PAGE_SIZE = 5;
         let lastResult = null;
         let activeFilters = {};   // {} = no filter; updated when Apply is clicked
 
@@ -315,7 +346,7 @@
             const y = now.getFullYear();
             const m = String(now.getMonth() + 1).padStart(2, "0");
             const d = String(now.getDate()).padStart(2, "0");
-            elFromDate.value = `${y}-${m}-01`;
+            elFromDate.value = `${y}-${m}-${d}`;
             elToDate.value = `${y}-${m}-${d}`;
         })();
 
@@ -338,7 +369,7 @@
         }
 
         function setExportBtnsVisible(v) {
-            ["btnExportPdf", "btnExportExcel", "btnPrint"].forEach(id => {
+            [ "btnExportExcel", "btnPrint"].forEach(id => {
                 document.getElementById(id).style.display = v ? "" : "none";
             });
         }
@@ -416,7 +447,7 @@
                 fromDate: elFromDate.value || undefined,
                 toDate: elToDate.value || undefined,
                 customerId: elCustomer.value || undefined,
-                 loanId: elLoanNo.value || undefined
+                loanId: elLoanNo.value || undefined
             };
             loadReport(activeFilters);
         });
@@ -451,7 +482,7 @@
            <td>${fmtDate(row.transactionDate)}</td>
 
           <td class="cell-link" title="Type: ${row.transactionType} | Date: ${fmtDate(row.transactionDate)}">${row.loanNumber}</td>
-          <td>
+          <td data-export="${row.customerName} (${row.customerCode} · ${row.customerMobile})">
             <div style="font-weight:600;">${row.customerName}</div>
             <div style="font-size:11px;color:#9aa4b2;">${row.customerCode} · ${row.customerMobile}</div>
           </td>
@@ -498,32 +529,58 @@
         }
 
         // ── Export / Print ─────────────────────────────────────────────
-        function exportExcel() {
-            const rows = Array.from(document.querySelectorAll("#collectionTable tbody tr"))
-                .filter(r => !r.querySelector(".state-panel"))
-                .map(r => Array.from(r.cells).map(c => c.innerText.trim()).join("\t")).join("\n");
-            const header = ["Loan No.", "Customer", "Scheme", "Loan Amt", "Out. Principal", "Out. Interest", "Penalty", "Total Outstanding", "Status"].join("\t");
-            const blob = new Blob([header + "\n" + rows], { type: "text/tab-separated-values" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `Outstanding_Report_${new Date().toISOString().slice(0, 10)}.xls`;
-            a.click();
-        }
+       function exportExcel() {
+    if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
 
-        function exportPdf() {
-            alert("PDF export requires a server-side PDF library. This feature is planned for a future release.");
+    const header = ["Txn Date","Loan No.","Customer","Scheme","Loan Amt","Principal Amt","Interest Amt","Paid Amount","Bal Amt"];
+
+    const rows = lastResult.items.map(row => [
+        fmtDate(row.transactionDate),
+        row.loanNumber,
+        `${row.customerName} (${row.customerCode} · ${row.customerMobile})`,
+        row.schemeName,
+        row.loanAmount || 0,
+        row.principalAmount || 0,
+        row.interestAmount || 0,
+        row.totalAmount || 0,
+        row.balanceAmount || 0
+    ]);
+
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+
+    // Format amount columns (E–I) as ₹ currency
+    const currencyFmt = '₹#,##,##0';
+    ["E","F","G","H","I"].forEach(col => {
+        for (let r = 2; r <= rows.length + 1; r++) {
+            const cell = ws[`${col}${r}`];
+            if (cell) cell.z = currencyFmt;
         }
+    });
+
+    ws["!cols"] = [
+        { wch: 12 }, { wch: 16 }, { wch: 30 }, { wch: 12 },
+        { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Collection Report");
+    XLSX.writeFile(wb, `Collection_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+        // function exportPdf() {
+        //     alert("PDF export requires a server-side PDF library. This feature is planned for a future release.");
+        // }
 
         function printReport() {
-            const tbl = document.getElementById("outstandingTable").outerHTML;
+            const tbl = document.getElementById("CollectionTable").outerHTML;
             const win = window.open("", "_blank");
-            win.document.write(`<!DOCTYPE html><html><head><title>Outstanding Report</title>
+            win.document.write(`<!DOCTYPE html><html><head><title>Collection Report</title>
         <style>body{font-family:Arial,sans-serif;font-size:12px;}
         table{border-collapse:collapse;width:100%;}
         th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;}
         th{background:#f0f0f0;font-weight:700;}.text-end{text-align:right;}
         </style></head><body>
-        <h2 style="margin-bottom:6px;">Outstanding Report</h2>
+        <h2 style="margin-bottom:6px;">Collection Report</h2>
         <p style="color:#666;margin-bottom:14px;">Generated: ${new Date().toLocaleString("en-IN")}</p>
         ${tbl}</body></html>`);
             win.document.close(); win.print();
@@ -532,8 +589,15 @@
         // ── Init: fires both in parallel on page open ──────────────────
         // loadReport({}) = no filters → shows ALL outstanding loans immediately.
         // loadCustomerDropdown() populates the dropdown in the background.
+        activeFilters = {
+            fromDate: elFromDate.value || undefined,
+            toDate: elToDate.value || undefined,
+            customerId: elCustomer.value || undefined,
+            loanId: elLoanNo.value || undefined
+        };
         loadCustomerDropdown();
-        loadReport({});
+        loadReport(activeFilters);
     </script>
 </body>
+
 </html>

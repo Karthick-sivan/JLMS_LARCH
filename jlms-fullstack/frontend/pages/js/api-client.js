@@ -92,6 +92,11 @@ const Api = {
   // ---- Masters ----
   getJewelTypes: (activeOnly = true) => apiRequest(`/jewel-types?activeOnly=${activeOnly}`),
   createJewelType: (dto) => apiRequest("/jewel-types", { method: "POST", body: dto }),
+   updateJewelType: (id, dto) =>
+    apiRequest(`/jewel-types/${id}`, {
+        method: "PUT",
+        body: dto
+    }),
 
   getTodayGoldRate: () => apiRequest("/gold-rates/today"),
   getGoldRateHistory: (days = 30) => apiRequest(`/gold-rates/history?days=${days}`),
