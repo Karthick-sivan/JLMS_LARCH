@@ -1,204 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>JLMS — Jewel Type Master</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="css/jlms-core.css">
+<meta charset="UTF-8">
+<title>JLMS — Jewel Type Master</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
 </head>
-
 <body>
-    <div class="app-shell">
-        <div id="jlmsSidebarMount"></div>
-        <div class="main-col">
-            <div id="jlmsTopbarMount"></div>
-            <div class="page-content">
-                <div class="page-header">
-                    <div id="apiErrorBanner" class="api-error-banner"></div>
-                    <div id="apiSuccessBanner" class="api-success-banner"></div>
-                    <!-- <div>
-                        <div class="breadcrumb-jlms">
-                            <a href="dashboard.html">Home</a><span class="sep">/</span>
-                            <a href="#">Masters</a><span class="sep">/</span>
-                            <span class="current">Jewel Type Master</span>
-                        </div>
-                    </div> -->
-                </div>
-
-                <div class="row g-3">
-                    <div class="col-lg-4">
-                        <div class="panel">
-                            <div class="panel-head">
-                                <div class="h4" id="formTitle">
-                                    Add Jewel Type
-                                </div>
-                            </div>
-                            <div class="panel-body">
-                                <div class="field-group"><label class="field-label">Jewel Type Name<span
-                                            class="req">*</span></label><input id="txtJewelTypeName"
-                                        class="form-control-jlms" placeholder="e.g. Gold Necklace"></div>
-                                <div class="field-group"><label class="field-label">Category<span
-                                            class="req">*</span></label><select id="ddlCategory"
-                                        class="form-select-jlms">
-
-                                        <option value="Ornament">Ornament</option>
-                                        <option value="Coin">Coin</option>
-                                        <option value="Bar">Bar</option>
-
-                                    </select></div>
-                                <div class="field-group"><label class="field-label">Default Purity</label><select
-                                        id="ddlPurity" class="form-select-jlms">
-
-                                        <option value="22K">22K (91.6%)</option>
-                                        <option value="18K">18K (75.0%)</option>
-                                        <option value="24K">24K (99.9%)</option>
-
-                                    </select></div>
-                                <div class="field-group">
-                                    <label class="field-label">Standard Wastage %</label>
-                                    <div class="input-affix">
-                                        <input id="txtWastage" type="number" class="form-control-jlms" step="0.01"
-                                            min="0" placeholder="Enter wastage %" value="2.0">
-                                        <span class="affix suffix">%</span>
-                                    </div>
-                                </div>
-                                <div class="form-check-jlms mb-3">
-                                    <input type="checkbox" id="chkActive" checked>
-
-                                    <label for="chkActive">Active</label>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <button id="btnClear" class="btn-jlms btn-jlms-ghost"
-                                        style="flex:1; justify-content:center;">Clear</button>
-                                    <button id="btnSave" class="btn-jlms btn-jlms-primary"
-                                        style="flex:1; justify-content:center;"><i class="bi bi-save"></i> Save</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-8">
-                        <div class="panel">
-                            <div class="grid-toolbar">
-                                <span class="h4">Jewel Types</span>
-                                <div class="grid-search"><i class="bi bi-search"></i><input
-                                        placeholder="Search jewel type"></div>
-                            </div>
-                            <div class="panel-body no-pad table-jlms-wrap">
-                                <table class="table-jlms">
-                                    <thead>
-                                        <tr>
-                                            <th>Jewel Type</th>
-                                            <th>Category</th>
-                                            <th>Default Purity</th>
-                                            <th class="text-end">Wastage %</th>
-                                            <th class="text-center">Status</th>
-                                            <th class="text-center">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tblJewelTypes">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div id="apiErrorBanner" class="api-error-banner"></div>
+<div id="apiSuccessBanner" class="api-success-banner"></div>
+        <div>
+          <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Jewel Type Master</span></div> -->
+          <div class="h1">Jewel Type Master</div>
         </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="panel">
+            <div class="panel-head">
+    <div class="h4" id="formTitle">
+        Add Jewel Type
     </div>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script>window.JLMS_ACTIVE = "jewel-type-master";</script>
-    <script src="js/jlms-shell.js"></script>
-    <script src="js/api-client.js"></script>
-    <script>
-        jlmsInitShell();
+</div>
+            <div class="panel-body">
+              <div class="field-group"><label class="field-label">Jewel Type Name<span class="req">*</span></label><input
+    id="txtJewelTypeName"
+    class="form-control-jlms"
+    placeholder="e.g. Gold Necklace"></div>
+              <div class="field-group"><label class="field-label">Category<span class="req">*</span></label><select
+    id="ddlCategory"
+    class="form-select-jlms">
 
-        let editingId = 0;
-        let jewelTypeList = [];
+    <option value="Ornament">Ornament</option>
+    <option value="Coin">Coin</option>
+    <option value="Bar">Bar</option>
 
-        document.addEventListener("DOMContentLoaded", () => {
+</select></div>
+              <div class="field-group"><label class="field-label">Default Purity</label><select
+    id="ddlPurity"
+    class="form-select-jlms">
 
-            Session.requireLogin();
+<option value="22K">22K (91.6%)</option>
+<option value="18K">18K (75.0%)</option>
+<option value="24K">24K (99.9%)</option>
 
-            //-------------------------------------------------------
-            // Controls
-            //-------------------------------------------------------
+</select></div>
+              <div class="field-group">
+    <label class="field-label">Standard Wastage %</label>
+    <div class="input-affix">
+        <input
+            id="txtWastage"
+            type="number"
+            class="form-control-jlms"
+            step="0.01"
+            min="0"
+            placeholder="Enter wastage %"
+            value="2.0">
+        <span class="affix suffix">%</span>
+    </div>
+</div>
+             <div class="form-check-jlms mb-3">
+    <input
+        type="checkbox"
+        id="chkActive"
+        checked>
 
-            const txtJewelTypeName = document.getElementById("txtJewelTypeName");
-            const ddlCategory = document.getElementById("ddlCategory");
-            const ddlPurity = document.getElementById("ddlPurity");
-            const txtWastage = document.getElementById("txtWastage");
-            const chkActive = document.getElementById("chkActive");
+    <label for="chkActive">Active</label>
+</div>
+              <div class="d-flex gap-2">
+                <button
+id="btnClear"
+class="btn-jlms btn-jlms-ghost" style="flex:1; justify-content:center;">Clear</button>
+                <button
+id="btnSave"
+class="btn-jlms btn-jlms-primary" style="flex:1; justify-content:center;"><i class="bi bi-save"></i> Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="panel">
+            <div class="grid-toolbar">
+              <span class="h4">Jewel Types</span>
+              <div class="grid-search"><i class="bi bi-search"></i><input placeholder="Search jewel type"></div>
+            </div>
+            <div class="panel-body no-pad table-jlms-wrap">
+              <table class="table-jlms">
+                <thead><tr><th>Jewel Type</th><th>Category</th><th>Default Purity</th><th class="text-end">Wastage %</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
+                <tbody id="tblJewelTypes">
+</tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "jewel-type-master";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
 
-            const btnSave = document.getElementById("btnSave");
-            const btnClear = document.getElementById("btnClear");
+let editingId = 0;
+let jewelTypeList = [];
 
-            const tblJewelTypes = document.getElementById("tblJewelTypes");
+document.addEventListener("DOMContentLoaded", () => {
 
-            const apiSuccessBanner =
-                document.getElementById("apiSuccessBanner");
+    Session.requireLogin();
 
-            //-------------------------------------------------------
-            // Events
-            //-------------------------------------------------------
+    //-------------------------------------------------------
+    // Controls
+    //-------------------------------------------------------
 
-            btnSave.addEventListener("click", saveJewelType);
-            btnClear.addEventListener("click", clearForm);
+    const txtJewelTypeName = document.getElementById("txtJewelTypeName");
+    const ddlCategory = document.getElementById("ddlCategory");
+    const ddlPurity = document.getElementById("ddlPurity");
+    const txtWastage = document.getElementById("txtWastage");
+    const chkActive = document.getElementById("chkActive");
 
-            loadJewelTypes();
+    const btnSave = document.getElementById("btnSave");
+    const btnClear = document.getElementById("btnClear");
 
-            //-------------------------------------------------------
-            // Load Jewel Types
-            //-------------------------------------------------------
+    const tblJewelTypes = document.getElementById("tblJewelTypes");
 
-            async function loadJewelTypes() {
+    const apiSuccessBanner =
+    document.getElementById("apiSuccessBanner");
 
-                clearApiError();
+    //-------------------------------------------------------
+    // Events
+    //-------------------------------------------------------
 
-                try {
+    btnSave.addEventListener("click", saveJewelType);
+    btnClear.addEventListener("click", clearForm);
 
-                    jewelTypeList = await Api.getJewelTypes(false);
+    loadJewelTypes();
 
-                    renderTable(jewelTypeList);
+    //-------------------------------------------------------
+    // Load Jewel Types
+    //-------------------------------------------------------
 
-                }
-                catch (err) {
+    async function loadJewelTypes() {
 
-                    showApiError(err);
+        clearApiError();
 
-                }
+        try {
 
-            }
+            jewelTypeList = await Api.getJewelTypes(false);
 
-            //-------------------------------------------------------
-            // Render Table
-            //-------------------------------------------------------
+            renderTable(jewelTypeList);
 
-            function renderTable(data) {
+        }
+        catch (err) {
 
-                tblJewelTypes.innerHTML = "";
+            showApiError(err);
 
-                if (data.length === 0) {
+        }
 
-                    tblJewelTypes.innerHTML =
-                        `<tr>
+    }
+
+    //-------------------------------------------------------
+    // Render Table
+    //-------------------------------------------------------
+
+    function renderTable(data) {
+
+        tblJewelTypes.innerHTML = "";
+
+        if (data.length === 0) {
+
+            tblJewelTypes.innerHTML =
+                `<tr>
                     <td colspan="6" class="text-center">
                         No Jewel Types Found
                     </td>
                 </tr>`;
 
-                    return;
-                }
+            return;
+        }
 
-                data.forEach(item => {
+        data.forEach(item => {
 
-                    const badge = item.isActive
-                        ? `<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>`
-                        : `<span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span>`;
+            const badge = item.isActive
+                ? `<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>`
+                : `<span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span>`;
 
-                    tblJewelTypes.innerHTML += `
+            tblJewelTypes.innerHTML += `
 
             <tr>
 
@@ -222,157 +220,156 @@
 
             </tr>
             `;
-                });
+        });
 
-                document.querySelectorAll(".edit-icon").forEach(icon => {
+        document.querySelectorAll(".edit-icon").forEach(icon => {
 
-                    icon.addEventListener("click", function () {
+            icon.addEventListener("click", function () {
 
-                        editJewelType(Number(this.dataset.id));
+                editJewelType(Number(this.dataset.id));
 
-                    });
-
-                });
-
-            }
-
-            //-------------------------------------------------------
-            // Save / Update
-            //-------------------------------------------------------
-
-            async function saveJewelType() {
-
-                clearApiError();
-
-                const dto = {
-
-                    jewelTypeName: txtJewelTypeName.value.trim(),
-
-                    category: ddlCategory.value,
-
-                    defaultPurity: ddlPurity.value,
-
-                    wastagePercent: parseFloat(txtWastage.value),
-
-                    isActive: chkActive.checked
-
-                };
-
-                if (dto.jewelTypeName === "") {
-
-                    showApiError(new Error("Please enter Jewel Type Name."));
-                    return;
-
-                }
-
-                if (isNaN(dto.wastagePercent)) {
-
-                    showApiError(new Error("Please enter Wastage %."));
-                    return;
-
-                }
-
-                btnSave.disabled = true;
-
-                try {
-
-                    if (editingId === 0) {
-
-                        await Api.createJewelType(dto);
-
-                        apiSuccessBanner.innerHTML = "Jewel Type created successfully.";
-
-                    }
-                    else {
-
-                        await Api.updateJewelType(editingId, dto);
-
-                        apiSuccessBanner.innerHTML = "Jewel Type updated successfully.";
-
-                    }
-
-                    apiSuccessBanner.style.display = "block";
-
-                    clearForm();
-
-                    loadJewelTypes();
-
-                }
-                catch (err) {
-
-                    showApiError(err);
-
-                }
-                finally {
-
-                    btnSave.disabled = false;
-
-                }
-
-            }
-
-            //-------------------------------------------------------
-            // Edit
-            //-------------------------------------------------------
-
-            function editJewelType(id) {
-
-                const item = jewelTypeList.find(x => x.jewelTypeId === id);
-
-                if (!item)
-                    return;
-
-                editingId = id;
-
-                document.getElementById("formTitle").textContent = "Edit Jewel Type";
-
-                txtJewelTypeName.value = item.jewelTypeName;
-
-                ddlCategory.value = item.category;
-
-                ddlPurity.value = item.defaultPurity;
-
-                txtWastage.value = item.wastagePercent;
-
-                chkActive.checked = item.isActive;
-
-                btnSave.innerHTML =
-                    '<i class="bi bi-check2-circle"></i> Update';
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
-
-            }
-
-            //-------------------------------------------------------
-            // Clear
-            //-------------------------------------------------------
-
-            function clearForm() {
-
-                editingId = 0;
-
-                document.getElementById("formTitle").textContent = "Add Jewel Type";
-
-                txtJewelTypeName.value = "";
-
-                ddlCategory.value = "Ornament";
-
-                ddlPurity.value = "22K";
-
-                txtWastage.value = "2.0";
-
-                chkActive.checked = true;
-
-                btnSave.innerHTML =
-                    '<i class="bi bi-save"></i> Save';
-
-            }
+            });
 
         });
-    </script>
-</body>
 
+    }
+
+    //-------------------------------------------------------
+    // Save / Update
+    //-------------------------------------------------------
+
+    async function saveJewelType() {
+
+        clearApiError();
+
+        const dto = {
+
+            jewelTypeName: txtJewelTypeName.value.trim(),
+
+            category: ddlCategory.value,
+
+            defaultPurity: ddlPurity.value,
+
+            wastagePercent: parseFloat(txtWastage.value),
+
+            isActive: chkActive.checked
+
+        };
+
+        if (dto.jewelTypeName === "") {
+
+            showApiError(new Error("Please enter Jewel Type Name."));
+            return;
+
+        }
+
+        if (isNaN(dto.wastagePercent)) {
+
+            showApiError(new Error("Please enter Wastage %."));
+            return;
+
+        }
+
+        btnSave.disabled = true;
+
+        try {
+
+            if (editingId === 0) {
+
+                await Api.createJewelType(dto);
+
+                apiSuccessBanner.innerHTML = "Jewel Type created successfully.";
+
+            }
+            else {
+
+                await Api.updateJewelType(editingId, dto);
+
+                apiSuccessBanner.innerHTML = "Jewel Type updated successfully.";
+
+            }
+
+            apiSuccessBanner.style.display = "block";
+
+            clearForm();
+
+            loadJewelTypes();
+
+        }
+        catch (err) {
+
+            showApiError(err);
+
+        }
+        finally {
+
+            btnSave.disabled = false;
+
+        }
+
+    }
+
+    //-------------------------------------------------------
+    // Edit
+    //-------------------------------------------------------
+
+    function editJewelType(id) {
+
+        const item = jewelTypeList.find(x => x.jewelTypeId === id);
+
+        if (!item)
+            return;
+
+        editingId = id;
+
+        document.getElementById("formTitle").textContent = "Edit Jewel Type";
+
+        txtJewelTypeName.value = item.jewelTypeName;
+
+        ddlCategory.value = item.category;
+
+        ddlPurity.value = item.defaultPurity;
+
+        txtWastage.value = item.wastagePercent;
+
+        chkActive.checked = item.isActive;
+
+        btnSave.innerHTML =
+            '<i class="bi bi-check2-circle"></i> Update';
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    }
+
+    //-------------------------------------------------------
+    // Clear
+    //-------------------------------------------------------
+
+    function clearForm() {
+
+        editingId = 0;
+
+        document.getElementById("formTitle").textContent = "Add Jewel Type";
+
+        txtJewelTypeName.value = "";
+
+        ddlCategory.value = "Ornament";
+
+        ddlPurity.value = "22K";
+
+        txtWastage.value = "2.0";
+
+        chkActive.checked = true;
+
+        btnSave.innerHTML =
+            '<i class="bi bi-save"></i> Save';
+
+    }
+
+});
+</script>
+</body>
 </html>

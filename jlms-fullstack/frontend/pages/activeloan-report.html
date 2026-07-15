@@ -167,7 +167,8 @@
                     <th class="text-end">Principal</th><th class="text-end">Overall Interest</th>
                     <th class="text-end">Out. Principal</th><th class="text-end">Out. Interest</th>
                     <th class="text-end">Total Outstanding</th><th>Last Payment</th><th class="text-end">Days Overdue</th>
-                    <th>Status</th><th>Branch</th>
+                    <!-- <th>Status</th> -->
+                    <th>Branch</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -229,12 +230,12 @@ function fmt(n) { return n == null ? "—" : "₹" + Number(n).toLocaleString("e
 function fmtNum(n) { return n == null ? "—" : Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 }); }
 function fmtDate(dt) { return dt ? new Date(dt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"; }
 
-function statusBadge(status, days) {
-  let cls = "badge-success", label = status;
-  if (status === "Overdue") { cls = "badge-danger"; label = days > 0 ? `Overdue (${days}d)` : "Overdue"; }
-  else if (status === "Due") { cls = "badge-warning"; }
-  return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
-}
+// function statusBadge(status, days) {
+//   let cls = "badge-success", label = status;
+//   if (status === "Overdue") { cls = "badge-danger"; label = days > 0 ? `Overdue (${days}d)` : "Overdue"; }
+//   else if (status === "Due") { cls = "badge-warning"; }
+//   return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
+// }
 
 function setExportBtnsVisible(v) {
   ["btnExportExcel", "btnPrint"].forEach(id => document.getElementById(id).style.display = v ? "" : "none");
@@ -282,13 +283,13 @@ el("btnApplyFilters").addEventListener("click", () => {
     loanNo:       el("fLoanNo").value.trim()       || undefined,
     customerName: el("fCustomerName").value.trim() || undefined,
     mobile:       el("fMobile").value.trim()       || undefined,
-    aadhaar:      el("fAadhaar").value.trim()      || undefined,
+    // aadhaar:      el("fAadhaar").value.trim()      || undefined,
     loanSchemeId: el("fScheme").value              || undefined,
     jewelTypeId:  el("fJewelType").value           || undefined,
     fromDate:     el("fFromDate").value            || undefined,
     toDate:       el("fToDate").value               || undefined,
-    branchId:     el("fBranch").value              || undefined,
-    status:       el("fStatus").value               || undefined
+    // branchId:     el("fBranch").value              || undefined,
+    // status:       el("fStatus").value               || undefined
   };
   loadReport(activeFilters);
 });
@@ -340,7 +341,6 @@ function renderGrid(data) {
       <td class="text-end cell-strong">${fmt(r.totalOutstanding)}</td>
       <td>${fmtDate(r.lastPaymentDate)}</td>
       <td class="text-end">${r.daysOverdue || 0}</td>
-      <td>${statusBadge(r.status, r.daysOverdue)}</td>
       <td>${r.branchName || "—"}</td>
     </tr>`;
   });
@@ -381,7 +381,7 @@ function exportExcel() {
 
   const header = ["S.No","Loan No","Customer","Mobile","Loan Scheme","Loan Date","Maturity Date",
     "Jewel Type","Gross Wt (g)","Net Wt (g)","Purity","Principal","Overall Interest",
-    "Out. Principal","Out. Interest","Total Outstanding","Last Payment","Days Overdue","Status","Branch"];
+    "Out. Principal","Out. Interest","Total Outstanding","Last Payment","Days Overdue","Branch"];
 
   const startNo = (lastResult.page - 1) * lastResult.pageSize + 1;
   const rows = lastResult.items.map((r, i) => [
@@ -403,7 +403,7 @@ function exportExcel() {
     r.totalOutstanding || 0,
     fmtDate(r.lastPaymentDate),
     r.daysOverdue || 0,
-    r.status,
+    // r.status,
     r.branchName || "—"
   ]);
 

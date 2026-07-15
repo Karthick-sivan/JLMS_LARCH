@@ -159,9 +159,12 @@
                     <th>Jewel Type</th><th class="text-end">Gross Wt (g)</th><th class="text-end">Net Wt (g)</th><th>Purity</th>
                     <th class="text-end">Principal</th><th class="text-end">Overall Interest</th>
                     <th class="text-end">Interest Collected</th><th class="text-end">Principal Collected</th><th class="text-end">Total Collected</th>
-                    <th class="text-end">Closure Charges</th><th class="text-end">Final Settlement</th>
-                    <th>Payment Mode</th><th>Reference No</th><th>Closed By</th><th>Branch</th>
-                    <th>Closure Receipt No</th><th>Status</th><th>Remarks</th>
+                    <!-- <th class="text-end">Closure Charges</th> -->
+                    <!-- <th class="text-end">Final Settlement</th> -->
+                    <th>Payment Mode</th>
+                    <!-- <th>Reference No</th> -->
+                    <th>Closed By</th><th>Branch</th>
+                    <!-- <th>Closure Receipt No</th><th>Status</th><th>Remarks</th> -->
                   </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -174,8 +177,8 @@
                     <td class="text-end" id="footInterestCollected">—</td>
                     <td class="text-end" id="footPrincipalCollected">—</td>
                     <td class="text-end" id="footTotalCollected">—</td>
-                    <td class="text-end" id="footClosureCharges">—</td>
-                    <td class="text-end" id="footFinalSettlement">—</td>
+                    <!-- <td class="text-end" id="footClosureCharges">—</td> -->
+                    <!-- <td class="text-end" id="footFinalSettlement">—</td> -->
                     <td colspan="6"></td>
                   </tr>
                 </tfoot>
@@ -274,13 +277,13 @@ el("btnApplyFilters").addEventListener("click", () => {
     loanNo:          el("fLoanNo").value.trim()       || undefined,
     customerName:    el("fCustomerName").value.trim() || undefined,
     mobile:          el("fMobile").value.trim()       || undefined,
-    aadhaar:         el("fAadhaar").value.trim()      || undefined,
+    // aadhaar:         el("fAadhaar").value.trim()      || undefined,
     loanSchemeId:    el("fScheme").value              || undefined,
     jewelTypeId:     el("fJewelType").value           || undefined,
     closureFromDate: el("fFromDate").value            || undefined,
-    closureToDate:   el("fToDate").value               || undefined,
-    closedByUserId:  el("fClosedBy").value            || undefined,
-    branchId:        el("fBranch").value              || undefined
+    closureToDate:   el("fToDate").value               || undefined
+    // closedByUserId:  el("fClosedBy").value            || undefined
+    // branchId:        el("fBranch").value              || undefined
   };
   loadReport(activeFilters);
 });
@@ -332,15 +335,10 @@ function renderGrid(data) {
       <td class="text-end">${fmt(r.totalInterestCollected)}</td>
       <td class="text-end">${fmt(r.totalPrincipalCollected)}</td>
       <td class="text-end cell-strong">${fmt(r.totalAmountCollected)}</td>
-      <td class="text-end">${fmt(r.closureCharges)}</td>
-      <td class="text-end">${fmt(r.finalSettlementAmount)}</td>
       <td>${r.paymentMode || "—"}</td>
-      <td>${r.referenceNo || "—"}</td>
       <td>${r.closedByName || "—"}</td>
       <td>${r.branchName || "—"}</td>
-      <td>${r.closureReceiptNo || "—"}</td>
-      <td><span class="badge-jlms badge-success"><span class="dot"></span>${r.status}</span></td>
-      <td>${r.remarks || "—"}</td>
+  
     </tr>`;
   });
 
@@ -349,8 +347,8 @@ function renderGrid(data) {
   el("footInterestCollected").textContent = fmt(pIC);
   el("footPrincipalCollected").textContent= fmt(pPC);
   el("footTotalCollected").textContent    = fmt(pTC);
-  el("footClosureCharges").textContent    = fmt(pCC);
-  el("footFinalSettlement").textContent   = fmt(pFS);
+  // el("footClosureCharges").textContent    = fmt(pCC);
+  // el("footFinalSettlement").textContent   = fmt(pFS);
   elTFoot.style.display = "";
 
   renderPagination(totalCount, page, pageSize);
@@ -382,8 +380,8 @@ function exportExcel() {
 
   const header = ["S.No","Loan No","Customer","Mobile","Loan Scheme","Loan Date","Maturity Date",
     "Closure Date","Duration (Days)","Jewel Type","Gross Wt (g)","Net Wt (g)","Purity","Principal","Overall Interest",
-    "Interest Collected","Principal Collected","Total Collected","Closure Charges","Final Settlement",
-    "Payment Mode","Reference No","Closed By","Branch","Closure Receipt No","Status","Remarks"];
+    "Interest Collected","Principal Collected","Total Collected",
+    "Payment Mode","Closed By","Branch"];
 
   const startNo = (lastResult.page - 1) * lastResult.pageSize + 1;
   const rows = lastResult.items.map((r, i) => [
@@ -405,15 +403,15 @@ function exportExcel() {
     r.totalInterestCollected || 0,
     r.totalPrincipalCollected || 0,
     r.totalAmountCollected || 0,
-    r.closureCharges || 0,
-    r.finalSettlementAmount || 0,
+    // r.closureCharges || 0,
+    // r.finalSettlementAmount || 0,
     r.paymentMode || "—",
-    r.referenceNo || "—",
+    // r.referenceNo || "—",
     r.closedByName || "—",
     r.branchName || "—",
-    r.closureReceiptNo || "—",
-    r.status,
-    r.remarks || "—"
+    // r.closureReceiptNo || "—",
+    // r.status,
+    // r.remarks || "—"
   ]);
 
   const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
