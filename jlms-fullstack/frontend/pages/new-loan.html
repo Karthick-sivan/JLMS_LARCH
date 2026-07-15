@@ -476,7 +476,7 @@
                 
                 <div class="premium-amount-input-wrap">
                   <span class="currency-symbol">₹</span>
-                  <input type="number" id="requestedAmount" placeholder="0" autocomplete="off">
+                  <input type="number" id="requestedAmount" placeholder="0" step="any" autocomplete="off">
                 </div>
 
                 <!-- Slider -->
@@ -556,7 +556,20 @@
 <script>
     jlmsInitShell();
 
-   
+   function watchBannerAndScroll(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const observer = new MutationObserver(() => {
+    // banner just got populated/shown
+    if (el.style.display !== 'none' && el.textContent.trim() !== '') {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+  observer.observe(el, { attributes: true, attributeFilter: ['style'], childList: true, characterData: true, subtree: true });
+}
+
+watchBannerAndScroll('apiErrorBanner');
+watchBannerAndScroll('apiSuccessBanner');
 let selectedCustomer = null;
 let jewelTypesCache = [];
 let schemesCache = [];
@@ -573,7 +586,7 @@ function jewelRowHtml(rowId) {
       <td><input type="number" class="qtyInput" value="1" min="1" style="text-align:center;"></td>
       <td><input type="number" step="0.001" class="grossInput" value="0.000"></td>
       <td><input type="number" step="0.001" class="stoneInput" value="0.000"></td>
-      <td><select class="purityInput"><option>22K</option><option>18K</option><option>24K</option></select></td>
+      <td><input type="text" class="purityInput" value="22K" readonly style="text-align:center; background:var(--n-50); color:var(--n-600); cursor:not-allowed;"></td>
       <td><i class="bi bi-trash removeRowBtn" style="color:var(--danger-600); cursor:pointer;"></i></td>
     </tr>`;
 }
@@ -864,6 +877,15 @@ async function downloadImage(url, filename) {
 
 // ---------------- Loan Summary: scheme-driven fields ----------------
 
+function formatEligibleAmount(val) {
+  const num = Number(val);
+  if (isNaN(num)) return '0';
+  if (num % 1 !== 0) {
+    return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  return num.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
 function getCurrentEligibleAmount() {
   if (!lastAppraisalResult) return 0;
   const schemeSelect = document.getElementById('schemeSelect');
@@ -871,7 +893,8 @@ function getCurrentEligibleAmount() {
   const schemeId = parseInt(schemeSelect.value, 10);
   const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
   if (!scheme) return 0;
-  return Math.round(lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100));
+  const rawEligible = lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100);
+  return Math.round(rawEligible * 100) / 100;
 }
 
 function updateRequestedAmountWidget() {
@@ -925,21 +948,21 @@ function updateRequestedAmountWidget() {
 
   if (value === 0) {
     pctBadge.className = 'badge-percent text-muted-jlms';
-    statusText.innerHTML = `<i class="bi bi-wallet2 text-primary"></i> Max Eligible: <strong>₹${eligible.toLocaleString('en-IN')}</strong>`;
+    statusText.innerHTML = `<i class="bi bi-wallet2 text-primary"></i> Max Eligible: <strong>₹${formatEligibleAmount(eligible)}</strong>`;
     statusText.className = 'limit-status-info mt-2 text-center text-muted-jlms';
   } else if (value <= eligible) {
     pctBadge.className = 'badge-percent';
-    statusText.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Within eligible limit (Max: ₹${eligible.toLocaleString('en-IN')})`;
+    statusText.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Within eligible limit (Max: ₹${formatEligibleAmount(eligible)})`;
     statusText.className = 'limit-status-info text-success mt-2 text-center';
   } else {
     // value > eligible
     if (chkAllowExceed.checked) {
       pctBadge.className = 'badge-percent warning';
-      statusText.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Exceeds limit by <strong>₹${(value - eligible).toLocaleString('en-IN')}</strong> (Override active)`;
+      statusText.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Exceeds limit by <strong>₹${formatEligibleAmount(value - eligible)}</strong> (Override active)`;
       statusText.className = 'limit-status-info text-warning mt-2 text-center';
     } else {
       pctBadge.className = 'badge-percent danger';
-      statusText.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> Exceeds eligible limit of <strong>₹${eligible.toLocaleString('en-IN')}</strong>`;
+      statusText.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> Exceeds eligible limit of <strong>₹${formatEligibleAmount(eligible)}</strong>`;
       statusText.className = 'limit-status-info text-danger mt-2 text-center';
     }
   }
@@ -955,10 +978,10 @@ function applySchemeToSummary() {
   document.getElementById('sumProcessingFee').textContent = '₹' + Number(scheme.processingFee).toLocaleString('en-IN');
 
   if (lastAppraisalResult) {
-    const eligible = lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100);
-    document.getElementById('sumEligible').textContent = '₹' + Math.round(eligible).toLocaleString('en-IN');
+    const eligible = Math.round((lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100)) * 100) / 100;
+    document.getElementById('sumEligible').textContent = '₹' + formatEligibleAmount(eligible);
     if (!document.getElementById('chkAllowExceed').checked) {
-      document.getElementById('requestedAmount').max = Math.round(eligible);
+      document.getElementById('requestedAmount').max = eligible;
     }
   }
   updateRequestedAmountWidget();
@@ -1072,7 +1095,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const eligible = getCurrentEligibleAmount();
     if (eligible > 0) {
       const pct = parseInt(requestedAmtSlider.value, 10);
-      requestedAmtInput.value = Math.round(eligible * (pct / 100));
+      requestedAmtInput.value = Number((eligible * (pct / 100)).toFixed(2));
       updateRequestedAmountWidget();
     }
   });
@@ -1082,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const eligible = getCurrentEligibleAmount();
       if (eligible > 0) {
         const pct = parseInt(e.currentTarget.dataset.pct, 10);
-        requestedAmtInput.value = Math.round(eligible * (pct / 100));
+        requestedAmtInput.value = Number((eligible * (pct / 100)).toFixed(2));
         updateRequestedAmountWidget();
       }
     });
@@ -1131,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const eligibleText = document.getElementById('sumEligible').textContent.replace(/[₹,]/g, '');
       const eligibleAmount = parseFloat(eligibleText);
       if (eligibleAmount > 0 && requestedAmount > eligibleAmount) {
-        showApiError(new Error(`Requested amount exceeds the eligible amount of ₹${eligibleAmount.toLocaleString('en-IN')}. Check "Don't validate" to override, or lower the amount.`));
+        showApiError(new Error(`Requested amount exceeds the eligible amount of ₹${formatEligibleAmount(eligibleAmount)}. Check "Don't validate" to override, or lower the amount.`));
         return;
       }
     }
@@ -1170,13 +1193,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Approving & disbursing...';
 
+      // const result = await Api.submitForApproval(loan.loanId, {
+      //   submittedByUserId: currentUser.userId
+      // });
+
+      // window.open(`${API_BASE_URL}/loans/${result.loanId}/receipt-pdf`, '_blank');
+      // resetFormForNewLoan();
+
       const result = await Api.submitForApproval(loan.loanId, {
         submittedByUserId: currentUser.userId
       });
 
       window.open(`${API_BASE_URL}/loans/${result.loanId}/receipt-pdf`, '_blank');
-      resetFormForNewLoan();
 
+      // Show a success message and bring it into view — the PDF opens in a new tab,
+      // so this tab needs an explicit scroll (opening a new tab can leave the
+      // current page scrolled wherever the user last was).
+      const successBanner = document.getElementById('apiSuccessBanner');
+      successBanner.textContent = `Loan ${result.loanNumber} approved and disbursed successfully.`;
+      successBanner.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      resetFormForNewLoan();
+      
       btn.innerHTML = '<i class="bi bi-send-check"></i> Submit for Approval';
       btn.disabled = false;
       btn.dataset.busy = '0';
