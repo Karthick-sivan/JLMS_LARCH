@@ -74,10 +74,18 @@ html, body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
 }
-
+/* 
 a { color: var(--navy-700); text-decoration: none; }
-a:hover { color: var(--navy-600); text-decoration: underline; }
+a:hover { color: var(--navy-600); text-decoration: underline; } */
+a {
+    color: var(--navy-700);
+    text-decoration: none;
+}
 
+a:hover {
+    color: var(--navy-600);
+    text-decoration: none;
+}
 /* ============================================================
    TYPOGRAPHY
    ============================================================ */
@@ -352,19 +360,19 @@ body.sidebar-collapsed .main-col { margin-left: var(--sidebar-w-collapsed); }
 .btn-jlms i { font-size: 1em; }
 
 .btn-jlms-primary { background: var(--navy-700); color: #fff; }
-.btn-jlms-primary:hover { background: var(--navy-600); }
+.btn-jlms-primary:hover { background: var(--navy-600); color: #fff; }
 .btn-jlms-gold { background: var(--gold-600); color: var(--n-900); }
-.btn-jlms-gold:hover { background: var(--gold-500); }
+.btn-jlms-gold:hover { background: var(--gold-500); color: var(--n-900); }
 .btn-jlms-outline { background: #fff; color: var(--navy-700); border-color: var(--navy-700); }
-.btn-jlms-outline:hover { background: var(--navy-50); }
+.btn-jlms-outline:hover { background: var(--navy-50); color: var(--navy-700); }
 .btn-jlms-ghost { background: transparent; color: var(--navy-700); }
-.btn-jlms-ghost:hover { background: var(--navy-50); }
+.btn-jlms-ghost:hover { background: var(--navy-50); color: var(--navy-700); }
 .btn-jlms-success { background: var(--success-600); color: #fff; }
-.btn-jlms-success:hover { background: var(--success-700); }
+.btn-jlms-success:hover { background: var(--success-700); color: #fff; }
 .btn-jlms-danger { background: var(--danger-600); color: #fff; }
-.btn-jlms-danger:hover { background: var(--danger-700); }
+.btn-jlms-danger:hover { background: var(--danger-700); color: #fff; }
 .btn-jlms-outline-danger { background: #fff; color: var(--danger-600); border-color: var(--danger-600); }
-.btn-jlms-outline-danger:hover { background: var(--danger-100); }
+.btn-jlms-outline-danger:hover { background: var(--danger-100); color: var(--danger-600); }
 .btn-jlms:disabled, .btn-jlms.disabled { background: var(--n-200); color: var(--n-500); cursor: not-allowed; border-color: transparent; }
 
 /* ============================================================

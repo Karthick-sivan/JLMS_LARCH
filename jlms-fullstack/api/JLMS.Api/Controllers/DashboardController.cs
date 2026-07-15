@@ -40,8 +40,8 @@ public class DashboardController : ControllerBase
         var renewalsThisMonth = await _db.LoanTransactions
             .CountAsync(t => t.TransactionType == "Renewal" && t.TransactionDate >= monthStart);
 
-        var closuresThisMonth = await _db.LoanTransactions
-            .CountAsync(t => t.TransactionType == "Closure" && t.TransactionDate >= monthStart);
+        var closuresThisMonth = await _db.Loans
+            .CountAsync(t => t.Status == "Closed" && t.ClosedAt >= monthStart);
 
         return Ok(new DashboardSummaryDto(
             activeLoans, outstandingAmount, todaysCollections, todaysDisbursement,
