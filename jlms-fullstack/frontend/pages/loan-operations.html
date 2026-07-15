@@ -186,11 +186,11 @@
       <div class="page-header">
         <div>
           <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Operations</span></div>
-          <div class="h1">Loan Operations</div>
+          <!--<div class="h1">Loan Operations</div>-->
         </div>
-        <div class="page-actions">
+        <!--<div class="page-actions">
           <button class="btn-jlms btn-jlms-outline" id="btnRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
-        </div>
+        </div>-->
       </div>
 
       <div id="apiErrorBanner" class="api-error-banner"></div>
@@ -223,16 +223,13 @@
             <div class="col-md-2">
               <label class="field-label">Loan Scheme</label>
               <select class="form-control-jlms" id="fScheme">
-                <option value="">All Schemes</option>
-                <option value="Gold Loan - Standard">Gold Loan - Standard</option>
-                <option value="Gold Loan - Flexi">Gold Loan - Flexi</option>
-                <option value="Personal Loan">Personal Loan</option>
-                <option value="Business Loan">Business Loan</option>
+              <option value="">All Schemes</option>
+                  <!--Api.getLoanSchemes()-->
               </select>
             </div>
           </div>
           <div class="row g-3 align-items-end mt-1">
-            <div class="col-md-2">
+            <!--<div class="col-md-2">
               <label class="field-label">Loan Status</label>
               <select class="form-control-jlms" id="fStatus">
                 <option value="">All</option>
@@ -240,7 +237,7 @@
                 <option value="Overdue">Overdue</option>
                 <option value="Closed">Closed</option>
               </select>
-            </div>
+            </div>-->
             <div class="col-md-2">
               <label class="field-label">From Date</label>
               <input type="date" class="form-control-jlms" id="fFromDate">
@@ -366,7 +363,7 @@
               <tr><td>Overall Interest</td><td id="calcOverallInterest">-</td></tr>
               <tr><td>Interest Paid So Far</td><td id="calcInterestPaid">-</td></tr>
               <tr><td>Outstanding Interest</td><td id="calcOutstandingInterest">-</td></tr>
-              <tr><td colspan="2" class="calc-section-divider">Daily Interest Reference <span class="info-only-badge">Info Only — Not Charged</span></td></tr>
+              <tr><td colspan="2" class="calc-section-divider">Daily Interest Reference <span class="info-only-badge d-none">Info Only — Not Charged</span></td></tr>
               <tr class="calc-info"><td>As Of Date</td><td id="calcCurrentDate">-</td></tr>
               <tr class="calc-info"><td>Reference Date</td><td id="calcLastRefDate">-</td></tr>
               <tr class="calc-info"><td>No. of Days</td><td id="calcDays">-</td></tr>
@@ -714,7 +711,7 @@ function currentFilters() {
     aadhaar: document.getElementById('fAadhaar').value.trim(),
     pan: document.getElementById('fPan').value.trim(),
     scheme: document.getElementById('fScheme').value,
-    status: document.getElementById('fStatus').value,
+    //status: document.getElementById('fStatus').value,
     fromDate: document.getElementById('fFromDate').value,
     toDate: document.getElementById('fToDate').value
   };
@@ -1576,14 +1573,32 @@ document.getElementById('ledgerPageSizeSelect').addEventListener('change', (e) =
 /* ============================ Page bootstrap ============================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  Session.requireLogin();
+    Session.requireLogin();
+
+    async function loadSchemeFilter() {
+        try {
+            const schemes = await Api.getLoanSchemes(true);
+            const sel = document.getElementById('fScheme');
+            schemes.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.schemeName;
+                opt.textContent = s.schemeName;
+                sel.appendChild(opt);
+            });
+        } catch (err) {
+            console.warn('Could not load loan schemes for filter:', err.message);
+        }
+    }
+
+
+    loadSchemeFilter();
 
   document.getElementById('btnSearch').addEventListener('click', () => runSearch(1));
-  document.getElementById('btnRefresh').addEventListener('click', () => runSearch(currentPage));
+  //document.getElementById('btnRefresh').addEventListener('click', () => runSearch(currentPage));
   document.getElementById('btnReset').addEventListener('click', () => {
     ['fLoanNo', 'fCustomerName', 'fMobile', 'fAadhaar', 'fPan', 'fFromDate', 'fToDate'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('fScheme').value = '';
-    document.getElementById('fStatus').value = 'Active';
+    //document.getElementById('fStatus').value = 'Active';
     runSearch(1);
   });
   document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
@@ -1593,6 +1608,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ['fLoanNo', 'fCustomerName', 'fMobile', 'fAadhaar', 'fPan'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(1); });
   });
+    
 
   runSearch(1);
 });
