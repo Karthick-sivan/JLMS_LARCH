@@ -80,40 +80,43 @@
     <div id="jlmsTopbarMount"></div>
     <div class="page-content">
       <div class="page-header">
-        <div>
+        <!--<div>
           <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><span class="current">Customer Search</span></div>
           <div class="h1">Customer Search</div>
-        </div>
-        <div class="page-actions">
-          <a href="customer-registration.html" class="btn-jlms btn-jlms-primary"><i class="bi bi-person-plus"></i> New Customer</a>
-        </div>
+        </div>-->
+        
       </div>
 
       <div id="apiErrorBanner" class="api-error-banner"></div>
 
       <div class="panel mb-3">
         <div class="panel-body">
-          <div class="row g-3 align-items-end">
-            <div class="col-md-3">
-              <label class="field-label">Customer Name</label>
-              <input type="text" class="form-control-jlms" id="searchName" placeholder="Search by name">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <label class="field-label">Customer Code</label>
+                    <input type="text" class="form-control-jlms" id="searchCode" placeholder="CUS-000000">
+                </div>
+                <div class="col-md-3">
+                    <label class="field-label">Customer Name</label>
+                    <input type="text" class="form-control-jlms" id="searchName" placeholder="Search by name">
+                </div>
+                <div class="col-md-2">
+                    <label class="field-label">Mobile Number</label>
+                    <input type="text" class="form-control-jlms" id="searchMobile" placeholder="10-digit mobile">
+                </div>
+                <div class="col-md-2">
+                    <label class="field-label">Aadhaar Number</label>
+                    <input type="text" class="form-control-jlms" id="searchAadhaar" placeholder="XXXX-XXXX-XXXX">
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn-jlms btn-jlms-primary" id="btnSearch" style="flex:1;"><i class="bi bi-search"></i> Search</button>
+
+                    <a href="customer-registration.html" class="btn-jlms btn-jlms-primary" style="flex:1;"><i class="bi bi-person-plus"></i> New Customer</a>
+
+                </div>
+                
             </div>
-            <div class="col-md-3">
-              <label class="field-label">Mobile Number</label>
-              <input type="text" class="form-control-jlms" id="searchMobile" placeholder="10-digit mobile">
-            </div>
-            <div class="col-md-2">
-              <label class="field-label">Aadhaar Number</label>
-              <input type="text" class="form-control-jlms" id="searchAadhaar" placeholder="XXXX-XXXX-XXXX">
-            </div>
-            <div class="col-md-2">
-              <label class="field-label">Customer Code</label>
-              <input type="text" class="form-control-jlms" id="searchCode" placeholder="CUS-000000">
-            </div>
-            <div class="col-md-2 d-flex gap-2">
-              <button class="btn-jlms btn-jlms-primary" id="btnSearch" style="flex:1;"><i class="bi bi-search"></i> Search</button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -128,11 +131,11 @@
           <table class="table-jlms">
             <thead>
               <tr>
-                <th>Customer Code</th><th>Customer Name</th><th>Loan No.</th><th>Mobile</th><th class="text-center">Active Loans</th><th class="text-end">Outstanding</th><th>Status</th><th class="text-center">Actions</th>
+                <th style="width: 150px; min-width: 150px;">Customer Code</th><th>Customer Name</th><th style="display: none;">Loan No.</th><th>Aadhaar Number</th><th style="width: 140px;">Mobile</th><th class="text-center" style="display: none;">Active Loans</th><th class="text-end" style="width: 140px;">Outstanding</th><th style="width: 160px; display:none">Status</th><th class="text-center" style="width: 90px;">Actions</th>
               </tr>
             </thead>
             <tbody id="resultsBody">
-              <tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">Loading...</td></tr>
+              <tr><td colspan="9" class="text-center text-muted-jlms" style="padding:28px;">Loading...</td></tr>
             </tbody>
           </table>
         </div>
@@ -140,8 +143,8 @@
           <div class="page-size-select">
             <span>Rows per page</span>
             <select id="pageSizeSelect">
-              <option value="10">10</option>
-              <option value="20" selected>20</option>
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
               <option value="50">50</option>
               <option value="100">100</option>
             </select>
@@ -225,7 +228,7 @@ async function runSearch(page = 1) {
   clearApiError();
   currentPage = page;
   const body = document.getElementById('resultsBody');
-  body.innerHTML = '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
+  body.innerHTML = '<tr><td colspan="9" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
 
   const params = { page: currentPage, pageSize: pageSize };
   const name = document.getElementById('searchName').value.trim();
@@ -255,11 +258,12 @@ async function runSearch(page = 1) {
       <tr>
         <td class="cell-link">${c.customerCode}</td>
         <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(c.customerName)}</div>${c.customerName}</div></td>
-        <td class="loan-no-cell">${c.loanNumbers ? c.loanNumbers : '<span class="text-muted-jlms">—</span>'}</td>
+        <td>${c.aadhaarNumber ? c.aadhaarNumber : '<span class="text-muted-jlms">—</span>'}</td>
+        <td class="loan-no-cell" style="display: none;">${c.loanNumbers ? c.loanNumbers : '<span class="text-muted-jlms">—</span>'}</td>
         <td>${c.mobile}</td>
-        <td class="text-center">${c.activeLoans}</td>
+        <td class="text-center" style="display: none;">${c.activeLoans}</td>
         <td class="text-end cell-strong">₹${Number(c.totalOutstanding).toLocaleString('en-IN')}</td>
-        <td>${statusBadge(c.status)}</td>
+        <td style="display: none;">${statusBadge(c.status)}</td>
         <td class="text-center">
           <button class="btn-icon-jlms" title="View documents" onclick="openDocsModal(${c.customerId}, '${c.customerName.replace(/'/g, "\\'")}')">
             <i class="bi bi-eye"></i>
@@ -353,7 +357,11 @@ async function loadDocument(customerId, docType, hasPath, previewId, btnId, down
   try {
     // API_BASE_URL comes from api-client.js (loaded before this script).
     const url = `${API_BASE_URL}/customers/${customerId}/documents/${docType}`;
-    const res = await fetch(url);
+      const res = await fetch(url);
+      if (res.status === 404) {
+          previewEl.innerHTML = '<span class="doc-empty">Not uploaded</span>';
+          return;
+      }
     if (!res.ok) throw new Error(`HTTP ${res.status} — the API returned an error for this document.`);
 
     const blob = await res.blob();

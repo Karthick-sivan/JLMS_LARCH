@@ -49,7 +49,7 @@ public record CustomerUpdateDto(
 );
 
 public record CustomerListItemDto(
-    int CustomerId, string CustomerCode, string CustomerName, string Mobile,
+    int CustomerId, string CustomerCode, string CustomerName, string? AadhaarNumber, string Mobile,
     int ActiveLoans, decimal TotalOutstanding, string Status, string? LoanNumbers = null
 );
 
