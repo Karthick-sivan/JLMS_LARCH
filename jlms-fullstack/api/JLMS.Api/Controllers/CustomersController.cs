@@ -64,7 +64,7 @@ public class CustomersController : ControllerBase
                 .ToListAsync();
             string? loanNumbersStr = loanNumbers.Count > 0 ? string.Join(", ", loanNumbers) : null;
 
-            result.Add(new CustomerListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Mobile,
+            result.Add(new CustomerListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.AadhaarNumber, c.Mobile,
                 activeLoans, outstanding, status, loanNumbersStr));
         }
 
@@ -78,7 +78,7 @@ public class CustomersController : ControllerBase
     public async Task<ActionResult<List<CustomerActiveListItemDto>>> GetActiveCustomers()
     {
         var customers = await _db.Customers.AsNoTracking()
-            .OrderBy(c => c.CustomerName)
+            .OrderBy(c => c.CustomerCode)
             .Select(c => new CustomerActiveListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Mobile))
             .ToListAsync();
 
