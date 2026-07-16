@@ -225,27 +225,27 @@
       <div class="panel mb-3">
         <div class="panel-body">
           <div class="row g-3">
-            <div class="col-md-2">
+            <div class="col-md-3">
               <label class="field-label">Loan No</label>
               <input type="text" class="form-control-jlms" id="fLoanNo" placeholder="LN-000000">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
               <label class="field-label">Customer Name</label>
               <input type="text" class="form-control-jlms" id="fCustomerName" placeholder="Search by name">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
               <label class="field-label">Mobile</label>
               <input type="text" class="form-control-jlms" id="fMobile" placeholder="10-digit mobile">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 d-none">
               <label class="field-label">Aadhaar</label>
               <input type="text" class="form-control-jlms" id="fAadhaar" placeholder="XXXX-XXXX-XXXX">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 d-none">
               <label class="field-label">PAN</label>
               <input type="text" class="form-control-jlms" id="fPan" placeholder="ABCDE1234F">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
               <label class="field-label">Loan Scheme</label>
               <select class="form-control-jlms" id="fScheme">
               <option value="">All Schemes</option>
@@ -263,15 +263,15 @@
                 <option value="Closed">Closed</option>
               </select>
             </div>-->
-            <div class="col-md-2">
+            <div class="col-md-3">
               <label class="field-label">From Date</label>
               <input type="date" class="form-control-jlms" id="fFromDate">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
               <label class="field-label">To Date</label>
               <input type="date" class="form-control-jlms" id="fToDate">
             </div>
-            <div class="col-md-6 d-flex gap-2 justify-content-md-end">
+            <div class="col-md-12 d-flex gap-2 justify-content-md-end">
               <button class="btn-jlms btn-jlms-outline" id="btnReset"><i class="bi bi-x-circle"></i> Reset</button>
               <button class="btn-jlms btn-jlms-primary" id="btnSearch"><i class="bi bi-search"></i> Search</button>
             </div>
@@ -1040,6 +1040,8 @@ document.getElementById('btnSavePayment').addEventListener('click', async () => 
       <div class="r-row"><span>Remaining Interest</span><span>${inr(response.remainingInterest)}</span></div>
       <div class="r-row"><span>Remaining Principal</span><span>${inr(response.remainingPrincipal)}</span></div>
       <div class="r-row"><span>Mode</span><span>${response.paymentMode}</span></div>`;
+
+      downloadPaymentReceipt();
     //document.getElementById('paymentReceiptSection').style.display = 'block';
   } catch (err) {
     showApiError(err);
@@ -1346,6 +1348,8 @@ document.getElementById('btnConfirmClosureProceed').addEventListener('click', ()
         <div class="receipt-divider"></div>
         <div class="r-row" style="font-weight:700;"><span>Grand Total Paid</span><span>${inr(response.grandTotal)}</span></div>
         <div class="r-row"><span>Status</span><span>Closed</span></div>`;
+
+        downloadClosureReceipt();
     })
     .catch(err => {
       showApiError(err);
