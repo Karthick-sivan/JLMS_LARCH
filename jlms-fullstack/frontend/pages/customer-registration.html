@@ -538,15 +538,15 @@ if (pan)
       successEl.textContent = `Customer saved successfully as ${saved.customerCode}. You can now create a loan for them from the New Loan screen.`;
       successEl.style.display = 'block';
 
-      const initials = name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
-      document.getElementById('summaryPanelBody').innerHTML = `
-        <div style="width:72px; height:72px; border-radius:50%; background:var(--navy-100); color:var(--navy-700); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700; margin:0 auto 10px;">${initials}</div>
-        <div class="h4">${saved.customerName}</div>
-        <div class="text-muted-jlms" style="margin-top:2px;">${saved.customerCode}</div>
-        <span class="badge-jlms badge-neutral" style="margin-top:10px;"><span class="dot"></span>KYC Not Verified</span>
-        <div class="divider-jlms"></div>
-        <div class="summary-row"><span class="label">Active Loans</span><span class="value">0</span></div>
-        <div class="summary-row"><span class="label">Total Outstanding</span><span class="value">₹0</span></div>`;
+      // const initials = name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+      // document.getElementById('summaryPanelBody').innerHTML = `
+      //   <div style="width:72px; height:72px; border-radius:50%; background:var(--navy-100); color:var(--navy-700); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700; margin:0 auto 10px;">${initials}</div>
+      //   <div class="h4">${saved.customerName}</div>
+      //   <div class="text-muted-jlms" style="margin-top:2px;">${saved.customerCode}</div>
+      //   <span class="badge-jlms badge-neutral" style="margin-top:10px;"><span class="dot"></span>KYC Not Verified</span>
+      //   <div class="divider-jlms"></div>
+      //   <div class="summary-row"><span class="label">Active Loans</span><span class="value">0</span></div>
+      //   <div class="summary-row"><span class="label">Total Outstanding</span><span class="value">₹0</span></div>`;
     } catch (err) {
       showApiError(err);
     } finally {

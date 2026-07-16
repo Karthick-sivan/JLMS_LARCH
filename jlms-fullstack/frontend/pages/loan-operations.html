@@ -1662,11 +1662,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadSchemeFilter();
 
+    // Set default date to today's date in the search filters
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('fFromDate').value = today;
+    document.getElementById('fToDate').value = today;
+
   document.getElementById('btnSearch').addEventListener('click', () => runSearch(1));
   //document.getElementById('btnRefresh').addEventListener('click', () => runSearch(currentPage));
   document.getElementById('btnReset').addEventListener('click', () => {
     ['fLoanNo', 'fCustomerName', 'fMobile', 'fAadhaar', 'fPan', 'fFromDate', 'fToDate'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('fScheme').value = '';
+      document.getElementById('fScheme').value = '';
+
+      // Reset dates back to today's date
+      document.getElementById('fFromDate').value = today;
+      document.getElementById('fToDate').value = today;
+
     //document.getElementById('fStatus').value = 'Active';
     runSearch(1);
   });
