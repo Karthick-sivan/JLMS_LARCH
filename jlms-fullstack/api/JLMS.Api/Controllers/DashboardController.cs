@@ -24,7 +24,7 @@ public class DashboardController : ControllerBase
             .SumAsync(l => (decimal?)l.OutstandingPrincipal) ?? 0;
 
         var todaysCollections = await _db.LoanTransactions
-            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "PrincipalCollection" || t.TransactionType == "Closure")
+            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
                         && t.TransactionDate.Date == today)
             .SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
 
@@ -51,22 +51,52 @@ public class DashboardController : ControllerBase
     [HttpGet("collections-today")]
     public async Task<ActionResult> GetCollectionsToday()
     {
-        var today = DateTime.UtcNow.Date;
-        var items = await _db.LoanTransactions.AsNoTracking()
-            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "PrincipalCollection")
-                        && t.TransactionDate.Date == today)
-            .OrderByDescending(t => t.TransactionDate)
-            .Join(_db.Loans, t => t.LoanId, l => l.LoanId, (t, l) => new { t, l })
-            .Join(_db.Customers, x => x.l.CustomerId, c => c.CustomerId, (x, c) => new
-            {
-                x.l.LoanNumber,
-                c.CustomerName,
-                x.t.TotalAmount,
-                x.t.PaymentMode,
-                x.t.TransactionDate
-            })
+        //var today = DateTime.UtcNow.Date;
+        //var items = await _db.LoanTransactions.AsNoTracking()
+        //    .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment")
+        //                && t.TransactionDate.Date == today)
+        //    .OrderByDescending(t => t.TransactionDate)
+        //    .Join(_db.Loans, t => t.LoanId, l => l.LoanId, (t, l) => new { t, l })
+        //    .Join(_db.Customers, x => x.l.CustomerId, c => c.CustomerId, (x, c) => new
+        //    {
+        //        x.l.LoanNumber,
+        //        c.CustomerName,
+        //        x.t.TotalAmount,
+        //        x.t.PaymentMode,
+        //        x.t.TransactionDate
+        //    })
+        //    .Take(20)
+        //    .ToListAsync();
+        //return Ok(items);
+
+        var today = DateTime.Today;
+
+        var items = await _db.LoanTransactions
+            .AsNoTracking()
+            .Where(x =>
+                (x.TransactionType == "InterestCollection" ||
+                 x.TransactionType == "LoanOpsPayment") &&
+                x.TransactionDate >= today &&
+                x.TransactionDate < today.AddDays(1))
+            .Join(_db.Loans,
+                x => x.LoanId,
+                t => t.LoanId,
+                (x, t) => new { x, t })
+            .Join(_db.Customers,
+                xt => xt.t.CustomerId,
+                c => c.CustomerId,
+                (xt, c) => new
+                {
+                    xt.t.LoanNumber,
+                    c.CustomerName,
+                    xt.x.TotalAmount,
+                    xt.x.PaymentMode,
+                    xt.x.TransactionDate
+                })
+            .OrderByDescending(x => x.TransactionDate)
             .Take(20)
             .ToListAsync();
+
         return Ok(items);
     }
 

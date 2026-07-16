@@ -56,7 +56,8 @@ public class LoanOperationsService
 
         if (statusFilter == "Overdue")
         {
-            var today = DateTime.UtcNow.Date;
+            //var today = DateTime.UtcNow.Date;
+            var today = IstClock.Today;
             q = q.Where(l => l.Status == "Active" && l.MaturityDate != null && l.MaturityDate.Value.Date < today);
         }
         else if (!string.Equals(statusFilter, "All", StringComparison.OrdinalIgnoreCase))
@@ -156,7 +157,8 @@ public class LoanOperationsService
         var loan = await _db.Loans.AsNoTracking().FirstOrDefaultAsync(l => l.LoanId == loanId);
         if (loan == null) throw new KeyNotFoundException($"Loan {loanId} not found.");
 
-        return await BuildInterestCalculationAsync(loan, (asOfDate ?? DateTime.UtcNow.Date).Date);
+        //return await BuildInterestCalculationAsync(loan, (asOfDate ?? DateTime.UtcNow.Date).Date);
+        return await BuildInterestCalculationAsync(loan, (asOfDate ?? IstClock.Today).Date);
     }
 
     /// <summary>
@@ -197,7 +199,8 @@ public class LoanOperationsService
         if (loan == null) throw new KeyNotFoundException($"Loan {loanId} not found.");
         if (loan.Customer == null) throw new InvalidOperationException($"Loan {loan.LoanNumber} has no linked customer record.");
 
-        var asOf = (asOfDate ?? DateTime.UtcNow.Date).Date;
+        //var asOf = (asOfDate ?? DateTime.UtcNow.Date).Date;
+        var asOf = (asOfDate ?? IstClock.Today).Date;
         var interestCalc = await BuildInterestCalculationAsync(loan, asOf);
         var lastPaymentDate = await GetLastCollectionDateAsync(loanId);
         var branchName = await GetBranchNameAsync(loan.BranchId);
@@ -218,7 +221,14 @@ public class LoanOperationsService
     // ===================================================================
     // SAVE PAYMENT
     // ===================================================================
+    public static class IstClock
+    {
+        private static readonly TimeZoneInfo IstZone = TimeZoneInfo.FindSystemTimeZoneById(
+            OperatingSystem.IsWindows() ? "India Standard Time" : "Asia/Kolkata");
 
+        public static DateTime Now => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, IstZone);
+        public static DateTime Today => Now.Date;
+    }
     public async Task<LoanOperationsPaymentResponseDto> SavePaymentAsync(int loanId, LoanOperationsPaymentRequestDto request)
     {
         if (request.AmountReceived <= 0)
@@ -252,7 +262,8 @@ public class LoanOperationsService
 
             loan.OutstandingPrincipal = remainingPrincipal;
             loan.OutstandingInterest = remainingInterest;
-            loan.UpdatedAt = DateTime.UtcNow;
+            //loan.UpdatedAt = DateTime.UtcNow;
+            loan.UpdatedAt = IstClock.Now;
 
             // Rule 12: NEVER auto-close, even if both balances hit zero.
             // Status changes ONLY inside CloseLoanAsync via an explicit user action.
@@ -265,7 +276,8 @@ public class LoanOperationsService
                 LoanId = loan.LoanId,
                 TransactionType = LoanOperationsCalculationHelper.PaymentTransactionType,
                 ReceiptNumber = receiptNumber,
-                TransactionDate = paymentDate == DateTime.UtcNow.Date ? DateTime.UtcNow : paymentDate,
+                //TransactionDate = paymentDate == DateTime.UtcNow.Date ? DateTime.UtcNow : paymentDate,
+                TransactionDate = paymentDate == IstClock.Today ? IstClock.Now : paymentDate,
                 PrincipalAmount = principalPaid,
                 InterestAmount = interestPaid,
                 PenaltyAmount = 0,
@@ -280,7 +292,8 @@ public class LoanOperationsService
                 Remarks = (remainingPrincipal == 0m && remainingInterest == 0m)
                     ? "Balance fully cleared by this payment. Loan remains Active until closed via Loan Closure."
                     : null,
-                CreatedAt = DateTime.UtcNow
+                //CreatedAt = DateTime.UtcNow
+                CreatedAt = IstClock.Now
             };
 
             _db.LoanTransactions.Add(txn);
@@ -344,9 +357,11 @@ public class LoanOperationsService
             loan.OutstandingPrincipal = 0;
             loan.OutstandingInterest = 0;
             loan.Status = "Closed";
-            loan.ClosedAt = DateTime.UtcNow;
+            //loan.ClosedAt = DateTime.UtcNow;
+            loan.ClosedAt = IstClock.Now;
             loan.ClosedBy = request.ProcessedByUserId;
-            loan.UpdatedAt = DateTime.UtcNow;
+            //loan.UpdatedAt = DateTime.UtcNow;
+            loan.UpdatedAt = IstClock.Now;
             loan.ClosePhotoPath = closePhotoPath;
 
             var sequence = await _db.LoanTransactions.CountAsync() + 1;
@@ -357,7 +372,8 @@ public class LoanOperationsService
                 LoanId = loan.LoanId,
                 TransactionType = LoanOperationsCalculationHelper.ClosureTransactionType,
                 ReceiptNumber = receiptNumber,
-                TransactionDate = DateTime.UtcNow,
+                //TransactionDate = DateTime.UtcNow,
+                TransactionDate = IstClock.Now,
                 PrincipalAmount = 0,
                 InterestAmount = 0,
                 PenaltyAmount = 0,
@@ -369,7 +385,8 @@ public class LoanOperationsService
                 ProcessedBy = request.ProcessedByUserId,
                 BranchId = loan.BranchId,
                 Remarks = "Loan closed by user - full settlement confirmed (balance was \u20b90.00 at time of closure).",
-                CreatedAt = DateTime.UtcNow
+                //CreatedAt = DateTime.UtcNow
+                CreatedAt = IstClock.Now
             };
             _db.LoanTransactions.Add(txn);
             await _db.SaveChangesAsync();
