@@ -487,6 +487,7 @@
                 <button type="button" class="btn btn-outline-success btn-sm w-100" id="btnCaptureClosurePhoto">
                   <i class="bi bi-camera"></i> Capture Photo
                 </button>
+                <div class="validation-msg" id="closureCameraErrorMsg" style="font-size: 0.8rem; margin-top: 6px;"></div>
                 <input type="file" id="closurePhotoFile" accept=".jpg,.jpeg,.png" hidden>
                 <button type="button" class="btn btn-outline-primary btn-sm w-100 mt-1 d-none" id="btnUploadClosurePhoto">
                   <i class="bi bi-upload"></i> Upload Photo
@@ -645,7 +646,27 @@
     </div>
   </div>
 </div>
-
+<!-- Confirm Closure Modal -->
+<div class="modal fade" id="confirmClosureModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Loan Closure</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">Loan Number :<strong id="confirmClosureLoanNo">-</strong>?</p>
+        <p class="text-danger mb-0" style="font-size:0.85rem;">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn-jlms btn-jlms-primary" id="btnConfirmClosureProceed">
+          <i class="bi bi-lock-fill"></i> Confirm Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "loan-operations";</script>
 <script src="js/jlms-shell.js"></script>
@@ -1203,15 +1224,26 @@ let lastClosureReceipt = null;
 
 // Closure camera — open
 document.getElementById('btnCaptureClosurePhoto').addEventListener('click', async () => {
+  const errEl = document.getElementById('closureCameraErrorMsg');
+  errEl.classList.remove('show');
+  errEl.textContent = '';
+
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Camera is not supported in this browser.'); return;
+      errEl.textContent = 'Camera is not supported in this browser.';
+      errEl.classList.add('show');
+      return;
     }
     closureCameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
     document.getElementById('closureCameraVideo').srcObject = closureCameraStream;
     bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).show();
-  } catch { alert('Unable to access camera.'); }
-});
+  } catch (err) {
+    errEl.textContent = err && err.name === 'NotAllowedError'
+      ? 'Camera access was denied. Please allow camera permission and try again.'
+      : 'Unable to access camera.';
+    errEl.classList.add('show');
+  }
+})
 
 // Closure camera — capture
 document.getElementById('btnTakeClosurePhoto').addEventListener('click', () => {
@@ -1221,7 +1253,12 @@ document.getElementById('btnTakeClosurePhoto').addEventListener('click', () => {
   canvas.height = video.videoHeight;
   canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
   canvas.toBlob(blob => {
-    if (!blob) { alert('Unable to capture photo.'); return; }
+    if (!blob) {
+      const errEl = document.getElementById('closureCameraErrorMsg');
+      errEl.textContent = 'Unable to capture photo. Please try again.';
+      errEl.classList.add('show');
+      return;
+    }
     closureCapturedPhoto = new File([blob], 'ClosurePhoto.jpg', { type: 'image/jpeg' });
     document.getElementById('closurePhotoFile').value = '';
     document.getElementById('closurePhotoPreview').innerHTML =
@@ -1230,7 +1267,6 @@ document.getElementById('btnTakeClosurePhoto').addEventListener('click', () => {
   bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).hide();
   if (closureCameraStream) { closureCameraStream.getTracks().forEach(t => t.stop()); closureCameraStream = null; }
 });
-
 // Closure camera — stop stream when modal dismissed without capturing
 document.getElementById('closureCameraModal').addEventListener('hidden.bs.modal', () => {
   if (closureCameraStream) { closureCameraStream.getTracks().forEach(t => t.stop()); closureCameraStream = null; }
@@ -1250,7 +1286,6 @@ document.getElementById('closurePhotoFile').addEventListener('change', function 
   };
   reader.readAsDataURL(file);
 });
-
 document.getElementById('btnCloseLoan').addEventListener('click', () => {
   if (!activeClosureLoan) return;
 
@@ -1263,9 +1298,18 @@ document.getElementById('btnCloseLoan').addEventListener('click', () => {
   }
   document.getElementById('closurePhotoMsg').classList.remove('show');
 
+  // Show styled confirm modal instead of window.confirm
+  document.getElementById('confirmClosureLoanNo').textContent = activeClosureLoan.loanNo;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmClosureModal')).show();
+});
+
+document.getElementById('btnConfirmClosureProceed').addEventListener('click', () => {
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmClosureModal')).hide();
+
+  if (!activeClosureLoan) return;
+  const uploadedFile = document.getElementById('closurePhotoFile').files[0];
+  const photoFile = uploadedFile || closureCapturedPhoto;
   const loanNo = activeClosureLoan.loanNo;
-  const confirmed = window.confirm(`Confirm closure of loan ${loanNo}? This action cannot be undone.`);
-  if (!confirmed) return;
 
   const btn = document.getElementById('btnCloseLoan');
   btn.disabled = true;
@@ -1302,7 +1346,6 @@ document.getElementById('btnCloseLoan').addEventListener('click', () => {
         <div class="receipt-divider"></div>
         <div class="r-row" style="font-weight:700;"><span>Grand Total Paid</span><span>${inr(response.grandTotal)}</span></div>
         <div class="r-row"><span>Status</span><span>Closed</span></div>`;
-      //document.getElementById('closureReceiptSection').style.display = 'block';
     })
     .catch(err => {
       showApiError(err);
