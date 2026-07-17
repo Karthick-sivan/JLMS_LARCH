@@ -41,6 +41,8 @@ public class JlmsDbContext : DbContext
     public DbSet<JewelRelease> JewelReleases => Set<JewelRelease>();
     public DbSet<Auction> Auctions => Set<Auction>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<FinancialYear> FinancialYears => Set<FinancialYear>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,7 +60,10 @@ public class JlmsDbContext : DbContext
         modelBuilder.Entity<JewelRelease>().ToTable("JewelReleases");
         modelBuilder.Entity<Auction>().ToTable("Auctions");
         modelBuilder.Entity<AuditLog>().ToTable("AuditLogs");
-
+        //modelBuilder.Entity<FinancialYear>().ToTable("FinancialYear");
+        modelBuilder.Entity<FinancialYear>().ToTable("FinancialYear");
+        modelBuilder.Entity<FinancialYear>().Property(f => f.FinancialYearId).HasColumnName("Id");
+        modelBuilder.Entity<FinancialYear>().Property(f => f.GoldLoanNoStartsFrom).HasColumnName("GoldLoanNoStarts");
         // Decimal precision (avoid EF Core warnings / silent truncation)
         modelBuilder.Entity<JewelType>().Property(p => p.WastagePercent).HasColumnType("decimal(5,2)");
         modelBuilder.Entity<GoldRate>().Property(p => p.Rate24K).HasColumnType("decimal(10,2)");

@@ -583,3 +583,39 @@ public record ClosureReceiptPdfDto(
     decimal OtherCharges,
     decimal GrandTotal
 );
+
+
+
+public record FinancialYearDto(
+    int FinancialYearId,
+    string Code,
+    string GoldLoanType,
+    DateTime FromDt,
+    DateTime ToDt,
+    int GoldLoanNoStartsFrom,
+    string Prefix,
+    string? Suffix,
+    string Status,
+    DateTime CreatedDt,
+    int CreatedBy);
+
+public record FinancialYearCreateDto(
+    string Code,
+    string GoldLoanType,
+    DateTime FromDt,
+    DateTime ToDt,
+    int GoldLoanNoStartsFrom,
+    string Prefix,
+    string? Suffix,
+    int CreatedBy);
+
+public record FinancialYearUpdateDto(
+    string Code,
+    string GoldLoanType,
+    DateTime FromDt,
+    DateTime ToDt,
+    int GoldLoanNoStartsFrom,
+    string Prefix,
+    string? Suffix,
+    string Status
+    );

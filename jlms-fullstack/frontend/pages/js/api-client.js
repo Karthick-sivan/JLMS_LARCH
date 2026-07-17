@@ -118,6 +118,13 @@ const Api = {
     updateUser: (id, dto) => apiRequest(`/user-master/${id}`, { method: "PUT", body: dto }),
     toggleUserStatus: (id) => apiRequest(`/user-master/${id}/toggle-status`, { method: "PATCH" }),
 
+    // ---- Financial Year ----
+  getFinancialYears: (activeOnly = false) => apiRequest(`/financial-years?activeOnly=${activeOnly}`),
+  getFinancialYear: (id) => apiRequest(`/financial-years/${id}`),
+  createFinancialYear: (dto) => apiRequest("/financial-years", { method: "POST", body: dto }),
+  updateFinancialYear: (id, dto) => apiRequest(`/financial-years/${id}`, { method: "PUT", body: dto }),
+  deactivateFinancialYear: (id) => apiRequest(`/financial-years/${id}/deactivate`, { method: "POST" }),
+  
   //getLoanSchemes: (activeOnly = true) => apiRequest(`/loan-schemes?activeOnly=${activeOnly}`),
   //createLoanScheme: (dto) => apiRequest("/loan-schemes", { method: "POST", body: dto }),
 

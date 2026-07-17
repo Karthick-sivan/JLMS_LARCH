@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Financial Year</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .fy-active-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .fy-active-card {
+    border:1px solid var(--n-200); border-left:4px solid var(--navy-600); border-radius:8px;
+    background:#fff; padding:14px 16px;
+  }
+  .fy-active-card.empty { border-left-color: var(--danger-600); }
+  .fy-active-card .fy-type { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--n-500); }
+  .fy-active-card .fy-prefix { font-size:20px; font-weight:700; color:var(--navy-900); margin:4px 0 2px; }
+  .fy-active-card .fy-range { font-size:11.5px; color:var(--n-500); }
+  .fy-active-card .fy-warn { font-size:12px; color:var(--danger-700); font-weight:600; }
+  .status-pill { font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:10px; }
+  .status-pill.active { background:rgba(34,139,76,0.1); color:#1a7f4e; }
+  .status-pill.inactive { background:var(--n-150); color:var(--n-500); }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Financial Year</span></div> -->
+          <div class="h1">Financial Year</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-jlms btn-jlms-primary" id="btnNewFy"><i class="bi bi-plus-lg"></i> New Financial Year</button>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+      <div id="apiSuccessBanner" class="api-success-banner"></div>
+
+      <div class="text-caption mb-2">Currently active series — this is the Prefix that new Loan Numbers and Customer Codes are generated from.</div>
+      <div class="fy-active-cards" id="activeCards">
+        <div class="fy-active-card"><div class="fy-type">Loan Number</div><div class="fy-prefix">—</div></div>
+        <div class="fy-active-card"><div class="fy-type">Customer Code</div><div class="fy-prefix">—</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><div class="h4">All Financial Years</div></div>
+        <div class="table-jlms-wrap">
+          <table class="table-jlms">
+            <thead>
+              <tr>
+                <th>Code</th><th>Type</th><th>From</th><th>To</th>
+                <th>Starts From</th><th>Prefix</th><th>Suffix</th><th>Status</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="fyTableBody">
+              <tr><td colspan="9" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Financial Year modal -->
+<div class="modal fade" id="fyModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="fyModalTitle">New Financial Year</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="fyId">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="field-label">Financial Year Code<span class="req">*</span></label>
+            <input type="text" class="form-control-jlms" id="fyCode" placeholder="e.g. 2026-2027">
+          </div>
+          <div class="col-md-6">
+            <label class="field-label">Series Type<span class="req">*</span></label>
+            <select class="form-select-jlms" id="fyType">
+              <option value="LoanNumber">Loan Number</option>
+              <option value="CustomerCode">Customer Code</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="field-label">From Date<span class="req">*</span></label>
+            <input type="date" class="form-control-jlms" id="fyFrom">
+          </div>
+          <div class="col-md-6">
+            <label class="field-label">To Date<span class="req">*</span></label>
+            <input type="date" class="form-control-jlms" id="fyTo">
+          </div>
+          <div class="col-md-6">
+            <label class="field-label">Prefix<span class="req">*</span></label>
+            <input type="text" class="form-control-jlms" id="fyPrefix" placeholder="e.g. BR2627 or BRCUS">
+          </div>
+          <div class="col-md-6">
+            <label class="field-label">Suffix <span class="opt">optional</span></label>
+            <input type="text" class="form-control-jlms" id="fySuffix" placeholder="none">
+          </div>
+          <div class="col-md-6">
+            <label class="field-label">Starts From<span class="req">*</span></label>
+            <input type="number" class="form-control-jlms" id="fyStartsFrom" min="1" value="1">
+          </div>
+          <div class="col-md-6" id="fyStatusWrap" style="display:none;">
+            <label class="field-label">Status</label>
+            <select class="form-select-jlms" id="fyStatus">
+              <option value="A">Active</option>
+              <option value="I">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="text-caption mt-2">
+          Example: Prefix <code>BR2627</code> + Starts From <code>1</code> generates <code>BR262700001</code>, <code>BR262700002</code>, ...
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn-jlms btn-jlms-primary" id="btnSaveFy"><i class="bi bi-save"></i> Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>window.JLMS_ACTIVE = "financial-year";</script>
+<script src="js/jlms-shell.js"></script>
+<script src="js/api-client.js"></script>
+<script>
+jlmsInitShell();
+
+let fyCache = [];
+let fyModalInstance;
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function typeLabel(t) {
+  return t === 'LoanNumber' ? 'Loan Number' : (t === 'CustomerCode' ? 'Customer Code' : t);
+}
+
+function renderActiveCards() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const wrap = document.getElementById('activeCards');
+  const types = [
+    { key: 'LoanNumber', label: 'Loan Number' },
+    { key: 'CustomerCode', label: 'Customer Code' }
+  ];
+
+  wrap.innerHTML = types.map(t => {
+    const active = fyCache.find(f => f.goldLoanType === t.key && f.status === 'A'
+      && new Date(f.fromDt) <= today && new Date(f.toDt) >= today);
+    if (!active) {
+      return `<div class="fy-active-card empty">
+        <div class="fy-type">${t.label}</div>
+        <div class="fy-prefix">—</div>
+        <div class="fy-warn"><i class="bi bi-exclamation-triangle-fill"></i> No active series covering today — new ${t.label.toLowerCase()}s will fail to generate.</div>
+      </div>`;
+    }
+    const nextExample = `${active.prefix}${String(active.goldLoanNoStartsFrom).padStart(5,'0')}${active.suffix || ''}`;
+    return `<div class="fy-active-card">
+      <div class="fy-type">${t.label}</div>
+      <div class="fy-prefix">${active.prefix}${active.suffix || ''}</div>
+      <div class="fy-range">${fmtDate(active.fromDt)} – ${fmtDate(active.toDt)} &middot; e.g. ${nextExample}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable() {
+  const tbody = document.getElementById('fyTableBody');
+  if (fyCache.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted-jlms" style="padding:16px;">No financial years configured yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = fyCache.map(f => `
+    <tr>
+      <td>${f.code}</td>
+      <td>${typeLabel(f.goldLoanType)}</td>
+      <td>${fmtDate(f.fromDt)}</td>
+      <td>${fmtDate(f.toDt)}</td>
+      <td>${f.goldLoanNoStartsFrom}</td>
+      <td>${f.prefix}</td>
+      <td>${f.suffix || '—'}</td>
+      <td><span class="status-pill ${f.status === 'A' ? 'active' : 'inactive'}">${f.status === 'A' ? 'Active' : 'Inactive'}</span></td>
+      <td class="text-end">
+        <button class="btn-jlms btn-jlms-outline btn-sm editFyBtn" data-id="${f.financialYearId}" title="Edit"><i class="bi bi-pencil"></i></button>
+        ${f.status === 'A' ? `<button class="btn-jlms btn-jlms-outline btn-sm deactivateFyBtn" data-id="${f.financialYearId}" title="Deactivate"><i class="bi bi-slash-circle"></i></button>` : ''}
+      </td>
+    </tr>`).join('');
+
+  tbody.querySelectorAll('.editFyBtn').forEach(btn => {
+    btn.addEventListener('click', () => openFyModal(parseInt(btn.dataset.id, 10)));
+  });
+  tbody.querySelectorAll('.deactivateFyBtn').forEach(btn => {
+    btn.addEventListener('click', () => deactivateFy(parseInt(btn.dataset.id, 10)));
+  });
+}
+
+async function loadFinancialYears() {
+  try {
+  fyCache = await Api.getFinancialYears();
+    renderActiveCards();
+    renderTable();
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+function openFyModal(id) {
+  clearApiError();
+  const statusWrap = document.getElementById('fyStatusWrap');
+  if (id) {
+    const f = fyCache.find(x => x.financialYearId === id);
+    if (!f) return;
+    document.getElementById('fyModalTitle').textContent = 'Edit Financial Year';
+    document.getElementById('fyId').value = f.financialYearId;
+    document.getElementById('fyCode').value = f.code;
+    document.getElementById('fyType').value = f.goldLoanType;
+    document.getElementById('fyFrom').value = f.fromDt.substring(0, 10);
+    document.getElementById('fyTo').value = f.toDt.substring(0, 10);
+    document.getElementById('fyPrefix').value = f.prefix;
+    document.getElementById('fySuffix').value = f.suffix || '';
+    document.getElementById('fyStartsFrom').value = f.goldLoanNoStartsFrom;
+    document.getElementById('fyStatus').value = f.status;
+    statusWrap.style.display = 'block';
+  } else {
+    document.getElementById('fyModalTitle').textContent = 'New Financial Year';
+    document.getElementById('fyId').value = '';
+    document.getElementById('fyCode').value = '';
+    document.getElementById('fyType').value = 'LoanNumber';
+    document.getElementById('fyFrom').value = '';
+    document.getElementById('fyTo').value = '';
+    document.getElementById('fyPrefix').value = '';
+    document.getElementById('fySuffix').value = '';
+    document.getElementById('fyStartsFrom').value = 1;
+    statusWrap.style.display = 'none';
+  }
+  fyModalInstance.show();
+}
+
+async function saveFy() {
+  clearApiError();
+  const id = document.getElementById('fyId').value;
+  const code = document.getElementById('fyCode').value.trim();
+  const goldLoanType = document.getElementById('fyType').value;
+  const fromDt = document.getElementById('fyFrom').value;
+  const toDt = document.getElementById('fyTo').value;
+  const prefix = document.getElementById('fyPrefix').value.trim();
+  const suffix = document.getElementById('fySuffix').value.trim() || null;
+  const goldLoanNoStartsFrom = parseInt(document.getElementById('fyStartsFrom').value, 10) || 1;
+
+  if (!code || !fromDt || !toDt || !prefix) {
+    showApiError(new Error('Code, From Date, To Date and Prefix are required.'));
+    return;
+  }
+  if (new Date(toDt) < new Date(fromDt)) {
+    showApiError(new Error('To Date cannot be before From Date.'));
+    return;
+  }
+
+  const currentUser = Session.get();
+  const btn = document.getElementById('btnSaveFy');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+
+  try {
+    if (id) {
+      const status = document.getElementById('fyStatus').value;
+      await Api.updateFinancialYear(id, { code, goldLoanType, fromDt, toDt, goldLoanNoStartsFrom, prefix, suffix, status });
+    } else {
+      await Api.createFinancialYear({ code, goldLoanType, fromDt, toDt, goldLoanNoStartsFrom, prefix, suffix, createdBy: currentUser ? currentUser.userId : 1 });
+    }
+    fyModalInstance.hide();
+    const successEl = document.getElementById('apiSuccessBanner');
+    successEl.textContent = 'Financial year saved successfully.';
+    successEl.style.display = 'block';
+    await loadFinancialYears();
+  } catch (err) {
+    showApiError(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-save"></i> Save';
+  }
+}
+
+async function deactivateFy(id) {
+  clearApiError();
+  if (!confirm('Deactivate this financial year series? New numbers will stop using it.')) return;
+  try {
+await Api.deactivateFinancialYear(id);
+    await loadFinancialYears();
+  } catch (err) {
+    showApiError(err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  Session.requireLogin();
+  fyModalInstance = new bootstrap.Modal(document.getElementById('fyModal'));
+
+  document.getElementById('btnNewFy').addEventListener('click', () => openFyModal(null));
+  document.getElementById('btnSaveFy').addEventListener('click', saveFy);
+
+  await loadFinancialYears();
+});
+</script>
+</body>
+</html>
