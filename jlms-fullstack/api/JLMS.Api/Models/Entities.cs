@@ -239,3 +239,34 @@ public class AuditLog
     public string? RecordReference { get; set; }
     public string? IpAddress { get; set; }
 }
+
+
+// Master table that drives numbering series (Loan Number / Customer Code) per financial year.
+// One row per (Code, GoldLoanType) — e.g. Code="2026-2027", GoldLoanType="LoanNumber", Prefix="BR2627".
+public class FinancialYear
+{
+    public int FinancialYearId { get; set; }
+
+    // e.g. "2026-2027"
+    public string Code { get; set; } = string.Empty;
+
+    // What this series numbers: "LoanNumber" or "CustomerCode"
+    public string GoldLoanType { get; set; } = string.Empty;
+
+    public DateTime FromDt { get; set; }
+    public DateTime ToDt { get; set; }
+
+    // First sequence number to use when this series starts (usually 1)
+    public int GoldLoanNoStartsFrom { get; set; } = 1;
+
+    public string Prefix { get; set; } = string.Empty;
+    public string? Suffix { get; set; }
+
+    // "A" = Active, "I" = Inactive
+    public string Status { get; set; } = "A";
+
+    public string? History { get; set; }
+
+    public DateTime CreatedDt { get; set; } = DateTime.UtcNow;
+    public int CreatedBy { get; set; }
+}

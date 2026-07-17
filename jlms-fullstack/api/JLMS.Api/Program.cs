@@ -33,7 +33,7 @@ builder.Services.AddDbContext<JlmsDbContext>(options =>
 
 
 builder.Services.AddScoped<LoanCalculationService>();
-
+builder.Services.AddScoped<JLMS.Api.Services.FinancialYearNumberingService>();
 builder.Services.AddScoped<LoanOperationsCalculationHelper>();
 builder.Services.AddScoped<LoanOperationsService>();
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;

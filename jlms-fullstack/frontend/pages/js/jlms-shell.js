@@ -17,6 +17,7 @@ const JLMS_MENU = [
     { id: "jewel-type-master", icon: "bi-gem", label: "Jewel Type Master", href: "jewel-type-master.html" },
     { id: "gold-rate-master", icon: "bi-graph-up-arrow", label: "Gold Rate Master", href: "gold-rate-master.html" },
     { id: "loan-scheme-master", icon: "bi-journal-text", label: "Loan Scheme Master", href: "loan-scheme-master.html" },
+     { id: "financial-year", icon: "bi-calendar-range", label: "Financial Year", href: "financial-year.html" },
     { id: "user-master", icon: "bi-people", label: "User Master", href: "user-master.html" }
   ]},
   { section: "Reports", items: [

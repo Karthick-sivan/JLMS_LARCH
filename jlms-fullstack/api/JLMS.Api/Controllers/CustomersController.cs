@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using JLMS.Api.Data;
 using JLMS.Api.Models;
 using JLMS.Api.DTOs;
+using JLMS.Api.Services;
 
 namespace JLMS.Api.Controllers;
 
@@ -11,7 +12,12 @@ namespace JLMS.Api.Controllers;
 public class CustomersController : ControllerBase
 {
     private readonly JlmsDbContext _db;
-    public CustomersController(JlmsDbContext db) => _db = db;
+    private readonly FinancialYearNumberingService _numbering;
+    public CustomersController(JlmsDbContext db, FinancialYearNumberingService numbering)
+    {
+        _db = db;
+        _numbering = numbering;
+    }
 
     // GET /api/customers?search=&mobile=&aadhaar=&code=&page=1&pageSize=20
     [HttpGet]
@@ -56,7 +62,6 @@ public class CustomersController : ControllerBase
 
             string status = activeLoans == 0 ? "No Active Loan" : (hasOverdue ? "Overdue" : "Active");
 
-            // All loan numbers for this customer (any status), most recent first.
             var loanNumbers = await _db.Loans
                 .Where(l => l.CustomerId == c.CustomerId)
                 .OrderByDescending(l => l.LoanDate)
@@ -70,20 +75,19 @@ public class CustomersController : ControllerBase
 
         return Ok(new PagedResultDto<CustomerListItemDto>(result, totalCount, page, pageSize));
     }
+
     // GET /api/customers/active
-    // Lightweight list (Code + Name only) for the "browse all customers" picker on New Loan.
-    // NOTE: Customer model has no IsActive flag today, so "active" = all registered customers.
-    // If/when a status flag is added to the Customer model, filter here (.Where(c => c.IsActive)).
     [HttpGet("active")]
     public async Task<ActionResult<List<CustomerActiveListItemDto>>> GetActiveCustomers()
     {
         var customers = await _db.Customers.AsNoTracking()
-            .OrderBy(c => c.CustomerCode)
+            .OrderByDescending(c => c.CreatedAt)
             .Select(c => new CustomerActiveListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Mobile))
             .ToListAsync();
 
         return Ok(customers);
     }
+
     // GET /api/customers/5
     [HttpGet("{id:int}")]
     public async Task<ActionResult<CustomerDetailDto>> GetById(int id)
@@ -104,7 +108,6 @@ public class CustomersController : ControllerBase
     }
 
     // GET /api/customers/5/documents/photo|aadhaar|pan
-    // Streams the actual file from disk. Only the relative path is stored in SQL.
     [HttpGet("{id:int}/documents/{docType}")]
     public async Task<IActionResult> GetDocument(int id, string docType)
     {
@@ -129,7 +132,6 @@ public class CustomersController : ControllerBase
         var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
         var fullPath = Path.GetFullPath(Path.Combine(uploadsRoot, relativePath));
 
-        // Guard against path traversal - resolved path must stay inside Uploads.
         if (!fullPath.StartsWith(Path.GetFullPath(uploadsRoot), StringComparison.OrdinalIgnoreCase))
             return BadRequest(new { message = "Invalid document path." });
 
@@ -166,77 +168,51 @@ public class CustomersController : ControllerBase
         var branch = await _db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.BranchId == branchId);
         if (branch == null) return BadRequest("Branch not found.");
 
-        var nextSeq = await _db.Customers.CountAsync() + 1;
-        var code = $"BRCUS{nextSeq:D5}";
-
-        while (await _db.Customers.AnyAsync(c => c.CustomerCode == code))
+        // Customer code now comes from the active "CustomerCode" Financial Year row
+        // (Prefix + running sequence), instead of the old hardcoded BRCUS##### counter.
+        string code;
+        try
         {
-            nextSeq++;
-            code = $"BRCUS{nextSeq:D5}";
+            code = await _numbering.GenerateNextCustomerCodeAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
-        // Create upload folders if they don't exist
         var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
         Directory.CreateDirectory(Path.Combine(uploadsRoot, "CustomerPhotos"));
         Directory.CreateDirectory(Path.Combine(uploadsRoot, "Aadhaar"));
         Directory.CreateDirectory(Path.Combine(uploadsRoot, "PAN"));
 
-        // Variables to store saved file paths
         string? photoPath = null;
         string? aadhaarPath = null;
         string? panPath = null;
 
-        // Save Customer Photo
         if (dto.CustomerPhoto != null && dto.CustomerPhoto.Length > 0)
         {
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.CustomerPhoto.FileName);
-
-            var filePath = Path.Combine(
-                uploadsRoot,
-                "CustomerPhotos",
-                fileName);
-
+            var filePath = Path.Combine(uploadsRoot, "CustomerPhotos", fileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
-            {
                 await dto.CustomerPhoto.CopyToAsync(stream);
-            }
-
             photoPath = Path.Combine("CustomerPhotos", fileName).Replace("\\", "/");
         }
 
-        // Save Aadhaar
         if (dto.AadhaarFile != null && dto.AadhaarFile.Length > 0)
         {
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.AadhaarFile.FileName);
-
-            var filePath = Path.Combine(
-                uploadsRoot,
-                "Aadhaar",
-                fileName);
-
+            var filePath = Path.Combine(uploadsRoot, "Aadhaar", fileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
-            {
                 await dto.AadhaarFile.CopyToAsync(stream);
-            }
-
             aadhaarPath = Path.Combine("Aadhaar", fileName).Replace("\\", "/");
         }
 
-        // Save PAN
         if (dto.PanFile != null && dto.PanFile.Length > 0)
         {
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.PanFile.FileName);
-
-            var filePath = Path.Combine(
-                uploadsRoot,
-                "PAN",
-                fileName);
-
+            var filePath = Path.Combine(uploadsRoot, "PAN", fileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
-            {
                 await dto.PanFile.CopyToAsync(stream);
-            }
-
             panPath = Path.Combine("PAN", fileName).Replace("\\", "/");
         }
 
@@ -256,7 +232,6 @@ public class CustomersController : ControllerBase
             PanNumber = dto.PanNumber,
             BranchId = dto.BranchId,
 
-            // File paths
             PhotoPath = photoPath,
             AadhaarDocPath = aadhaarPath,
             PanDocPath = panPath,

@@ -14,12 +14,15 @@ public class LoansController : ControllerBase
     private readonly JlmsDbContext _db;
     private readonly LoanCalculationService _calc;
     private readonly LoanReceiptPdfService _receiptService;
+    private readonly FinancialYearNumberingService _numbering;
 
-    public LoansController(JlmsDbContext db, LoanCalculationService calc, LoanReceiptPdfService receiptService)
+    public LoansController(JlmsDbContext db, LoanCalculationService calc, LoanReceiptPdfService receiptService,
+        FinancialYearNumberingService numbering)
     {
         _db = db;
         _calc = calc;
         _receiptService = receiptService;
+        _numbering = numbering;
     }
 
     // GET /api/loans?status=Active
@@ -43,7 +46,7 @@ public class LoansController : ControllerBase
             l.OutstandingPrincipal, l.OutstandingInterest, l.LoanDate, l.MaturityDate)));
     }
 
-    // GET /api/loans/JL-20261247  (lookup by loan number — used by Collections/Closure/Renewal screens)
+    // GET /api/loans/JL-20261247
     [HttpGet("by-number/{loanNumber}")]
     public async Task<ActionResult<object>> GetByNumber(string loanNumber)
     {
@@ -119,7 +122,7 @@ public class LoansController : ControllerBase
     public async Task<ActionResult<object>> GetReleaseDetails(int id)
     {
         var loan = await _db.Loans
-            .AsNoTracking() 
+            .AsNoTracking()
             .Include(l => l.Customer)
             .Include(l => l.JewelItems)
                 .ThenInclude(j => j.JewelType)
@@ -155,9 +158,6 @@ public class LoansController : ControllerBase
     }
 
     // POST /api/loans/5/submit-for-approval
-    // Combines: validate -> approve -> disburse -> ledger entry, in one transaction.
-    // Final status is "Active" (loan is now live and accruing interest).
-    // Payment mode is hardcoded to "Cash" since this flow no longer collects it.
     [HttpPost("{id:int}/submit-for-approval")]
     public async Task<ActionResult<SubmitForApprovalResponseDto>> SubmitForApproval(
         int id, [FromBody] SubmitForApprovalRequestDto request)
@@ -167,11 +167,6 @@ public class LoansController : ControllerBase
         await using var tx = await _db.Database.BeginTransactionAsync();
         try
         {
-            // ---- Step 1: Atomic "claim" — prevents duplicate approval/disbursement
-            // if the button is clicked twice or the request is retried. This UPDATE
-            // takes a row lock immediately; a concurrent duplicate call blocks until
-            // this transaction finishes, then its WHERE no longer matches (status
-            // already moved on) so it affects 0 rows.
             var claimed = await _db.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE Loans
                 SET Status = 'Processing', UpdatedAt = GETUTCDATE()
@@ -186,13 +181,11 @@ public class LoansController : ControllerBase
                     return NotFound($"Loan {id} not found.");
 
                 if (existing.Status == "Active")
-                    // Duplicate click after success — return existing result instead of erroring.
                     return Ok(await BuildSubmitResponse(id));
 
                 return Conflict($"Loan {id} cannot be submitted for approval. Current status: {existing.Status}.");
             }
 
-            // ---- Step 2: Load full loan graph ----
             var loan = await _db.Loans
                 .Include(l => l.Customer)
                 .Include(l => l.LoanScheme)
@@ -205,7 +198,6 @@ public class LoansController : ControllerBase
                 return NotFound($"Loan {id} not found.");
             }
 
-            // ---- Step 3: Validate ----
             var errors = ValidateLoanForSubmission(loan);
             if (errors.Count > 0)
             {
@@ -215,13 +207,11 @@ public class LoansController : ControllerBase
 
             var now = DateTime.UtcNow;
 
-            // ---- Step 4: Approve ----
             loan.SubmittedBy = request.SubmittedByUserId;
             loan.SubmittedAt = now;
             loan.ApprovedBy = request.SubmittedByUserId;
             loan.ApprovedAt = now;
 
-            // ---- Step 5: Disburse ----
             var today = now.Date;
             var maturity = today.AddMonths(loan.TenureMonths);
             var netDisbursement = loan.LoanAmount - loan.ProcessingFee;
@@ -231,36 +221,7 @@ public class LoansController : ControllerBase
             loan.DisbursedBy = request.SubmittedByUserId;
             loan.DisbursedAt = now;
             loan.UpdatedAt = now;
-            loan.Status = "Active"; // loan is now live and accruing interest
-
-            //var seq = await _db.LoanTransactions.CountAsync() + 1;
-            //var receiptNo = _calc.GenerateReceiptNumber(seq);
-            //while (await _db.LoanTransactions.AnyAsync(t => t.ReceiptNumber == receiptNo))
-            //{
-            //    seq++;
-            //    receiptNo = _calc.GenerateReceiptNumber(seq);
-            //}
-
-            //var txn = new LoanTransaction
-            //{
-            //    LoanId = loan.LoanId,
-            //    TransactionType = "Disbursement",
-            //    ReceiptNumber = receiptNo,
-            //    TransactionDate = now,
-            //    PrincipalAmount = loan.LoanAmount,
-            //    InterestAmount = 0,
-            //    PenaltyAmount = 0,
-            //    ChargesAmount = loan.ProcessingFee,
-            //    TotalAmount = netDisbursement,
-            //    PaymentMode = HardcodedPaymentMode,
-            //    ReferenceNo = null,
-            //    BalancePrincipalAfter = loan.OutstandingPrincipal,
-            //    ProcessedBy = request.SubmittedByUserId,
-            //    BranchId = loan.BranchId,
-            //    Remarks = "Auto-approved and disbursed via Submit for Approval",
-            //    CreatedAt = now
-            //};
-            //_db.LoanTransactions.Add(txn);
+            loan.Status = "Active";
 
             LoanTransaction txn = null;
             Exception lastError = null;
@@ -294,13 +255,12 @@ public class LoansController : ControllerBase
 
                 try
                 {
-                    await _db.SaveChangesAsync(); // try to save right here
+                    await _db.SaveChangesAsync();
                     lastError = null;
-                    break; // success, stop retrying
+                    break;
                 }
                 catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
                 {
-                    // Duplicate receipt number — undo this attempt and try the next number
                     _db.Entry(txn).State = EntityState.Detached;
                     lastError = ex;
                 }
@@ -321,9 +281,7 @@ public class LoansController : ControllerBase
                 RecordReference = loan.LoanNumber
             });
 
-            //await _db.SaveChangesAsync();
-            //await tx.CommitAsync();
-            await _db.SaveChangesAsync(); // saves the audit log (transaction already saved above)
+            await _db.SaveChangesAsync();
             await tx.CommitAsync();
             return Ok(await BuildSubmitResponse(loan.LoanId));
         }
@@ -378,9 +336,6 @@ public class LoansController : ControllerBase
     }
 
     // POST /api/loans
-    // Creates a Draft/PendingApproval loan with jewel items, using the appraisal values supplied.
-    // Returns the created jewel item ids (same order as request.JewelItems) so the front end
-    // can immediately upload a photo against each jewel item.
     [HttpPost]
     public async Task<ActionResult<NewLoanResponseDto>> Create([FromBody] NewLoanRequestDto request)
     {
@@ -434,31 +389,25 @@ public class LoansController : ControllerBase
 
         var eligibleAmount = _calc.CalculateEligibleAmount(totalMarketValue, scheme.MaxLtvPercent);
 
-        // Skip the LTV cap only when the caller explicitly checked "Don't validate" on the New Loan screen.
         if (!request.AllowExceedEligible && request.RequestedLoanAmount > eligibleAmount)
             return BadRequest($"Requested amount ₹{request.RequestedLoanAmount:N2} exceeds eligible amount ₹{eligibleAmount:N2} for this scheme's LTV. Check 'Don't validate — allow amount to exceed eligible' to override.");
 
-        //var sequence = await _db.Loans.CountAsync() + 1;
-        //var loanNumber = _calc.GenerateLoanNumber(sequence);
-        //while (await _db.Loans.AnyAsync(l => l.LoanNumber == loanNumber))
-        //{
-        //    sequence++;
-        //    loanNumber = _calc.GenerateLoanNumber(sequence);
-        //}
         var branchId = customer.BranchId ?? 1;
         var branch = await _db.Branches.AsNoTracking().FirstOrDefaultAsync(b => b.BranchId == branchId);
         if (branch == null) return BadRequest("Branch not found.");
 
-        var sequence = await _db.Loans.CountAsync() + 1;
-        var loanNumber = _calc.GenerateLoanNumber(sequence);
-        while (await _db.Loans.AnyAsync(l => l.LoanNumber == loanNumber))
+        // Loan number now comes from the active "LoanNumber" Financial Year row
+        // (Prefix + running sequence), instead of the old hardcoded BR{year}L##### counter.
+        string loanNumber;
+        try
         {
-            sequence++;
-            loanNumber = _calc.GenerateLoanNumber(sequence);
+            loanNumber = await _numbering.GenerateNextLoanNumberAsync();
         }
-        // Rule 4: Overall Interest = Principal x Interest%, fixed once at creation.
-        // Outstanding Interest starts EQUAL to Overall Interest — not zero — so the
-        // grid and payment screens show the correct figure from day one.
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
         var overallInterest = Math.Round(request.RequestedLoanAmount * scheme.InterestRatePct / 100m, 2, MidpointRounding.AwayFromZero);
 
         var loan = new Loan
@@ -467,7 +416,6 @@ public class LoansController : ControllerBase
             CustomerId = request.CustomerId,
             LoanSchemeId = request.LoanSchemeId,
             BranchId = branchId,
-            //BranchId = customer.BranchId ?? 1,
             InterestRatePct = scheme.InterestRatePct,
             TenureMonths = scheme.TenureMonths,
             MarketValue = totalMarketValue,
@@ -476,7 +424,7 @@ public class LoansController : ControllerBase
             ProcessingFee = request.ProcessingFee,
             OverallInterest = overallInterest,
             OutstandingPrincipal = request.RequestedLoanAmount,
-            OutstandingInterest = 0,
+            OutstandingInterest = overallInterest,
             PenaltyAccrued = 0,
             Status = "PendingApproval",
             Remarks = request.Remarks,
@@ -500,9 +448,6 @@ public class LoansController : ControllerBase
     }
 
     // POST /api/loans/jewel-items/5/photo
-    // Uploads/replaces the photo for a single jewel item. Retained for other screens
-    // that still work per-jewel-item; the New Loan screen no longer uses this endpoint
-    // (it now captures one combined photo per loan — see POST /api/loans/{id}/photo).
     [HttpPost("jewel-items/{jewelItemId:int}/photo")]
     public async Task<ActionResult> UploadJewelItemPhoto(int jewelItemId, IFormFile photo)
     {
@@ -531,8 +476,7 @@ public class LoansController : ControllerBase
         return Ok(new { jewelItem.JewelItemId, jewelItem.PhotoPath });
     }
 
-    // GET /api/loans/jewel-items/5/photo            -> inline (for the lightbox / thumbnail)
-    // GET /api/loans/jewel-items/5/photo?download=true -> forces attachment download
+    // GET /api/loans/jewel-items/5/photo
     [HttpGet("jewel-items/{jewelItemId:int}/photo")]
     public async Task<IActionResult> GetJewelItemPhoto(int jewelItemId, [FromQuery] bool download = false)
     {
@@ -547,7 +491,6 @@ public class LoansController : ControllerBase
         var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
         var fullPath = Path.GetFullPath(Path.Combine(uploadsRoot, jewelItem.PhotoPath));
 
-        // Guard against path traversal - resolved path must stay inside Uploads.
         if (!fullPath.StartsWith(Path.GetFullPath(uploadsRoot), StringComparison.OrdinalIgnoreCase))
             return BadRequest(new { message = "Invalid photo path." });
 
@@ -564,10 +507,6 @@ public class LoansController : ControllerBase
     }
 
     // POST /api/loans/5/photo
-    // Uploads/replaces the SINGLE combined photo covering all jewel items on this loan.
-    // Used by the New Loan screen (Step 3), which now captures one photo via the
-    // customer's webcam instead of one photo per jewel item. View-only on the New Loan
-    // screen — no download action is exposed there.
     [HttpPost("{id:int}/photo")]
     public async Task<ActionResult> UploadLoanPhoto(int id, IFormFile photo)
     {
@@ -600,7 +539,6 @@ public class LoansController : ControllerBase
     }
 
     // GET /api/loans/5/photo
-    // Streams the single combined jewel-items photo for the loan (inline only).
     [HttpGet("{id:int}/photo")]
     public async Task<IActionResult> GetLoanPhoto(int id)
     {
