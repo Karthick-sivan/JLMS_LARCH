@@ -42,33 +42,26 @@
                 </div>
               </div>
               <div class="field-group">
-                <label class="field-label">Tenure<span class="req">*</span></label>
+                <label class="field-label">Tenure</label>
                 <div class="input-affix">
-                  <input id="txtTenure" type="number" step="1" min="1" placeholder="e.g. 12">
-                  <span class="affix suffix">months</span>
+                  <input id="txtTenure" type="number" value="12" readonly disabled>
+                  <span class="affix suffix">months </span>
                 </div>
               </div>
               <div class="field-group">
-                <label class="field-label">Max LTV Ratio<span class="req">*</span></label>
+                <label class="field-label">Max LTV Ratio(Loan Limit %)<span class="req">*</span></label>
                 <div class="input-affix">
                   <input id="txtMaxLtv" type="number" step="0.01" min="0" max="100" placeholder="e.g. 75">
                   <span class="affix suffix">%</span>
                 </div>
               </div>
-              <div class="field-group">
+              <!-- <div class="field-group">
                 <label class="field-label">Processing Fee</label>
                 <div class="input-affix">
                   <span class="affix">₹</span>
                   <input id="txtProcessingFee" type="number" step="0.01" min="0" placeholder="e.g. 750">
                 </div>
-              </div>
-              <div class="field-group">
-                <label class="field-label">Penalty Rate (per day, overdue)</label>
-                <div class="input-affix">
-                  <input id="txtPenaltyRate" type="number" step="0.001" min="0" placeholder="e.g. 0.05">
-                  <span class="affix suffix">%</span>
-                </div>
-              </div>
+              </div> -->
               <div class="form-check-jlms mb-3">
                 <input type="checkbox" id="chkActive" checked>
                 <label for="chkActive">Active</label>
@@ -88,7 +81,9 @@
             </div>
             <div class="panel-body no-pad table-jlms-wrap">
               <table class="table-jlms">
-                <thead><tr><th>Scheme Name</th><th class="text-end">Interest %</th><th class="text-end">Tenure</th><th class="text-end">Max LTV</th><th class="text-end">Processing Fee</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
+                <thead><tr><th>Scheme Name</th><th class="text-end">Interest %</th><th class="text-end">Tenure</th><th class="text-end">Max LTV(Loan Limit %)</th>
+                  <!-- <th class="text-end">Processing Fee</th> -->
+                  <th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
                 <tbody id="tblLoanSchemes"></tbody>
               </table>
             </div>
@@ -105,6 +100,8 @@
 <script>
 jlmsInitShell();
 
+const FIXED_TENURE_MONTHS = 12;
+
 let editingId = 0;
 let schemeList = [];
 
@@ -118,10 +115,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const txtSchemeName   = document.getElementById("txtSchemeName");
     const txtInterestRate = document.getElementById("txtInterestRate");
-    const txtTenure       = document.getElementById("txtTenure");
     const txtMaxLtv       = document.getElementById("txtMaxLtv");
-    const txtProcessingFee= document.getElementById("txtProcessingFee");
-    const txtPenaltyRate  = document.getElementById("txtPenaltyRate");
+    // const txtProcessingFee= document.getElementById("txtProcessingFee");
     const chkActive       = document.getElementById("chkActive");
 
     const btnSave  = document.getElementById("btnSave");
@@ -180,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tblLoanSchemes.innerHTML =
                 `<tr>
-                    <td colspan="7" class="text-center">
+                    <td colspan="6" class="text-center">
                         No Loan Schemes Found
                     </td>
                 </tr>`;
@@ -193,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const badge = item.isActive
                 ? `<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>`
-                : `<span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span>`;
+                : `<span class="badge-jlms badge-danger"><span class="dot"></span>Inactive</span>`;
 
             tblLoanSchemes.innerHTML += `
             <tr>
@@ -201,7 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td class="text-end">${Number(item.interestRatePct).toFixed(2)}%</td>
                 <td class="text-end">${item.tenureMonths} mo</td>
                 <td class="text-end">${Number(item.maxLtvPercent).toFixed(0)}%</td>
-                <td class="text-end">₹${Number(item.processingFee).toFixed(0)}</td>
                 <td class="text-center">${badge}</td>
                 <td class="text-center">
                     <i class="bi bi-pencil edit-icon"
@@ -236,10 +230,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const dto = {
             schemeName:       txtSchemeName.value.trim(),
             interestRatePct:  parseFloat(txtInterestRate.value),
-            tenureMonths:     parseInt(txtTenure.value),
+            tenureMonths:     FIXED_TENURE_MONTHS,
             maxLtvPercent:    parseFloat(txtMaxLtv.value),
-            processingFee:    parseFloat(txtProcessingFee.value) || 0,
-            penaltyRatePerDay:parseFloat(txtPenaltyRate.value) || 0,
+            // processingFee:    parseFloat(txtProcessingFee.value) || 0,
+            penaltyRatePerDay:0,
             isActive:         chkActive.checked
         };
 
@@ -250,11 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (isNaN(dto.interestRatePct)) {
             showApiError(new Error("Please enter Interest Rate."));
-            return;
-        }
-
-        if (isNaN(dto.tenureMonths) || dto.tenureMonths < 1) {
-            showApiError(new Error("Please enter a valid Tenure (months)."));
             return;
         }
 
@@ -318,10 +307,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         txtSchemeName.value    = item.schemeName;
         txtInterestRate.value  = item.interestRatePct;
-        txtTenure.value        = item.tenureMonths;
         txtMaxLtv.value        = item.maxLtvPercent;
-        txtProcessingFee.value = item.processingFee;
-        txtPenaltyRate.value   = item.penaltyRatePerDay;
+        // txtProcessingFee.value = item.processingFee;
         chkActive.checked      = item.isActive;
 
         btnSave.innerHTML = '<i class="bi bi-check2-circle"></i> Update';
@@ -342,10 +329,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         txtSchemeName.value    = "";
         txtInterestRate.value  = "";
-        txtTenure.value        = "";
         txtMaxLtv.value        = "";
-        txtProcessingFee.value = "";
-        txtPenaltyRate.value   = "";
+        // txtProcessingFee.value = "";
         chkActive.checked      = true;
 
         btnSave.innerHTML = '<i class="bi bi-save"></i> Save';

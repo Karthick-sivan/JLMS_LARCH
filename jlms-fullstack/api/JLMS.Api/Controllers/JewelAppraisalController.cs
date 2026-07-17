@@ -55,14 +55,14 @@ public class JewelAppraisalController : ControllerBase
                 item.GrossWeightGrams, item.StoneWeightGrams, purity,
                 goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K);
 
-            var lineNetWeight = netWeight * item.Quantity;
-            var lineMarketValue = marketValue * item.Quantity;
+            var lineNetWeight = netWeight;
+            var lineMarketValue = marketValue;
 
             results.Add(new JewelItemResultDto(0, jewelType.JewelTypeName, item.Quantity,
                 item.GrossWeightGrams, item.StoneWeightGrams, netWeight, purity, lineMarketValue));
 
-            totalGross += item.GrossWeightGrams * item.Quantity;
-            totalStone += item.StoneWeightGrams * item.Quantity;
+            totalGross += item.GrossWeightGrams ;
+            totalStone += item.StoneWeightGrams ;
             totalNet += lineNetWeight;
             totalValue += lineMarketValue;
         }

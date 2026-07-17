@@ -20,7 +20,7 @@ const JLMS_MENU = [
     { id: "user-master", icon: "bi-people", label: "User Master", href: "user-master.html" }
   ]},
   { section: "Reports", items: [
-    { id: "report-center", icon: "bi-bar-chart-line", label: "Report Center", href: "activeloan-report.html" }
+    { id: "report-center", icon: "bi-bar-chart-line", label: "Report Center", href: "collection-reports.html" }
   ]},
   { section: "Administration", items: [
     { id: "roles", icon: "bi-shield-lock", label: "Roles", href: "roles.html" },
