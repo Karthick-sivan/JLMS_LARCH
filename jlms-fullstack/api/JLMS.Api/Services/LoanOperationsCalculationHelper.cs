@@ -4,13 +4,20 @@
 /// Pure, stateless financial calculations for the Loan Operations page.
 /// Independent of LoanCalculationService — does not modify or call it.
 ///
-/// INTEREST MODEL:
-///   - OverallInterest is fixed ONCE at loan creation: Principal x Rate%.
-///   - OutstandingInterest only ever DECREASES via interest-first payment
-///     allocation. It is never increased by anything in this class.
-///   - Daily/Accrued Interest figures below are INFORMATIONAL ONLY (Rule 7 +
-///     your follow-up: shown to staff for reference, but never added to
-///     Outstanding Interest, never part of Max Payable, never collected).
+/// INTEREST MODEL (updated):
+///   - OverallInterest is still recorded ONCE at loan creation (Principal x
+///     Rate%) and kept as a reference/display figure only.
+///   - Payment allocation no longer uses OverallInterest / the fixed
+///     schedule amount. The interest actually charged and collected on each
+///     payment is the DAILY ACCRUED INTEREST computed by
+///     CalculateAccruedInterestInfoOnly — Outstanding Principal x Annual
+///     Rate% / 365 x days-since-last-payment (or since loan start, for the
+///     first payment).
+///   - OutstandingInterest now holds only the unpaid carry-forward portion
+///     of accrued interest (0 in the normal case where a payment covers the
+///     full accrued interest). See LoanOperationsService.SavePaymentAsync
+///     and BuildInterestCalculationAsync for how it's combined with the
+///     newly accrued amount on each call.
 /// </summary>
 public class LoanOperationsCalculationHelper
 {
@@ -25,10 +32,15 @@ public class LoanOperationsCalculationHelper
         => Math.Round(principal * annualInterestRatePct / 100m, 2, MidpointRounding.AwayFromZero);
 
     /// <summary>
-    /// INFO-ONLY reference figure for the Payment Modal. Shows what interest
-    /// would be under a standard daily-accrual scheme, purely for staff
-    /// visibility. Does NOT feed into Outstanding Interest or Max Payable —
-    /// see LoanOperationsService.BuildInterestCalculationAsync.
+    /// Computes the daily-accrued interest that is now the AUTHORITATIVE
+    /// figure used for payment allocation in the Payment Modal (previously
+    /// this was informational only). Formula:
+    ///   Daily Interest   = Outstanding Principal x Annual Rate% / 365
+    ///   Accrued Interest = Daily Interest x days since lastReferenceDate
+    /// lastReferenceDate is the previous payment date, or the loan start
+    /// date for the first payment. See LoanOperationsService.SavePaymentAsync
+    /// and BuildInterestCalculationAsync for how the result is combined with
+    /// any carried-forward unpaid interest and fed into AllocatePayment.
     /// </summary>
     public (int noOfDays, decimal dailyInterestRate, decimal dailyInterestAmount, decimal accruedInterestInfoOnly) CalculateAccruedInterestInfoOnly(
         decimal outstandingPrincipal, decimal annualInterestRatePct, DateTime lastReferenceDate, DateTime asOfDate)

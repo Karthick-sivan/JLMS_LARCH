@@ -1,1696 +1,1924 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>JLMS — Loan Operations</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/jlms-core.css">
-<style>
-  /* ---- Loan Operations page-scoped styles (reuses jlms-core tokens) ---- */
-  .btn-icon-jlms {
-    border: none;
-    background: transparent;
-    color: var(--jlms-primary, #0d3b66);
-    font-size: 1.05rem;
-    padding: 4px 8px;
-    border-radius: 6px;
-    line-height: 1;
-  }
-  .btn-icon-jlms:hover { background: rgba(13, 59, 102, 0.08); }
-  .btn-icon-jlms.text-danger:hover { background: rgba(192, 57, 43, 0.08); }
-  .btn-icon-jlms.text-success:hover { background: rgba(39, 141, 71, 0.08); }
+    <meta charset="UTF-8">
+    <title>JLMS — Loan Operations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/jlms-core.css">
+    <style>
+        /* ---- Loan Operations page-scoped styles (reuses jlms-core tokens) ---- */
+        .btn-icon-jlms {
+            border: none;
+            background: transparent;
+            color: var(--jlms-primary, #0d3b66);
+            font-size: 1.05rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            line-height: 1;
+        }
 
-  .loan-no-cell { font-weight: 600; color: var(--jlms-primary, #0d3b66);width: 100px; min-width: 100px; }
+            .btn-icon-jlms:hover {
+                background: rgba(13, 59, 102, 0.08);
+            }
 
-  .pagination-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-top: 1px solid #eef0f3;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .pagination-bar .page-info { color: #6b7280; font-size: 0.85rem; }
-  .page-size-select {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    color: #6b7280;
-  }
-  .page-size-select select {
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 1px solid #d7dce3;
-    font-size: 0.85rem;
-  }
+            .btn-icon-jlms.text-danger:hover {
+                background: rgba(192, 57, 43, 0.08);
+            }
 
-  /* Modal-internal building blocks, styled to match panel/card language */
-  .info-card {
-    border: 1px solid #e5e9ef;
-    border-radius: 10px;
-    padding: 8px 12px;
-    background: #f9fafb;
-  }
-  .info-card-title {
-    font-weight: 600;
-    font-size: 0.82rem;
-    color: #374151;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-    margin-bottom: 6px;
-  }
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px 16px;
-  }
-  .info-row .info-label { font-size: 0.74rem; color: #374151; margin-bottom: 1px; }
-  .info-row .info-value { font-size: 0.85rem; color: #1f2937; font-weight: 600; }
+            .btn-icon-jlms.text-success:hover {
+                background: rgba(39, 141, 71, 0.08);
+            }
 
-  .calc-table {
-    width: 100%;
-    font-size: 0.82rem;
-  }
-  .calc-table td { padding: 4px 4px; border-bottom: 1px dashed #e5e9ef; }
-  .calc-table td:last-child { text-align: right; font-weight: 600; color: #1f2937; }
-  .calc-table tr.calc-total td { border-bottom: none; border-top: 2px solid #dbe1e8; padding-top: 6px; font-size: 0.9rem; }
-  .calc-table tr.calc-total td:last-child { color: var(--jlms-primary, #0d3b66); }
-  .calc-table tr.calc-warn td { color: #c0392b; }
-  .calc-table tr.calc-info td { color: #4b5563; font-style: italic; }
-  .calc-table tr.calc-info td:last-child { color: #4b5563; font-weight: 600; }
+        .loan-no-cell {
+            font-weight: 600;
+            color: var(--jlms-primary, #0d3b66);
+            width: 100px;
+            min-width: 100px;
+        }
 
-  .calc-section-divider {
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    color: #374151;
-    padding: 6px 4px 2px;
-    border-bottom: 1px dashed #e5e9ef;
-  }
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-top: 1px solid #eef0f3;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-  .info-only-badge {
-    display: inline-block;
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: .02em;
-    text-transform: uppercase;
-    color: #8a93a3;
-    background: #f1f2f5;
-    border-radius: 4px;
-    padding: 1px 6px;
-    margin-left: 6px;
-  }
+            .pagination-bar .page-info {
+                color: #6b7280;
+                font-size: 0.85rem;
+            }
 
-  .allocation-preview {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-  }
-  .alloc-box {
-    border: 1px solid #e5e9ef;
-    border-radius: 8px;
-    padding: 6px 10px;
-    background: #fff;
-  }
-  .alloc-box .alloc-label { font-size: 0.72rem; color: #374151; }
-  .alloc-box .alloc-value { font-size: 0.88rem; font-weight: 700; color: #1f2937; }
-  .alloc-box.alloc-highlight { background: #eef5ff; border-color: #cfe0f7; }
-  .alloc-box.alloc-highlight .alloc-value { color: var(--jlms-primary, #0d3b66); }
-  .alloc-box.alloc-highlight-green { background: #f0fdf4; border-color: #bbf7d0; }
-  .alloc-box.alloc-highlight-green .alloc-value { color: #166534; }
+        .page-size-select {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
 
-  .section-label {
-    font-weight: 600;
-    font-size: 0.82rem;
-    color: #374151;
-    margin: 2px 0 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+            .page-size-select select {
+                padding: 4px 8px;
+                border-radius: 6px;
+                border: 1px solid #d7dce3;
+                font-size: 0.85rem;
+            }
 
-  .validation-msg {
-    font-size: 0.78rem;
-    color: #c0392b;
-    margin-top: 4px;
-    display: none;
-  }
-  .validation-msg.show { display: block; }
+        /* Modal-internal building blocks, styled to match panel/card language */
+        .info-card {
+            border: 1px solid #e5e9ef;
+            border-radius: 10px;
+            padding: 8px 12px;
+            background: #f9fafb;
+        }
 
-  .ledger-table-wrap { max-height: 480px; overflow-y: auto; border: 1px solid #eef0f3; border-radius: 8px; }
-  .ledger-table-wrap table { margin-bottom: 0; }
-  .ledger-table-wrap thead th { position: sticky; top: 0; background: #f7f8fa; z-index: 1; }
+        .info-card-title {
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+            margin-bottom: 6px;
+        }
 
-  .ledger-footer-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 14px;
-  }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px 16px;
+        }
 
-  .grid-toolbar-left { display: flex; align-items: center; gap: 10px; }
+        .info-row .info-label {
+            font-size: 0.74rem;
+            color: #374151;
+            margin-bottom: 1px;
+        }
 
-  /* Keep action icons on a single row regardless of column width */
-  .action-icons-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-  }
-  td.actions-cell { white-space: nowrap; }
+        .info-row .info-value {
+            font-size: 0.85rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
 
-  /* Receipt (matches the receipt-box pattern used on Principal Collection) */
-  .receipt-box { border: 1px solid var(--n-200, #e5e9ef); border-radius: var(--radius-md, 10px); padding: 18px; font-family: "Consolas", monospace; font-size: 11.5px; background: #fdfdfd; }
-  .receipt-box .r-row { display: flex; justify-content: space-between; padding: 3px 0; }
-  .receipt-divider { border-top: 1px dashed var(--n-300, #d7dce3); margin: 8px 0; }
-  .receipt-section { margin-top: 16px; }
-  .receipt-section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .receipt-section-title .h4 { margin: 0; }
+        .calc-table {
+            width: 100%;
+            font-size: 0.82rem;
+        }
 
-  #paymentModal .modal-header, #paymentModal .modal-footer { padding: 8px 16px; }
-  #paymentModal .modal-body { padding: 12px 16px; }
-  #paymentModal .form-control-jlms { padding: 5px 8px; font-size: 12px; }
-  #paymentModal .field-label { margin-bottom: 3px; font-size: 11px; }
+            .calc-table td {
+                padding: 4px 4px;
+                border-bottom: 1px dashed #e5e9ef;
+            }
 
-  #ledgerModal .modal-dialog {
-    max-width: 92%;
-  }
-  @media (min-width: 1200px) {
-    #ledgerModal .modal-dialog {
-      max-width: 1300px;
-    }
-  }
-  #ledgerModal .modal-header, #ledgerModal .modal-footer { padding: 12px 20px; }
-  #ledgerModal .modal-body { padding: 16px 20px; }
-  #ledgerModal .info-card { padding: 12px 16px; }
-  #ledgerModal .info-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 24px; }
-  #ledgerModal .table-jlms thead th { padding: 8px 12px; font-size: 11px; }
-  #ledgerModal .table-jlms tbody td { padding: 8px 12px; font-size: 12.5px; }
-  #ledgerModal .pagination-bar { padding: 10px 16px; }
-  #ledgerModal .ledger-footer-stats { margin-top: 12px; gap: 12px; }
+                .calc-table td:last-child {
+                    text-align: right;
+                    font-weight: 600;
+                    color: #1f2937;
+                }
 
-  @media (max-width: 767px) {
-    .info-grid, #ledgerModal .info-grid, .allocation-preview, .ledger-footer-stats { grid-template-columns: 1fr; }
-    .allocation-preview .alloc-box { grid-column: span 1 !important; }
-  }
-</style>
+            .calc-table tr.calc-total td {
+                border-bottom: none;
+                border-top: 2px solid #dbe1e8;
+                padding-top: 6px;
+                font-size: 0.9rem;
+            }
+
+                .calc-table tr.calc-total td:last-child {
+                    color: var(--jlms-primary, #0d3b66);
+                }
+
+            .calc-table tr.calc-warn td {
+                color: #c0392b;
+            }
+
+            .calc-table tr.calc-info td {
+                color: #4b5563;
+                font-style: italic;
+            }
+
+                .calc-table tr.calc-info td:last-child {
+                    color: #4b5563;
+                    font-weight: 600;
+                }
+
+        .calc-section-divider {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #374151;
+            padding: 6px 4px 2px;
+            border-bottom: 1px dashed #e5e9ef;
+        }
+
+        .info-only-badge {
+            display: inline-block;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+            color: #8a93a3;
+            background: #f1f2f5;
+            border-radius: 4px;
+            padding: 1px 6px;
+            margin-left: 6px;
+        }
+
+        .allocation-preview {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .alloc-box {
+            border: 1px solid #e5e9ef;
+            border-radius: 8px;
+            padding: 6px 10px;
+            background: #fff;
+        }
+
+            .alloc-box .alloc-label {
+                font-size: 0.72rem;
+                color: #374151;
+            }
+
+            .alloc-box .alloc-value {
+                font-size: 0.88rem;
+                font-weight: 700;
+                color: #1f2937;
+            }
+
+            .alloc-box.alloc-highlight {
+                background: #eef5ff;
+                border-color: #cfe0f7;
+            }
+
+                .alloc-box.alloc-highlight .alloc-value {
+                    color: var(--jlms-primary, #0d3b66);
+                }
+
+            .alloc-box.alloc-highlight-green {
+                background: #f0fdf4;
+                border-color: #bbf7d0;
+            }
+
+                .alloc-box.alloc-highlight-green .alloc-value {
+                    color: #166534;
+                }
+
+        .section-label {
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: #374151;
+            margin: 2px 0 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .validation-msg {
+            font-size: 0.78rem;
+            color: #c0392b;
+            margin-top: 4px;
+            display: none;
+        }
+
+            .validation-msg.show {
+                display: block;
+            }
+
+        .ledger-table-wrap {
+            max-height: 480px;
+            overflow-y: auto;
+            border: 1px solid #eef0f3;
+            border-radius: 8px;
+        }
+
+            .ledger-table-wrap table {
+                margin-bottom: 0;
+            }
+
+            .ledger-table-wrap thead th {
+                position: sticky;
+                top: 0;
+                background: #f7f8fa;
+                z-index: 1;
+            }
+
+        .ledger-footer-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .grid-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Keep action icons on a single row regardless of column width */
+        .action-icons-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+
+        td.actions-cell {
+            white-space: nowrap;
+        }
+
+        /* Receipt (matches the receipt-box pattern used on Principal Collection) */
+        .receipt-box {
+            border: 1px solid var(--n-200, #e5e9ef);
+            border-radius: var(--radius-md, 10px);
+            padding: 18px;
+            font-family: "Consolas", monospace;
+            font-size: 11.5px;
+            background: #fdfdfd;
+        }
+
+            .receipt-box .r-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 3px 0;
+            }
+
+        .receipt-divider {
+            border-top: 1px dashed var(--n-300, #d7dce3);
+            margin: 8px 0;
+        }
+
+        .receipt-section {
+            margin-top: 16px;
+        }
+
+        .receipt-section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+            .receipt-section-title .h4 {
+                margin: 0;
+            }
+
+        #paymentModal .modal-header, #paymentModal .modal-footer {
+            padding: 8px 16px;
+        }
+
+        #paymentModal .modal-body {
+            padding: 12px 16px;
+        }
+
+        #paymentModal .form-control-jlms {
+            padding: 5px 8px;
+            font-size: 12px;
+        }
+
+        #paymentModal .field-label {
+            margin-bottom: 3px;
+            font-size: 11px;
+        }
+
+        #ledgerModal .modal-dialog {
+            max-width: 92%;
+        }
+
+        @media (min-width: 1200px) {
+            #ledgerModal .modal-dialog {
+                max-width: 1300px;
+            }
+        }
+
+        #ledgerModal .modal-header, #ledgerModal .modal-footer {
+            padding: 12px 20px;
+        }
+
+        #ledgerModal .modal-body {
+            padding: 16px 20px;
+        }
+
+        #ledgerModal .info-card {
+            padding: 12px 16px;
+        }
+
+        #ledgerModal .info-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px 24px;
+        }
+
+        #ledgerModal .table-jlms thead th {
+            padding: 8px 12px;
+            font-size: 11px;
+        }
+
+        #ledgerModal .table-jlms tbody td {
+            padding: 8px 12px;
+            font-size: 12.5px;
+        }
+
+        #ledgerModal .pagination-bar {
+            padding: 10px 16px;
+        }
+
+        #ledgerModal .ledger-footer-stats {
+            margin-top: 12px;
+            gap: 12px;
+        }
+
+        @media (max-width: 767px) {
+            .info-grid, #ledgerModal .info-grid, .allocation-preview, .ledger-footer-stats {
+                grid-template-columns: 1fr;
+            }
+
+                .allocation-preview .alloc-box {
+                    grid-column: span 1 !important;
+                }
+        }
+    </style>
 </head>
 <body>
-<div class="app-shell">
-  <div id="jlmsSidebarMount"></div>
-  <div class="main-col">
-    <div id="jlmsTopbarMount"></div>
-    <div class="page-content">
-      <div class="page-header">
-        <div>
-          <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Operations</span></div> -->
-          <div class="h1">Loan Operations</div>
-        </div>
-        <!--<div class="page-actions">
-          <button class="btn-jlms btn-jlms-outline" id="btnRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
-        </div>-->
-      </div>
-
-      <div id="apiErrorBanner" class="api-error-banner"></div>
-      <div id="apiSuccessBanner" class="api-success-banner"></div>
-
-      <!-- Filters -->
-      <div class="panel mb-3">
-        <div class="panel-body">
-          <div class="row g-3">
-            <div class="col-md-3">
-              <label class="field-label">Loan No</label>
-              <input type="text" class="form-control-jlms" id="fLoanNo" placeholder="LN-000000">
-            </div>
-            <div class="col-md-3">
-              <label class="field-label">Customer Name</label>
-              <input type="text" class="form-control-jlms" id="fCustomerName" placeholder="Search by name">
-            </div>
-            <div class="col-md-3">
-              <label class="field-label">Mobile</label>
-              <input type="text" class="form-control-jlms" id="fMobile" placeholder="10-digit mobile">
-            </div>
-            <div class="col-md-2 d-none">
-              <label class="field-label">Aadhaar</label>
-              <input type="text" class="form-control-jlms" id="fAadhaar" placeholder="XXXX-XXXX-XXXX">
-            </div>
-            <div class="col-md-2 d-none">
-              <label class="field-label">PAN</label>
-              <input type="text" class="form-control-jlms" id="fPan" placeholder="ABCDE1234F">
-            </div>
-            <div class="col-md-3">
-              <label class="field-label">Loan Scheme</label>
-              <select class="form-control-jlms" id="fScheme">
-              <option value="">All Schemes</option>
-                  <!--Api.getLoanSchemes()-->
-              </select>
-            </div>
-          </div>
-          <div class="row g-3 align-items-end mt-1">
-            <!--<div class="col-md-2">
-              <label class="field-label">Loan Status</label>
-              <select class="form-control-jlms" id="fStatus">
-                <option value="">All</option>
-                <option value="Active" selected>Active</option>
-                <option value="Overdue">Overdue</option>
-                <option value="Closed">Closed</option>
-              </select>
-            </div>-->
-            <div class="col-md-3">
-              <label class="field-label">From Date</label>
-              <input type="date" class="form-control-jlms" id="fFromDate">
-            </div>
-            <div class="col-md-3">
-              <label class="field-label">To Date</label>
-              <input type="date" class="form-control-jlms" id="fToDate">
-            </div>
-            <div class="col-md-12 d-flex gap-2 justify-content-md-end">
-              <button class="btn-jlms btn-jlms-outline" id="btnReset"><i class="bi bi-x-circle"></i> Reset</button>
-              <button class="btn-jlms btn-jlms-primary" id="btnSearch"><i class="bi bi-search"></i> Search</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Results grid -->
-      <div class="panel">
-        <div class="grid-toolbar">
-          <div class="grid-toolbar-left">
-            <span class="h4">Active Loans</span>
-            <span class="badge-jlms badge-neutral" id="resultCount">0 loans</span>
-          </div>
-        </div>
-        <div class="panel-body no-pad table-jlms-wrap">
-          <table class="table-jlms">
-            <thead>
-              <tr>
-                <th class="text-center">Actions</th>
-                <th style="width: 150px; min-width: 150px;">Loan No</th>
-                <th style="width: 100px; min-width: 100px;">Loan Date</th>
-                <th>Customer Name</th>
-                <th>Loan Scheme</th>
-                <th class="text-end">Principal Amount</th>
-                <th class="text-end">Overall Interest</th>
-                <th class="text-end">Outstanding Principal</th>
-                <th class="text-end">Outstanding Interest</th>
-                <th class="text-end">Total Outstanding</th>
-                <th class="text-end">Total Amount Paid</th>
-                <th style="display: none;">Loan Status</th>
-                
-                <th>Maturity Date</th>
-              </tr>
-            </thead>
-            <tbody id="resultsBody">
-              <tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="pagination-bar">
-          <div class="page-size-select">
-            <span>Rows per page</span>
-            <select id="pageSizeSelect">
-              <option value="10" selected>10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-          <div class="page-info" id="pageInfo">Page 1</div>
-          <nav>
-            <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
-          </nav>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ Payment Modal ============ -->
-<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Collect Payment — <span id="payLoanNoLabel">-</span></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="paymentModalBody">
-        <div class="text-center text-muted-jlms" style="padding:30px;" id="paymentLoadingState">Loading loan details...</div>
-
-        <div id="paymentContent" style="display:none;">
-          <div class="row g-3">
-
-          <!-- Customer section -->
-          <div class="col-lg-5 border-end d-flex flex-column">
-
-          <div class="info-card mb-3">
-            <div class="info-card-title">Customer &amp; Loan Details</div>
-            <div class="info-grid">
-              <div class="info-row"><div class="info-label">Customer Name</div><div class="info-value" id="payCustomerName">-</div></div>
-              <div class="info-row"><div class="info-label">Loan No</div><div class="info-value" id="payLoanNo">-</div></div>
-              <div class="info-row"><div class="info-label">Aadhaar</div><div class="info-value" id="payAadhaar">-</div></div>
-              <div class="info-row"><div class="info-label">PAN</div><div class="info-value" id="payPan">-</div></div>
-              <div class="info-row"><div class="info-label">Mobile</div><div class="info-value" id="payMobile">-</div></div>
-              <div class="info-row"><div class="info-label">Loan Scheme</div><div class="info-value" id="payScheme">-</div></div>
-              <div class="info-row"><div class="info-label">Processing Fee</div><div class="info-value" id="payProcessingFee">-</div></div>
-              <div class="info-row"><div class="info-label">Principal</div><div class="info-value" id="payPrincipal">-</div></div>
-              <div class="info-row"><div class="info-label">Overall Interest</div><div class="info-value" id="payOverallInterest">-</div></div>
-              <div class="info-row"><div class="info-label">Outstanding Principal</div><div class="info-value" id="payOutPrincipal">-</div></div>
-              <div class="info-row"><div class="info-label">Outstanding Interest</div><div class="info-value" id="payOutInterest">-</div></div>
-              <div class="info-row"><div class="info-label">Total Outstanding</div><div class="info-value" id="payTotalOutstanding">-</div></div>
-              <div class="info-row"><div class="info-label">Maturity Date</div><div class="info-value" id="payMaturityDate">-</div></div>
-            </div>
-          </div>
-
-          <!-- Receipt (shown after a successful save) -->
-          
-          <div class="receipt-section" id="paymentReceiptSection" style="display:none;">
-            <div class="receipt-section-title">
-              <span class="h4">Receipt</span>
-              <span class="badge-jlms badge-success" id="paymentReceiptNoBadge"></span>
-            </div>
-            <div class="receipt-box" id="paymentReceiptBox"></div>
-          </div>
-
-          </div>
-
-          <div class="col-lg-7">
-          <!-- Interest calculation -->
-          <div class="section-label mt-0"><i class="bi bi-calculator"></i> Interest Calculation</div>
-          <table class="calc-table mb-3">
-            <tbody>
-              <tr><td>Overall Interest</td><td id="calcOverallInterest">-</td></tr>
-              <tr><td>Interest Paid So Far</td><td id="calcInterestPaid">-</td></tr>
-              <tr><td>Outstanding Interest</td><td id="calcOutstandingInterest">-</td></tr>
-              <tr><td colspan="2" class="calc-section-divider">Daily Interest Reference <span class="info-only-badge d-none">Info Only — Not Charged</span></td></tr>
-              <tr class="calc-info"><td>As Of Date</td><td id="calcCurrentDate">-</td></tr>
-              <tr class="calc-info"><td>Reference Date</td><td id="calcLastRefDate">-</td></tr>
-              <tr class="calc-info"><td>No. of Days</td><td id="calcDays">-</td></tr>
-              <tr class="calc-info"><td>Daily Interest Rate</td><td id="calcDailyRate">-</td></tr>
-              <tr class="calc-info"><td>Daily Interest Amount</td><td id="calcDailyAmount">-</td></tr>
-              <tr class="calc-info"><td>Accrued Interest (reference only)</td><td id="calcAccrued">-</td></tr>
-              <tr class="calc-total"><td>Total Payable</td><td id="calcTotalPayable">-</td></tr>
-            </tbody>
-          </table>
-
-          <!-- Payment entry -->
-          <div class="section-label"><i class="bi bi-cash-coin"></i> Payment Entry</div>
-          <div class="row g-2 mb-1">
-            <div class="col-md-4">
-              <label class="field-label">Payment Date</label>
-              <input type="date" class="form-control-jlms" id="payDate">
-            </div>
-            <div class="col-md-4">
-              <label class="field-label">Payment Mode</label>
-              <select class="form-control-jlms" id="payMode">
-                <option value="Cash">Cash</option>
-                <option value="UPI">UPI</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-                <option value="Cheque">Cheque</option>
-                <option value="Card">Card</option>
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="field-label">Amount Received (₹)</label>
-              <input type="number" class="form-control-jlms" id="payAmountReceived" placeholder="0.00" min="0" step="0.01">
-              <div class="validation-msg" id="payValidationMsg">Amount exceeds total payable. Please enter a valid amount.</div>
-            </div>
-          </div>
-
-          <!-- Allocation preview -->
-          <div class="section-label"><i class="bi bi-diagram-3"></i> Allocation Preview</div>
-          <div class="allocation-preview mb-2">
-            <div class="alloc-box alloc-highlight"><div class="alloc-label">Interest Paid</div><div class="alloc-value" id="allocInterestPaid">₹0.00</div></div>
-            <div class="alloc-box alloc-highlight"><div class="alloc-label">Principal Paid</div><div class="alloc-value" id="allocPrincipalPaid">₹0.00</div></div>
-            <div class="alloc-box"><div class="alloc-label">Remaining Interest</div><div class="alloc-value" id="allocRemainingInterest">₹0.00</div></div>
-            <div class="alloc-box"><div class="alloc-label">Remaining Principal</div><div class="alloc-value" id="allocRemainingPrincipal">₹0.00</div></div>
-            <div class="alloc-box alloc-highlight-green" style="grid-column: span 2;"><div class="alloc-label">Balance After Payment</div><div class="alloc-value" id="allocBalanceAfter">₹0.00</div></div>
-          </div>
-
-          
-          </div>
-        </div>
-      </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal" id="btnPaymentCancel">Cancel</button>
-        <button type="button" class="btn-jlms btn-jlms-ghost" id="btnPrintPaymentReceipt" disabled><i class="bi bi-printer"></i> Print Receipt</button>
-        <button type="button" class="btn-jlms btn-jlms-primary" id="btnSavePayment" disabled><i class="bi bi-check2-circle"></i> Save Payment</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ Loan Closure Modal ============ -->
-<div class="modal fade" id="closureModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Close Loan — <span id="closeLoanNoLabel">-</span></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="closureModalBody">
-        <div class="text-center text-muted-jlms" style="padding:30px;" id="closureLoadingState">Loading loan details...</div>
-
-        <div id="closureContent" style="display:none;">
-           <div class="info-card mb-3">
-            <div class="info-card-title">Customer Details</div>
-            <div class="row g-0">
-
-              <!-- Column 1: Customer Name + Loan Scheme + Mobile -->
-              <div class="col-md-4" style="padding-right:16px;">
-                <div class="info-row mb-2"><div class="info-label">Customer Name</div><div class="info-value" id="closeCustomerName">-</div></div>
-                <div class="info-row mb-2"><div class="info-label">Loan Scheme</div><div class="info-value" id="closeScheme">-</div></div>
-                <div class="info-row mt-2"><div class="info-label">Processing Fee</div><div class="info-value" id="closeProcessingFee">-</div></div>                
-                <div class="info-row mt-2"><div class="info-label">Mobile</div><div class="info-value" id="closeMobile">-</div></div>
-              </div>
-
-              <!-- Column 2: Loan No + Total Amount Paid -->
-              <div class="col-md-4" style="padding-right:16px;border-left:1px solid #eef0f3;padding-left:16px;">
-                <div class="info-row mb-2"><div class="info-label">Loan No</div><div class="info-value" id="closeLoanNo">-</div></div>
-                <div class="info-row"><div class="info-label">Total Amount Paid</div><div class="info-value" id="closeTotalPaid">-</div></div>
-              </div>
-
-              <!-- Column 3: Photo preview + Capture button -->
-              <div class="col-md-4" style="border-left:1px solid #eef0f3;padding-left:16px;">
-                <div class="info-label mb-1"><i class="bi bi-camera"></i> Customer Photo <span style="color:#c0392b;font-size:0.7rem;">(required)</span></div>
-                <div id="closurePhotoPreview"
-                     style="border:1.5px dashed #d7dce3;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:26px;overflow:hidden;margin-bottom:6px;">
-                  <i class="bi bi-person-circle"></i>
+    <div class="app-shell">
+        <div id="jlmsSidebarMount"></div>
+        <div class="main-col">
+            <div id="jlmsTopbarMount"></div>
+            <div class="page-content">
+                <div class="page-header">
+                    <div>
+                        <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Operations</span></div> -->
+                        <div class="h1">Loan Operations</div>
+                    </div>
+                    <!--<div class="page-actions">
+                      <button class="btn-jlms btn-jlms-outline" id="btnRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                    </div>-->
                 </div>
-                <button type="button" class="btn btn-outline-success btn-sm w-100" id="btnCaptureClosurePhoto">
-                  <i class="bi bi-camera"></i> Capture Photo
-                </button>
-                <div class="validation-msg" id="closureCameraErrorMsg" style="font-size: 0.8rem; margin-top: 6px;"></div>
-                <input type="file" id="closurePhotoFile" accept=".jpg,.jpeg,.png" hidden>
-                <button type="button" class="btn btn-outline-primary btn-sm w-100 mt-1 d-none" id="btnUploadClosurePhoto">
-                  <i class="bi bi-upload"></i> Upload Photo
-                </button>
 
-                <div class="validation-msg" id="closurePhotoMsg" style="font-size: 0.9rem; margin-top: 8px; text-align: center;">A customer photo is required to close the loan.</div>
-              </div>
+                <div id="apiErrorBanner" class="api-error-banner"></div>
+                <div id="apiSuccessBanner" class="api-success-banner"></div>
 
+                <!-- Filters -->
+                <div class="panel mb-3">
+                    <div class="panel-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="field-label">Loan No</label>
+                                <input type="text" class="form-control-jlms" id="fLoanNo" placeholder="LN-000000">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="field-label">Customer Name</label>
+                                <input type="text" class="form-control-jlms" id="fCustomerName" placeholder="Search by name">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="field-label">Mobile</label>
+                                <input type="text" class="form-control-jlms" id="fMobile" placeholder="10-digit mobile">
+                            </div>
+                            <div class="col-md-2 d-none">
+                                <label class="field-label">Aadhaar</label>
+                                <input type="text" class="form-control-jlms" id="fAadhaar" placeholder="XXXX-XXXX-XXXX">
+                            </div>
+                            <div class="col-md-2 d-none">
+                                <label class="field-label">PAN</label>
+                                <input type="text" class="form-control-jlms" id="fPan" placeholder="ABCDE1234F">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="field-label">Loan Scheme</label>
+                                <select class="form-control-jlms" id="fScheme">
+                                    <option value="">All Schemes</option>
+                                    <!--Api.getLoanSchemes()-->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3 align-items-end mt-1">
+                            <!--<div class="col-md-2">
+                              <label class="field-label">Loan Status</label>
+                              <select class="form-control-jlms" id="fStatus">
+                                <option value="">All</option>
+                                <option value="Active" selected>Active</option>
+                                <option value="Overdue">Overdue</option>
+                                <option value="Closed">Closed</option>
+                              </select>
+                            </div>-->
+                            <div class="col-md-3">
+                                <label class="field-label">From Date</label>
+                                <input type="date" class="form-control-jlms" id="fFromDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="field-label">To Date</label>
+                                <input type="date" class="form-control-jlms" id="fToDate">
+                            </div>
+                            <div class="col-md-12 d-flex gap-2 justify-content-md-end">
+                                <button class="btn-jlms btn-jlms-outline" id="btnReset"><i class="bi bi-x-circle"></i> Reset</button>
+                                <button class="btn-jlms btn-jlms-primary" id="btnSearch"><i class="bi bi-search"></i> Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results grid -->
+                <div class="panel">
+                    <div class="grid-toolbar">
+                        <div class="grid-toolbar-left">
+                            <span class="h4">Active Loans</span>
+                            <span class="badge-jlms badge-neutral" id="resultCount">0 loans</span>
+                        </div>
+                    </div>
+                    <div class="panel-body no-pad table-jlms-wrap">
+                        <table class="table-jlms">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Actions</th>
+                                    <th style="width: 150px; min-width: 150px;">Loan No</th>
+                                    <th style="width: 100px; min-width: 100px;">Loan Date</th>
+                                    <th>Customer Name</th>
+                                    <th>Loan Scheme</th>
+                                    <th class="text-end">Principal Amount</th>
+                                    <th class="text-end">Overall Interest</th>
+                                    <th class="text-end">Outstanding Principal</th>
+                                    <th class="text-end">Outstanding Interest</th>
+                                    <th class="text-end">Total Outstanding</th>
+                                    <th class="text-end">Total Amount Paid</th>
+                                    <th style="display: none;">Loan Status</th>
+
+                                    <th>Maturity Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsBody">
+                                <tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-bar">
+                        <div class="page-size-select">
+                            <span>Rows per page</span>
+                            <select id="pageSizeSelect">
+                                <option value="10" selected>10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="page-info" id="pageInfo">Page 1</div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          
-
-
-          <table class="calc-table mb-2">
-            <tbody>
-              <tr><td>Outstanding Principal</td><td id="closeOutPrincipal">-</td></tr>
-              <tr><td>Outstanding Interest</td><td id="closeOutInterest">-</td></tr>
-              <tr><td>Other Charges</td><td id="closeOtherCharges">-</td></tr>
-              <tr class="calc-total"><td>Grand Total</td><td id="closeGrandTotal">-</td></tr>
-            </tbody>
-          </table>
-
-          <!-- Customer Photo at Closure
-          <div class="section-label mt-3"><i class="bi bi-camera"></i> Customer Photo at Closure <span style="font-size:0.75rem;color:#6b7280;font-weight:400;">(required)</span></div>
-          <div class="row g-2 align-items-start mb-2">
-            <div class="col-md-4">
-              <div id="closurePhotoPreview"
-                  style="border:1.5px dashed #d7dce3;border-radius:8px;height:90px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:28px;overflow:hidden;">
-                <i class="bi bi-person-circle"></i>
-              </div>
-            </div>
-            <div class="col-md-8 d-grid gap-2">
-              <button type="button" class="btn btn-outline-success" id="btnCaptureClosurePhoto">
-                <i class="bi bi-camera"></i> Capture Photo
-              </button>
-              <button type="button" class="btn btn-outline-primary d-none" id="btnUploadClosurePhoto">
-                <i class="bi bi-upload"></i> Upload Photo
-              </button>
-              <input type="file" id="closurePhotoFile" accept=".jpg,.jpeg,.png" hidden>
-            </div>
-          </div>
-          <div class="validation-msg" id="closurePhotoMsg">A customer photo is required to close the loan.</div> -->
-
-
-          <div class="validation-msg" id="closeValidationMsg" style="font-size: 0.95rem">The Grand Total must be ₹0.00 to close this loan. Please collect pending payments first.</div>
-
-          <!-- Receipt (shown after a successful closure) -->
-          <div class="receipt-section" id="closureReceiptSection" style="display:none;">
-            <div class="receipt-section-title">
-              <span class="h4">Closure Receipt</span>
-              <span class="badge-jlms badge-success" id="closureReceiptNoBadge"></span>
-            </div>
-            <div class="receipt-box" id="closureReceiptBox"></div>
-          </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal" id="btnClosureCancel">Cancel</button>
-        <button type="button" class="btn-jlms btn-jlms-ghost" id="btnPrintClosureReceipt" disabled><i class="bi bi-printer"></i> Print Receipt</button>
-        <button type="button" class="btn-jlms btn-jlms-primary" id="btnCloseLoan" disabled><i class="bi bi-lock-fill"></i> Close Loan</button>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- ============ Loan Ledger Modal ============ -->
-<div class="modal fade" id="ledgerModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Loan Ledger — <span id="ledgerLoanNoLabel">-</span></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="ledgerModalBody">
-        <div class="text-center text-muted-jlms" style="padding:30px;" id="ledgerLoadingState">Loading ledger...</div>
+    <!-- ============ Payment Modal ============ -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Collect Payment — <span id="payLoanNoLabel">-</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="paymentModalBody">
+                    <div class="text-center text-muted-jlms" style="padding:30px;" id="paymentLoadingState">Loading loan details...</div>
 
-        <div id="ledgerContent" style="display:none;">
-          <div class="info-card mb-3">
-            <div class="info-grid">
-              <div class="info-row"><div class="info-label">Customer</div><div class="info-value" id="ledgerCustomer">-</div></div>
-              <div class="info-row"><div class="info-label">Scheme</div><div class="info-value" id="ledgerScheme">-</div></div>
-              <div class="info-row"><div class="info-label">Loan Date</div><div class="info-value" id="ledgerLoanDate">-</div></div>
-              <div class="info-row"><div class="info-label">Processing Fee</div><div class="info-value" id="ledgerProcessingFee">-</div></div>              
-              <div class="info-row"><div class="info-label">Maturity Date</div><div class="info-value" id="ledgerMaturityDate">-</div></div>
-              <div class="info-row"><div class="info-label">Principal</div><div class="info-value" id="ledgerPrincipal">-</div></div>
-              <div class="info-row"><div class="info-label">Overall Interest</div><div class="info-value" id="ledgerOverallInterest">-</div></div>
-              <div class="info-row"><div class="info-label">Rate</div><div class="info-value" id="ledgerRate">-</div></div>
-              <div class="info-row"><div class="info-label">Status</div><div class="info-value" id="ledgerStatus">-</div></div>
+                    <div id="paymentContent" style="display:none;">
+                        <div class="row g-3">
+
+                            <!-- Customer section -->
+                            <div class="col-lg-5 border-end d-flex flex-column">
+
+                                <div class="info-card mb-3">
+                                    <div class="info-card-title">Customer &amp; Loan Details</div>
+                                    <div class="info-grid">
+                                        <div class="info-row"><div class="info-label">Customer Name</div><div class="info-value" id="payCustomerName">-</div></div>
+                                        <div class="info-row"><div class="info-label">Loan No</div><div class="info-value" id="payLoanNo">-</div></div>
+                                        <div class="info-row"><div class="info-label">Aadhaar</div><div class="info-value" id="payAadhaar">-</div></div>
+                                        <div class="info-row"><div class="info-label">PAN</div><div class="info-value" id="payPan">-</div></div>
+                                        <div class="info-row"><div class="info-label">Mobile</div><div class="info-value" id="payMobile">-</div></div>
+                                        <div class="info-row"><div class="info-label">Loan Scheme</div><div class="info-value" id="payScheme">-</div></div>
+                                        <div class="info-row"><div class="info-label">Processing Fee</div><div class="info-value" id="payProcessingFee">-</div></div>
+                                        <div class="info-row"><div class="info-label">Principal</div><div class="info-value" id="payPrincipal">-</div></div>
+                                        <div class="info-row d-none"><div class="info-label">Overall Interest</div><div class="info-value" id="payOverallInterest">-</div></div>
+                                        <div class="info-row"><div class="info-label">Outstanding Principal</div><div class="info-value" id="payOutPrincipal">-</div></div>
+                                        <div class="info-row"><div class="info-label">Outstanding Interest</div><div class="info-value" id="payOutInterest">-</div></div>
+                                        <div class="info-row"><div class="info-label">Total Outstanding</div><div class="info-value" id="payTotalOutstanding">-</div></div>
+                                        <div class="info-row"><div class="info-label">Maturity Date</div><div class="info-value" id="payMaturityDate">-</div></div>
+                                    </div>
+                                </div>
+
+                                <!-- Receipt (shown after a successful save) -->
+
+                                <div class="receipt-section" id="paymentReceiptSection" style="display:none;">
+                                    <div class="receipt-section-title">
+                                        <span class="h4">Receipt</span>
+                                        <span class="badge-jlms badge-success" id="paymentReceiptNoBadge"></span>
+                                    </div>
+                                    <div class="receipt-box" id="paymentReceiptBox"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-lg-7">
+                                <!-- Interest calculation -->
+                                <div class="section-label mt-0"><i class="bi bi-calculator"></i> Interest Calculation</div>
+                                <table class="calc-table mb-3">
+                                    <tbody>
+                                        <!-- CHANGE (daily-interest fix): commented out — Overall Interest no
+                                             longer feeds any calculation (allocation is daily-accrual based). -->
+                                        <!-- <tr><td>Overall Interest</td><td id="calcOverallInterest">-</td></tr> -->
+                                        <!-- CHANGE (daily-interest fix): commented out — this was
+                                             OverallInterest - OutstandingInterest, which made sense under the
+                                             old fixed-schedule model but is now misleading (OutstandingInterest
+                                             is dynamic and can exceed OverallInterest, going negative here). -->
+                                        <!-- <tr><td>Interest Paid So Far</td><td id="calcInterestPaid">-</td></tr> -->
+                                        <tr><td>Outstanding Interest</td><td id="calcOutstandingInterest">-</td></tr>
+                                        <!-- CHANGE (daily-interest fix): relabeled from "Daily Interest Reference"
+                                             / "Info Only — Not Charged" — this block now IS the charged calculation,
+                                             badge removed (was already hidden via d-none but text was still wrong) -->
+                                        <tr><td colspan="2" class="calc-section-divider">Daily Interest Calculation</td></tr>
+                                        <!-- CHANGE (daily-interest fix): removed class="calc-info" (was muted/
+                                             italic styling implying "just reference, ignore this") — these rows
+                                             now show the figures actually charged this payment -->
+                                        <tr><td>As Of Date</td><td id="calcCurrentDate">-</td></tr>
+                                        <tr><td>Reference Date (Last Payment / Loan Start)</td><td id="calcLastRefDate">-</td></tr>
+                                        <tr><td>No. of Days</td><td id="calcDays">-</td></tr>
+                                        <tr><td>Daily Interest Rate</td><td id="calcDailyRate">-</td></tr>
+                                        <tr><td>Daily Interest Amount</td><td id="calcDailyAmount">-</td></tr>
+                                        <tr><td>Accrued Interest (this period)</td><td id="calcAccrued">-</td></tr>
+                                        <tr class="calc-total"><td>Total Payable</td><td id="calcTotalPayable">-</td></tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Payment entry -->
+                                <div class="section-label"><i class="bi bi-cash-coin"></i> Payment Entry</div>
+                                <div class="row g-2 mb-1">
+                                    <!-- CHANGE: Payment Date hidden — date is always today (server-authoritative).
+                                         The input is still rendered (hidden) so onPaymentDateChanged / payDate
+                                         references in JS continue to work without modification.
+                                    <div class="col-md-4">
+                                        <label class="field-label">Payment Date</label>
+                                        <input type="date" class="form-control-jlms" id="payDate">
+                                    </div>
+                                    -->
+                                    <input type="date" id="payDate" hidden>
+                                    <div class="col-md-6">
+                                        <label class="field-label">Payment Mode</label>
+                                        <select class="form-control-jlms" id="payMode">
+                                            <option value="Cash">Cash</option>
+                                            <option value="UPI">UPI</option>
+                                            <option value="Bank Transfer">Bank Transfer</option>
+                                            <option value="Cheque">Cheque</option>
+                                            <option value="Card">Card</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="field-label">Amount Received (₹)</label>
+                                        <input type="number" class="form-control-jlms" id="payAmountReceived" placeholder="0.00" min="0" step="0.01">
+                                        <div class="validation-msg" id="payValidationMsg">Amount exceeds total payable. Please enter a valid amount.</div>
+                                    </div>
+                                </div>
+
+                                <!-- Allocation preview -->
+                                <div class="section-label"><i class="bi bi-diagram-3"></i> Allocation Preview</div>
+                                <div class="allocation-preview mb-2">
+                                    <div class="alloc-box alloc-highlight"><div class="alloc-label">Interest Paid</div><div class="alloc-value" id="allocInterestPaid">₹0.00</div></div>
+                                    <div class="alloc-box alloc-highlight"><div class="alloc-label">Principal Paid</div><div class="alloc-value" id="allocPrincipalPaid">₹0.00</div></div>
+                                    <div class="alloc-box"><div class="alloc-label">Remaining Interest</div><div class="alloc-value" id="allocRemainingInterest">₹0.00</div></div>
+                                    <div class="alloc-box"><div class="alloc-label">Remaining Principal</div><div class="alloc-value" id="allocRemainingPrincipal">₹0.00</div></div>
+                                    <div class="alloc-box alloc-highlight-green" style="grid-column: span 2;"><div class="alloc-label">Balance After Payment</div><div class="alloc-value" id="allocBalanceAfter">₹0.00</div></div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal" id="btnPaymentCancel">Cancel</button>
+                    <button type="button" class="btn-jlms btn-jlms-ghost" id="btnPrintPaymentReceipt" disabled><i class="bi bi-printer"></i> Print Receipt</button>
+                    <button type="button" class="btn-jlms btn-jlms-primary" id="btnSavePayment" disabled><i class="bi bi-check2-circle"></i> Save Payment</button>
+                </div>
             </div>
-          </div>
-
-          <div class="ledger-table-wrap">
-            <table class="table-jlms">
-              <thead>
-                <tr>
-                  <th style="width: 100px; min-width: 100px;">Date</th><th>Txn Type</th><th>Description</th>
-                  <th class="text-end">Debit</th><th class="text-end">Credit</th>
-                  <th class="text-end">Principal Balance</th><th class="text-end">Interest Balance</th>
-                  <th class="text-end">Running Balance</th><th style="display: none;">Receipt No</th><th style="display: none;">User</th>
-                  <th class="text-center" style="width:48px;">Receipt</th>
-                </tr>
-              </thead>
-              <tbody id="ledgerBody"></tbody>
-            </table>
-          </div>
-          <div class="pagination-bar">
-            <div class="page-size-select">
-              <span>Rows per page</span>
-              <select id="ledgerPageSizeSelect">
-                <option value="5" selected>5</option>
-                <option value="10" >10</option>
-                <option value="20">20</option>
-              </select>
-            </div>
-            <div class="page-info" id="ledgerPageInfo">Page 1</div>
-            <nav>
-              <ul class="pagination pagination-sm mb-0" id="ledgerPaginationControls"></ul>
-            </nav>
-          </div>
-
-          <div class="ledger-footer-stats">
-            <div class="alloc-box alloc-highlight"><div class="alloc-label">Total Interest Collected</div><div class="alloc-value" id="ledgerTotalInterest">₹0.00</div></div>
-            <div class="alloc-box alloc-highlight"><div class="alloc-label">Total Principal Collected</div><div class="alloc-value" id="ledgerTotalPrincipal">₹0.00</div></div>
-            <div class="alloc-box"><div class="alloc-label">Current Outstanding</div><div class="alloc-value" id="ledgerCurrentOutstanding">₹0.00</div></div>
-          </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-jlms btn-jlms-outline d-none" id="btnExportLedgerPdf"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
-        <button type="button" class="btn-jlms btn-jlms-outline d-none" id="btnPrintLedger"><i class="bi bi-printer"></i> Print</button>
-        <button type="button" class="btn-jlms btn-jlms-primary" data-bs-dismiss="modal">Close</button>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- Camera modal for closure photo capture -->
-<div class="modal fade" id="closureCameraModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Capture Customer Photo — Closure</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body text-center">
-        <video id="closureCameraVideo" autoplay playsinline style="width:100%;border-radius:10px;"></video>
-        <canvas id="closureCameraCanvas" style="display:none;"></canvas>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button class="btn btn-success" id="btnTakeClosurePhoto">
-          <i class="bi bi-camera-fill"></i> Capture
-        </button>
-      </div>
+    <!-- ============ Loan Closure Modal ============ -->
+    <div class="modal fade" id="closureModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Close Loan — <span id="closeLoanNoLabel">-</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="closureModalBody">
+                    <div class="text-center text-muted-jlms" style="padding:30px;" id="closureLoadingState">Loading loan details...</div>
+
+                    <div id="closureContent" style="display:none;">
+                        <div class="info-card mb-3">
+                            <div class="info-card-title">Customer Details</div>
+                            <div class="row g-0">
+
+                                <!-- Column 1: Customer Name + Loan Scheme + Mobile -->
+                                <div class="col-md-4" style="padding-right:16px;">
+                                    <div class="info-row mb-2"><div class="info-label">Customer Name</div><div class="info-value" id="closeCustomerName">-</div></div>
+                                    <div class="info-row mb-2"><div class="info-label">Loan Scheme</div><div class="info-value" id="closeScheme">-</div></div>
+                                    <div class="info-row mt-2"><div class="info-label">Processing Fee</div><div class="info-value" id="closeProcessingFee">-</div></div>
+                                    <div class="info-row mt-2"><div class="info-label">Mobile</div><div class="info-value" id="closeMobile">-</div></div>
+                                </div>
+
+                                <!-- Column 2: Loan No + Total Amount Paid -->
+                                <div class="col-md-4" style="padding-right:16px;border-left:1px solid #eef0f3;padding-left:16px;">
+                                    <div class="info-row mb-2"><div class="info-label">Loan No</div><div class="info-value" id="closeLoanNo">-</div></div>
+                                    <div class="info-row"><div class="info-label">Total Amount Paid</div><div class="info-value" id="closeTotalPaid">-</div></div>
+                                </div>
+
+                                <!-- Column 3: Photo preview + Capture button -->
+                                <div class="col-md-4" style="border-left:1px solid #eef0f3;padding-left:16px;">
+                                    <div class="info-label mb-1"><i class="bi bi-camera"></i> Customer Photo <span style="color:#c0392b;font-size:0.7rem;">(required)</span></div>
+                                    <div id="closurePhotoPreview"
+                                         style="border:1.5px dashed #d7dce3;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:26px;overflow:hidden;margin-bottom:6px;">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-success btn-sm w-100" id="btnCaptureClosurePhoto">
+                                        <i class="bi bi-camera"></i> Capture Photo
+                                    </button>
+                                    <div class="validation-msg" id="closureCameraErrorMsg" style="font-size: 0.8rem; margin-top: 6px;"></div>
+                                    <input type="file" id="closurePhotoFile" accept=".jpg,.jpeg,.png" hidden>
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100 mt-1 d-none" id="btnUploadClosurePhoto">
+                                        <i class="bi bi-upload"></i> Upload Photo
+                                    </button>
+
+                                    <div class="validation-msg" id="closurePhotoMsg" style="font-size: 0.9rem; margin-top: 8px; text-align: center;">A customer photo is required to close the loan.</div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+
+                        <table class="calc-table mb-2">
+                            <tbody>
+                                <tr><td>Outstanding Principal</td><td id="closeOutPrincipal">-</td></tr>
+                                <tr><td>Outstanding Interest</td><td id="closeOutInterest">-</td></tr>
+                                <tr><td>Other Charges</td><td id="closeOtherCharges">-</td></tr>
+                                <tr class="calc-total"><td>Grand Total</td><td id="closeGrandTotal">-</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Customer Photo at Closure
+                        <div class="section-label mt-3"><i class="bi bi-camera"></i> Customer Photo at Closure <span style="font-size:0.75rem;color:#6b7280;font-weight:400;">(required)</span></div>
+                        <div class="row g-2 align-items-start mb-2">
+                          <div class="col-md-4">
+                            <div id="closurePhotoPreview"
+                                style="border:1.5px dashed #d7dce3;border-radius:8px;height:90px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:28px;overflow:hidden;">
+                              <i class="bi bi-person-circle"></i>
+                            </div>
+                          </div>
+                          <div class="col-md-8 d-grid gap-2">
+                            <button type="button" class="btn btn-outline-success" id="btnCaptureClosurePhoto">
+                              <i class="bi bi-camera"></i> Capture Photo
+                            </button>
+                            <button type="button" class="btn btn-outline-primary d-none" id="btnUploadClosurePhoto">
+                              <i class="bi bi-upload"></i> Upload Photo
+                            </button>
+                            <input type="file" id="closurePhotoFile" accept=".jpg,.jpeg,.png" hidden>
+                          </div>
+                        </div>
+                        <div class="validation-msg" id="closurePhotoMsg">A customer photo is required to close the loan.</div> -->
+
+
+                        <div class="validation-msg" id="closeValidationMsg" style="font-size: 0.95rem">The Grand Total must be ₹0.00 to close this loan. Please collect pending payments first.</div>
+
+                        <!-- Receipt (shown after a successful closure) -->
+                        <div class="receipt-section" id="closureReceiptSection" style="display:none;">
+                            <div class="receipt-section-title">
+                                <span class="h4">Closure Receipt</span>
+                                <span class="badge-jlms badge-success" id="closureReceiptNoBadge"></span>
+                            </div>
+                            <div class="receipt-box" id="closureReceiptBox"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal" id="btnClosureCancel">Cancel</button>
+                    <button type="button" class="btn-jlms btn-jlms-ghost" id="btnPrintClosureReceipt" disabled><i class="bi bi-printer"></i> Print Receipt</button>
+                    <button type="button" class="btn-jlms btn-jlms-primary" id="btnCloseLoan" disabled><i class="bi bi-lock-fill"></i> Close Loan</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<!-- Confirm Closure Modal -->
-<div class="modal fade" id="confirmClosureModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Loan Closure</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p class="mb-0">Loan Number :<strong id="confirmClosureLoanNo">-</strong>?</p>
-        <p class="text-danger mb-0" style="font-size:0.85rem;">This action cannot be undone.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn-jlms btn-jlms-primary" id="btnConfirmClosureProceed">
-          <i class="bi bi-lock-fill"></i> Confirm Close
-        </button>
-      </div>
+
+    <!-- ============ Loan Ledger Modal ============ -->
+    <div class="modal fade" id="ledgerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Loan Ledger — <span id="ledgerLoanNoLabel">-</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="ledgerModalBody">
+                    <div class="text-center text-muted-jlms" style="padding:30px;" id="ledgerLoadingState">Loading ledger...</div>
+
+                    <div id="ledgerContent" style="display:none;">
+                        <div class="info-card mb-3">
+                            <div class="info-grid">
+                                <div class="info-row"><div class="info-label">Customer</div><div class="info-value" id="ledgerCustomer">-</div></div>
+                                <div class="info-row"><div class="info-label">Scheme</div><div class="info-value" id="ledgerScheme">-</div></div>
+                                <div class="info-row"><div class="info-label">Loan Date</div><div class="info-value" id="ledgerLoanDate">-</div></div>
+                                <div class="info-row"><div class="info-label">Processing Fee</div><div class="info-value" id="ledgerProcessingFee">-</div></div>
+                                <div class="info-row"><div class="info-label">Maturity Date</div><div class="info-value" id="ledgerMaturityDate">-</div></div>
+                                <div class="info-row"><div class="info-label">Principal</div><div class="info-value" id="ledgerPrincipal">-</div></div>
+                                <!-- CHANGE (daily-interest): Overall Interest removed — pre-loaded fixed
+                                     interest is not used in daily-accrual model. Rate shown instead. -->
+                                <div class="info-row"><div class="info-label">Rate</div><div class="info-value" id="ledgerRate">-</div></div>
+                                <div class="info-row"><div class="info-label">Status</div><div class="info-value" id="ledgerStatus">-</div></div>
+                            </div>
+                        </div>
+
+                        <div class="ledger-table-wrap">
+                            <table class="table-jlms">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 100px; min-width: 100px;">Date</th>
+                                        <th>Txn Type</th>
+                                        <th>Description</th>
+                                        <th class="text-end">Debit</th>
+                                        <th class="text-end">Credit</th>
+                                        <th class="text-end">Principal Balance</th>
+                                        <th class="text-end">Interest Balance</th>
+                                        <th class="text-end">Running Balance</th>
+                                        <th style="display: none;">Receipt No</th>
+                                        <th style="display: none;">User</th>
+                                        <th class="text-center" style="width:48px;">Receipt</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ledgerBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-bar">
+                            <div class="page-size-select">
+                                <span>Rows per page</span>
+                                <select id="ledgerPageSizeSelect">
+                                    <option value="5" selected>5</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                </select>
+                            </div>
+                            <div class="page-info" id="ledgerPageInfo">Page 1</div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0" id="ledgerPaginationControls"></ul>
+                            </nav>
+                        </div>
+
+                        <div class="ledger-footer-stats">
+                            <div class="alloc-box alloc-highlight"><div class="alloc-label">Total Interest Collected</div><div class="alloc-value" id="ledgerTotalInterest">₹0.00</div></div>
+                            <div class="alloc-box alloc-highlight"><div class="alloc-label">Total Principal Collected</div><div class="alloc-value" id="ledgerTotalPrincipal">₹0.00</div></div>
+                            <div class="alloc-box"><div class="alloc-label">Current Outstanding</div><div class="alloc-value" id="ledgerCurrentOutstanding">₹0.00</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-jlms btn-jlms-outline d-none" id="btnExportLedgerPdf"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
+                    <button type="button" class="btn-jlms btn-jlms-outline d-none" id="btnPrintLedger"><i class="bi bi-printer"></i> Print</button>
+                    <button type="button" class="btn-jlms btn-jlms-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script>window.JLMS_ACTIVE = "loan-operations";</script>
-<script src="js/jlms-shell.js"></script>
-<script src="js/api-client.js"></script>
-<script>
-jlmsInitShell();
 
-/* =========================================================================
-   LIVE BACKEND VERSION.
-   All calls go through Api.* (js/api-client.js):
-     - Api.getLoanOperationsGrid(params)
-     - Api.getLoanOperationsPaymentDetails(loanId)
-     - Api.getLoanOperationsInterestPreview(loanId, asOfDate)
-     - Api.saveLoanOperationsPayment(loanId, payload)
-     - Api.getLoanOperationsClosureDetails(loanId)
-     - Api.closeLoanOperations(loanId, payload)
-     - Api.getLoanOperationsLedger(loanId, page, pageSize)
-
-   INTEREST MODEL: Overall Interest is fixed once at loan creation
-   (Principal x Rate%) and only ever decreases as interest is paid. There is
-   NO daily accrual added to what the customer owes. The "Daily Interest
-   Reference" block in the Payment Modal is INFORMATIONAL ONLY — it mirrors
-   fields the backend clearly marks as *_InfoOnly and never feeds into
-   Outstanding Interest, Max Payable, or Save Payment.
-
-   Money math (interest-first allocation) is authoritative on the server.
-   The client mirrors that allocation logic locally only for instant UI
-   feedback as the user types an amount; Save always re-validates and
-   re-computes server-side before writing anything.
-   ========================================================================= */
-
-/* ========================= Formatting helpers ========================= */
-
-function inr(n) {
-  return `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function fmtDate(d) {
-  if (!d) return '-';
-  const dt = new Date(d);
-  const day = String(dt.getDate()).padStart(2, '0');
-  const month = String(dt.getMonth() + 1).padStart(2, '0');
-  const year = dt.getFullYear();
-  return `${day}-${month}-${year}`;
-  //return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function statusBadge(status) {
-  if (status === 'Active') return '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>';
-  if (status === 'Overdue') return '<span class="badge-jlms badge-warning"><span class="dot"></span>Overdue</span>';
-  return '<span class="badge-jlms badge-neutral"><span class="dot"></span>Closed</span>';
-}
-
-function clearApiError() {
-  const el = document.getElementById('apiErrorBanner');
-  if (el) { el.style.display = 'none'; el.textContent = ''; }
-  const s = document.getElementById('apiSuccessBanner');
-  if (s) { s.style.display = 'none'; s.textContent = ''; }
-}
-
-function showApiError(err) {
-  const el = document.getElementById('apiErrorBanner');
-  el.textContent = err && err.message ? err.message : 'Something went wrong. Please try again.';
-  el.style.display = 'block';
-}
-
-function showApiSuccess(msg) {
-  const el = document.getElementById('apiSuccessBanner');
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 4000);
-}
-
-/* ============================ Grid state =============================== */
-
-let pageSize = 10;
-let currentPage = 1;
-let totalPages = 1;
-
-function currentFilters() {
-  return {
-    loanNo: document.getElementById('fLoanNo').value.trim(),
-    customerName: document.getElementById('fCustomerName').value.trim(),
-    mobile: document.getElementById('fMobile').value.trim(),
-    aadhaar: document.getElementById('fAadhaar').value.trim(),
-    pan: document.getElementById('fPan').value.trim(),
-    scheme: document.getElementById('fScheme').value,
-    //status: document.getElementById('fStatus').value,
-    fromDate: document.getElementById('fFromDate').value,
-    toDate: document.getElementById('fToDate').value
-  };
-}
-
-async function runSearch(page = 1) {
-  clearApiError();
-  currentPage = page;
-  const body = document.getElementById('resultsBody');
-  body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
-
-  const f = currentFilters();
-  const params = {
-    loanNo: f.loanNo, customerName: f.customerName, mobile: f.mobile,
-    aadhaar: f.aadhaar, pan: f.pan, scheme: f.scheme, status: f.status,
-    fromDate: f.fromDate, toDate: f.toDate, page: currentPage, pageSize,
-    sortDir: 'desc',sortBy: 'loandate'
-  };
-
-  try {
-    const result = await Api.getLoanOperationsGrid(params);
-    const rows = result.items || [];
-    const totalCount = result.totalCount ?? rows.length;
-
-    document.getElementById('resultCount').textContent = `${totalCount} loan${totalCount === 1 ? '' : 's'}`;
-
-    if (rows.length === 0) {
-      body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">No loans found. Try different filters.</td></tr>';
-      renderPagination(0, 0);
-      return;
-    }
-
-    body.innerHTML = rows.map(l => {
-      const isClosed = l.status === 'Closed';
-      return `
-      <tr>
-        <td class="text-center actions-cell">
-          <div class="action-icons-row">
-            <button class="btn-icon-jlms" title="Collect Payment" ${isClosed ? 'disabled' : ''} onclick="openPaymentModal(${l.loanId})">
-              <i class="bi bi-cash-coin"></i>
-            </button>
-            <button class="btn-icon-jlms text-danger" title="Loan Closure" ${isClosed ? 'disabled' : ''} onclick="openClosureModal(${l.loanId})">
-              <i class="bi bi-lock"></i>
-            </button>
-            <button class="btn-icon-jlms text-success" title="Loan Ledger" onclick="openLedgerModal(${l.loanId})">
-              <i class="bi bi-journal-text"></i>
-            </button>
-          </div>
-        </td>
-        <td class="loan-no-cell">${l.loanNo}</td>
-        <td>${fmtDate(l.loanDate)}</td>
-        <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
-        <td>${l.loanScheme}</td>
-        <td class="text-end">${inr(l.principal)}</td>
-        <td class="text-end">${inr(l.overallInterest)}</td>
-        <td class="text-end">${inr(l.outstandingPrincipal)}</td>
-        <td class="text-end">${inr(l.outstandingInterest)}</td>
-        <td class="text-end cell-strong">${inr(l.totalOutstanding)}</td>
-        <td class="text-end">${inr(l.totalAmountPaid)}</td>
-        <td style="display: none;">${statusBadge(l.status)}</td>
-        
-        <td>${fmtDate(l.maturityDate)}</td>
-      </tr>`;
-    }).join('');
-
-    totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-    renderPagination(currentPage, totalPages);
-  } catch (err) {
-    showApiError(err);
-    body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">Could not load loans.</td></tr>';
-    renderPagination(0, 0);
-  }
-}
-
-function initials(name) {
-  return name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
-}
-
-function renderPagination(page, pages) {
-  const info = document.getElementById('pageInfo');
-  const controls = document.getElementById('paginationControls');
-  if (pages === 0) {
-    info.textContent = '';
-    controls.innerHTML = '';
-    return;
-  }
-  info.textContent = `Page ${page} of ${pages}`;
-
-  let html = '';
-  html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
-    <button class="page-link" onclick="runSearch(${page - 1})">Prev</button></li>`;
-
-  const windowSize = 5;
-  let start = Math.max(1, page - Math.floor(windowSize / 2));
-  let end = Math.min(pages, start + windowSize - 1);
-  start = Math.max(1, end - windowSize + 1);
-
-  for (let p = start; p <= end; p++) {
-    html += `<li class="page-item ${p === page ? 'active' : ''}">
-      <button class="page-link" onclick="runSearch(${p})">${p}</button></li>`;
-  }
-
-  html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
-    <button class="page-link" onclick="runSearch(${page + 1})">Next</button></li>`;
-
-  controls.innerHTML = html;
-}
-
-/* ============================ Payment modal ============================ */
-
-let activePaymentLoan = null;   // payment-details response
-let activeInterestCalc = null;  // latest interest-preview / interestCalculation
-
-async function openPaymentModal(loanId) {
-  const modalEl = document.getElementById('paymentModal');
-  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
-  document.getElementById('paymentLoadingState').style.display = 'block';
-  document.getElementById('paymentContent').style.display = 'none';
-  document.getElementById('payLoanNoLabel').textContent = '...';
-  document.getElementById('btnSavePayment').disabled = true;
-  document.getElementById('btnSavePayment').style.display = '';
-  document.getElementById('btnPrintPaymentReceipt').disabled = true;
-  document.getElementById('paymentReceiptSection').style.display = 'none';
-  document.getElementById('btnPaymentCancel').textContent = 'Cancel';
-  lastPaymentReceipt = null;
-  activePaymentLoan = null;
-  activeInterestCalc = null;
-
-  modal.show();
-
-  try {
-    const details = await Api.getLoanOperationsPaymentDetails(loanId);
-    activePaymentLoan = details;
-    activeInterestCalc = details.interestCalculation;
-
-    document.getElementById('payLoanNoLabel').textContent = details.loanNo;
-    document.getElementById('payCustomerName').textContent = details.customerName;
-    document.getElementById('payLoanNo').textContent = details.loanNo;
-    document.getElementById('payAadhaar').textContent = details.aadhaar || '-';
-    document.getElementById('payPan').textContent = details.pan || '-';
-    document.getElementById('payMobile').textContent = details.mobile || '-';
-    document.getElementById('payScheme').textContent = details.loanScheme;
-    document.getElementById('payProcessingFee').textContent = inr(details.processingFee);
-    document.getElementById('payPrincipal').textContent = inr(details.principal);
-    document.getElementById('payOverallInterest').textContent = inr(details.overallInterest);
-    document.getElementById('payOutPrincipal').textContent = inr(details.outstandingPrincipal);
-    document.getElementById('payOutInterest').textContent = inr(details.outstandingInterest);
-    document.getElementById('payTotalOutstanding').textContent = inr(details.totalOutstanding);
-    document.getElementById('payMaturityDate').textContent = fmtDate(details.maturityDate);
-
-    document.getElementById('payDate').value = new Date().toISOString().slice(0, 10);
-    document.getElementById('payDate').disabled = false;
-    document.getElementById('payMode').disabled = false;
-    document.getElementById('payAmountReceived').value = '';
-    document.getElementById('payAmountReceived').disabled = false;
-    document.getElementById('payValidationMsg').classList.remove('show');
-
-    renderInterestCalc(activeInterestCalc);
-    recalcAllocation();
-
-    document.getElementById('paymentLoadingState').style.display = 'none';
-    document.getElementById('paymentContent').style.display = 'block';
-  } catch (err) {
-    document.getElementById('paymentLoadingState').innerHTML = `<span class="doc-error text-danger">Could not load loan details. ${err.message || ''}</span>`;
-  }
-}
-
-function renderInterestCalc(calc) {
-  // ---- Authoritative figures (these decide what's payable) ----
-  document.getElementById('calcOverallInterest').textContent = inr(calc.overallInterest);
-  document.getElementById('calcInterestPaid').textContent = inr(calc.interestPaidToDate);
-  document.getElementById('calcOutstandingInterest').textContent = inr(calc.outstandingInterest);
-  document.getElementById('calcTotalPayable').textContent = inr(calc.maxPayable);
-
-  // ---- Info-only daily/accrued reference (never charged) ----
-  document.getElementById('calcCurrentDate').textContent = fmtDate(calc.asOfDate);
-  document.getElementById('calcLastRefDate').textContent = fmtDate(calc.lastInterestReferenceDate);
-  document.getElementById('calcDays').textContent = calc.noOfDaysInfoOnly;
-  document.getElementById('calcDailyRate').textContent = `${(calc.dailyInterestRateInfoOnly * 100).toFixed(4)}%`;
-  document.getElementById('calcDailyAmount').textContent = inr(calc.dailyInterestAmountInfoOnly);
-  document.getElementById('calcAccrued').textContent = inr(calc.accruedInterestInfoOnly);
-}
-
-// Re-fetch the authoritative interest figures from the server whenever the
-// payment date changes. Only the info-only daily/accrued reference block
-// actually depends on the date — Outstanding Interest itself does not.
-async function onPaymentDateChanged() {
-  if (!activePaymentLoan) return;
-  const asOfDate = document.getElementById('payDate').value;
-  try {
-    activeInterestCalc = await Api.getLoanOperationsInterestPreview(activePaymentLoan.loanId, asOfDate);
-    renderInterestCalc(activeInterestCalc);
-    recalcAllocation();
-  } catch (err) {
-    showApiError(err);
-  }
-}
-
-// Client-side mirror of the server's interest-first allocation, used ONLY
-// for instant UI feedback as the user types an amount. SavePayment always
-// re-computes and re-validates this on the server before writing anything.
-function recalcAllocation() {
-  if (!activePaymentLoan || !activeInterestCalc) return;
-
-  const outstandingInterest = activeInterestCalc.outstandingInterest;
-  const outstandingPrincipal = activeInterestCalc.outstandingPrincipal;
-  const maxPayable = activeInterestCalc.maxPayable;
-  const amountReceived = parseFloat(document.getElementById('payAmountReceived').value) || 0;
-
-  const validationMsg = document.getElementById('payValidationMsg');
-  const saveBtn = document.getElementById('btnSavePayment');
-
-  if (amountReceived > maxPayable + 0.01) {
-    validationMsg.classList.add('show');
-    saveBtn.disabled = true;
-  } else {
-    validationMsg.classList.remove('show');
-    saveBtn.disabled = amountReceived <= 0;
-  }
-
-  const interestPaid = Math.min(amountReceived, outstandingInterest);
-  const remainderAfterInterest = Math.max(0, amountReceived - interestPaid);
-  const principalPaid = Math.min(remainderAfterInterest, outstandingPrincipal);
-  const remainingInterest = Math.max(0, outstandingInterest - interestPaid);
-  const remainingPrincipal = Math.max(0, outstandingPrincipal - principalPaid);
-  const balanceAfter = remainingInterest + remainingPrincipal;
-
-  document.getElementById('allocInterestPaid').textContent = inr(interestPaid);
-  document.getElementById('allocPrincipalPaid').textContent = inr(principalPaid);
-  document.getElementById('allocRemainingInterest').textContent = inr(remainingInterest);
-  document.getElementById('allocRemainingPrincipal').textContent = inr(remainingPrincipal);
-  document.getElementById('allocBalanceAfter').textContent = inr(balanceAfter);
-}
-
-document.getElementById('payAmountReceived').addEventListener('input', recalcAllocation);
-document.getElementById('payDate').addEventListener('change', onPaymentDateChanged);
-
-let lastPaymentReceipt = null;
-
-document.getElementById('btnSavePayment').addEventListener('click', async () => {
-  if (!activePaymentLoan) return;
-  const btn = document.getElementById('btnSavePayment');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
-
-  try {
-    const payload = {
-      paymentDate: document.getElementById('payDate').value,
-      paymentMode: document.getElementById('payMode').value,
-      referenceNo: null,
-      amountReceived: parseFloat(document.getElementById('payAmountReceived').value) || 0,
-      processedByUserId: (Session.get() && Session.get().userId) || 1
-    };
-
-    // The server recomputes interest/allocation from scratch and is authoritative.
-    const response = await Api.saveLoanOperationsPayment(activePaymentLoan.loanId, payload);
-    lastPaymentReceipt = response;
-
-    showApiSuccess(`Payment of ${inr(response.amountReceived)} recorded for ${activePaymentLoan.loanNo}.`);
-
-    document.getElementById('payDate').disabled = true;
-    document.getElementById('payMode').disabled = true;
-    document.getElementById('payAmountReceived').disabled = true;
-    btn.style.display = 'none';
-    document.getElementById('btnPaymentCancel').textContent = 'Done';
-    document.getElementById('btnPrintPaymentReceipt').disabled = false;
-
-    document.getElementById('paymentReceiptNoBadge').innerHTML = '<span class="dot"></span>' + response.receiptNumber;
-    document.getElementById('paymentReceiptBox').innerHTML = `
-      <div style="text-align:center; font-weight:700; font-size:13px;">JLMS RECEIPT</div>
-      <div style="text-align:center; color:var(--n-500, #6b7280); margin-bottom:8px;">Loan Payment</div>
-      <div class="receipt-divider"></div>
-      <div class="r-row"><span>Receipt No.</span><span>${response.receiptNumber}</span></div>
-      <div class="r-row"><span>Date</span><span>${new Date(response.transactionDate).toLocaleString('en-IN')}</span></div>
-      <div class="r-row"><span>Loan No.</span><span>${response.loanNo}</span></div>
-      <div class="r-row"><span>Customer</span><span>${response.customerName}</span></div>
-      <div class="receipt-divider"></div>
-      <div class="r-row"><span>Interest Paid</span><span>${inr(response.interestPaid)}</span></div>
-      <div class="r-row"><span>Principal Paid</span><span>${inr(response.principalPaid)}</span></div>
-      <div class="r-row" style="font-weight:700;"><span>Amount Received</span><span>${inr(response.amountReceived)}</span></div>
-      <div class="receipt-divider"></div>
-      <div class="r-row"><span>Remaining Interest</span><span>${inr(response.remainingInterest)}</span></div>
-      <div class="r-row"><span>Remaining Principal</span><span>${inr(response.remainingPrincipal)}</span></div>
-      <div class="r-row"><span>Mode</span><span>${response.paymentMode}</span></div>`;
-
-      downloadPaymentReceipt();
-    //document.getElementById('paymentReceiptSection').style.display = 'block';
-  } catch (err) {
-    showApiError(err);
-    btn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Payment';
-    btn.disabled = false;
-  }
-});
-
-// function downloadPaymentReceipt() {
-//   if (!lastPaymentReceipt) {
-//     showApiError(new Error('No receipt available. Please save a payment first.'));
-//     return;
-//   }
-//   const r = lastPaymentReceipt;
-//   const fileName = `Receipt-${r.receiptNumber}.pdf`;
-
-//   const { jsPDF } = window.jspdf;
-//   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
-
-//   const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
-//   let y = 20;
-
-//   const line = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: 'right' }); y += 6; };
-//   const divid = () => { doc.setDrawColor(180); doc.setLineDashPattern([1, 1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
-
-
-//   // --- ADDED COMPANY HEADER ---
-//   doc.setFont('courier', 'bold');
-//   doc.setFontSize(16);
-//   doc.text('SRI SARAVANA BANKERS', lm + tw / 2, y, { align: 'center' }); y += 6;
-  
-//   doc.setFont('courier', 'normal');
-//   doc.setFontSize(10);
-//   doc.text('3/39, Mangulam Main Road, Poosaripatti', lm + tw / 2, y, { align: 'center' }); y += 5;
-//   doc.text('Madurai - 625122 | Ph: 9943155324', lm + tw / 2, y, { align: 'center' }); y += 6;
-//   // ----------------------------
-
-//   doc.setFont('courier', 'bold');
-//   doc.setFontSize(12);
-//   doc.text('LOAN PAYMENT RECEIPT', lm + tw / 2, y, { align: 'center' }); y += 4;
-//   doc.setTextColor(30);
-//   divid();
-
-//   doc.setFontSize(10);
-//   line('Receipt No.', r.receiptNumber);
-//   line('Date', new Date(r.receiptDate || r.transactionDate).toLocaleString('en-IN'));
-//   line('Loan No.', r.loanNo);
-//   line('Customer', r.customerName);
-//   divid();
-
-//   line('Interest Paid', 'Rs.' + Number(r.interestPaid).toLocaleString('en-IN'));
-//   line('Principal Paid', 'Rs.' + Number(r.principalPaid).toLocaleString('en-IN'));
-//   doc.setFont('courier', 'bold');
-//   line('Amount Received', 'Rs.' + Number(r.amountReceived).toLocaleString('en-IN'));
-//   doc.setFont('courier', 'normal');
-//   divid();
-
-//   line('Remaining Interest', 'Rs.' + Number(r.remainingInterest).toLocaleString('en-IN'));
-//   line('Remaining Principal', 'Rs.' + Number(r.remainingPrincipal).toLocaleString('en-IN'));
-//   line('Mode', r.paymentMode);
-
-//   doc.save(fileName);
-// }
-
-// document.getElementById('btnPrintPaymentReceipt').addEventListener('click', downloadPaymentReceipt);
-
-// document.getElementById('paymentModal').addEventListener('hidden.bs.modal', () => {
-//   runSearch(currentPage);
-// });
-async function downloadPaymentReceipt() {
-  if (!lastPaymentReceipt) {
-    showApiError(new Error('No receipt available. Please save a payment first.'));
-    return;
-  }
-  const r = lastPaymentReceipt;
-  const btn = document.getElementById('btnPrintPaymentReceipt');
-  const originalHtml = btn.innerHTML;
-  try {
-    btn.disabled = true;
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
-    // Call the server PDF service — returns the QuestPDF A5 payment receipt
-    // generated by LoanReceiptPdfService.GeneratePaymentReceipt()
-    const receiptDto = {
-      receiptNumber: r.receiptNumber,
-      loanNo: r.loanNo,
-      customerName: r.customerName,
-      mobile: (activePaymentLoan && activePaymentLoan.mobile) || null,
-      transactionDate: r.transactionDate,
-      paymentMode: r.paymentMode,
-      loanScheme: (activePaymentLoan && activePaymentLoan.loanScheme) || null,     
-      maturityDate: (activePaymentLoan && activePaymentLoan.maturityDate) || null, 
-      interestPaid: r.interestPaid,
-      principalPaid: r.principalPaid,
-      amountReceived: r.amountReceived,
-      remainingInterest: r.remainingInterest,
-      remainingPrincipal: r.remainingPrincipal
-    };
-    const blob = await Api.downloadPaymentReceiptPdf(receiptDto);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Receipt-${r.receiptNumber}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    showApiError(err);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHtml;
-  }
-}
-document.getElementById('btnPrintPaymentReceipt').addEventListener('click', downloadPaymentReceipt);
-
-document.getElementById('paymentModal').addEventListener('hidden.bs.modal', () => {
-  runSearch(currentPage);
-});
-
-/* ============================ Closure modal ============================ */
-
-let activeClosureLoan = null;
-let closureCapturedPhoto = null;
-let closureCameraStream = null;
-
-async function openClosureModal(loanId) {
-  const modalEl = document.getElementById('closureModal');
-  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
-  document.getElementById('closureLoadingState').style.display = 'block';
-  document.getElementById('closureContent').style.display = 'none';
-  document.getElementById('closeLoanNoLabel').textContent = '...';
-  document.getElementById('btnCloseLoan').disabled = true;
-  document.getElementById('btnCloseLoan').style.display = '';
-  document.getElementById('btnPrintClosureReceipt').disabled = true;
-  document.getElementById('closureReceiptSection').style.display = 'none';
-  document.getElementById('btnClosureCancel').textContent = 'Cancel';
-  lastClosureReceipt = null;
-  activeClosureLoan = null;
-
-  // Reset closure photo
-  closureCapturedPhoto = null;
-  document.getElementById('closurePhotoFile').value = '';
-  document.getElementById('closurePhotoPreview').innerHTML = '<i class="bi bi-person-circle"></i>';
-  document.getElementById('closurePhotoMsg').classList.remove('show');
-
-  modal.show();
-
-  try {
-    const details = await Api.getLoanOperationsClosureDetails(loanId);
-    activeClosureLoan = details;
-
-    document.getElementById('closeLoanNoLabel').textContent = details.loanNo;
-    document.getElementById('closeCustomerName').textContent = details.customerName;
-    document.getElementById('closeLoanNo').textContent = details.loanNo;
-    document.getElementById('closeScheme').textContent = details.loanScheme;
-    document.getElementById('closeProcessingFee').textContent = inr(details.processingFee);
-    document.getElementById('closeTotalPaid').textContent = inr(details.totalAmountPaid);
-    document.getElementById('closeMobile').textContent = details.mobile || '-';
-
-    document.getElementById('closeOutPrincipal').textContent = inr(details.outstandingPrincipal);
-    document.getElementById('closeOutInterest').textContent = inr(details.outstandingInterest);
-    document.getElementById('closeOtherCharges').textContent = inr(details.otherCharges);
-    document.getElementById('closeGrandTotal').textContent = inr(details.grandTotal);
-
-    if (details.isClosable) {
-      document.getElementById('btnCloseLoan').disabled = false;
-      document.getElementById('closeValidationMsg').classList.remove('show');
-    } else {
-      document.getElementById('btnCloseLoan').disabled = true;
-      document.getElementById('closeValidationMsg').classList.add('show');
-    }
-
-    document.getElementById('closureLoadingState').style.display = 'none';
-    document.getElementById('closureContent').style.display = 'block';
-  } catch (err) {
-    document.getElementById('closureLoadingState').innerHTML = `<span class="doc-error text-danger">Could not load loan details. ${err.message || ''}</span>`;
-  }
-}
-
-let lastClosureReceipt = null;
-
-// Closure camera — open
-document.getElementById('btnCaptureClosurePhoto').addEventListener('click', async () => {
-  const errEl = document.getElementById('closureCameraErrorMsg');
-  errEl.classList.remove('show');
-  errEl.textContent = '';
-
-  try {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      errEl.textContent = 'Camera is not supported in this browser.';
-      errEl.classList.add('show');
-      return;
-    }
-    closureCameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
-    document.getElementById('closureCameraVideo').srcObject = closureCameraStream;
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).show();
-  } catch (err) {
-    errEl.textContent = err && err.name === 'NotAllowedError'
-      ? 'Camera access was denied. Please allow camera permission and try again.'
-      : 'Unable to access camera.';
-    errEl.classList.add('show');
-  }
-})
-
-// Closure camera — capture
-document.getElementById('btnTakeClosurePhoto').addEventListener('click', () => {
-  const video = document.getElementById('closureCameraVideo');
-  const canvas = document.getElementById('closureCameraCanvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-  canvas.toBlob(blob => {
-    if (!blob) {
-      const errEl = document.getElementById('closureCameraErrorMsg');
-      errEl.textContent = 'Unable to capture photo. Please try again.';
-      errEl.classList.add('show');
-      return;
-    }
-    closureCapturedPhoto = new File([blob], 'ClosurePhoto.jpg', { type: 'image/jpeg' });
-    document.getElementById('closurePhotoFile').value = '';
-    document.getElementById('closurePhotoPreview').innerHTML =
-      `<img src="${URL.createObjectURL(blob)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
-  }, 'image/jpeg');
-  bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).hide();
-  if (closureCameraStream) { closureCameraStream.getTracks().forEach(t => t.stop()); closureCameraStream = null; }
-});
-// Closure camera — stop stream when modal dismissed without capturing
-document.getElementById('closureCameraModal').addEventListener('hidden.bs.modal', () => {
-  if (closureCameraStream) { closureCameraStream.getTracks().forEach(t => t.stop()); closureCameraStream = null; }
-});
-
-// Closure photo — file upload
-document.getElementById('btnUploadClosurePhoto').addEventListener('click', () => {
-  document.getElementById('closurePhotoFile').click();
-});
-document.getElementById('closurePhotoFile').addEventListener('change', function () {
-  const file = this.files[0]; if (!file) return;
-  closureCapturedPhoto = null;
-  const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById('closurePhotoPreview').innerHTML =
-      `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
-  };
-  reader.readAsDataURL(file);
-});
-document.getElementById('btnCloseLoan').addEventListener('click', () => {
-  if (!activeClosureLoan) return;
-
-  // Validate photo — require either a captured or uploaded file
-  const uploadedFile = document.getElementById('closurePhotoFile').files[0];
-  const photoFile = uploadedFile || closureCapturedPhoto;
-  if (!photoFile) {
-    document.getElementById('closurePhotoMsg').classList.add('show');
-    return;
-  }
-  document.getElementById('closurePhotoMsg').classList.remove('show');
-
-  // Show styled confirm modal instead of window.confirm
-  document.getElementById('confirmClosureLoanNo').textContent = activeClosureLoan.loanNo;
-  bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmClosureModal')).show();
-});
-
-document.getElementById('btnConfirmClosureProceed').addEventListener('click', () => {
-  bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmClosureModal')).hide();
-
-  if (!activeClosureLoan) return;
-  const uploadedFile = document.getElementById('closurePhotoFile').files[0];
-  const photoFile = uploadedFile || closureCapturedPhoto;
-  const loanNo = activeClosureLoan.loanNo;
-
-  const btn = document.getElementById('btnCloseLoan');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Closing...';
-
-  const formData = new FormData();
-  formData.append('PaymentMode', 'Cash');
-  formData.append('ProcessedByUserId', String((Session.get() && Session.get().userId) || 1));
-  formData.append('ClosePhoto', photoFile);
-
-  Api.closeLoanOperationsWithPhoto(activeClosureLoan.loanId, formData)
-    .then((response) => {
-      lastClosureReceipt = response;
-      showApiSuccess(`Loan ${loanNo} has been closed successfully.`);
-
-      btn.style.display = 'none';
-      document.getElementById('btnClosureCancel').textContent = 'Done';
-      document.getElementById('btnPrintClosureReceipt').disabled = false;
-
-      document.getElementById('closureReceiptNoBadge').innerHTML = '<span class="dot"></span>' + response.receiptNumber;
-      document.getElementById('closureReceiptBox').innerHTML = `
-        <div style="text-align:center; font-weight:700; font-size:13px;">JLMS RECEIPT</div>
-        <div style="text-align:center; color:var(--n-500, #6b7280); margin-bottom:8px;">Loan Closure</div>
-        <div class="receipt-divider"></div>
-        <div class="r-row"><span>Receipt No.</span><span>${response.receiptNumber}</span></div>
-        <div class="r-row"><span>Date</span><span>${new Date(response.transactionDate).toLocaleString('en-IN')}</span></div>
-        <div class="r-row"><span>Loan No.</span><span>${response.loanNo}</span></div>
-        <div class="r-row"><span>Customer</span><span>${response.customerName}</span></div>
-        <div class="r-row"><span>Loan Scheme</span><span>${response.loanScheme}</span></div>
-        <div class="receipt-divider"></div>
-        <div class="r-row"><span>Outstanding Principal</span><span>${inr(response.outstandingPrincipal)}</span></div>
-        <div class="r-row"><span>Outstanding Interest</span><span>${inr(response.outstandingInterest)}</span></div>
-        <div class="r-row"><span>Other Charges</span><span>${inr(response.otherCharges)}</span></div>
-        <div class="receipt-divider"></div>
-        <div class="r-row" style="font-weight:700;"><span>Grand Total Paid</span><span>${inr(response.grandTotal)}</span></div>
-        <div class="r-row"><span>Status</span><span>Closed</span></div>`;
-
-        downloadClosureReceipt();
-    })
-    .catch(err => {
-      showApiError(err);
-      btn.innerHTML = '<i class="bi bi-lock-fill"></i> Close Loan';
-      btn.disabled = false;
-    });
-});
-
-// function downloadClosureReceipt() {
-//   if (!lastClosureReceipt) {
-//     showApiError(new Error('No receipt available. Please close a loan first.'));
-//     return;
-//   }
-//   const r = lastClosureReceipt;
-//   const fileName = `Closure-Receipt-${r.receiptNumber}.pdf`;
-
-//   const { jsPDF } = window.jspdf;
-//   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
-
-//   const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
-//   let y = 20;
-
-//   const line = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: 'right' }); y += 6; };
-//   const divid = () => { doc.setDrawColor(180); doc.setLineDashPattern([1, 1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
-
-//   // --- ADDED COMPANY HEADER ---
-//   doc.setFont('courier', 'bold');
-//   doc.setFontSize(16);
-//   doc.text('SRI SARAVANA BANKERS', lm + tw / 2, y, { align: 'center' }); y += 6;
-  
-//   doc.setFont('courier', 'normal');
-//   doc.setFontSize(10);
-//   doc.text('3/39, Mangulam Main Road, Poosaripatti', lm + tw / 2, y, { align: 'center' }); y += 5;
-//   doc.text('Madurai - 625122 | Ph: 9943155324', lm + tw / 2, y, { align: 'center' }); y += 6;
-//   // ----------------------------
-
-//   doc.setFont('courier', 'bold');
-//   doc.setFontSize(12);
-//   doc.text('LOAN CLOSURE RECEIPT', lm + tw / 2, y, { align: 'center' }); y += 4;
-//   doc.setTextColor(30);
-//   divid();
-
-//   doc.setFontSize(10);
-//   line('Receipt No.', r.receiptNumber);
-//   line('Date', new Date(r.receiptDate || r.transactionDate).toLocaleString('en-IN'));
-//   line('Loan No.', r.loanNo);
-//   line('Customer', r.customerName);
-//   line('Loan Scheme', r.loanScheme);
-//   divid();
-
-//   line('Outstanding Principal', 'Rs.' + Number(r.outstandingPrincipal).toLocaleString('en-IN'));
-//   line('Outstanding Interest', 'Rs.' + Number(r.outstandingInterest).toLocaleString('en-IN'));
-//   line('Other Charges', 'Rs.' + Number(r.otherCharges).toLocaleString('en-IN'));
-//   divid();
-
-//   doc.setFont('courier', 'bold');
-//   line('Grand Total Paid', 'Rs.' + Number(r.grandTotal).toLocaleString('en-IN'));
-//   doc.setFont('courier', 'normal');
-//   line('Status', 'Closed');
-
-//   doc.save(fileName);
-// }
-async function downloadClosureReceipt() {
-  if (!lastClosureReceipt) {
-    showApiError(new Error('No receipt available. Please close a loan first.'));
-    return;
-  }
-  const r = lastClosureReceipt;
-  const btn = document.getElementById('btnPrintClosureReceipt');
-  const originalHtml = btn.innerHTML;
-  try {
-    btn.disabled = true;
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
-    // Call the server PDF service — returns the QuestPDF A5 closure receipt
-    // generated by LoanReceiptPdfService.GenerateClosureReceipt()
-    const receiptDto = {
-      receiptNumber: r.receiptNumber,
-      loanNo: r.loanNo,
-      customerName: r.customerName,
-      mobile: (activeClosureLoan && activeClosureLoan.mobile) || null,
-      loanScheme: r.loanScheme,
-      transactionDate: r.transactionDate,
-      outstandingPrincipal: r.outstandingPrincipal,
-      outstandingInterest: r.outstandingInterest,
-      otherCharges: r.otherCharges,
-      grandTotal: r.grandTotal
-    };
-    const blob = await Api.downloadClosureReceiptPdf(receiptDto);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Closure-Receipt-${r.receiptNumber}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    showApiError(err);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHtml;
-  }
-}
-document.getElementById('btnPrintClosureReceipt').addEventListener('click', downloadClosureReceipt);
-
-document.getElementById('closureModal').addEventListener('hidden.bs.modal', () => {
-  runSearch(currentPage);
-});
-
-/* ============================= Ledger modal ============================= */
-
-let activeLedgerLoanId = null;
-let ledgerPageSize = 10;
-let ledgerCurrentPage = 1;
-let ledgerTotalPages = 1;
-
-async function openLedgerModal(loanId) {
-  const modalEl = document.getElementById('ledgerModal');
-  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
-  document.getElementById('ledgerLoadingState').style.display = 'block';
-  document.getElementById('ledgerContent').style.display = 'none';
-  document.getElementById('ledgerLoanNoLabel').textContent = '...';
-
-  activeLedgerLoanId = loanId;
-  ledgerCurrentPage = 1;
-  ledgerPageSize = parseInt(document.getElementById('ledgerPageSizeSelect').value, 10) || 10;
-
-  modal.show();
-  await loadLedgerPage(1);
-}
-
-async function loadLedgerPage(page) {
-  ledgerCurrentPage = page;
-  const body = document.getElementById('ledgerBody');
-
-  try {
-    const result = await Api.getLoanOperationsLedger(activeLedgerLoanId, ledgerCurrentPage, ledgerPageSize);
-
-    document.getElementById('ledgerLoanNoLabel').textContent = result.loanNo;
-    document.getElementById('ledgerCustomer').textContent = result.customerName;
-    document.getElementById('ledgerScheme').textContent = result.loanScheme;
-    document.getElementById('ledgerProcessingFee').textContent = inr(result.processingFee);
-    document.getElementById('ledgerLoanDate').textContent = fmtDate(result.loanDate);
-    document.getElementById('ledgerMaturityDate').textContent = fmtDate(result.maturityDate);
-    document.getElementById('ledgerPrincipal').textContent = inr(result.principal);
-    document.getElementById('ledgerOverallInterest').textContent = inr(result.overallInterest);
-    document.getElementById('ledgerRate').textContent = `${result.annualInterestRate}% p.a.`;
-    document.getElementById('ledgerStatus').innerHTML = statusBadge(result.status);
-
-    body.innerHTML = result.items.map((e, idx) => {
-      // const isDisbursement = idx === 0;
-      // const receiptCell = isDisbursement
-      // Rows 0-2 are always: Disbursement, Processing Fee Debited, Processing
-   // Fee Collected (see LoanOperationsService.GetLedgerAsync) — none of
-   // these map to a real collectable transaction, so no receipt to print.
-        const hideDownload = !e.canDownloadReceipt;
-        const receiptCell = hideDownload
-        ? `<td class="text-center"></td>`
-        : `<td class="text-center">
-             <button class="btn-icon-jlms" title="Download Receipt"
-               onclick="downloadLedgerReceipt(this)"
-               data-transaction-id="${e.transactionId}"
-               data-date="${e.date || ''}"
-               data-txn-type="${(e.transactionType || '').replace(/"/g, '&quot;')}"
-               data-description="${(e.description || '').replace(/"/g, '&quot;')}"
-               data-receipt-no="${e.receiptNumber || ''}"
-               data-user="${(e.userName || '').replace(/"/g, '&quot;')}"
-               data-debit="${e.debit || 0}"
-               data-credit="${e.credit || 0}"
-               data-interest-paid="${e.interestPaid || 0}"
-               data-principal-paid="${e.principalPaid || 0}"
-               data-amount-received="${e.credit || e.debit || 0}"
-               data-remaining-interest="${e.interestBalance || 0}"
-               data-remaining-principal="${e.principalBalance || 0}"
-               data-payment-mode="${(e.paymentMode || '').replace(/"/g, '&quot;')}"
-               data-running-balance="${e.runningBalance || 0}">
-               <i class="bi bi-download"></i>
-             </button>
-           </td>`;
-      return `
-      <tr>
-        <td>${fmtDate(e.date)}</td>
-        <td>${e.transactionType}</td>
-        <td>${e.description}</td>
-        <td class="text-end">${e.debit ? inr(e.debit) : '<span class="text-muted-jlms">—</span>'}</td>
-        <td class="text-end">${e.credit ? inr(e.credit) : '<span class="text-muted-jlms">—</span>'}</td>
-        <td class="text-end">${inr(e.principalBalance)}</td>
-        <td class="text-end">${inr(e.interestBalance)}</td>
-        <td class="text-end cell-strong">${inr(e.runningBalance)}</td>
-        <td style="display: none;">${e.receiptNumber || '-'}</td>
-        <td style="display: none;">${e.userName || '-'}</td>
-        ${receiptCell}
-      </tr>`;
-    }).join('');
-
-    document.getElementById('ledgerTotalInterest').textContent = inr(result.totalInterestCollected);
-    document.getElementById('ledgerTotalPrincipal').textContent = inr(result.totalPrincipalCollected);
-    document.getElementById('ledgerCurrentOutstanding').textContent = inr(result.currentOutstanding);
-
-    ledgerTotalPages = Math.max(1, Math.ceil(result.totalCount / ledgerPageSize));
-    renderLedgerPagination(ledgerCurrentPage, ledgerTotalPages);
-
-    document.getElementById('ledgerLoadingState').style.display = 'none';
-    document.getElementById('ledgerContent').style.display = 'block';
-  } catch (err) {
-    document.getElementById('ledgerLoadingState').style.display = 'block';
-    document.getElementById('ledgerContent').style.display = 'none';
-    document.getElementById('ledgerLoadingState').innerHTML = `<span class="doc-error text-danger">Could not load ledger. ${err.message || ''}</span>`;
-  }
-}
-
-async function downloadLedgerReceipt(btn) {
-  const d = btn.dataset;
-  const receiptNo = d.receiptNo || 'receipt';
-  const loanNo    = document.getElementById('ledgerLoanNoLabel').textContent || '';
-  const transactionId = parseInt(d.transactionId, 10);
-  const originalHtml = btn.innerHTML;
-  if (!transactionId) {
-    showApiError(new Error('This ledger row has no transaction to generate a receipt for.'));
-    return;
-  }
-  try {
-    btn.disabled = true;
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
-    // Call the server PDF service — looks up the transaction and returns the
-    // same QuestPDF A5 payment receipt generated by
-    // LoanReceiptPdfService.GeneratePaymentReceipt()
-    const blob = await Api.downloadTransactionReceiptPdf(transactionId);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Receipt-${receiptNo}-${loanNo}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    showApiError(err);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHtml;
-  }
-}
-
-function renderLedgerPagination(page, pages) {
-  const info = document.getElementById('ledgerPageInfo');
-  const controls = document.getElementById('ledgerPaginationControls');
-  if (pages === 0) {
-    info.textContent = '';
-    controls.innerHTML = '';
-    return;
-  }
-  info.textContent = `Page ${page} of ${pages}`;
-
-  let html = '';
-  html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
-    <button class="page-link" onclick="loadLedgerPage(${page - 1})">Prev</button></li>`;
-
-  const windowSize = 5;
-  let start = Math.max(1, page - Math.floor(windowSize / 2));
-  let end = Math.min(pages, start + windowSize - 1);
-  start = Math.max(1, end - windowSize + 1);
-
-  for (let p = start; p <= end; p++) {
-    html += `<li class="page-item ${p === page ? 'active' : ''}">
-      <button class="page-link" onclick="loadLedgerPage(${p})">${p}</button></li>`;
-  }
-
-  html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
-    <button class="page-link" onclick="loadLedgerPage(${page + 1})">Next</button></li>`;
-
-  controls.innerHTML = html;
-}
-
-document.getElementById('ledgerPageSizeSelect').addEventListener('change', (e) => {
-  ledgerPageSize = parseInt(e.target.value, 10) || 10;
-  loadLedgerPage(1);
-});
-
-// document.getElementById('btnExportLedgerPdf').addEventListener('click', () => {
-//   // TODO: hook up to a real export endpoint, e.g. Api.exportLedgerPdf(loanId)
-//   showApiSuccess('Ledger export started. The PDF will download shortly.');
-// });
-
-// document.getElementById('btnPrintLedger').addEventListener('click', () => {
-//   window.print();
-// });
-
-/* ============================ Page bootstrap ============================ */
-
-document.addEventListener('DOMContentLoaded', () => {
-    Session.requireLogin();
-
-    async function loadSchemeFilter() {
-        try {
-            const schemes = await Api.getLoanSchemes(true);
-            const sel = document.getElementById('fScheme');
-            schemes.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.schemeName;
-                opt.textContent = s.schemeName;
-                sel.appendChild(opt);
-            });
-        } catch (err) {
-            console.warn('Could not load loan schemes for filter:', err.message);
+    <!-- Camera modal for closure photo capture -->
+    <div class="modal fade" id="closureCameraModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Capture Customer Photo — Closure</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <video id="closureCameraVideo" autoplay playsinline style="width:100%;border-radius:10px;"></video>
+                    <canvas id="closureCameraCanvas" style="display:none;"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-success" id="btnTakeClosurePhoto">
+                        <i class="bi bi-camera-fill"></i> Capture
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Confirm Closure Modal -->
+    <div class="modal fade" id="confirmClosureModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Loan Closure</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Loan Number :<strong id="confirmClosureLoanNo">-</strong>?</p>
+                    <p class="text-danger mb-0" style="font-size:0.85rem;">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-jlms btn-jlms-primary" id="btnConfirmClosureProceed">
+                        <i class="bi bi-lock-fill"></i> Confirm Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>window.JLMS_ACTIVE = "loan-operations";</script>
+    <script src="js/jlms-shell.js"></script>
+    <script src="js/api-client.js"></script>
+    <script>
+        jlmsInitShell();
+
+        /* =========================================================================
+           LIVE BACKEND VERSION.
+           All calls go through Api.* (js/api-client.js):
+             - Api.getLoanOperationsGrid(params)
+             - Api.getLoanOperationsPaymentDetails(loanId)
+             - Api.getLoanOperationsInterestPreview(loanId, asOfDate)
+             - Api.saveLoanOperationsPayment(loanId, payload)
+             - Api.getLoanOperationsClosureDetails(loanId)
+             - Api.closeLoanOperations(loanId, payload)
+             - Api.getLoanOperationsLedger(loanId, page, pageSize)
+
+           INTEREST MODEL (updated — daily-interest fix):
+           Overall Interest is still set once at loan creation (Principal x Rate%)
+           but is now a REFERENCE/DISPLAY figure only. What's actually charged and
+           collected on each payment is DAILY ACCRUED INTEREST — Outstanding
+           Principal x Annual Rate% / 365 x days since the last payment (or loan
+           start, for the first payment). The "Daily Interest Calculation" block in
+           the Payment Modal is that authoritative figure now, not an info-only
+           mirror — it feeds directly into Outstanding Interest and Max Payable.
+
+           Money math (interest-first allocation against the daily-accrued figure)
+           is authoritative on the server.
+           The client mirrors that allocation logic locally only for instant UI
+           feedback as the user types an amount; Save always re-validates and
+           re-computes server-side before writing anything.
+           ========================================================================= */
+
+        /* ========================= Formatting helpers ========================= */
+
+        function inr(n) {
+            return `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
-    }
+
+        function fmtDate(d) {
+            if (!d) return '-';
+            const dt = new Date(d);
+            const day = String(dt.getDate()).padStart(2, '0');
+            const month = String(dt.getMonth() + 1).padStart(2, '0');
+            const year = dt.getFullYear();
+            return `${day}-${month}-${year}`;
+            //return dt.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function statusBadge(status) {
+            if (status === 'Active') return '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>';
+            if (status === 'Overdue') return '<span class="badge-jlms badge-warning"><span class="dot"></span>Overdue</span>';
+            return '<span class="badge-jlms badge-neutral"><span class="dot"></span>Closed</span>';
+        }
+
+        function clearApiError() {
+            const el = document.getElementById('apiErrorBanner');
+            if (el) { el.style.display = 'none'; el.textContent = ''; }
+            const s = document.getElementById('apiSuccessBanner');
+            if (s) { s.style.display = 'none'; s.textContent = ''; }
+        }
+
+        function showApiError(err) {
+            const el = document.getElementById('apiErrorBanner');
+            el.textContent = err && err.message ? err.message : 'Something went wrong. Please try again.';
+            el.style.display = 'block';
+        }
+
+        function showApiSuccess(msg) {
+            const el = document.getElementById('apiSuccessBanner');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+        }
+
+        /* ============================ Grid state =============================== */
+
+        let pageSize = 10;
+        let currentPage = 1;
+        let totalPages = 1;
+
+        function currentFilters() {
+            return {
+                loanNo: document.getElementById('fLoanNo').value.trim(),
+                customerName: document.getElementById('fCustomerName').value.trim(),
+                mobile: document.getElementById('fMobile').value.trim(),
+                aadhaar: document.getElementById('fAadhaar').value.trim(),
+                pan: document.getElementById('fPan').value.trim(),
+                scheme: document.getElementById('fScheme').value,
+                //status: document.getElementById('fStatus').value,
+                fromDate: document.getElementById('fFromDate').value,
+                toDate: document.getElementById('fToDate').value
+            };
+        }
+
+        async function runSearch(page = 1) {
+            clearApiError();
+            currentPage = page;
+            const body = document.getElementById('resultsBody');
+            body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
+
+            const f = currentFilters();
+            const params = {
+                loanNo: f.loanNo, customerName: f.customerName, mobile: f.mobile,
+                aadhaar: f.aadhaar, pan: f.pan, scheme: f.scheme, status: f.status,
+                fromDate: f.fromDate, toDate: f.toDate, page: currentPage, pageSize,
+                sortDir: 'desc', sortBy: 'createdat'
+            };
+
+            try {
+                const result = await Api.getLoanOperationsGrid(params);
+                const rows = result.items || [];
+                const totalCount = result.totalCount ?? rows.length;
+
+                document.getElementById('resultCount').textContent = `${totalCount} loan${totalCount === 1 ? '' : 's'}`;
+
+                if (rows.length === 0) {
+                    body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">No loans found. Try different filters.</td></tr>';
+                    renderPagination(0, 0);
+                    return;
+                }
+
+                body.innerHTML = rows.map(l => {
+                    const isClosed = l.status === 'Closed';
+                    return `
+                          <tr>
+                            <td class="text-center actions-cell">
+                              <div class="action-icons-row">
+                                <button class="btn-icon-jlms" title="Collect Payment" ${isClosed ? 'disabled' : ''} onclick="openPaymentModal(${l.loanId})">
+                                  <i class="bi bi-cash-coin"></i>
+                                </button>
+                                <button class="btn-icon-jlms text-danger" title="Loan Closure" ${isClosed ? 'disabled' : ''} onclick="openClosureModal(${l.loanId})">
+                                  <i class="bi bi-lock"></i>
+                                </button>
+                                <button class="btn-icon-jlms text-success" title="Loan Ledger" onclick="openLedgerModal(${l.loanId})">
+                                  <i class="bi bi-journal-text"></i>
+                                </button>
+                              </div>
+                            </td>
+                            <td class="loan-no-cell">${l.loanNo}</td>
+                            <td>${fmtDate(l.loanDate)}</td>
+                            <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
+                            <td>${l.loanScheme}</td>
+                            <td class="text-end">${inr(l.principal)}</td>
+                            <td class="text-end">${inr(l.overallInterest)}</td>
+                            <td class="text-end">${inr(l.outstandingPrincipal)}</td>
+                            <td class="text-end">${inr(l.outstandingInterest)}</td>
+                            <td class="text-end cell-strong">${inr(l.totalOutstanding)}</td>
+                            <td class="text-end">${inr(l.totalAmountPaid)}</td>
+                            <td style="display: none;">${statusBadge(l.status)}</td>
+
+                            <td>${fmtDate(l.maturityDate)}</td>
+                          </tr>`;
+                }).join('');
+
+                totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+                renderPagination(currentPage, totalPages);
+            } catch (err) {
+                showApiError(err);
+                body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">Could not load loans.</td></tr>';
+                renderPagination(0, 0);
+            }
+        }
+
+        function initials(name) {
+            return name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        function renderPagination(page, pages) {
+            const info = document.getElementById('pageInfo');
+            const controls = document.getElementById('paginationControls');
+            if (pages === 0) {
+                info.textContent = '';
+                controls.innerHTML = '';
+                return;
+            }
+            info.textContent = `Page ${page} of ${pages}`;
+
+            let html = '';
+            html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                        <button class="page-link" onclick="runSearch(${page - 1})">Prev</button></li>`;
+
+            const windowSize = 5;
+            let start = Math.max(1, page - Math.floor(windowSize / 2));
+            let end = Math.min(pages, start + windowSize - 1);
+            start = Math.max(1, end - windowSize + 1);
+
+            for (let p = start; p <= end; p++) {
+                html += `<li class="page-item ${p === page ? 'active' : ''}">
+                          <button class="page-link" onclick="runSearch(${p})">${p}</button></li>`;
+            }
+
+            html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
+                        <button class="page-link" onclick="runSearch(${page + 1})">Next</button></li>`;
+
+            controls.innerHTML = html;
+        }
+
+        /* ============================ Payment modal ============================ */
+
+        let activePaymentLoan = null;   // payment-details response
+        let activeInterestCalc = null;  // latest interest-preview / interestCalculation
+
+        async function openPaymentModal(loanId) {
+            const modalEl = document.getElementById('paymentModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+            document.getElementById('paymentLoadingState').style.display = 'block';
+            document.getElementById('paymentContent').style.display = 'none';
+            document.getElementById('payLoanNoLabel').textContent = '...';
+            document.getElementById('btnSavePayment').disabled = true;
+            document.getElementById('btnSavePayment').style.display = '';
+            document.getElementById('btnPrintPaymentReceipt').disabled = true;
+            document.getElementById('paymentReceiptSection').style.display = 'none';
+            document.getElementById('btnPaymentCancel').textContent = 'Cancel';
+            lastPaymentReceipt = null;
+            activePaymentLoan = null;
+            activeInterestCalc = null;
+
+            modal.show();
+
+            try {
+                const details = await Api.getLoanOperationsPaymentDetails(loanId);
+                activePaymentLoan = details;
+                activeInterestCalc = details.interestCalculation;
+
+                document.getElementById('payLoanNoLabel').textContent = details.loanNo;
+                document.getElementById('payCustomerName').textContent = details.customerName;
+                document.getElementById('payLoanNo').textContent = details.loanNo;
+                document.getElementById('payAadhaar').textContent = details.aadhaar || '-';
+                document.getElementById('payPan').textContent = details.pan || '-';
+                document.getElementById('payMobile').textContent = details.mobile || '-';
+                document.getElementById('payScheme').textContent = details.loanScheme;
+                document.getElementById('payProcessingFee').textContent = inr(details.processingFee);
+                document.getElementById('payPrincipal').textContent = inr(details.principal);
+                //document.getElementById('payOverallInterest').textContent = inr(details.overallInterest);
+                document.getElementById('payOutPrincipal').textContent = inr(details.outstandingPrincipal);
+                // NOTE: payOutInterest and payTotalOutstanding are intentionally NOT set
+                // from details.outstandingInterest / details.totalOutstanding here.
+                // The server now returns interestCalc-based values in those fields, so
+                // renderInterestCalc() below is the single source of truth for both panels.
+                document.getElementById('payMaturityDate').textContent = fmtDate(details.maturityDate);
+
+                document.getElementById('payDate').value = new Date().toISOString().slice(0, 10);
+                document.getElementById('payDate').disabled = false;
+                document.getElementById('payMode').disabled = false;
+                document.getElementById('payAmountReceived').value = '';
+                document.getElementById('payAmountReceived').disabled = false;
+                document.getElementById('payValidationMsg').classList.remove('show');
+
+                renderInterestCalc(activeInterestCalc);
+                recalcAllocation();
+
+                document.getElementById('paymentLoadingState').style.display = 'none';
+                document.getElementById('paymentContent').style.display = 'block';
+            } catch (err) {
+                document.getElementById('paymentLoadingState').innerHTML = `<span class="doc-error text-danger">Could not load loan details. ${err.message || ''}</span>`;
+            }
+        }
+
+        function renderInterestCalc(calc) {
+            // ---- Authoritative figures (Outstanding Interest is now itself derived
+            // from the daily-accrued calculation below, not an independent value) ----
+            // CHANGE (daily-interest fix): commented out along with the corresponding
+            // HTML rows — see notes there.
+            // document.getElementById('calcOverallInterest').textContent = inr(calc.overallInterest);
+            // document.getElementById('calcInterestPaid').textContent = inr(calc.interestPaidToDate);
+            document.getElementById('calcOutstandingInterest').textContent = inr(calc.outstandingInterest);
+            document.getElementById('calcTotalPayable').textContent = inr(calc.maxPayable);
+
+            // CHANGE (daily-interest fix): sync the left-panel "Outstanding Interest"
+            // and "Total Outstanding" to the authoritative daily-accrued figures from
+            // the interest calc (outstandingInterest = carry-forward + newly accrued;
+            // maxPayable = outstandingInterest + outstandingPrincipal). The raw DB
+            // values shown on modal open are stale — they exclude accrued interest.
+            document.getElementById('payOutInterest').textContent = inr(calc.outstandingInterest);
+            document.getElementById('payTotalOutstanding').textContent = inr(calc.maxPayable);
+
+            // ---- CHANGE (daily-interest fix): this is now the authoritative charged
+            // calculation, not an info-only reference — it's what Outstanding
+            // Interest / Max Payable above are built from. ----
+            document.getElementById('calcCurrentDate').textContent = fmtDate(calc.asOfDate);
+            document.getElementById('calcLastRefDate').textContent = fmtDate(calc.lastInterestReferenceDate);
+            document.getElementById('calcDays').textContent = calc.noOfDaysInfoOnly;
+            document.getElementById('calcDailyRate').textContent = `${(calc.dailyInterestRateInfoOnly * 100).toFixed(4)}%`;
+            document.getElementById('calcDailyAmount').textContent = inr(calc.dailyInterestAmountInfoOnly);
+            document.getElementById('calcAccrued').textContent = inr(calc.accruedInterestInfoOnly);
+        }
+
+        // Re-fetch the authoritative interest figures from the server whenever the
+        // payment date changes. CHANGE (daily-interest fix): Outstanding Interest
+        // and Max Payable now DO depend on this date too, since they're built from
+        // the daily-accrued figure (days since last payment -> asOfDate).
+        async function onPaymentDateChanged() {
+            if (!activePaymentLoan) return;
+            const asOfDate = document.getElementById('payDate').value;
+            try {
+                activeInterestCalc = await Api.getLoanOperationsInterestPreview(activePaymentLoan.loanId, asOfDate);
+                renderInterestCalc(activeInterestCalc);
+                recalcAllocation();
+            } catch (err) {
+                showApiError(err);
+            }
+        }
+
+        // Client-side mirror of the server's interest-first allocation, used ONLY
+        // for instant UI feedback as the user types an amount. SavePayment always
+        // re-computes and re-validates this on the server before writing anything.
+        function recalcAllocation() {
+            if (!activePaymentLoan || !activeInterestCalc) return;
+
+            const outstandingInterest = activeInterestCalc.outstandingInterest;
+            const outstandingPrincipal = activeInterestCalc.outstandingPrincipal;
+            const maxPayable = activeInterestCalc.maxPayable;
+            const amountReceived = parseFloat(document.getElementById('payAmountReceived').value) || 0;
+
+            const validationMsg = document.getElementById('payValidationMsg');
+            const saveBtn = document.getElementById('btnSavePayment');
+
+            if (amountReceived > maxPayable + 0.01) {
+                validationMsg.classList.add('show');
+                saveBtn.disabled = true;
+            } else {
+                validationMsg.classList.remove('show');
+                saveBtn.disabled = amountReceived <= 0;
+            }
+
+            const interestPaid = Math.min(amountReceived, outstandingInterest);
+            const remainderAfterInterest = Math.max(0, amountReceived - interestPaid);
+            const principalPaid = Math.min(remainderAfterInterest, outstandingPrincipal);
+            const remainingInterest = Math.max(0, outstandingInterest - interestPaid);
+            const remainingPrincipal = Math.max(0, outstandingPrincipal - principalPaid);
+            const balanceAfter = remainingInterest + remainingPrincipal;
+
+            document.getElementById('allocInterestPaid').textContent = inr(interestPaid);
+            document.getElementById('allocPrincipalPaid').textContent = inr(principalPaid);
+            document.getElementById('allocRemainingInterest').textContent = inr(remainingInterest);
+            document.getElementById('allocRemainingPrincipal').textContent = inr(remainingPrincipal);
+            document.getElementById('allocBalanceAfter').textContent = inr(balanceAfter);
+        }
+
+        document.getElementById('payAmountReceived').addEventListener('input', recalcAllocation);
+        document.getElementById('payDate').addEventListener('change', onPaymentDateChanged);
+
+        let lastPaymentReceipt = null;
+
+        document.getElementById('btnSavePayment').addEventListener('click', async () => {
+            if (!activePaymentLoan) return;
+            const btn = document.getElementById('btnSavePayment');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+
+            try {
+                const payload = {
+                    paymentDate: document.getElementById('payDate').value,
+                    paymentMode: document.getElementById('payMode').value,
+                    referenceNo: null,
+                    amountReceived: parseFloat(document.getElementById('payAmountReceived').value) || 0,
+                    processedByUserId: (Session.get() && Session.get().userId) || 1
+                };
+
+                // The server recomputes interest/allocation from scratch and is authoritative.
+                const response = await Api.saveLoanOperationsPayment(activePaymentLoan.loanId, payload);
+                lastPaymentReceipt = response;
+
+                showApiSuccess(`Payment of ${inr(response.amountReceived)} recorded for ${activePaymentLoan.loanNo}.`);
+
+                document.getElementById('payDate').disabled = true;
+                document.getElementById('payMode').disabled = true;
+                document.getElementById('payAmountReceived').disabled = true;
+                btn.style.display = 'none';
+                document.getElementById('btnPaymentCancel').textContent = 'Done';
+                document.getElementById('btnPrintPaymentReceipt').disabled = false;
+
+                document.getElementById('paymentReceiptNoBadge').innerHTML = '<span class="dot"></span>' + response.receiptNumber;
+                document.getElementById('paymentReceiptBox').innerHTML = `
+                          <div style="text-align:center; font-weight:700; font-size:13px;">JLMS RECEIPT</div>
+                          <div style="text-align:center; color:var(--n-500, #6b7280); margin-bottom:8px;">Loan Payment</div>
+                          <div class="receipt-divider"></div>
+                          <div class="r-row"><span>Receipt No.</span><span>${response.receiptNumber}</span></div>
+                          <div class="r-row"><span>Date</span><span>${new Date(response.transactionDate).toLocaleString('en-IN')}</span></div>
+                          <div class="r-row"><span>Loan No.</span><span>${response.loanNo}</span></div>
+                          <div class="r-row"><span>Customer</span><span>${response.customerName}</span></div>
+                          <div class="receipt-divider"></div>
+                          <div class="r-row"><span>Interest Paid</span><span>${inr(response.interestPaid)}</span></div>
+                          <div class="r-row"><span>Principal Paid</span><span>${inr(response.principalPaid)}</span></div>
+                          <div class="r-row" style="font-weight:700;"><span>Amount Received</span><span>${inr(response.amountReceived)}</span></div>
+                          <div class="receipt-divider"></div>
+                          <div class="r-row"><span>Remaining Interest</span><span>${inr(response.remainingInterest)}</span></div>
+                          <div class="r-row"><span>Remaining Principal</span><span>${inr(response.remainingPrincipal)}</span></div>
+                          <div class="r-row"><span>Mode</span><span>${response.paymentMode}</span></div>`;
+
+                downloadPaymentReceipt();
+                //document.getElementById('paymentReceiptSection').style.display = 'block';
+            } catch (err) {
+                showApiError(err);
+                btn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Payment';
+                btn.disabled = false;
+            }
+        });
+
+        // function downloadPaymentReceipt() {
+        //   if (!lastPaymentReceipt) {
+        //     showApiError(new Error('No receipt available. Please save a payment first.'));
+        //     return;
+        //   }
+        //   const r = lastPaymentReceipt;
+        //   const fileName = `Receipt-${r.receiptNumber}.pdf`;
+
+        //   const { jsPDF } = window.jspdf;
+        //   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
+
+        //   const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
+        //   let y = 20;
+
+        //   const line = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: 'right' }); y += 6; };
+        //   const divid = () => { doc.setDrawColor(180); doc.setLineDashPattern([1, 1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
 
 
-    loadSchemeFilter();
+        //   // --- ADDED COMPANY HEADER ---
+        //   doc.setFont('courier', 'bold');
+        //   doc.setFontSize(16);
+        //   doc.text('SRI SARAVANA BANKERS', lm + tw / 2, y, { align: 'center' }); y += 6;
 
-    // Set default date to today's date in the search filters
-    const today = new Date().toISOString().slice(0, 10);
-    document.getElementById('fFromDate').value = today;
-    document.getElementById('fToDate').value = today;
+        //   doc.setFont('courier', 'normal');
+        //   doc.setFontSize(10);
+        //   doc.text('3/39, Mangulam Main Road, Poosaripatti', lm + tw / 2, y, { align: 'center' }); y += 5;
+        //   doc.text('Madurai - 625122 | Ph: 9943155324', lm + tw / 2, y, { align: 'center' }); y += 6;
+        //   // ----------------------------
 
-  document.getElementById('btnSearch').addEventListener('click', () => runSearch(1));
-  //document.getElementById('btnRefresh').addEventListener('click', () => runSearch(currentPage));
-  document.getElementById('btnReset').addEventListener('click', () => {
-    ['fLoanNo', 'fCustomerName', 'fMobile', 'fAadhaar', 'fPan', 'fFromDate', 'fToDate'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('fScheme').value = '';
+        //   doc.setFont('courier', 'bold');
+        //   doc.setFontSize(12);
+        //   doc.text('LOAN PAYMENT RECEIPT', lm + tw / 2, y, { align: 'center' }); y += 4;
+        //   doc.setTextColor(30);
+        //   divid();
 
-      // Reset dates back to today's date
-      document.getElementById('fFromDate').value = today;
-      document.getElementById('fToDate').value = today;
+        //   doc.setFontSize(10);
+        //   line('Receipt No.', r.receiptNumber);
+        //   line('Date', new Date(r.receiptDate || r.transactionDate).toLocaleString('en-IN'));
+        //   line('Loan No.', r.loanNo);
+        //   line('Customer', r.customerName);
+        //   divid();
 
-    //document.getElementById('fStatus').value = 'Active';
-    runSearch(1);
-  });
-  document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
-    pageSize = parseInt(e.target.value, 10) || 10;
-    runSearch(1);
-  });
-  ['fLoanNo', 'fCustomerName', 'fMobile', 'fAadhaar', 'fPan'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(1); });
-  });
-    
+        //   line('Interest Paid', 'Rs.' + Number(r.interestPaid).toLocaleString('en-IN'));
+        //   line('Principal Paid', 'Rs.' + Number(r.principalPaid).toLocaleString('en-IN'));
+        //   doc.setFont('courier', 'bold');
+        //   line('Amount Received', 'Rs.' + Number(r.amountReceived).toLocaleString('en-IN'));
+        //   doc.setFont('courier', 'normal');
+        //   divid();
 
-  runSearch(1);
-});
-</script>
+        //   line('Remaining Interest', 'Rs.' + Number(r.remainingInterest).toLocaleString('en-IN'));
+        //   line('Remaining Principal', 'Rs.' + Number(r.remainingPrincipal).toLocaleString('en-IN'));
+        //   line('Mode', r.paymentMode);
+
+        //   doc.save(fileName);
+        // }
+
+        // document.getElementById('btnPrintPaymentReceipt').addEventListener('click', downloadPaymentReceipt);
+
+        // document.getElementById('paymentModal').addEventListener('hidden.bs.modal', () => {
+        //   runSearch(currentPage);
+        // });
+        async function downloadPaymentReceipt() {
+            if (!lastPaymentReceipt) {
+                showApiError(new Error('No receipt available. Please save a payment first.'));
+                return;
+            }
+            const r = lastPaymentReceipt;
+            const btn = document.getElementById('btnPrintPaymentReceipt');
+            const originalHtml = btn.innerHTML;
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
+                // Call the server PDF service — returns the QuestPDF A5 payment receipt
+                // generated by LoanReceiptPdfService.GeneratePaymentReceipt()
+                const receiptDto = {
+                    receiptNumber: r.receiptNumber,
+                    loanNo: r.loanNo,
+                    customerName: r.customerName,
+                    mobile: (activePaymentLoan && activePaymentLoan.mobile) || null,
+                    transactionDate: r.transactionDate,
+                    paymentMode: r.paymentMode,
+                    loanScheme: (activePaymentLoan && activePaymentLoan.loanScheme) || null,
+                    maturityDate: (activePaymentLoan && activePaymentLoan.maturityDate) || null,
+                    interestPaid: r.interestPaid,
+                    principalPaid: r.principalPaid,
+                    amountReceived: r.amountReceived,
+                    remainingInterest: r.remainingInterest,
+                    remainingPrincipal: r.remainingPrincipal
+                };
+                const blob = await Api.downloadPaymentReceiptPdf(receiptDto);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Receipt-${r.receiptNumber}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                showApiError(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+        document.getElementById('btnPrintPaymentReceipt').addEventListener('click', downloadPaymentReceipt);
+
+        document.getElementById('paymentModal').addEventListener('hidden.bs.modal', () => {
+            runSearch(currentPage);
+        });
+
+        /* ============================ Closure modal ============================ */
+
+        let activeClosureLoan = null;
+        let closureCapturedPhoto = null;
+        let closureCameraStream = null;
+
+        async function openClosureModal(loanId) {
+            const modalEl = document.getElementById('closureModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+            document.getElementById('closureLoadingState').style.display = 'block';
+            document.getElementById('closureContent').style.display = 'none';
+            document.getElementById('closeLoanNoLabel').textContent = '...';
+            document.getElementById('btnCloseLoan').disabled = true;
+            document.getElementById('btnCloseLoan').style.display = '';
+            document.getElementById('btnPrintClosureReceipt').disabled = true;
+            document.getElementById('closureReceiptSection').style.display = 'none';
+            document.getElementById('btnClosureCancel').textContent = 'Cancel';
+            lastClosureReceipt = null;
+            activeClosureLoan = null;
+
+            // Reset closure photo
+            closureCapturedPhoto = null;
+            document.getElementById('closurePhotoFile').value = '';
+            document.getElementById('closurePhotoPreview').innerHTML = '<i class="bi bi-person-circle"></i>';
+            document.getElementById('closurePhotoMsg').classList.remove('show');
+
+            modal.show();
+
+            try {
+                const details = await Api.getLoanOperationsClosureDetails(loanId);
+                activeClosureLoan = details;
+
+                document.getElementById('closeLoanNoLabel').textContent = details.loanNo;
+                document.getElementById('closeCustomerName').textContent = details.customerName;
+                document.getElementById('closeLoanNo').textContent = details.loanNo;
+                document.getElementById('closeScheme').textContent = details.loanScheme;
+                document.getElementById('closeProcessingFee').textContent = inr(details.processingFee);
+                document.getElementById('closeTotalPaid').textContent = inr(details.totalAmountPaid);
+                document.getElementById('closeMobile').textContent = details.mobile || '-';
+
+                document.getElementById('closeOutPrincipal').textContent = inr(details.outstandingPrincipal);
+                document.getElementById('closeOutInterest').textContent = inr(details.outstandingInterest);
+                document.getElementById('closeOtherCharges').textContent = inr(details.otherCharges);
+                document.getElementById('closeGrandTotal').textContent = inr(details.grandTotal);
+
+                if (details.isClosable) {
+                    document.getElementById('btnCloseLoan').disabled = false;
+                    document.getElementById('closeValidationMsg').classList.remove('show');
+                } else {
+                    document.getElementById('btnCloseLoan').disabled = true;
+                    document.getElementById('closeValidationMsg').classList.add('show');
+                }
+
+                document.getElementById('closureLoadingState').style.display = 'none';
+                document.getElementById('closureContent').style.display = 'block';
+            } catch (err) {
+                document.getElementById('closureLoadingState').innerHTML = `<span class="doc-error text-danger">Could not load loan details. ${err.message || ''}</span>`;
+            }
+        }
+
+        let lastClosureReceipt = null;
+
+        // Closure camera — open
+        document.getElementById('btnCaptureClosurePhoto').addEventListener('click', async () => {
+            const errEl = document.getElementById('closureCameraErrorMsg');
+            errEl.classList.remove('show');
+            errEl.textContent = '';
+
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    errEl.textContent = 'Camera is not supported in this browser.';
+                    errEl.classList.add('show');
+                    return;
+                }
+                closureCameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('closureCameraVideo').srcObject = closureCameraStream;
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).show();
+            } catch (err) {
+                errEl.textContent = err && err.name === 'NotAllowedError'
+                    ? 'Camera access was denied. Please allow camera permission and try again.'
+                    : 'Unable to access camera.';
+                errEl.classList.add('show');
+            }
+        })
+
+        // Closure camera — capture
+        document.getElementById('btnTakeClosurePhoto').addEventListener('click', () => {
+            const video = document.getElementById('closureCameraVideo');
+            const canvas = document.getElementById('closureCameraCanvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+                if (!blob) {
+                    const errEl = document.getElementById('closureCameraErrorMsg');
+                    errEl.textContent = 'Unable to capture photo. Please try again.';
+                    errEl.classList.add('show');
+                    return;
+                }
+                closureCapturedPhoto = new File([blob], 'ClosurePhoto.jpg', { type: 'image/jpeg' });
+                document.getElementById('closurePhotoFile').value = '';
+                document.getElementById('closurePhotoPreview').innerHTML =
+                    `<img src="${URL.createObjectURL(blob)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+            }, 'image/jpeg');
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).hide();
+            if (closureCameraStream) { closureCameraStream.getTracks().forEach(t => t.stop()); closureCameraStream = null; }
+        });
+        // Closure camera — stop stream when modal dismissed without capturing
+        document.getElementById('closureCameraModal').addEventListener('hidden.bs.modal', () => {
+            if (closureCameraStream) { closureCameraStream.getTracks().forEach(t => t.stop()); closureCameraStream = null; }
+        });
+
+        // Closure photo — file upload
+        document.getElementById('btnUploadClosurePhoto').addEventListener('click', () => {
+            document.getElementById('closurePhotoFile').click();
+        });
+        document.getElementById('closurePhotoFile').addEventListener('change', function () {
+            const file = this.files[0]; if (!file) return;
+            closureCapturedPhoto = null;
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('closurePhotoPreview').innerHTML =
+                    `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+            };
+            reader.readAsDataURL(file);
+        });
+        document.getElementById('btnCloseLoan').addEventListener('click', () => {
+            if (!activeClosureLoan) return;
+
+            // Validate photo — require either a captured or uploaded file
+            const uploadedFile = document.getElementById('closurePhotoFile').files[0];
+            const photoFile = uploadedFile || closureCapturedPhoto;
+            if (!photoFile) {
+                document.getElementById('closurePhotoMsg').classList.add('show');
+                return;
+            }
+            document.getElementById('closurePhotoMsg').classList.remove('show');
+
+            // Show styled confirm modal instead of window.confirm
+            document.getElementById('confirmClosureLoanNo').textContent = activeClosureLoan.loanNo;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmClosureModal')).show();
+        });
+
+        document.getElementById('btnConfirmClosureProceed').addEventListener('click', () => {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmClosureModal')).hide();
+
+            if (!activeClosureLoan) return;
+            const uploadedFile = document.getElementById('closurePhotoFile').files[0];
+            const photoFile = uploadedFile || closureCapturedPhoto;
+            const loanNo = activeClosureLoan.loanNo;
+
+            const btn = document.getElementById('btnCloseLoan');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Closing...';
+
+            const formData = new FormData();
+            formData.append('PaymentMode', 'Cash');
+            formData.append('ProcessedByUserId', String((Session.get() && Session.get().userId) || 1));
+            formData.append('ClosePhoto', photoFile);
+
+            Api.closeLoanOperationsWithPhoto(activeClosureLoan.loanId, formData)
+                .then((response) => {
+                    lastClosureReceipt = response;
+                    showApiSuccess(`Loan ${loanNo} has been closed successfully.`);
+
+                    btn.style.display = 'none';
+                    document.getElementById('btnClosureCancel').textContent = 'Done';
+                    document.getElementById('btnPrintClosureReceipt').disabled = false;
+
+                    document.getElementById('closureReceiptNoBadge').innerHTML = '<span class="dot"></span>' + response.receiptNumber;
+                    document.getElementById('closureReceiptBox').innerHTML = `
+                            <div style="text-align:center; font-weight:700; font-size:13px;">JLMS RECEIPT</div>
+                            <div style="text-align:center; color:var(--n-500, #6b7280); margin-bottom:8px;">Loan Closure</div>
+                            <div class="receipt-divider"></div>
+                            <div class="r-row"><span>Receipt No.</span><span>${response.receiptNumber}</span></div>
+                            <div class="r-row"><span>Date</span><span>${new Date(response.transactionDate).toLocaleString('en-IN')}</span></div>
+                            <div class="r-row"><span>Loan No.</span><span>${response.loanNo}</span></div>
+                            <div class="r-row"><span>Customer</span><span>${response.customerName}</span></div>
+                            <div class="r-row"><span>Loan Scheme</span><span>${response.loanScheme}</span></div>
+                            <div class="receipt-divider"></div>
+                            <div class="r-row"><span>Outstanding Principal</span><span>${inr(response.outstandingPrincipal)}</span></div>
+                            <div class="r-row"><span>Outstanding Interest</span><span>${inr(response.outstandingInterest)}</span></div>
+                            <div class="r-row"><span>Other Charges</span><span>${inr(response.otherCharges)}</span></div>
+                            <div class="receipt-divider"></div>
+                            <div class="r-row" style="font-weight:700;"><span>Grand Total Paid</span><span>${inr(response.grandTotal)}</span></div>
+                            <div class="r-row"><span>Status</span><span>Closed</span></div>`;
+
+                    downloadClosureReceipt();
+                })
+                .catch(err => {
+                    showApiError(err);
+                    btn.innerHTML = '<i class="bi bi-lock-fill"></i> Close Loan';
+                    btn.disabled = false;
+                });
+        });
+
+        // function downloadClosureReceipt() {
+        //   if (!lastClosureReceipt) {
+        //     showApiError(new Error('No receipt available. Please close a loan first.'));
+        //     return;
+        //   }
+        //   const r = lastClosureReceipt;
+        //   const fileName = `Closure-Receipt-${r.receiptNumber}.pdf`;
+
+        //   const { jsPDF } = window.jspdf;
+        //   const doc = new jsPDF({ unit: 'mm', format: 'a5', orientation: 'portrait' });
+
+        //   const lm = 20, rm = 20, tw = doc.internal.pageSize.getWidth() - lm - rm;
+        //   let y = 20;
+
+        //   const line = (a, b) => { doc.text(a, lm, y); doc.text(b, lm + tw, y, { align: 'right' }); y += 6; };
+        //   const divid = () => { doc.setDrawColor(180); doc.setLineDashPattern([1, 1], 0); doc.line(lm, y, lm + tw, y); doc.setLineDashPattern([], 0); y += 5; };
+
+        //   // --- ADDED COMPANY HEADER ---
+        //   doc.setFont('courier', 'bold');
+        //   doc.setFontSize(16);
+        //   doc.text('SRI SARAVANA BANKERS', lm + tw / 2, y, { align: 'center' }); y += 6;
+
+        //   doc.setFont('courier', 'normal');
+        //   doc.setFontSize(10);
+        //   doc.text('3/39, Mangulam Main Road, Poosaripatti', lm + tw / 2, y, { align: 'center' }); y += 5;
+        //   doc.text('Madurai - 625122 | Ph: 9943155324', lm + tw / 2, y, { align: 'center' }); y += 6;
+        //   // ----------------------------
+
+        //   doc.setFont('courier', 'bold');
+        //   doc.setFontSize(12);
+        //   doc.text('LOAN CLOSURE RECEIPT', lm + tw / 2, y, { align: 'center' }); y += 4;
+        //   doc.setTextColor(30);
+        //   divid();
+
+        //   doc.setFontSize(10);
+        //   line('Receipt No.', r.receiptNumber);
+        //   line('Date', new Date(r.receiptDate || r.transactionDate).toLocaleString('en-IN'));
+        //   line('Loan No.', r.loanNo);
+        //   line('Customer', r.customerName);
+        //   line('Loan Scheme', r.loanScheme);
+        //   divid();
+
+        //   line('Outstanding Principal', 'Rs.' + Number(r.outstandingPrincipal).toLocaleString('en-IN'));
+        //   line('Outstanding Interest', 'Rs.' + Number(r.outstandingInterest).toLocaleString('en-IN'));
+        //   line('Other Charges', 'Rs.' + Number(r.otherCharges).toLocaleString('en-IN'));
+        //   divid();
+
+        //   doc.setFont('courier', 'bold');
+        //   line('Grand Total Paid', 'Rs.' + Number(r.grandTotal).toLocaleString('en-IN'));
+        //   doc.setFont('courier', 'normal');
+        //   line('Status', 'Closed');
+
+        //   doc.save(fileName);
+        // }
+        async function downloadClosureReceipt() {
+            if (!lastClosureReceipt) {
+                showApiError(new Error('No receipt available. Please close a loan first.'));
+                return;
+            }
+            const r = lastClosureReceipt;
+            const btn = document.getElementById('btnPrintClosureReceipt');
+            const originalHtml = btn.innerHTML;
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating...';
+                // Call the server PDF service — returns the QuestPDF A5 closure receipt
+                // generated by LoanReceiptPdfService.GenerateClosureReceipt()
+                const receiptDto = {
+                    receiptNumber: r.receiptNumber,
+                    loanNo: r.loanNo,
+                    customerName: r.customerName,
+                    mobile: (activeClosureLoan && activeClosureLoan.mobile) || null,
+                    loanScheme: r.loanScheme,
+                    transactionDate: r.transactionDate,
+                    outstandingPrincipal: r.outstandingPrincipal,
+                    outstandingInterest: r.outstandingInterest,
+                    otherCharges: r.otherCharges,
+                    grandTotal: r.grandTotal
+                };
+                const blob = await Api.downloadClosureReceiptPdf(receiptDto);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Closure-Receipt-${r.receiptNumber}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                showApiError(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+        document.getElementById('btnPrintClosureReceipt').addEventListener('click', downloadClosureReceipt);
+
+        document.getElementById('closureModal').addEventListener('hidden.bs.modal', () => {
+            runSearch(currentPage);
+        });
+
+        /* ============================= Ledger modal ============================= */
+
+        let activeLedgerLoanId = null;
+        let ledgerPageSize = 10;
+        let ledgerCurrentPage = 1;
+        let ledgerTotalPages = 1;
+
+        async function openLedgerModal(loanId) {
+            const modalEl = document.getElementById('ledgerModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+            document.getElementById('ledgerLoadingState').style.display = 'block';
+            document.getElementById('ledgerContent').style.display = 'none';
+            document.getElementById('ledgerLoanNoLabel').textContent = '...';
+
+            activeLedgerLoanId = loanId;
+            ledgerCurrentPage = 1;
+            ledgerPageSize = parseInt(document.getElementById('ledgerPageSizeSelect').value, 10) || 10;
+
+            modal.show();
+            await loadLedgerPage(1);
+        }
+
+        async function loadLedgerPage(page) {
+            ledgerCurrentPage = page;
+            const body = document.getElementById('ledgerBody');
+
+            try {
+                const result = await Api.getLoanOperationsLedger(activeLedgerLoanId, ledgerCurrentPage, ledgerPageSize);
+
+                document.getElementById('ledgerLoanNoLabel').textContent = result.loanNo;
+                document.getElementById('ledgerCustomer').textContent = result.customerName;
+                document.getElementById('ledgerScheme').textContent = result.loanScheme;
+                document.getElementById('ledgerProcessingFee').textContent = inr(result.processingFee);
+                document.getElementById('ledgerLoanDate').textContent = fmtDate(result.loanDate);
+                document.getElementById('ledgerMaturityDate').textContent = fmtDate(result.maturityDate);
+                document.getElementById('ledgerPrincipal').textContent = inr(result.principal);
+                // CHANGE (daily-interest): Overall Interest removed from ledger header.
+                // document.getElementById('ledgerOverallInterest') no longer exists.
+                document.getElementById('ledgerRate').textContent = `${result.annualInterestRate}% p.a.`;
+                document.getElementById('ledgerStatus').innerHTML = statusBadge(result.status);
+
+                body.innerHTML = result.items.map((e, idx) => {
+                    // const isDisbursement = idx === 0;
+                    // const receiptCell = isDisbursement
+                    // Rows 0-2 are always: Disbursement, Processing Fee Debited, Processing
+                    // Fee Collected (see LoanOperationsService.GetLedgerAsync) — none of
+                    // these map to a real collectable transaction, so no receipt to print.
+                    const hideDownload = !e.canDownloadReceipt;
+                    const receiptCell = hideDownload
+                        ? `<td class="text-center"></td>`
+                        : `<td class="text-center">
+                                 <button class="btn-icon-jlms" title="Download Receipt"
+                                   onclick="downloadLedgerReceipt(this)"
+                                   data-transaction-id="${e.transactionId}"
+                                   data-date="${e.date || ''}"
+                                   data-txn-type="${(e.transactionType || '').replace(/"/g, '&quot;')}"
+                                   data-description="${(e.description || '').replace(/"/g, '&quot;')}"
+                                   data-receipt-no="${e.receiptNumber || ''}"
+                                   data-user="${(e.userName || '').replace(/"/g, '&quot;')}"
+                                   data-debit="${e.debit || 0}"
+                                   data-credit="${e.credit || 0}"
+                                   data-interest-paid="${e.interestPaid || 0}"
+                                   data-principal-paid="${e.principalPaid || 0}"
+                                   data-amount-received="${e.credit || e.debit || 0}"
+                                   data-remaining-interest="${e.interestBalance || 0}"
+                                   data-remaining-principal="${e.principalBalance || 0}"
+                                   data-payment-mode="${(e.paymentMode || '').replace(/"/g, '&quot;')}"
+                                   data-running-balance="${e.runningBalance || 0}">
+                                   <i class="bi bi-download"></i>
+                                 </button>
+                               </td>`;
+                    return `
+                          <tr>
+                            <td>${fmtDate(e.date)}</td>
+                            <td>${e.transactionType}</td>
+                            <td>${e.description}</td>
+                            <td class="text-end">${e.debit ? inr(e.debit) : '<span class="text-muted-jlms">—</span>'}</td>
+                            <td class="text-end">${e.credit ? inr(e.credit) : '<span class="text-muted-jlms">—</span>'}</td>
+                            <td class="text-end">${inr(e.principalBalance)}</td>
+                            <td class="text-end">${inr(e.interestBalance)}</td>
+                            <td class="text-end cell-strong">${inr(e.runningBalance)}</td>
+                            <td style="display: none;">${e.receiptNumber || '-'}</td>
+                            <td style="display: none;">${e.userName || '-'}</td>
+                            ${receiptCell}
+                          </tr>`;
+                }).join('');
+
+                document.getElementById('ledgerTotalInterest').textContent = inr(result.totalInterestCollected);
+                document.getElementById('ledgerTotalPrincipal').textContent = inr(result.totalPrincipalCollected);
+                document.getElementById('ledgerCurrentOutstanding').textContent = inr(result.currentOutstanding);
+
+                ledgerTotalPages = Math.max(1, Math.ceil(result.totalCount / ledgerPageSize));
+                renderLedgerPagination(ledgerCurrentPage, ledgerTotalPages);
+
+                document.getElementById('ledgerLoadingState').style.display = 'none';
+                document.getElementById('ledgerContent').style.display = 'block';
+            } catch (err) {
+                document.getElementById('ledgerLoadingState').style.display = 'block';
+                document.getElementById('ledgerContent').style.display = 'none';
+                document.getElementById('ledgerLoadingState').innerHTML = `<span class="doc-error text-danger">Could not load ledger. ${err.message || ''}</span>`;
+            }
+        }
+
+        async function downloadLedgerReceipt(btn) {
+            const d = btn.dataset;
+            const receiptNo = d.receiptNo || 'receipt';
+            const loanNo = document.getElementById('ledgerLoanNoLabel').textContent || '';
+            const transactionId = parseInt(d.transactionId, 10);
+            const originalHtml = btn.innerHTML;
+            if (!transactionId) {
+                showApiError(new Error('This ledger row has no transaction to generate a receipt for.'));
+                return;
+            }
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+                // Call the server PDF service — looks up the transaction and returns the
+                // same QuestPDF A5 payment receipt generated by
+                // LoanReceiptPdfService.GeneratePaymentReceipt()
+                const blob = await Api.downloadTransactionReceiptPdf(transactionId);
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Receipt-${receiptNo}-${loanNo}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                showApiError(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        function renderLedgerPagination(page, pages) {
+            const info = document.getElementById('ledgerPageInfo');
+            const controls = document.getElementById('ledgerPaginationControls');
+            if (pages === 0) {
+                info.textContent = '';
+                controls.innerHTML = '';
+                return;
+            }
+            info.textContent = `Page ${page} of ${pages}`;
+
+            let html = '';
+            html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                        <button class="page-link" onclick="loadLedgerPage(${page - 1})">Prev</button></li>`;
+
+            const windowSize = 5;
+            let start = Math.max(1, page - Math.floor(windowSize / 2));
+            let end = Math.min(pages, start + windowSize - 1);
+            start = Math.max(1, end - windowSize + 1);
+
+            for (let p = start; p <= end; p++) {
+                html += `<li class="page-item ${p === page ? 'active' : ''}">
+                          <button class="page-link" onclick="loadLedgerPage(${p})">${p}</button></li>`;
+            }
+
+            html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
+                        <button class="page-link" onclick="loadLedgerPage(${page + 1})">Next</button></li>`;
+
+            controls.innerHTML = html;
+        }
+
+        document.getElementById('ledgerPageSizeSelect').addEventListener('change', (e) => {
+            ledgerPageSize = parseInt(e.target.value, 10) || 10;
+            loadLedgerPage(1);
+        });
+
+        // document.getElementById('btnExportLedgerPdf').addEventListener('click', () => {
+        //   // TODO: hook up to a real export endpoint, e.g. Api.exportLedgerPdf(loanId)
+        //   showApiSuccess('Ledger export started. The PDF will download shortly.');
+        // });
+
+        // document.getElementById('btnPrintLedger').addEventListener('click', () => {
+        //   window.print();
+        // });
+
+        /* ============================ Page bootstrap ============================ */
+
+        document.addEventListener('DOMContentLoaded', () => {
+            Session.requireLogin();
+
+            async function loadSchemeFilter() {
+                try {
+                    const schemes = await Api.getLoanSchemes(true);
+                    const sel = document.getElementById('fScheme');
+                    schemes.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.schemeName;
+                        opt.textContent = s.schemeName;
+                        sel.appendChild(opt);
+                    });
+                } catch (err) {
+                    console.warn('Could not load loan schemes for filter:', err.message);
+                }
+            }
+
+
+            loadSchemeFilter();
+
+            // Set default date to today's date in the search filters
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById('fFromDate').value = today;
+            document.getElementById('fToDate').value = today;
+
+            document.getElementById('btnSearch').addEventListener('click', () => runSearch(1));
+            //document.getElementById('btnRefresh').addEventListener('click', () => runSearch(currentPage));
+            document.getElementById('btnReset').addEventListener('click', () => {
+                ['fLoanNo', 'fCustomerName', 'fMobile', 'fAadhaar', 'fPan', 'fFromDate', 'fToDate'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('fScheme').value = '';
+
+                // Reset dates back to today's date
+                document.getElementById('fFromDate').value = today;
+                document.getElementById('fToDate').value = today;
+
+                //document.getElementById('fStatus').value = 'Active';
+                runSearch(1);
+            });
+            document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+                pageSize = parseInt(e.target.value, 10) || 10;
+                runSearch(1);
+            });
+            ['fLoanNo', 'fCustomerName', 'fMobile', 'fAadhaar', 'fPan'].forEach(id => {
+                document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(1); });
+            });
+
+
+            runSearch(1);
+        });
+    </script>
 </body>
 </html>
