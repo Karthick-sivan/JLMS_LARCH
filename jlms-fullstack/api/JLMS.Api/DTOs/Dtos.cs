@@ -87,7 +87,7 @@ public record AppraisalResultDto(
 // skips the RequestedLoanAmount > EligibleAmount check. Defaults to false so existing
 // callers that don't send this field keep the old, validated behavior.
 public record NewLoanRequestDto(
-    int CustomerId, int LoanSchemeId, List<JewelItemInputDto> JewelItems,
+    int CustomerId, int LoanSchemeId, List<JewelItemInputDto> JewelItems,decimal ProcessingFee,
     decimal RequestedLoanAmount, string? Remarks, bool AllowExceedEligible = false
 );
 

@@ -416,7 +416,7 @@ public class LoansController : ControllerBase
                 item.GrossWeightGrams, item.StoneWeightGrams, purity,
                 goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K);
 
-            var lineMarketValue = marketValuePerUnit * item.Quantity;
+            var lineMarketValue = marketValuePerUnit;
             totalMarketValue += lineMarketValue;
 
             jewelItemEntities.Add(new JewelItem
@@ -425,7 +425,7 @@ public class LoansController : ControllerBase
                 Quantity = item.Quantity,
                 GrossWeightGrams = item.GrossWeightGrams,
                 StoneWeightGrams = item.StoneWeightGrams,
-                NetWeightGrams = netWeight * item.Quantity,
+                NetWeightGrams = netWeight,
                 Purity = purity,
                 MarketValue = lineMarketValue,
                 CreatedAt = DateTime.UtcNow
@@ -450,11 +450,11 @@ public class LoansController : ControllerBase
         if (branch == null) return BadRequest("Branch not found.");
 
         var sequence = await _db.Loans.CountAsync() + 1;
-        var loanNumber = _calc.GenerateLoanNumber(sequence, branch.BranchCode);
+        var loanNumber = _calc.GenerateLoanNumber(sequence);
         while (await _db.Loans.AnyAsync(l => l.LoanNumber == loanNumber))
         {
             sequence++;
-            loanNumber = _calc.GenerateLoanNumber(sequence, branch.BranchCode);
+            loanNumber = _calc.GenerateLoanNumber(sequence);
         }
         // Rule 4: Overall Interest = Principal x Interest%, fixed once at creation.
         // Outstanding Interest starts EQUAL to Overall Interest — not zero — so the
@@ -473,7 +473,7 @@ public class LoansController : ControllerBase
             MarketValue = totalMarketValue,
             EligibleAmount = eligibleAmount,
             LoanAmount = request.RequestedLoanAmount,
-            ProcessingFee = scheme.ProcessingFee,
+            ProcessingFee = request.ProcessingFee,
             OverallInterest = overallInterest,
             OutstandingPrincipal = request.RequestedLoanAmount,
             OutstandingInterest = overallInterest,

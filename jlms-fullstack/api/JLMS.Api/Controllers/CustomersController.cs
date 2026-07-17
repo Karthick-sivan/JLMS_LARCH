@@ -167,12 +167,12 @@ public class CustomersController : ControllerBase
         if (branch == null) return BadRequest("Branch not found.");
 
         var nextSeq = await _db.Customers.CountAsync() + 1;
-        var code = $"{branch.BranchCode}-CUS-{nextSeq:D6}";
+        var code = $"JLCUS-{nextSeq:D6}";
 
         while (await _db.Customers.AnyAsync(c => c.CustomerCode == code))
         {
             nextSeq++;
-            code = $"{branch.BranchCode}-CUS-{nextSeq:D6}";
+            code = $"JLCUS-{nextSeq:D6}";
         }
 
         // Create upload folders if they don't exist

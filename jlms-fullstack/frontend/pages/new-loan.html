@@ -411,6 +411,10 @@
                 <label class="field-label">Loan Scheme<span class="req">*</span></label>
                 <select class="form-select-jlms" id="schemeSelect"></select>
               </div>
+              <div class="col-md-6">
+  <label class="field-label">Processing Fee<span class="req">*</span></label>
+  <input type="number" class="form-control-jlms" id="processingFeeInput" placeholder="0" step="any" min="0">
+</div>
               <div class="col-md-12">
                 <label class="field-label">Remarks <span class="opt">optional</span></label>
                 <textarea class="form-control-jlms" id="loanRemarks" rows="2" placeholder="Internal notes"></textarea>
@@ -453,7 +457,7 @@
                 <div class="summary-row"><span class="label">Total Weight</span><span class="value" id="sumTotalWeight">0.000 g</span></div>
                 <div class="summary-row"><span class="label">Gold Rate (per gram)</span><span class="value" id="sumGoldRate">—</span></div>
                 <div class="summary-row"><span class="label">Total Market Value</span><span class="value" id="sumMarketValue">₹0</span></div>
-                <div class="summary-row"><span class="label">Scheme Max LTV</span><span class="value" id="sumLtv">—</span></div>
+                <div class="summary-row"><span class="label">Scheme Max LTV(Loan Limit %)</span><span class="value" id="sumLtv">—</span></div>
                 <div class="summary-row"><span class="label">Processing Fee Amount</span><span class="value" id="sumProcessingFee">₹0</span></div>
                 <div class="summary-row total"><span class="label">Eligible Amount</span><span class="value" id="sumEligible">₹0</span></div>
               </div>
@@ -975,7 +979,7 @@ function applySchemeToSummary() {
 
   document.getElementById('sumScheme').textContent = scheme.schemeName;
   document.getElementById('sumLtv').textContent = scheme.maxLtvPercent + '%';
-  document.getElementById('sumProcessingFee').textContent = '₹' + Number(scheme.processingFee).toLocaleString('en-IN');
+  // document.getElementById('sumProcessingFee').textContent = '₹' + Number(scheme.processingFee).toLocaleString('en-IN');
 
   if (lastAppraisalResult) {
     const eligible = Math.round((lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100)) * 100) / 100;
@@ -1012,13 +1016,18 @@ async function calculateValuation() {
     return null;
   }
 }
-
+function updateProcessingFeeSummary() {
+  const val = parseFloat(document.getElementById('processingFeeInput').value) || 0;
+  document.getElementById('sumProcessingFee').textContent = '₹' + val.toLocaleString('en-IN');
+}
 function resetFormForNewLoan() {
   // Customer
   selectedCustomer = null;
   document.getElementById('customerSearchInput').value = '';
   document.getElementById('customerSearchResults').style.display = 'none';
   document.getElementById('selectedCustomerCard').style.display = 'none';
+  document.getElementById('processingFeeInput').value = '';
+document.getElementById('sumProcessingFee').textContent = '₹0';
   const photoBox = document.getElementById('customerPhotoBox');
   photoBox.innerHTML = '<div class="customer-photo-placeholder" id="customerPhotoPlaceholder"><i class="bi bi-person-circle"></i>No customer selected</div>';
   photoBox.classList.remove('has-photo');
@@ -1069,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btnStartCamera').addEventListener('click', startWebcam);
   document.getElementById('btnCapturePhoto').addEventListener('click', capturePhoto);
   document.getElementById('btnRetakePhoto').addEventListener('click', retakePhoto);
-
+document.getElementById('processingFeeInput').addEventListener('input', updateProcessingFeeSummary);
   document.getElementById('btnBrowseCustomers').addEventListener('click', openCustomerListModal);
     document.getElementById('customerListFilter').addEventListener('input', (e) => {
         const q = e.target.value.trim().toLowerCase();
@@ -1149,6 +1158,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const allowExceedEligible = document.getElementById('chkAllowExceed').checked;
 
+      const processingFee = parseFloat(document.getElementById('processingFeeInput').value);
+    if (isNaN(processingFee) || processingFee < 0) {
+      showApiError(new Error('Please enter a valid processing fee.'));
+      return;
+    }
     // Client-side pre-check against the last calculated eligible amount, purely to save a round trip.
     if (!allowExceedEligible) {
       const eligibleText = document.getElementById('sumEligible').textContent.replace(/[₹,]/g, '');
@@ -1176,6 +1190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loanSchemeId: schemeId,
         jewelItems: items,
         requestedLoanAmount: requestedAmount,
+          processingFee: processingFee,   
         remarks: document.getElementById('loanRemarks').value.trim() || null,
         allowExceedEligible: allowExceedEligible
       });
