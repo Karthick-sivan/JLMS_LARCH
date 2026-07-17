@@ -31,7 +31,7 @@ public class LoanReceiptPdfService
             .Column(head =>
             {
                 head.Item().AlignCenter().Text("Sri Masangaruppar Thunai").FontSize(fontSize).Italic();
-                head.Item().AlignCenter().Text("SRI SARAVANA BANKERS").FontSize(fontSize + 6).Bold().FontColor("#7a1f2b");
+                head.Item().AlignCenter().Text("SRI MEENAKSHI BANKERS").FontSize(fontSize + 6).Bold().FontColor("#7a1f2b");
                 head.Item().AlignCenter().Text("Government Approved | PBL. No. 01/2021-2022, Dt: 16.07.2021").FontSize(fontSize - 0.5f);
                 head.Item().AlignCenter().Text("3/39, Mangulam Main Road, Poosaripatti, Madurai - 625122").FontSize(fontSize - 0.5f);
                 head.Item().AlignCenter().Text("Ph: 9943155324").FontSize(fontSize - 0.5f);
@@ -43,7 +43,7 @@ public class LoanReceiptPdfService
     /// rightLabel examples: "For Sri Saravana Bankers", "Authorized Signatory - Sri Saravana Bankers"
     /// </summary>
     private static void RenderSignatureRow(ColumnDescriptor col, float paddingTop = 24,
-        string rightLabel = "For Sri Saravana Bankers", float fontSize = 7.5f)
+        string rightLabel = "For Sri Meenakshi Bankers", float fontSize = 7.5f)
     {
         col.Item().PaddingTop(paddingTop).Row(row =>
         {
@@ -247,7 +247,7 @@ public class LoanReceiptPdfService
                     col.Item().Border(1).BorderColor(Colors.Grey.Darken1).Padding(12).Column(head =>
                     {
                         head.Item().AlignCenter().Text("Sri Masangaruppar Thunai").FontSize(9).Italic();
-                        head.Item().AlignCenter().Text("SRI SARAVANA BANKERS").FontSize(22).Bold().FontColor("#7a1f2b");
+                        head.Item().AlignCenter().Text("SRI MEENAKSHI BANKERS").FontSize(22).Bold().FontColor("#7a1f2b");
                         head.Item().AlignCenter().Text("Government Approved | PBL. No. 01/2021-2022, Dt: 16.07.2021").FontSize(9).FontColor(Colors.Blue.Darken2);
                         head.Item().AlignCenter().Text("3/39, Mangulam Main Road, Poosaripatti, Madurai - 625122 | Ph: 9943155324").FontSize(8.5f);
                     });
@@ -357,7 +357,7 @@ public class LoanReceiptPdfService
                 page.Footer().Column(foot =>
                 {
                     // ---- Signatures ----
-                    RenderSignatureRow(foot, paddingTop: 20, rightLabel: "For Sri Saravana Bankers", fontSize: 8);
+                    RenderSignatureRow(foot, paddingTop: 20, rightLabel: "For Sri Meenakshi Bankers", fontSize: 8);
 
                     // ---- Footer terms ----
                     RenderAuctionFooter(foot, fontSize: 7.5f);
@@ -446,7 +446,7 @@ public class LoanReceiptPdfService
                 // ---- Signatures + footer pinned to page bottom via page.Footer() ----
                 page.Footer().Column(foot =>
                 {
-                    RenderSignatureRow(foot, paddingTop: 16, rightLabel: "For Sri Saravana Bankers");
+                    RenderSignatureRow(foot, paddingTop: 16, rightLabel: "For Sri Meenakshi Bankers");
                     RenderAuctionFooter(foot);
                 });
             });
@@ -528,7 +528,7 @@ public class LoanReceiptPdfService
                     });
 
                     // ---- Signatures ----
-                    RenderSignatureRow(foot, paddingTop: 50, rightLabel: "Authorized Signatory - Sri Saravana Bankers");
+                    RenderSignatureRow(foot, paddingTop: 50, rightLabel: "Authorized Signatory - Sri Meenakshi Bankers");
 
                         // ---- Closure footer ----
                         foot.Item().PaddingTop(10).Text(
