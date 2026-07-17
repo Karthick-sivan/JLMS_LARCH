@@ -119,6 +119,20 @@
 
 <script src="js/api-client.js"></script>
 <script>
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const branches = await Api.getBranches();
+    const branchSelect = document.getElementById('branchSelect');
+    if (branchSelect && branches && branches.length > 0) {
+      branchSelect.innerHTML =
+        `<option value="" disabled selected>-- Select Branch --</option>` +
+        branches.map(b => `<option value="${b.branchId}">${b.branchName} (${b.branchCode})</option>`).join('');
+    }
+  } catch (err) {
+    console.error('Failed to load branches:', err);
+  }
+});
+
 function togglePw() {
   const input = document.getElementById('passwordInput');
   const icon = document.getElementById('pwToggleIcon');

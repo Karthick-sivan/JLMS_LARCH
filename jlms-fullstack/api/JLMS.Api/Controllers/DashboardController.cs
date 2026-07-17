@@ -35,7 +35,7 @@ public class DashboardController : ControllerBase
         var overdueLoans = await _db.Loans
             .CountAsync(l => l.Status == "Active" && l.MaturityDate != null && l.MaturityDate < today);
 
-        var auctionEligible = await _db.Auctions.CountAsync(a => a.Status == "Eligible" || a.Status == "NoticeSent");
+        var auctionEligible = await _db.Auctions.CountAsync(a => (a.Status == "Eligible" || a.Status == "NoticeSent") && _db.Loans.Any(l => l.LoanId == a.LoanId));
 
         var renewalsThisMonth = await _db.LoanTransactions
             .CountAsync(t => t.TransactionType == "Renewal" && t.TransactionDate >= monthStart);

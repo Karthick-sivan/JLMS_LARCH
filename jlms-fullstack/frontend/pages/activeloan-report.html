@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -254,8 +254,16 @@ async function loadDropdowns() {
   } catch {}
   try {
     const branches = await Api.getBranches();
-    el("fBranch").innerHTML = `<option value="">All Branches</option>` +
-      branches.map(b => `<option value="${b.branchId}">${b.branchName}</option>`).join("");
+    const user = Session.get();
+    // All users are scoped to their branch — lock the dropdown for everyone
+    const userBranch = user && branches.find(b => b.branchId === user.branchId);
+    if (userBranch) {
+      el("fBranch").innerHTML = `<option value="${userBranch.branchId}">${userBranch.branchName}</option>`;
+      el("fBranch").disabled = true;
+    } else {
+      el("fBranch").innerHTML = `<option value="">All Branches</option>` +
+        branches.map(b => `<option value="${b.branchId}">${b.branchName}</option>`).join("");
+    }
   } catch { /* branches endpoint not available — filter silently disabled */ }
 }
 

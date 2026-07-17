@@ -36,7 +36,7 @@
           <div class="kpi-card">
             <div class="kpi-top"><span class="kpi-label">Active Loans</span><div class="kpi-icon navy"><i class="bi bi-folder2-open"></i></div></div>
             <div class="kpi-value" id="kpiActiveLoans">0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms"></span></div>
+            <div class="kpi-foot"><span class="text-muted-jlms">Ongoing Loans</span></div>
           </div>
         </div>
         <div class="col-xl-4 col-md-6">
@@ -173,7 +173,9 @@ function formatCurrency(n) {
   if (n >= 100000) return '₹' + (n / 100000).toFixed(2) + ' L';
   return '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
 }
-
+function formatCurrencyExact(n) {
+  return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
 document.addEventListener('DOMContentLoaded', async () => {
   const user = Session.requireLogin();
   if (!user) return;
@@ -186,9 +188,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     const summary = await Api.getDashboardSummary();
     document.getElementById('kpiActiveLoans').textContent = summary.activeLoans.toLocaleString('en-IN');
-    document.getElementById('kpiOutstanding').textContent = formatCurrency(summary.outstandingAmount);
-    document.getElementById('kpiCollections').textContent = formatCurrency(summary.todaysCollections);
-    document.getElementById('kpiDisbursement').textContent = formatCurrency(summary.todaysDisbursement);
+    document.getElementById('kpiOutstanding').textContent = formatCurrencyExact(summary.outstandingAmount);
+    // document.getElementById('kpiCollections').textContent = formatCurrency(summary.todaysCollections);
+    document.getElementById('kpiCollections').textContent = formatCurrencyExact(summary.todaysCollections);
+    document.getElementById('kpiDisbursement').textContent = formatCurrencyExact(summary.todaysDisbursement);
     document.getElementById('kpiOverdue').textContent = summary.overdueLoans.toLocaleString('en-IN');
     // document.getElementById('kpiRenewals').textContent = summary.renewalsThisMonth.toLocaleString('en-IN');
     document.getElementById('kpiClosures').textContent = summary.closuresThisMonth.toLocaleString('en-IN');

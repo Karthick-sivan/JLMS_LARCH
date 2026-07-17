@@ -36,12 +36,17 @@ public class AuthController : ControllerBase
         if (!string.Equals(hash, user.PasswordHash, StringComparison.OrdinalIgnoreCase))
             return Unauthorized("Invalid username or password.");
 
+        // Validate that the user belongs to the selected branch.
+        // If a branch was supplied on the login form, the user's BranchId must match.
+        if (request.BranchId.HasValue && request.BranchId.Value > 0 && user.BranchId != request.BranchId.Value)
+            return Unauthorized("Invalid username or password for the selected branch.");
+
         // Simple opaque token for this test build (not a real JWT).
         var token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user.UserId}:{user.Username}:{DateTime.UtcNow.Ticks}"));
 
         return Ok(new LoginResponse(
             user.UserId, user.FullName, user.Username,
-            user.Role?.RoleName ?? "", user.Branch?.BranchName ?? "", token));
+            user.Role?.RoleName ?? "", user.Branch?.BranchName ?? "", token, user.BranchId));
     }
 
     private static string ComputeSha256(string input)

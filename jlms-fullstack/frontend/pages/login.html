@@ -1,154 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>JLMS — Sign In</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/jlms-core.css">
-<style>
-  body { background: #fff; }
-  .login-feature-list li { display:flex; align-items:flex-start; gap:10px; margin-bottom:14px; color:#C9D2E8; font-size:13px; }
-  .login-feature-list i { color: var(--gold-600); margin-top:2px; }
-  .trust-strip { display:flex; gap:22px; align-items:center; margin-top: 36px; opacity:0.85; }
-  .trust-strip .item { font-size:11px; color:#8E9BC0; display:flex; align-items:center; gap:6px; }
-</style>
+  <meta charset="UTF-8">
+  <title>JLMS — Sign In</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/jlms-core.css">
+  <style>
+    body {
+      background: #fff;
+    }
+
+    .login-feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+      color: #C9D2E8;
+      font-size: 13px;
+    }
+
+    .login-feature-list i {
+      color: var(--gold-600);
+      margin-top: 2px;
+    }
+
+    .trust-strip {
+      display: flex;
+      gap: 22px;
+      align-items: center;
+      margin-top: 36px;
+      opacity: 0.85;
+    }
+
+    .trust-strip .item {
+      font-size: 11px;
+      color: #8E9BC0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="login-shell">
-  <!-- Left brand panel -->
-  <div class="login-aside">
-    <div style="position:relative; z-index:2;">
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:48px;">
-        <div style="width:42px;height:42px;border-radius:9px;background:linear-gradient(135deg,var(--gold-600),var(--gold-700));display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--navy-900);font-size:18px;">JL</div>
-        <div>
-          <div style="font-weight:700; font-size:18px; color:#fff;">JLMS</div>
-          <div style="font-size:11px; color:#8E9BC0; letter-spacing:0.04em;">JEWEL LOAN MANAGEMENT SYSTEM</div>
+  <div class="login-shell">
+    <!-- Left brand panel -->
+    <div class="login-aside">
+      <div style="position:relative; z-index:2;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:48px;">
+          <div
+            style="width:42px;height:42px;border-radius:9px;background:linear-gradient(135deg,var(--gold-600),var(--gold-700));display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--navy-900);font-size:18px;">
+            JL</div>
+          <div>
+            <div style="font-weight:700; font-size:18px; color:#fff;">JLMS</div>
+            <div style="font-size:11px; color:#8E9BC0; letter-spacing:0.04em;">JEWEL LOAN MANAGEMENT SYSTEM</div>
+          </div>
         </div>
+
+        <h1 style="color:#fff; font-size:30px; font-weight:700; line-height:1.3; max-width:440px;">
+          Secure, audited gold loan operations for every branch.
+        </h1>
+        <p style="color:#A9B5D6; font-size:13.5px; max-width:420px; margin-top:14px; line-height:1.6;">
+          Manage appraisals, disbursements, collections and renewals in one
+          unified platform built for NBFC and gold loan companies.
+        </p>
+
+        <ul class="login-feature-list" style="list-style:none; padding:0; margin-top:36px;">
+          <li><i class="bi bi-shield-check"></i> Role-based access for Branch Managers, Officers &amp; Cashiers</li>
+          <li><i class="bi bi-clock-history"></i> Real-time interest, penalty &amp; renewal calculations</li>
+          <li><i class="bi bi-journal-check"></i> Complete audit trail for every transaction</li>
+        </ul>
       </div>
 
-      <h1 style="color:#fff; font-size:30px; font-weight:700; line-height:1.3; max-width:440px;">
-        Secure, audited gold loan operations for every branch.
-      </h1>
-      <p style="color:#A9B5D6; font-size:13.5px; max-width:420px; margin-top:14px; line-height:1.6;">
-        Manage appraisals, disbursements, collections and renewals in one
-        unified platform built for NBFC and gold loan companies.
-      </p>
-
-      <ul class="login-feature-list" style="list-style:none; padding:0; margin-top:36px;">
-        <li><i class="bi bi-shield-check"></i> Role-based access for Branch Managers, Officers &amp; Cashiers</li>
-        <li><i class="bi bi-clock-history"></i> Real-time interest, penalty &amp; renewal calculations</li>
-        <li><i class="bi bi-journal-check"></i> Complete audit trail for every transaction</li>
-      </ul>
-    </div>
-
-    <div class="trust-strip" style="position:relative; z-index:2;">
-      <div class="item"><i class="bi bi-lock-fill"></i> 256-bit Encrypted</div>
-      <div class="item"><i class="bi bi-patch-check-fill"></i> RBI Compliant Workflow</div>
-      <div class="item"><i class="bi bi-server"></i> v3.2.1</div>
-    </div>
-  </div>
-
-  <!-- Right form panel -->
-  <div class="login-form-side">
-    <div class="login-card">
-      <div style="margin-bottom: 28px;">
-        <div class="h1">Sign in to your account</div>
-        <div class="text-muted-jlms" style="margin-top:6px;">Enter your credentials to access the branch console.</div>
+      <div class="trust-strip" style="position:relative; z-index:2;">
+        <div class="item"><i class="bi bi-lock-fill"></i> 256-bit Encrypted</div>
+        <div class="item"><i class="bi bi-patch-check-fill"></i> RBI Compliant Workflow</div>
+        <div class="item"><i class="bi bi-server"></i> v3.2.1</div>
       </div>
+    </div>
 
-      <div id="apiErrorBanner" class="api-error-banner"></div>
-      <form id="loginForm">
-        <div class="field-group">
-          <label class="field-label">Branch<span class="req">*</span></label>
-          <select class="form-select-jlms" id="branchSelect">
+    <!-- Right form panel -->
+    <div class="login-form-side">
+      <div class="login-card">
+        <div style="margin-bottom: 28px;">
+          <div class="h1">Sign in to your account</div>
+          <div class="text-muted-jlms" style="margin-top:6px;">Enter your credentials to access the branch console.
+          </div>
+        </div>
+
+        <div id="apiErrorBanner" class="api-error-banner"></div>
+        <form id="loginForm">
+          <div class="field-group">
+            <label class="field-label">Branch<span class="req">*</span></label>
+            <!-- <select class="form-select-jlms" id="branchSelect">
             <option value="1">Madurai Main Branch (BR-001)</option>
-          </select>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Username / Employee ID<span class="req">*</span></label>
-          <div class="input-affix">
-            <span class="affix"><i class="bi bi-person"></i></span>
-            <input type="text" id="usernameInput" placeholder="e.g. admin" value="admin">
+          </select> -->
+            <select class="form-select-jlms" id="branchSelect" disabled>
+              <option value="" disabled selected>Loading branches...</option>
+            </select>
           </div>
-        </div>
 
-        <div class="field-group">
-          <label class="field-label">Password<span class="req">*</span></label>
-          <div class="input-affix">
-            <span class="affix"><i class="bi bi-lock"></i></span>
-            <input type="password" id="passwordInput" placeholder="Enter your password" value="">
-            <span class="affix suffix" style="cursor:pointer;" onclick="togglePw()"><i class="bi bi-eye" id="pwToggleIcon"></i></span>
+          <div class="field-group">
+            <label class="field-label">Username / Employee ID<span class="req">*</span></label>
+            <div class="input-affix">
+              <span class="affix"><i class="bi bi-person"></i></span>
+              <input type="text" id="usernameInput" placeholder="e.g. admin">
+            </div>
           </div>
-        </div>
 
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
-          <div class="form-check-jlms">
-            <input type="checkbox" id="rememberMe" checked>
-            <label for="rememberMe">Keep me signed in</label>
+          <div class="field-group">
+            <label class="field-label">Password<span class="req">*</span></label>
+            <div class="input-affix">
+              <span class="affix"><i class="bi bi-lock"></i></span>
+              <input type="password" id="passwordInput" placeholder="Enter your password" value="">
+              <span class="affix suffix" style="cursor:pointer;" onclick="togglePw()"><i class="bi bi-eye"
+                  id="pwToggleIcon"></i></span>
+            </div>
           </div>
-          <a href="forgot-password.html" style="font-size:12px; font-weight:600;">Forgot password?</a>
-        </div>
 
-        <button type="submit" id="loginBtn" class="btn-jlms btn-jlms-primary btn-lg" style="width:100%; justify-content:center;">
-          <i class="bi bi-box-arrow-in-right"></i> Sign In
-        </button>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <div class="form-check-jlms">
+              <input type="checkbox" id="rememberMe" checked>
+              <label for="rememberMe">Keep me signed in</label>
+            </div>
+            <a href="forgot-password.html" style="font-size:12px; font-weight:600;">Forgot password?</a>
+          </div>
 
-        <div class="divider-jlms"></div>
+          <button type="submit" id="loginBtn" class="btn-jlms btn-jlms-primary btn-lg"
+            style="width:100%; justify-content:center;">
+            <i class="bi bi-box-arrow-in-right"></i> Sign In
+          </button>
+
+          <!-- <div class="divider-jlms"></div>
 
         <div style="background:var(--n-100); border-radius:var(--radius-md); padding:12px 14px; display:flex; gap:10px; align-items:flex-start;">
           <i class="bi bi-info-circle" style="color:var(--navy-700); margin-top:1px;"></i>
           <div style="font-size:11.5px; color:var(--n-600); line-height:1.5;">
             Default test login: <strong>admin</strong> / <strong>Admin@123</strong> (from the optional reference data seed script). Access is monitored and logged for compliance.
           </div>
-        </div>
-      </form>
+        </div> -->
+        </form>
 
-      <div style="text-align:center; margin-top:28px; font-size:11.5px; color:var(--n-500);">
-        © 2026 JLMS Financial Technologies. All rights reserved.
+        <div style="text-align:center; margin-top:28px; font-size:11.5px; color:var(--n-500);">
+          © 2026 JLMS Financial Technologies. All rights reserved.
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 </body>
+
 </html>
 
 <script src="js/api-client.js"></script>
 <script>
-function togglePw() {
-  const input = document.getElementById('passwordInput');
-  const icon = document.getElementById('pwToggleIcon');
-  if (input.type === 'password') { input.type = 'text'; icon.className = 'bi bi-eye-slash'; }
-  else { input.type = 'password'; icon.className = 'bi bi-eye'; }
-}
-
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  clearApiError();
-  const username = document.getElementById('usernameInput').value.trim();
-  const password = document.getElementById('passwordInput').value;
-  const branchId = parseInt(document.getElementById('branchSelect').value, 10);
-  const btn = document.getElementById('loginBtn');
-
-  if (!username || !password) {
-    showApiError(new Error('Please enter both username and password.'));
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
+window.addEventListener('DOMContentLoaded', async () => {
+  const branchSelect = document.getElementById('branchSelect');
+  const loginBtn = document.getElementById('loginBtn');
   try {
-    const user = await Api.login(username, password, branchId);
-    Session.set(user);
-    window.location.href = 'dashboard.html';
+    const branches = await Api.getBranches();
+    if (branchSelect && branches && branches.length > 0) {
+      branchSelect.innerHTML =
+        `<option value="" disabled selected>-- Select Branch --</option>` +
+        branches.map(b => `<option value="${b.branchId}">${b.branchName} (${b.branchCode})</option>`).join('');
+      branchSelect.disabled = false;
+    }
   } catch (err) {
-    showApiError(err);
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Sign In';
+    console.error('Failed to load branches:', err);
+    branchSelect.innerHTML = `<option value="" disabled selected>Unable to load branches</option>`;
   }
 });
+
+  function togglePw() {
+    const input = document.getElementById('passwordInput');
+    const icon = document.getElementById('pwToggleIcon');
+    if (input.type === 'password') { input.type = 'text'; icon.className = 'bi bi-eye-slash'; }
+    else { input.type = 'password'; icon.className = 'bi bi-eye'; }
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearApiError();
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value;
+    const branchRaw = document.getElementById('branchSelect').value;
+    const branchId = parseInt(branchRaw, 10);
+    const btn = document.getElementById('loginBtn');
+
+    if (!branchRaw || isNaN(branchId) || branchId <= 0) {
+      showApiError(new Error('Please select a branch to continue.'));
+      return;
+    }
+
+    if (!username || !password) {
+      showApiError(new Error('Please enter both username and password.'));
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing in...';
+    try {
+      const user = await Api.login(username, password, branchId);
+      Session.set(user);
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      showApiError(err);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Sign In';
+    }
+  });
 </script>

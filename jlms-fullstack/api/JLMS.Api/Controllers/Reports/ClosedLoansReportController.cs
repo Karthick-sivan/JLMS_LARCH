@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JLMS.Api.Data;
 using JLMS.Api.DTOs;
@@ -72,8 +72,10 @@ public class ClosedLoansReportController : ControllerBase
         if (closedByUserId.HasValue && closedByUserId.Value > 0)
             query = query.Where(l => l.ClosedBy == closedByUserId.Value);
 
-        if (branchId.HasValue && branchId.Value > 0)
-            query = query.Where(l => l.BranchId == branchId.Value);
+        var user = HttpContext.Items["CurrentUser"] as JLMS.Api.Models.User;
+        var filterBranchId = user?.GetFilterBranchId() ?? branchId;
+        if (filterBranchId.HasValue && filterBranchId.Value > 0)
+            query = query.Where(l => l.BranchId == filterBranchId.Value);
 
         var totalCount = await query.CountAsync();
 

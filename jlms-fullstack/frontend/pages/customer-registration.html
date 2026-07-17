@@ -502,7 +502,9 @@ formData.append("State", document.getElementById("custState").value);
 formData.append("Pincode", document.getElementById("custPincode").value);
 formData.append("AadhaarNumber", document.getElementById("custAadhaar").value);
 formData.append("PanNumber", document.getElementById("custPan").value.toUpperCase());
-formData.append("BranchId", "1");
+const sessionUser = Session.get();
+const branchId = sessionUser ? sessionUser.branchId : 1;
+formData.append("BranchId", branchId);
 const uploadedPhoto =
     document.getElementById("customerPhoto").files[0];
 
