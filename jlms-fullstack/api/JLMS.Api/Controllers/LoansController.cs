@@ -476,7 +476,7 @@ public class LoansController : ControllerBase
             ProcessingFee = request.ProcessingFee,
             OverallInterest = overallInterest,
             OutstandingPrincipal = request.RequestedLoanAmount,
-            OutstandingInterest = overallInterest,
+            OutstandingInterest = 0,
             PenaltyAccrued = 0,
             Status = "PendingApproval",
             Remarks = request.Remarks,

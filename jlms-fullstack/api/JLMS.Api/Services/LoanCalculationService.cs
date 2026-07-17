@@ -73,7 +73,7 @@ public class LoanCalculationService
     //    => $"{branchCode}-JL-{DateTime.UtcNow:yyyy}{sequence:D4}";
 
 
-    public string GenerateLoanNumber(int sequence) => $"JL-{DateTime.UtcNow:yyyy}{sequence:D5}";
+    public string GenerateLoanNumber(int sequence) => $"BR{DateTime.UtcNow:yyyy}{sequence:D5}";
     public string GenerateReceiptNumber(long sequence) => $"RC-{sequence:D5}";
-    public string GenerateCustomerCode(int sequence) => $"JLCUS-{DateTime.UtcNow:yyyy}{sequence:D6}";
+    public string GenerateCustomerCode(int sequence) => $"BRCUS{sequence:D5}";
 }
