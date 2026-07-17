@@ -55,10 +55,10 @@ var app = builder.Build();
 
 // ---------- Middleware pipeline ----------
 //if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "JLMS API v1"));
-//}
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "JLMS API v1"));
+}
 
 app.UseCors("AllowFrontendDev");
 
