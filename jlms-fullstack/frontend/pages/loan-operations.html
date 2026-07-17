@@ -481,9 +481,9 @@
                                     <th>Customer Name</th>
                                     <th>Loan Scheme</th>
                                     <th class="text-end">Principal Amount</th>
-                                    <th class="text-end">Overall Interest</th>
+                                    <th class="text-end d-none">Overall Interest</th>
                                     <th class="text-end">Outstanding Principal</th>
-                                    <th class="text-end">Outstanding Interest</th>
+                                    <th class="text-end d-none">Outstanding Interest</th>
                                     <th class="text-end">Total Outstanding</th>
                                     <th class="text-end">Total Amount Paid</th>
                                     <th style="display: none;">Loan Status</th>
@@ -538,6 +538,7 @@
                                     <div class="info-grid">
                                         <div class="info-row"><div class="info-label">Customer Name</div><div class="info-value" id="payCustomerName">-</div></div>
                                         <div class="info-row"><div class="info-label">Loan No</div><div class="info-value" id="payLoanNo">-</div></div>
+                                        <div class="info-row"><div class="info-label">Loan Date</div><div class="info-value" id="payLoanDate">-</div></div>
                                         <div class="info-row"><div class="info-label">Aadhaar</div><div class="info-value" id="payAadhaar">-</div></div>
                                         <div class="info-row"><div class="info-label">PAN</div><div class="info-value" id="payPan">-</div></div>
                                         <div class="info-row"><div class="info-label">Mobile</div><div class="info-value" id="payMobile">-</div></div>
@@ -792,7 +793,7 @@
                                         <th class="text-end">Debit</th>
                                         <th class="text-end">Credit</th>
                                         <th class="text-end">Principal Balance</th>
-                                        <th class="text-end">Interest Balance</th>
+                                        <th class="text-end d-none">Interest Balance</th>
                                         <th class="text-end">Running Balance</th>
                                         <th style="display: none;">Receipt No</th>
                                         <th style="display: none;">User</th>
@@ -1020,9 +1021,9 @@
                             <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
                             <td>${l.loanScheme}</td>
                             <td class="text-end">${inr(l.principal)}</td>
-                            <td class="text-end">${inr(l.overallInterest)}</td>
+                            <td class="text-end d-none">${inr(l.overallInterest)}</td>
                             <td class="text-end">${inr(l.outstandingPrincipal)}</td>
-                            <td class="text-end">${inr(l.outstandingInterest)}</td>
+                            <td class="text-end d-none">${inr(l.outstandingInterest)}</td>
                             <td class="text-end cell-strong">${inr(l.totalOutstanding)}</td>
                             <td class="text-end">${inr(l.totalAmountPaid)}</td>
                             <td style="display: none;">${statusBadge(l.status)}</td>
@@ -1105,6 +1106,7 @@
                 document.getElementById('payLoanNoLabel').textContent = details.loanNo;
                 document.getElementById('payCustomerName').textContent = details.customerName;
                 document.getElementById('payLoanNo').textContent = details.loanNo;
+                document.getElementById('payLoanDate').textContent = fmtDate(details.loanDate);
                 document.getElementById('payAadhaar').textContent = details.aadhaar || '-';
                 document.getElementById('payPan').textContent = details.pan || '-';
                 document.getElementById('payMobile').textContent = details.mobile || '-';
@@ -1766,7 +1768,7 @@
                             <td class="text-end">${e.debit ? inr(e.debit) : '<span class="text-muted-jlms">—</span>'}</td>
                             <td class="text-end">${e.credit ? inr(e.credit) : '<span class="text-muted-jlms">—</span>'}</td>
                             <td class="text-end">${inr(e.principalBalance)}</td>
-                            <td class="text-end">${inr(e.interestBalance)}</td>
+                            <td class="text-end d-none">${inr(e.interestBalance)}</td>
                             <td class="text-end cell-strong">${inr(e.runningBalance)}</td>
                             <td style="display: none;">${e.receiptNumber || '-'}</td>
                             <td style="display: none;">${e.userName || '-'}</td>
@@ -1891,9 +1893,9 @@
             loadSchemeFilter();
 
             // Set default date to today's date in the search filters
-            const today = new Date().toISOString().slice(0, 10);
-            document.getElementById('fFromDate').value = today;
-            document.getElementById('fToDate').value = today;
+            // const today = new Date().toISOString().slice(0, 10);
+            // document.getElementById('fFromDate').value = today;
+            // document.getElementById('fToDate').value = today;
 
             document.getElementById('btnSearch').addEventListener('click', () => runSearch(1));
             //document.getElementById('btnRefresh').addEventListener('click', () => runSearch(currentPage));
