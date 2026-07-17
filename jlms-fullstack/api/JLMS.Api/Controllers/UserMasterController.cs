@@ -23,9 +23,19 @@ public class UserMasterController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserMasterDto>>> GetAll()
     {
-        var users = await _db.Users.AsNoTracking()
+        var currentUser = HttpContext.Items["CurrentUser"] as JLMS.Api.Models.User;
+        var filterBranchId = currentUser?.GetFilterBranchId();
+
+        var query = _db.Users.AsNoTracking()
             .Include(u => u.Role)
             .Include(u => u.Branch)
+            .AsQueryable();
+
+        // Scope to the logged-in user's branch
+        if (filterBranchId.HasValue)
+            query = query.Where(u => u.BranchId == filterBranchId.Value);
+
+        var users = await query
             .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
 
@@ -77,6 +87,12 @@ public class UserMasterController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserMasterDto>> Create([FromBody] UserCreateDto dto)
     {
+        // Force new user into the current user's branch
+        var currentUser = HttpContext.Items["CurrentUser"] as JLMS.Api.Models.User;
+        var filterBranchId = currentUser?.GetFilterBranchId();
+        // Use the logged-in user's branch when set; otherwise fall back to the DTO value
+        var effectiveBranchId = filterBranchId ?? dto.BranchId;
+
         if (string.IsNullOrWhiteSpace(dto.EmployeeCode))
             return BadRequest("Employee Code is required.");
         if (string.IsNullOrWhiteSpace(dto.FullName))
@@ -87,7 +103,7 @@ public class UserMasterController : ControllerBase
             return BadRequest("Password is required.");
         if (dto.RoleId <= 0)
             return BadRequest("Valid Role is required.");
-        if (dto.BranchId <= 0)
+        if (effectiveBranchId <= 0)
             return BadRequest("Valid Branch is required.");
 
         // Check uniqueness
@@ -110,7 +126,7 @@ public class UserMasterController : ControllerBase
         var role = await _db.Roles.FindAsync(dto.RoleId);
         if (role == null) return BadRequest("Selected Role does not exist.");
 
-        var branch = await _db.Branches.FindAsync(dto.BranchId);
+        var branch = await _db.Branches.FindAsync(effectiveBranchId);
         if (branch == null) return BadRequest("Selected Branch does not exist.");
 
         var user = new User
@@ -120,7 +136,7 @@ public class UserMasterController : ControllerBase
             Username = dto.Username.Trim().ToLowerInvariant(),
             PasswordHash = ComputeSha256(dto.Password),
             RoleId = dto.RoleId,
-            BranchId = dto.BranchId,
+            BranchId = effectiveBranchId,
             Mobile = dto.Mobile?.Trim(),
             Email = dto.Email?.Trim(),
             IsActive = dto.IsActive,
@@ -150,8 +166,17 @@ public class UserMasterController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UserUpdateDto dto)
     {
+        var currentUser = HttpContext.Items["CurrentUser"] as JLMS.Api.Models.User;
+        var filterBranchId = currentUser?.GetFilterBranchId();
+        // Use the logged-in user's branch when set; otherwise fall back to the DTO value
+        var effectiveBranchId = filterBranchId ?? dto.BranchId;
+
         var user = await _db.Users.FindAsync(id);
         if (user == null) return NotFound();
+
+        // Prevent editing users from other branches
+        if (filterBranchId.HasValue && user.BranchId != filterBranchId.Value)
+            return Forbid();
 
         if (string.IsNullOrWhiteSpace(dto.EmployeeCode))
             return BadRequest("Employee Code is required.");
@@ -161,7 +186,7 @@ public class UserMasterController : ControllerBase
             return BadRequest("Username is required.");
         if (dto.RoleId <= 0)
             return BadRequest("Valid Role is required.");
-        if (dto.BranchId <= 0)
+        if (effectiveBranchId <= 0)
             return BadRequest("Valid Branch is required.");
 
         // Check uniqueness
@@ -191,7 +216,7 @@ public class UserMasterController : ControllerBase
         user.FullName = dto.FullName.Trim();
         user.Username = dto.Username.Trim().ToLowerInvariant();
         user.RoleId = dto.RoleId;
-        user.BranchId = dto.BranchId;
+        user.BranchId = effectiveBranchId;
         user.Mobile = dto.Mobile?.Trim();
         user.Email = dto.Email?.Trim();
         user.IsActive = dto.IsActive;
@@ -209,8 +234,15 @@ public class UserMasterController : ControllerBase
     [HttpPatch("{id:int}/toggle-status")]
     public async Task<IActionResult> ToggleStatus(int id)
     {
+        var currentUser = HttpContext.Items["CurrentUser"] as JLMS.Api.Models.User;
+        var filterBranchId = currentUser?.GetFilterBranchId();
+
         var user = await _db.Users.FindAsync(id);
         if (user == null) return NotFound();
+
+        // Prevent toggling users from other branches
+        if (filterBranchId.HasValue && user.BranchId != filterBranchId.Value)
+            return Forbid();
 
         user.IsActive = !user.IsActive;
         await _db.SaveChangesAsync();

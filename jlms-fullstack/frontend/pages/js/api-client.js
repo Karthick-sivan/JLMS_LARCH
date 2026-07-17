@@ -1,4 +1,4 @@
-/* =================================customer aster===========================
+﻿/* =================================customer aster===========================
    JLMS API Client
    ============================================================
    Set API_BASE_URL to match where your ASP.NET Core API is
@@ -20,9 +20,17 @@ class ApiError extends Error {
 async function apiRequest(path, { method = "GET", body = null } = {}) {
   let response;
   try {
+    const headers = {};
+    if (body) {
+      headers["Content-Type"] = "application/json";
+    }
+    const user = Session.get();
+    if (user && user.token) {
+      headers["Authorization"] = `Bearer ${user.token}`;
+    }
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
-      headers: body ? { "Content-Type": "application/json" } : {},
+      headers,
       body: body ? JSON.stringify(body) : undefined
     });
   } catch (networkErr) {
@@ -194,7 +202,7 @@ getCollectionReport: (params = {}) => {
 
     // ---- Branches (used by report filter dropdowns — adjust path if your actual
     // branches endpoint differs; I couldn't see a BranchesController in what you shared) ----
-    getBranches: () => apiRequest(`/branches`),
+    getBranches: () => apiRequest(`/user-master/branches`),
 
 
 // ---- Loan Operations (new, independent merged page) ----

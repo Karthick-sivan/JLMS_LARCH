@@ -13,6 +13,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 });
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -53,11 +54,11 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ---------- Middleware pipeline ----------
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "JLMS API v1"));
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "JLMS API v1"));
+//}
 
 app.UseCors("AllowFrontendDev");
 
@@ -72,6 +73,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Uploads"
 });
 
+app.UseMiddleware<JLMS.Api.Middleware.UserContextMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

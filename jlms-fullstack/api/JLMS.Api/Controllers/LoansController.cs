@@ -233,34 +233,84 @@ public class LoansController : ControllerBase
             loan.UpdatedAt = now;
             loan.Status = "Active"; // loan is now live and accruing interest
 
-            var seq = await _db.LoanTransactions.CountAsync() + 1;
-            var receiptNo = _calc.GenerateReceiptNumber(seq);
-            while (await _db.LoanTransactions.AnyAsync(t => t.ReceiptNumber == receiptNo))
+            //var seq = await _db.LoanTransactions.CountAsync() + 1;
+            //var receiptNo = _calc.GenerateReceiptNumber(seq);
+            //while (await _db.LoanTransactions.AnyAsync(t => t.ReceiptNumber == receiptNo))
+            //{
+            //    seq++;
+            //    receiptNo = _calc.GenerateReceiptNumber(seq);
+            //}
+
+            //var txn = new LoanTransaction
+            //{
+            //    LoanId = loan.LoanId,
+            //    TransactionType = "Disbursement",
+            //    ReceiptNumber = receiptNo,
+            //    TransactionDate = now,
+            //    PrincipalAmount = loan.LoanAmount,
+            //    InterestAmount = 0,
+            //    PenaltyAmount = 0,
+            //    ChargesAmount = loan.ProcessingFee,
+            //    TotalAmount = netDisbursement,
+            //    PaymentMode = HardcodedPaymentMode,
+            //    ReferenceNo = null,
+            //    BalancePrincipalAfter = loan.OutstandingPrincipal,
+            //    ProcessedBy = request.SubmittedByUserId,
+            //    BranchId = loan.BranchId,
+            //    Remarks = "Auto-approved and disbursed via Submit for Approval",
+            //    CreatedAt = now
+            //};
+            //_db.LoanTransactions.Add(txn);
+
+            LoanTransaction txn = null;
+            Exception lastError = null;
+
+            for (int attempt = 0; attempt < 5; attempt++)
             {
-                seq++;
-                receiptNo = _calc.GenerateReceiptNumber(seq);
+                var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
+                var receiptNo = _calc.GenerateReceiptNumber(seq);
+
+                txn = new LoanTransaction
+                {
+                    LoanId = loan.LoanId,
+                    TransactionType = "Disbursement",
+                    ReceiptNumber = receiptNo,
+                    TransactionDate = now,
+                    PrincipalAmount = loan.LoanAmount,
+                    InterestAmount = 0,
+                    PenaltyAmount = 0,
+                    ChargesAmount = loan.ProcessingFee,
+                    TotalAmount = netDisbursement,
+                    PaymentMode = HardcodedPaymentMode,
+                    ReferenceNo = null,
+                    BalancePrincipalAfter = loan.OutstandingPrincipal,
+                    ProcessedBy = request.SubmittedByUserId,
+                    BranchId = loan.BranchId,
+                    Remarks = "Auto-approved and disbursed via Submit for Approval",
+                    CreatedAt = now
+                };
+
+                _db.LoanTransactions.Add(txn);
+
+                try
+                {
+                    await _db.SaveChangesAsync(); // try to save right here
+                    lastError = null;
+                    break; // success, stop retrying
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
+                {
+                    // Duplicate receipt number — undo this attempt and try the next number
+                    _db.Entry(txn).State = EntityState.Detached;
+                    lastError = ex;
+                }
             }
 
-            var txn = new LoanTransaction
+            if (lastError != null)
             {
-                LoanId = loan.LoanId,
-                TransactionType = "Disbursement",
-                ReceiptNumber = receiptNo,
-                TransactionDate = now,
-                PrincipalAmount = loan.LoanAmount,
-                InterestAmount = 0,
-                PenaltyAmount = 0,
-                ChargesAmount = loan.ProcessingFee,
-                TotalAmount = netDisbursement,
-                PaymentMode = HardcodedPaymentMode,
-                ReferenceNo = null,
-                BalancePrincipalAfter = loan.OutstandingPrincipal,
-                ProcessedBy = request.SubmittedByUserId,
-                BranchId = loan.BranchId,
-                Remarks = "Auto-approved and disbursed via Submit for Approval",
-                CreatedAt = now
-            };
-            _db.LoanTransactions.Add(txn);
+                await tx.RollbackAsync();
+                throw lastError;
+            }
 
             _db.AuditLogs.Add(new AuditLog
             {
@@ -271,9 +321,10 @@ public class LoansController : ControllerBase
                 RecordReference = loan.LoanNumber
             });
 
-            await _db.SaveChangesAsync();
+            //await _db.SaveChangesAsync();
+            //await tx.CommitAsync();
+            await _db.SaveChangesAsync(); // saves the audit log (transaction already saved above)
             await tx.CommitAsync();
-
             return Ok(await BuildSubmitResponse(loan.LoanId));
         }
         catch

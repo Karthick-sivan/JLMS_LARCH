@@ -1,11 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 using JLMS.Api.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace JLMS.Api.Data;
 
 public class JlmsDbContext : DbContext
 {
-    public JlmsDbContext(DbContextOptions<JlmsDbContext> options) : base(options) { }
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public JlmsDbContext(DbContextOptions<JlmsDbContext> options, IHttpContextAccessor httpContextAccessor) : base(options)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public int? CurrentBranchId
+    {
+        get
+        {
+            var httpContext = _httpContextAccessor?.HttpContext;
+            if (httpContext != null && httpContext.Items.TryGetValue("CurrentUser", out var u) && u is User user)
+            {
+                // Every user is scoped to their assigned branch, regardless of role.
+                // Branch isolation is driven by BranchId on the User, not by role name.
+                return user.BranchId;
+            }
+            return null; // No authenticated user → no filter (e.g. background/system calls)
+        }
+    }
 
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<Role> Roles => Set<Role>();
@@ -120,5 +141,10 @@ public class JlmsDbContext : DbContext
             .WithMany()
             .HasForeignKey(u => u.BranchId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Global Query Filters for Branch-Based Data Isolation
+        modelBuilder.Entity<Loan>().HasQueryFilter(l => CurrentBranchId == null || l.BranchId == CurrentBranchId);
+        modelBuilder.Entity<Customer>().HasQueryFilter(c => CurrentBranchId == null || c.BranchId == CurrentBranchId);
+        modelBuilder.Entity<LoanTransaction>().HasQueryFilter(t => CurrentBranchId == null || t.BranchId == CurrentBranchId);
     }
 }

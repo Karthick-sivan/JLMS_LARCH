@@ -1,4 +1,4 @@
-namespace JLMS.Api.DTOs;
+ï»¿namespace JLMS.Api.DTOs;
 
 using Microsoft.AspNetCore.Http;
 
@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 // ---------- Auth ----------
 public record LoginRequest(string Username, string Password, int? BranchId);
-public record LoginResponse(int UserId, string FullName, string Username, string RoleName, string BranchName, string Token);
+public record LoginResponse(int UserId, string FullName, string Username, string RoleName, string BranchName, string Token, int BranchId);
 
 // ---------- Common ----------
 public record PagedResultDto<T>(List<T> Items, int TotalCount, int Page, int PageSize);
@@ -240,7 +240,7 @@ public record CollectionReportPagedDto(
     decimal GrandTotalCollected
 );
 // ============================================================================
-// Loan Operations — DTOs
+// Loan Operations ï¿½ DTOs
 // ============================================================================
 
 // ---------------------------- Grid ----------------------------------------
