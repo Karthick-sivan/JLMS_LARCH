@@ -1228,7 +1228,7 @@
             if (!activePaymentLoan) return;
             const btn = document.getElementById('btnSavePayment');
             btn.disabled = true;
-            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Save';
 
             try {
                 const payload = {
@@ -1272,6 +1272,13 @@
 
                 downloadPaymentReceipt();
                 //document.getElementById('paymentReceiptSection').style.display = 'block';
+
+                const modalEl = document.getElementById('paymentModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+
             } catch (err) {
                 showApiError(err);
                 btn.innerHTML = '<i class="bi bi-check2-circle"></i> Save Payment';
@@ -1579,6 +1586,13 @@
                             <div class="r-row"><span>Status</span><span>Closed</span></div>`;
 
                     downloadClosureReceipt();
+
+                    const modalEl = document.getElementById('closureModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+
                 })
                 .catch(err => {
                     showApiError(err);
