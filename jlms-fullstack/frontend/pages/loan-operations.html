@@ -233,7 +233,7 @@
         /* ★ CHANGE (split interest/principal fields): helper message shown
            under the Principal field explaining why it's locked/unlocked. */
         .field-hint {
-            font-size: 0.72rem;
+            font-size: 0.98rem;
             color: #6b7280;
             margin-top: 4px;
         }
@@ -866,7 +866,7 @@
                                 <span>Rows per page</span>
                                 <select id="ledgerPageSizeSelect">
                                     <option value="5" selected>5</option>
-                                    <option value="10">10</option>
+                                    <option value="10" >10</option>
                                     <option value="20">20</option>
                                 </select>
                             </div>
@@ -1332,43 +1332,58 @@
         // Client-side mirror of the server's interest-first allocation, used ONLY
         // for instant UI feedback as the user types an amount. SavePayment always
         // re-computes and re-validates this on the server before writing anything.
-        // ★ CHANGE (split interest/principal fields): now reads the two split
-        // inputs instead of one combined "Amount Received" field. Interest is
-        // clamped to what's outstanding; Principal is ignored while locked.
-        function recalcAllocation() {
+        //
+        // ★ FIX (don't clamp mid-typing): recalcAllocation now has two modes:
+        //   • commitInterest = false  (fired on every 'input' keystroke)
+        //       → updates the allocation preview and lock state using whatever
+        //         the user has typed so far, but does NOT clamp the interest
+        //         field or push surplus into principal. This lets the user
+        //         finish entering a number before the field reacts.
+        //   • commitInterest = true   (fired on 'blur' / when leaving the field)
+        //       → clamps the interest field to outstandingInterest and pushes
+        //         any surplus into the principal field, exactly as before.
+        function recalcAllocation(commitInterest = false) {
             if (!activePaymentLoan || !activeInterestCalc) return;
 
             updateInterestFieldLock();
-            updatePrincipalFieldLock();
 
-            const outstandingInterest = activeInterestCalc.outstandingInterest;
+            const outstandingInterest  = activeInterestCalc.outstandingInterest;
             const outstandingPrincipal = activeInterestCalc.outstandingPrincipal;
-            const maxPayable = activeInterestCalc.maxPayable;
+            const maxPayable           = activeInterestCalc.maxPayable;
 
-            const interestInput = document.getElementById('payInterestAmount');
+            const interestInput  = document.getElementById('payInterestAmount');
             const principalInput = document.getElementById('payPrincipalAmount');
 
             let interestTyped = parseFloat(interestInput.value) || 0;
-            let surplusToPrincipal = 0;
-            if (interestTyped > outstandingInterest) {
-                surplusToPrincipal = interestTyped - outstandingInterest;
-                interestTyped = outstandingInterest;
-                interestInput.value = interestTyped ? interestTyped.toFixed(2) : '';
+
+            if (commitInterest) {
+                // User has finished typing — clamp and spill surplus into principal.
+                let surplusToPrincipal = 0;
+                if (interestTyped > outstandingInterest) {
+                    surplusToPrincipal = Round2(interestTyped - outstandingInterest);
+                    interestTyped      = outstandingInterest;
+                    interestInput.value = interestTyped ? interestTyped.toFixed(2) : '';
+                }
+
+                updatePrincipalFieldLock();
+
+                if (surplusToPrincipal > 0) {
+                    principalInput.disabled = false;
+                    principalInput.value = Math.min(surplusToPrincipal, outstandingPrincipal).toFixed(2);
+                }
+            } else {
+                // Still typing — just update the lock state without touching field values.
+                updatePrincipalFieldLock();
             }
 
-            updatePrincipalFieldLock();
-            
-            if (surplusToPrincipal > 0) {
-                principalInput.disabled = false; // Force unlock the principal field
-                // Fill principal, capped safely to outstanding principal
-                principalInput.value = Math.min(surplusToPrincipal, outstandingPrincipal).toFixed(2); 
-            }
-
-            const principalTyped = principalInput.disabled ? 0 : (parseFloat(principalInput.value) || 0);
-            const amountReceived = Round2(interestTyped + principalTyped);
+            const principalTyped  = principalInput.disabled ? 0 : (parseFloat(principalInput.value) || 0);
+            // For the live preview while typing, cap the displayed interest at outstanding
+            // so the allocation numbers make sense even before the field is committed.
+            const interestForCalc = Math.min(interestTyped, outstandingInterest);
+            const amountReceived  = Round2(interestForCalc + principalTyped);
 
             const validationMsg = document.getElementById('payValidationMsg');
-            const saveBtn = document.getElementById('btnSavePayment');
+            const saveBtn       = document.getElementById('btnSavePayment');
 
             if (amountReceived > maxPayable + 0.01 || principalTyped > outstandingPrincipal + 0.01) {
                 validationMsg.classList.add('show');
@@ -1378,22 +1393,24 @@
                 saveBtn.disabled = amountReceived <= 0;
             }
 
-            const interestPaid = Math.min(interestTyped, outstandingInterest);
-            const principalPaid = Math.min(principalTyped, outstandingPrincipal);
-            const remainingInterest = Math.max(0, outstandingInterest - interestPaid);
-            const remainingPrincipal = Math.max(0, outstandingPrincipal - principalPaid);
-            const balanceAfter = remainingInterest + remainingPrincipal;
+            const interestPaid        = Math.min(interestForCalc, outstandingInterest);
+            const principalPaid       = Math.min(principalTyped,  outstandingPrincipal);
+            const remainingInterest   = Math.max(0, outstandingInterest  - interestPaid);
+            const remainingPrincipal  = Math.max(0, outstandingPrincipal - principalPaid);
+            const balanceAfter        = remainingInterest + remainingPrincipal;
 
-            document.getElementById('allocInterestPaid').textContent = inr(interestPaid);
-            document.getElementById('allocPrincipalPaid').textContent = inr(principalPaid);
+            document.getElementById('allocInterestPaid').textContent      = inr(interestPaid);
+            document.getElementById('allocPrincipalPaid').textContent     = inr(principalPaid);
             document.getElementById('allocRemainingInterest').textContent = inr(remainingInterest);
-            document.getElementById('allocRemainingPrincipal').textContent = inr(remainingPrincipal);
-            document.getElementById('allocBalanceAfter').textContent = inr(balanceAfter);
+            document.getElementById('allocRemainingPrincipal').textContent= inr(remainingPrincipal);
+            document.getElementById('allocBalanceAfter').textContent      = inr(balanceAfter);
         }
 
-        // ★ CHANGE (split interest/principal fields): listen on both inputs.
-        document.getElementById('payInterestAmount').addEventListener('input', recalcAllocation);
-        document.getElementById('payPrincipalAmount').addEventListener('input', recalcAllocation);
+        // 'input'  → live preview while typing (no clamping).
+        // 'blur'   → user leaves the interest field: clamp + push surplus to principal.
+        document.getElementById('payInterestAmount').addEventListener('input', () => recalcAllocation(false));
+        document.getElementById('payInterestAmount').addEventListener('blur',  () => recalcAllocation(true));
+        document.getElementById('payPrincipalAmount').addEventListener('input', () => recalcAllocation(false));
         document.getElementById('payDate').addEventListener('change', onPaymentDateChanged);
 
         let lastPaymentReceipt = null;
@@ -2340,4 +2357,4 @@
         });
     </script>
 </body>
-</html>
+</html> 
