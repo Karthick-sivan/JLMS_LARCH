@@ -198,6 +198,9 @@ getCollectionReport: (params = {}) => {
     },
     searchCustomersForActiveReport: (q) => apiRequest(`/active-loans-report/customer-search?q=${encodeURIComponent(q)}`),
 
+    searchCustomersForActiveReport: (q) => apiRequest(`/active-loans-report/customer-search?q=${encodeURIComponent(q)}`),
+searchLoansForActiveReport: (q) => apiRequest(`/active-loans-report/loan-search?q=${encodeURIComponent(q)}`),
+
     // ---- Closed Loans Report ----
     getClosedLoansReport: (params = {}) => {
         const qs = new URLSearchParams(

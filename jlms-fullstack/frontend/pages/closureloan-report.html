@@ -35,6 +35,35 @@
   .table-jlms-wrap { overflow-x:auto; }
   .table-jlms { min-width:1100px; }
   .nowrap { white-space:nowrap; }
+
+  .suggestion-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  max-height: 220px;
+  overflow-y: auto;
+  display: none;
+  margin-top: 2px;
+}
+.suggestion-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.suggestion-item:hover {
+  background: var(--n-50, #f5f7fa);
+}
+.suggestion-item small {
+  color: #9aa4b2;
+  display: block;
+  font-size: 11px;
+}
 </style>
 </head>
 <body>
@@ -66,10 +95,11 @@
             <div class="panel-head"><div class="h4">Closed Loans — Filters</div></div>
             <div class="panel-body">
               <div class="row g-3 align-items-end">
-                <div class="col-md-4">
-                  <label class="field-label" for="fLoanNo">Loan Number</label>
-                  <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="Loan Number">
-                </div>
+                <div class="col-md-4" style="position:relative;">
+  <label class="field-label" for="fLoanNo">Loan Number</label>
+  <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="Loan Number" autocomplete="off">
+  <div id="loanNoSuggestions" class="suggestion-list"></div>
+</div>
                 <div class="col-md-3">
                   <label class="field-label" for="fFromDate">Closure Date From</label>
                   <input id="fFromDate" type="date" class="form-control-jlms">
@@ -118,7 +148,7 @@
                     <th>Loan Date</th>
                     <!-- NOTE: "Book No" has no source field in the current API/DTO.
                          Using Loan No as a stand-in until a real Book No field is wired up. -->
-                    <th>Book No</th>
+                    <!-- <th>Book No</th> -->
                     <th>Customer</th>
                     <th class="text-end">Loan Amount</th>
                     <th class="text-end">Interest Amount</th>
@@ -246,7 +276,6 @@ function renderGrid(data) {
       <td>${startNo + i}</td>
       <td class="nowrap">${r.loanNumber}</td>
       <td>${fmtDate(r.loanDate)}</td>
-      <td class="nowrap">${r.loanNumber}</td>
       <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
       <td class="text-end">${fmt(r.principalAmount)}</td>
       <td class="text-end">${fmt(r.totalInterestCollected)}</td>
@@ -261,7 +290,50 @@ function renderGrid(data) {
 
   renderPagination(totalCount, page, pageSize);
 }
+function debounce(fn, delay) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), delay);
+  };
+}
 
+function setupAutocomplete({ inputId, boxId, fetchFn, renderItem, onSelect }) {
+  const input = el(inputId);
+  const box = el(boxId);
+
+  const doSearch = debounce(async () => {
+    const q = input.value.trim();
+    if (q.length < 2) { box.style.display = "none"; box.innerHTML = ""; return; }
+    try {
+      const results = await fetchFn(q);
+      if (!results || results.length === 0) { box.style.display = "none"; box.innerHTML = ""; return; }
+      box.innerHTML = results.map((r, i) => `<div class="suggestion-item" data-idx="${i}">${renderItem(r)}</div>`).join("");
+      box.style.display = "block";
+      box.querySelectorAll(".suggestion-item").forEach((node, i) => {
+        node.addEventListener("click", () => {
+          onSelect(results[i]);
+          box.style.display = "none";
+        });
+      });
+    } catch {
+      box.style.display = "none";
+    }
+  }, 300);
+
+  input.addEventListener("input", doSearch);
+  document.addEventListener("click", (e) => {
+    if (!input.contains(e.target) && !box.contains(e.target)) box.style.display = "none";
+  });
+}
+
+setupAutocomplete({
+  inputId: "fLoanNo",
+  boxId: "loanNoSuggestions",
+  fetchFn: (q) => Api.searchLoansForActiveReport(q),
+  renderItem: (l) => l.loanNumber,
+  onSelect: (l) => { el("fLoanNo").value = l.loanNumber; }
+});
 function renderPagination(totalCount, page, pageSize) {
   const totalPages = Math.ceil(totalCount / pageSize);
   const from = (page - 1) * pageSize + 1, to = Math.min(page * pageSize, totalCount);
