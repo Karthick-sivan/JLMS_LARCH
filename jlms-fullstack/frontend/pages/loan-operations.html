@@ -230,6 +230,18 @@
                 display: block;
             }
 
+        /* ★ CHANGE (split interest/principal fields): helper message shown
+           under the Principal field explaining why it's locked/unlocked. */
+        .field-hint {
+            font-size: 0.72rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+            .field-hint.field-hint-locked {
+                color: #b45309;
+            }
+
         .ledger-table-wrap {
             max-height: 480px;
             overflow-y: auto;
@@ -250,7 +262,7 @@
 
         .ledger-footer-stats {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
             margin-top: 14px;
         }
@@ -587,7 +599,7 @@
                                              italic styling implying "just reference, ignore this") — these rows
                                              now show the figures actually charged this payment -->
                                         <tr><td>As Of Date</td><td id="calcCurrentDate">-</td></tr>
-                                        <tr><td>Reference Date (Last Payment / Loan Start)</td><td id="calcLastRefDate">-</td></tr>
+                                        <tr><td>Reference Date (Last Payment)</td><td id="calcLastRefDate">-</td></tr>
                                         <tr><td>No. of Days</td><td id="calcDays">-</td></tr>
                                         <tr><td>Daily Interest Rate</td><td id="calcDailyRate">-</td></tr>
                                         <tr><td>Daily Interest Amount</td><td id="calcDailyAmount">-</td></tr>
@@ -598,7 +610,7 @@
 
                                 <!-- Payment entry -->
                                 <div class="section-label"><i class="bi bi-cash-coin"></i> Payment Entry</div>
-                                <div class="row g-2 mb-1">
+                                <div class="row g-3 mb-1 align-items-end">
                                     <!-- CHANGE: Payment Date hidden — date is always today (server-authoritative).
                                          The input is still rendered (hidden) so onPaymentDateChanged / payDate
                                          references in JS continue to work without modification.
@@ -608,19 +620,53 @@
                                     </div>
                                     -->
                                     <input type="date" id="payDate" hidden>
-                                    <div class="col-md-6">
+                                    <!-- FIRST ROW -->
+                                    <!-- Column 1: Payment Mode -->
+                                    <div class="col-md-4">
                                         <label class="field-label">Payment Mode</label>
                                         <select class="form-control-jlms" id="payMode">
                                             <option value="Cash">Cash</option>
                                             <option value="UPI">UPI</option>
-                                            <option value="Bank Transfer">Bank Transfer</option>
-                                            <option value="Cheque">Cheque</option>
                                             <option value="Card">Card</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="field-label">Amount Received (₹)</label>
-                                        <input type="number" class="form-control-jlms" id="payAmountReceived" placeholder="0.00" min="0" step="0.01">
+                                    <!-- ★ CHANGE (split interest/principal fields): the single
+                                         "Amount Received" input is replaced by two explicit fields.
+                                         Interest is always editable (capped at Outstanding Interest).
+                                         Principal stays disabled until the outstanding interest for
+                                         this payment is fully covered — mirrors the server's
+                                         interest-first allocation rule but makes it explicit to the
+                                         teller instead of an implicit split of one number. -->
+                                    <!-- Column 2: Interest Amount -->
+                                    <div class="col-md-4">
+                                        <label class="field-label">Interest Amount (₹)</label>
+                                        <input type="number" class="form-control-jlms" id="payInterestAmount" placeholder="0.00" min="0" step="0.01">
+                                    </div>
+
+                                    <!-- Column 3: Outstanding Interest Reference -->
+                                    <div class="col-md-4">
+                                        <label class="field-label text-muted-jlms">Outstanding Interest</label>
+                                        <div class="form-control-jlms bg-light fw-semibold text-secondary d-flex align-items-center" id="payOutInterestDisplay" style="height: 31px; opacity: 0.85;">₹0.00</div>
+                                    </div>
+
+                                    <!-- SECOND ROW -->
+                                    <!-- Column 1: Empty space to align Principal to the middle column -->
+                                    <div class="col-md-4 d-none d-md-block"></div>
+
+                                    <!-- Column 2: Principal Amount -->
+                                    <div class="col-md-4">
+                                        <label class="field-label">Principal Amount (₹)</label>
+                                        <input type="number" class="form-control-jlms" id="payPrincipalAmount" placeholder="0.00" min="0" step="0.01" disabled>
+                                    </div>
+
+                                    <!-- Column 3: Outstanding Principal Reference -->
+                                    <div class="col-md-4">
+                                        <label class="field-label text-muted-jlms">Outstanding Principal</label>
+                                        <div class="form-control-jlms bg-light fw-semibold text-secondary d-flex align-items-center" id="payOutPrincipalDisplay" style="height: 31px; opacity: 0.85;">₹0.00</div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="field-hint" id="payPrincipalHint">Clear the full outstanding interest first to unlock principal payment.</div>
                                         <div class="validation-msg" id="payValidationMsg">Amount exceeds total payable. Please enter a valid amount.</div>
                                     </div>
                                 </div>
@@ -792,15 +838,27 @@
                                         <th>Description</th>
                                         <th class="text-end">Debit</th>
                                         <th class="text-end">Credit</th>
-                                        <th class="text-end">Principal Balance</th>
+                                        <th class="text-end d-none">Principal Balance</th>
                                         <th class="text-end d-none">Interest Balance</th>
-                                        <th class="text-end">Running Balance</th>
+                                        <th class="text-end d-none">Running Balance</th>
                                         <th style="display: none;">Receipt No</th>
                                         <th style="display: none;">User</th>
                                         <th class="text-center" style="width:48px;">Receipt</th>
                                     </tr>
                                 </thead>
                                 <tbody id="ledgerBody"></tbody>
+                                <tfoot id="ledgerGrandTotalFoot" style="display:none;">
+                                    <tr style="border-top:2px solid #0d3b66;background:#f0f4fa;">
+                                        <td colspan="3" style="padding:8px 12px;font-weight:700;font-size:12.5px;color:#374151;">Grand Total</td>
+                                        <td class="text-end" style="padding:8px 12px;font-weight:700;font-size:12.5px;color:#0d3b66;" id="ledgerGrandTotalDebit">—</td>
+                                        <td class="text-end" style="padding:8px 12px;font-weight:700;font-size:12.5px;color:#0d3b66;" id="ledgerGrandTotalCredit">—</td>
+                                        <!-- Principal Balance hidden -->
+                                        <!-- Running Balance hidden -->
+                                        <td style="display:none;"></td>
+                                        <td style="display:none;"></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                         <div class="pagination-bar">
@@ -826,8 +884,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-jlms btn-jlms-outline d-none" id="btnExportLedgerPdf"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
-                    <button type="button" class="btn-jlms btn-jlms-outline d-none" id="btnPrintLedger"><i class="bi bi-printer"></i> Print</button>
+                    <!-- ★ CHANGE: Export buttons made visible; Excel button added -->
+                    <button type="button" class="btn-jlms btn-jlms-outline" id="btnExportLedgerExcel" disabled>
+                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    </button>
+                    <button type="button" class="btn-jlms btn-jlms-outline" id="btnExportLedgerPdf" disabled>
+                        <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                    </button>
                     <button type="button" class="btn-jlms btn-jlms-primary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -877,6 +940,11 @@
         </div>
     </div>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- ★ CHANGE: SheetJS for client-side Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- ★ CHANGE: jsPDF + html2canvas for true PDF download (no print dialog) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>window.JLMS_ACTIVE = "loan-operations";</script>
     <script src="js/jlms-shell.js"></script>
     <script src="js/api-client.js"></script>
@@ -1115,6 +1183,7 @@
                 document.getElementById('payPrincipal').textContent = inr(details.principal);
                 //document.getElementById('payOverallInterest').textContent = inr(details.overallInterest);
                 document.getElementById('payOutPrincipal').textContent = inr(details.outstandingPrincipal);
+                document.getElementById('payOutPrincipalDisplay').textContent = inr(details.outstandingPrincipal);
                 // NOTE: payOutInterest and payTotalOutstanding are intentionally NOT set
                 // from details.outstandingInterest / details.totalOutstanding here.
                 // The server now returns interestCalc-based values in those fields, so
@@ -1124,8 +1193,14 @@
                 document.getElementById('payDate').value = new Date().toISOString().slice(0, 10);
                 document.getElementById('payDate').disabled = false;
                 document.getElementById('payMode').disabled = false;
-                document.getElementById('payAmountReceived').value = '';
-                document.getElementById('payAmountReceived').disabled = false;
+                // ★ CHANGE (split interest/principal fields): reset both fields.
+                // Principal starts disabled — updatePrincipalFieldLock() (called via
+                // recalcAllocation() below) sets its real enabled state from the
+                // loan's current outstanding interest.
+                document.getElementById('payInterestAmount').value = '';
+                document.getElementById('payInterestAmount').disabled = false;
+                document.getElementById('payPrincipalAmount').value = '';
+                document.getElementById('payPrincipalAmount').disabled = true;
                 document.getElementById('payValidationMsg').classList.remove('show');
 
                 renderInterestCalc(activeInterestCalc);
@@ -1154,6 +1229,7 @@
             // maxPayable = outstandingInterest + outstandingPrincipal). The raw DB
             // values shown on modal open are stale — they exclude accrued interest.
             document.getElementById('payOutInterest').textContent = inr(calc.outstandingInterest);
+            document.getElementById('payOutInterestDisplay').textContent = inr(calc.outstandingInterest);
             document.getElementById('payTotalOutstanding').textContent = inr(calc.maxPayable);
 
             // ---- CHANGE (daily-interest fix): this is now the authoritative charged
@@ -1161,7 +1237,25 @@
             // Interest / Max Payable above are built from. ----
             document.getElementById('calcCurrentDate').textContent = fmtDate(calc.asOfDate);
             document.getElementById('calcLastRefDate').textContent = fmtDate(calc.lastInterestReferenceDate);
-            document.getElementById('calcDays').textContent = calc.noOfDaysInfoOnly;
+            //document.getElementById('calcDays').textContent = calc.noOfDaysInfoOnly;
+            // --- DYNAMIC MONTHS + DAYS DISPLAY ---
+            
+            const totalDays = calc.noOfDaysInfoOnly;
+            let daysDisplay = `${totalDays} day${totalDays !== 1 ? 's' : ''}`;
+
+            if (totalDays > 30) {
+                const months = Math.floor(totalDays / 30);
+                const extraDays = totalDays % 30;
+                
+                let breakdown = `${months} month${months > 1 ? 's' : ''}`;
+                if (extraDays > 0) {
+                    breakdown += `  ${extraDays} day${extraDays > 1 ? 's' : ''}`;
+                }
+                
+                daysDisplay += ` (${breakdown})`;
+            }
+
+            document.getElementById('calcDays').textContent = daysDisplay;
             document.getElementById('calcDailyRate').textContent = `${(calc.dailyInterestRateInfoOnly * 100).toFixed(4)}%`;
             document.getElementById('calcDailyAmount').textContent = inr(calc.dailyInterestAmountInfoOnly);
             document.getElementById('calcAccrued').textContent = inr(calc.accruedInterestInfoOnly);
@@ -1183,21 +1277,100 @@
             }
         }
 
+        // ★ CHANGE (split interest/principal fields): small rounding helper,
+        // used by both the lock logic and the allocation preview below.
+        function Round2(v) { return Math.round((v + Number.EPSILON) * 100) / 100; }
+
+        // ★ CHANGE (disable interest field at zero outstanding interest): if the
+        // loan currently has no interest due at all, there's nothing to type into
+        // Interest — disable it (and clear any stale value) so the teller goes
+        // straight to Principal, which unlocks on its own via
+        // updatePrincipalFieldLock() below once outstandingInterest is 0.
+        function updateInterestFieldLock() {
+            if (!activeInterestCalc) return;
+
+            const outstandingInterest = activeInterestCalc.outstandingInterest;
+            const interestField = document.getElementById('payInterestAmount');
+
+            if (outstandingInterest <= 0) {
+                interestField.value = '';
+                interestField.disabled = true;
+            } else {
+                interestField.disabled = false;
+            }
+        }
+
+        // ★ CHANGE (split interest/principal fields): Principal Amount stays
+        // disabled until the interest typed so far covers the full
+        // outstanding interest for this payment (or there simply is none
+        // outstanding). Shows an inline message either way so the teller
+        // knows why the field is locked/unlocked.
+        function updatePrincipalFieldLock() {
+            if (!activeInterestCalc) return;
+
+            const outstandingInterest = activeInterestCalc.outstandingInterest;
+            const interestTyped = parseFloat(document.getElementById('payInterestAmount').value) || 0;
+            const remainingInterestAfterEntry = Math.max(0, Round2(outstandingInterest - interestTyped));
+
+            const principalField = document.getElementById('payPrincipalAmount');
+            const hint = document.getElementById('payPrincipalHint');
+            const unlocked = remainingInterestAfterEntry <= 0.01;
+
+            principalField.disabled = !unlocked;
+            if (!unlocked) {
+                principalField.value = '';
+                hint.textContent = `Clear the full outstanding interest (${inr(outstandingInterest)}) to unlock principal payment.`;
+                hint.classList.add('field-hint-locked');
+            } else {
+                hint.textContent = outstandingInterest <= 0
+                    ? 'No interest outstanding — principal payment is open.'
+                    : 'Outstanding interest fully covered — principal payment unlocked.';
+                hint.classList.remove('field-hint-locked');
+            }
+        }
+
         // Client-side mirror of the server's interest-first allocation, used ONLY
         // for instant UI feedback as the user types an amount. SavePayment always
         // re-computes and re-validates this on the server before writing anything.
+        // ★ CHANGE (split interest/principal fields): now reads the two split
+        // inputs instead of one combined "Amount Received" field. Interest is
+        // clamped to what's outstanding; Principal is ignored while locked.
         function recalcAllocation() {
             if (!activePaymentLoan || !activeInterestCalc) return;
+
+            updateInterestFieldLock();
+            updatePrincipalFieldLock();
 
             const outstandingInterest = activeInterestCalc.outstandingInterest;
             const outstandingPrincipal = activeInterestCalc.outstandingPrincipal;
             const maxPayable = activeInterestCalc.maxPayable;
-            const amountReceived = parseFloat(document.getElementById('payAmountReceived').value) || 0;
+
+            const interestInput = document.getElementById('payInterestAmount');
+            const principalInput = document.getElementById('payPrincipalAmount');
+
+            let interestTyped = parseFloat(interestInput.value) || 0;
+            let surplusToPrincipal = 0;
+            if (interestTyped > outstandingInterest) {
+                surplusToPrincipal = interestTyped - outstandingInterest;
+                interestTyped = outstandingInterest;
+                interestInput.value = interestTyped ? interestTyped.toFixed(2) : '';
+            }
+
+            updatePrincipalFieldLock();
+            
+            if (surplusToPrincipal > 0) {
+                principalInput.disabled = false; // Force unlock the principal field
+                // Fill principal, capped safely to outstanding principal
+                principalInput.value = Math.min(surplusToPrincipal, outstandingPrincipal).toFixed(2); 
+            }
+
+            const principalTyped = principalInput.disabled ? 0 : (parseFloat(principalInput.value) || 0);
+            const amountReceived = Round2(interestTyped + principalTyped);
 
             const validationMsg = document.getElementById('payValidationMsg');
             const saveBtn = document.getElementById('btnSavePayment');
 
-            if (amountReceived > maxPayable + 0.01) {
+            if (amountReceived > maxPayable + 0.01 || principalTyped > outstandingPrincipal + 0.01) {
                 validationMsg.classList.add('show');
                 saveBtn.disabled = true;
             } else {
@@ -1205,9 +1378,8 @@
                 saveBtn.disabled = amountReceived <= 0;
             }
 
-            const interestPaid = Math.min(amountReceived, outstandingInterest);
-            const remainderAfterInterest = Math.max(0, amountReceived - interestPaid);
-            const principalPaid = Math.min(remainderAfterInterest, outstandingPrincipal);
+            const interestPaid = Math.min(interestTyped, outstandingInterest);
+            const principalPaid = Math.min(principalTyped, outstandingPrincipal);
             const remainingInterest = Math.max(0, outstandingInterest - interestPaid);
             const remainingPrincipal = Math.max(0, outstandingPrincipal - principalPaid);
             const balanceAfter = remainingInterest + remainingPrincipal;
@@ -1219,7 +1391,9 @@
             document.getElementById('allocBalanceAfter').textContent = inr(balanceAfter);
         }
 
-        document.getElementById('payAmountReceived').addEventListener('input', recalcAllocation);
+        // ★ CHANGE (split interest/principal fields): listen on both inputs.
+        document.getElementById('payInterestAmount').addEventListener('input', recalcAllocation);
+        document.getElementById('payPrincipalAmount').addEventListener('input', recalcAllocation);
         document.getElementById('payDate').addEventListener('change', onPaymentDateChanged);
 
         let lastPaymentReceipt = null;
@@ -1231,11 +1405,21 @@
             btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Save';
 
             try {
+                // ★ CHANGE (split interest/principal fields): sum the two typed
+                // fields into the single amountReceived the API expects — the
+                // server still runs its own authoritative interest-first
+                // allocation on this total, this UI split just makes the
+                // interest-first rule explicit and enforced client-side too.
+                const outstandingInterest = activeInterestCalc.outstandingInterest;
+                const interestAmount = Math.min(parseFloat(document.getElementById('payInterestAmount').value) || 0, outstandingInterest);
+                const principalField = document.getElementById('payPrincipalAmount');
+                const principalAmount = principalField.disabled ? 0 : (parseFloat(principalField.value) || 0);
+
                 const payload = {
                     paymentDate: document.getElementById('payDate').value,
                     paymentMode: document.getElementById('payMode').value,
                     referenceNo: null,
-                    amountReceived: parseFloat(document.getElementById('payAmountReceived').value) || 0,
+                    amountReceived: Round2(interestAmount + principalAmount),
                     processedByUserId: (Session.get() && Session.get().userId) || 1
                 };
 
@@ -1247,7 +1431,9 @@
 
                 document.getElementById('payDate').disabled = true;
                 document.getElementById('payMode').disabled = true;
-                document.getElementById('payAmountReceived').disabled = true;
+                // ★ CHANGE (split interest/principal fields): lock both fields after save.
+                document.getElementById('payInterestAmount').disabled = true;
+                document.getElementById('payPrincipalAmount').disabled = true;
                 btn.style.display = 'none';
                 document.getElementById('btnPaymentCancel').textContent = 'Done';
                 document.getElementById('btnPrintPaymentReceipt').disabled = false;
@@ -1781,9 +1967,9 @@
                             <td>${e.description}</td>
                             <td class="text-end">${e.debit ? inr(e.debit) : '<span class="text-muted-jlms">—</span>'}</td>
                             <td class="text-end">${e.credit ? inr(e.credit) : '<span class="text-muted-jlms">—</span>'}</td>
-                            <td class="text-end">${inr(e.principalBalance)}</td>
+                            <td class="text-end d-none">${inr(e.principalBalance)}</td>
                             <td class="text-end d-none">${inr(e.interestBalance)}</td>
-                            <td class="text-end cell-strong">${inr(e.runningBalance)}</td>
+                            <td class="text-end cell-strong d-none">${inr(e.runningBalance)}</td>
                             <td style="display: none;">${e.receiptNumber || '-'}</td>
                             <td style="display: none;">${e.userName || '-'}</td>
                             ${receiptCell}
@@ -1794,11 +1980,21 @@
                 document.getElementById('ledgerTotalPrincipal').textContent = inr(result.totalPrincipalCollected);
                 document.getElementById('ledgerCurrentOutstanding').textContent = inr(result.currentOutstanding);
 
+                /* ── Grand Total row: sum Debit & Credit for current page ── */
+                const grandDebit  = result.items.reduce((s, e) => s + (Number(e.debit)  || 0), 0);
+                const grandCredit = result.items.reduce((s, e) => s + (Number(e.credit) || 0), 0);
+                document.getElementById('ledgerGrandTotalDebit').textContent  = grandDebit  ? inr(grandDebit)  : '—';
+                document.getElementById('ledgerGrandTotalCredit').textContent = grandCredit ? inr(grandCredit) : '—';
+                document.getElementById('ledgerGrandTotalFoot').style.display = result.items.length ? '' : 'none';
+
                 ledgerTotalPages = Math.max(1, Math.ceil(result.totalCount / ledgerPageSize));
                 renderLedgerPagination(ledgerCurrentPage, ledgerTotalPages);
 
                 document.getElementById('ledgerLoadingState').style.display = 'none';
                 document.getElementById('ledgerContent').style.display = 'block';
+                // ★ CHANGE: enable export buttons once data is available
+                document.getElementById('btnExportLedgerPdf').disabled = false;
+                document.getElementById('btnExportLedgerExcel').disabled = false;
             } catch (err) {
                 document.getElementById('ledgerLoadingState').style.display = 'block';
                 document.getElementById('ledgerContent').style.display = 'none';
@@ -1874,14 +2070,221 @@
             loadLedgerPage(1);
         });
 
-        // document.getElementById('btnExportLedgerPdf').addEventListener('click', () => {
-        //   // TODO: hook up to a real export endpoint, e.g. Api.exportLedgerPdf(loanId)
-        //   showApiSuccess('Ledger export started. The PDF will download shortly.');
-        // });
+        // ★ CHANGE: disable export buttons on modal hide so they don't remain
+        // enabled if the user re-opens an empty/error state
+        document.getElementById('ledgerModal').addEventListener('hidden.bs.modal', () => {
+            document.getElementById('btnExportLedgerPdf').disabled = true;
+            document.getElementById('btnExportLedgerExcel').disabled = true;
+        });
 
-        // document.getElementById('btnPrintLedger').addEventListener('click', () => {
-        //   window.print();
-        // });
+        /* ★ CHANGE: Ledger export helpers
+           Both functions fetch ALL ledger rows via the new /ledger-all endpoint,
+           then generate the file client-side — no pagination, complete history.
+        =========================================================================== */
+
+        /**
+         * Fetches all ledger rows for the current loanId (no pagination).
+         * Uses the new GET /api/loan-operations/{loanId}/ledger-all endpoint.
+         *
+         * ★ NOTE for api-client.js: add the following method to the Api object:
+         *   getLoanOperationsLedgerAll: (loanId) =>
+         *       apiFetch(`/api/loan-operations/${loanId}/ledger-all`),
+         *
+         * Until api-client.js is updated this function falls back to a direct fetch.
+         */
+        async function fetchAllLedgerRows() {
+            if (!activeLedgerLoanId) throw new Error('No loan selected.');
+            // Use Api helper if available, otherwise fall back to direct fetch
+            if (typeof Api !== 'undefined' && typeof Api.getLoanOperationsLedgerAll === 'function') {
+                return await Api.getLoanOperationsLedgerAll(activeLedgerLoanId);
+            }
+            // ★ CHANGE: direct fetch fallback (remove once api-client.js is updated)
+            const baseUrl = (typeof Api !== 'undefined' && Api.baseUrl) ? Api.baseUrl : '';
+            const res = await fetch(`${baseUrl}/api/loan-operations/${activeLedgerLoanId}/ledger-all`, {
+                headers: { 'Authorization': `Bearer ${Session.getToken ? Session.getToken() : ''}` }
+            });
+            if (!res.ok) throw new Error(`Failed to fetch full ledger (${res.status})`);
+            return await res.json();
+        }
+
+        /**
+         * Builds the flat data array used by both PDF and Excel exports.
+         * Returns { loanInfo, rows } where rows are plain-object arrays.
+         */
+        async function buildLedgerExportData() {
+            const data = await fetchAllLedgerRows();
+            const loanNo   = document.getElementById('ledgerLoanNoLabel').textContent  || '';
+            const customer = document.getElementById('ledgerCustomer').textContent      || '';
+            const scheme   = document.getElementById('ledgerScheme').textContent        || '';
+            const loanDate = document.getElementById('ledgerLoanDate').textContent      || '';
+            const matDate  = document.getElementById('ledgerMaturityDate').textContent  || '';
+            const rate     = document.getElementById('ledgerRate').textContent          || '';
+            const principal= document.getElementById('ledgerPrincipal').textContent     || '';
+            const status   = document.getElementById('ledgerStatus').textContent        || '';
+
+            const rows = (data.items || []).map(e => ({
+                'Date':        fmtDate(e.date),
+                'Txn Type':    e.transactionType,
+                'Description': e.description,
+                'Debit (₹)':   e.debit  ? Number(e.debit).toFixed(2)  : '',
+                'Credit (₹)':  e.credit ? Number(e.credit).toFixed(2) : '',
+                // 'Principal Balance': commented out
+                // 'Running Balance':   commented out
+                // 'Receipt No':        e.receiptNumber || '-',
+                // 'User':              e.userName      || '-',
+            }));
+
+            const totalDebit  = (data.items || []).reduce((s, e) => s + (Number(e.debit)  || 0), 0);
+            const totalCredit = (data.items || []).reduce((s, e) => s + (Number(e.credit) || 0), 0);
+
+            return { loanNo, customer, scheme, loanDate, matDate, rate, principal, status, rows,
+                     totalInterest: data.totalInterestCollected, totalPrincipal: data.totalPrincipalCollected,
+                     totalDebit, totalCredit };
+        }
+
+        /* ---- Excel export ---- */
+        document.getElementById('btnExportLedgerExcel').addEventListener('click', async () => {
+            const btn = document.getElementById('btnExportLedgerExcel');
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Exporting…';
+            try {
+                // const { loanNo, customer, scheme, loanDate, matDate, rate, principal,
+                //         status, rows, totalInterest, totalPrincipal } = await buildLedgerExportData();
+
+                const { loanNo, rows, totalDebit, totalCredit } = await buildLedgerExportData();
+
+                const wb = XLSX.utils.book_new();
+
+                const dataRows = rows.map(r => Object.values(r));
+                const colHeaders = Object.keys(rows[0] || {});
+
+                const allRows = [colHeaders, ...dataRows];
+
+                /* ── Grand Total footer row ── */
+                allRows.push([]);
+                allRows.push(['Grand Total', '', '', Number(totalDebit||0).toFixed(2), Number(totalCredit||0).toFixed(2)]);
+
+                const ws = XLSX.utils.aoa_to_sheet(allRows);
+
+                /* ── Column widths (Date, Txn Type, Description, Debit, Credit) ── */
+                ws['!cols'] = [14, 20, 36, 14, 14].map(w => ({ wch: w }));
+
+                XLSX.utils.book_append_sheet(wb, ws, 'Ledger');
+                XLSX.writeFile(wb, `Ledger-${loanNo}-${new Date().toISOString().slice(0,10)}.xlsx`);
+            } catch (err) {
+                showApiError(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        });
+
+        /* ---- PDF export — direct download via jsPDF + html2canvas (no print dialog) ---- */
+        document.getElementById('btnExportLedgerPdf').addEventListener('click', async () => {
+            const btn = document.getElementById('btnExportLedgerPdf');
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating PDF…';
+            try {
+                const { loanNo, customer, scheme, loanDate, matDate, rate, principal,
+                        status, rows, totalDebit, totalCredit } = await buildLedgerExportData();
+
+                // ★ CHANGE: Build a hidden off-screen div, render it with html2canvas,
+                //   then feed the canvas pages into jsPDF for a direct .pdf download.
+                // Create hidden render container
+                const container = document.createElement('div');
+                container.style.cssText = 'position:fixed;left:-9999px;top:0;width:1100px;background:#fff;padding:24px;font-family:Arial,sans-serif;font-size:11px;color:#1f2937;';
+                container.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+                        <h1 style="font-size:15px;font-weight:700;color:#0d3b66;margin:0;">JLMS &mdash; Loan Ledger</h1>
+                        <span style="font-size:10px;color:#6b7280;">Generated: ${new Date().toLocaleString('en-IN')}</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(4,auto);gap:4px 24px;margin-bottom:14px;padding:10px 12px;background:#f7f8fa;border-radius:6px;border:1px solid #e5e9ef;">
+                        <span style="color:#6b7280;font-size:10px;">Loan No</span>      <span style="font-weight:600;">${loanNo}</span>
+                        <span style="color:#6b7280;font-size:10px;">Customer</span>    <span style="font-weight:600;">${customer}</span>
+                        <span style="color:#6b7280;font-size:10px;">Scheme</span>      <span style="font-weight:600;">${scheme}</span>
+                        <span style="color:#6b7280;font-size:10px;">Status</span>      <span style="font-weight:600;">${status}</span>
+                        <span style="color:#6b7280;font-size:10px;">Loan Date</span>   <span style="font-weight:600;">${loanDate}</span>
+                        <span style="color:#6b7280;font-size:10px;">Maturity</span>    <span style="font-weight:600;">${matDate}</span>
+                        <span style="color:#6b7280;font-size:10px;">Principal</span>   <span style="font-weight:600;">${principal}</span>
+                        <span style="color:#6b7280;font-size:10px;">Rate</span>        <span style="font-weight:600;">${rate}</span>
+                    </div>
+                    <table style="width:100%;border-collapse:collapse;">
+                        <thead>
+                            <tr>
+                                <th style="background:#0d3b66;color:#fff;padding:6px 8px;text-align:left;font-size:10px;">Date</th>
+                                <th style="background:#0d3b66;color:#fff;padding:6px 8px;text-align:left;font-size:10px;">Txn Type</th>
+                                <th style="background:#0d3b66;color:#fff;padding:6px 8px;text-align:left;font-size:10px;">Description</th>
+                                <th style="background:#0d3b66;color:#fff;padding:6px 8px;text-align:right;font-size:10px;">Debit</th>
+                                <th style="background:#0d3b66;color:#fff;padding:6px 8px;text-align:right;font-size:10px;">Credit</th>
+                                <!-- Principal Balance: commented out -->
+                                <!-- Running Balance: commented out -->
+                            </tr>
+                        </thead>
+                        <tbody style="font-size:10.5px;">
+                            ${rows.map((r, i) => `
+                            <tr style="background:${i % 2 === 1 ? '#f7f8fa' : '#fff'};">
+                                <td style="padding:5px 8px;border-bottom:1px solid #eef0f3;">${r['Date']}</td>
+                                <td style="padding:5px 8px;border-bottom:1px solid #eef0f3;">${r['Txn Type']}</td>
+                                <td style="padding:5px 8px;border-bottom:1px solid #eef0f3;">${r['Description']}</td>
+                                <td style="padding:5px 8px;border-bottom:1px solid #eef0f3;text-align:right;">${r['Debit (₹)'] ? '&#8377;' + r['Debit (₹)'] : '&mdash;'}</td>
+                                <td style="padding:5px 8px;border-bottom:1px solid #eef0f3;text-align:right;">${r['Credit (₹)'] ? '&#8377;' + r['Credit (₹)'] : '&mdash;'}</td>
+                                <!-- Principal Balance: commented out -->
+                                <!-- Running Balance: commented out -->
+                            </tr>`).join('')}
+                        </tbody>
+                        <tfoot>
+                            <tr style="border-top:2px solid #0d3b66;background:#f0f4fa;">
+                                <td colspan="3" style="padding:6px 8px;font-weight:700;color:#374151;">Grand Total</td>
+                                <td style="padding:6px 8px;text-align:right;font-weight:700;color:#0d3b66;">&#8377;${Number(totalDebit||0).toFixed(2)}</td>
+                                <td style="padding:6px 8px;text-align:right;font-weight:700;color:#0d3b66;">&#8377;${Number(totalCredit||0).toFixed(2)}</td>
+                                <!-- Principal Balance: commented out -->
+                                <!-- Running Balance: commented out -->
+                            </tr>
+                        </tfoot>
+                    </table>`;
+
+                document.body.appendChild(container);
+
+                // Render to canvas then build PDF pages
+                const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+                document.body.removeChild(container);
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+                const pageW  = pdf.internal.pageSize.getWidth();
+                const pageH  = pdf.internal.pageSize.getHeight();
+                const margin = 10;
+                const imgW   = pageW - margin * 2;
+                const imgH   = (canvas.height * imgW) / canvas.width;
+                const pageContentH = pageH - margin * 2;
+
+                let yOffset = 0;
+                while (yOffset < imgH) {
+                    if (yOffset > 0) pdf.addPage();
+                    pdf.addImage(
+                        canvas.toDataURL('image/jpeg', 0.92),
+                        'JPEG',
+                        margin,
+                        margin - yOffset,
+                        imgW,
+                        imgH
+                    );
+                    // Clip drawn area to page bounds
+                    yOffset += pageContentH;
+                }
+
+                pdf.save(`Ledger-${loanNo}-${new Date().toISOString().slice(0,10)}.pdf`);
+
+            } catch (err) {
+                showApiError(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        });
 
         /* ============================ Page bootstrap ============================ */
 

@@ -306,7 +306,10 @@ async _fetchBlob(path, options = {}) {
 
 
 getLoanOperationsLedger: (loanId, page = 1, pageSize = 10) =>
-  apiRequest(`/loan-operations/${loanId}/ledger?page=${page}&pageSize=${pageSize}`)
+  apiRequest(`/loan-operations/${loanId}/ledger?page=${page}&pageSize=${pageSize}`),
+
+getLoanOperationsLedgerAll: (loanId) =>
+  apiRequest(`/loan-operations/${loanId}/ledger-all`)
 
 
 

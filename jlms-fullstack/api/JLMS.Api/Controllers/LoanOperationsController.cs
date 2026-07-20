@@ -153,8 +153,20 @@ public class LoanOperationsController : ControllerBase
         catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
     }
 
+    // Returns ALL ledger rows (no pagination) for client-side PDF / Excel export.
+    // Identical shape to GetLedger but pageSize = int.MaxValue so no row is omitted.
+    [HttpGet("{loanId:int}/ledger-all")]
+    public async Task<ActionResult<LoanOperationsLedgerResponseDto>> GetLedgerAll(int loanId)
+    {
+        try
+        {
+            return Ok(await _service.GetLedgerAsync(loanId, page: 1, pageSize: int.MaxValue));
+        }
+        catch (KeyNotFoundException ex) { return NotFound(ex.Message); }
+    }
+
     // Inject LoanReceiptPdfService and DbContext in the constructor
-    
+
 
     // POST /api/loan-operations/payment-receipt-pdf
     // Body: PaymentReceiptPdfDto (matches fields of LoanOperationsPaymentResponseDto)
