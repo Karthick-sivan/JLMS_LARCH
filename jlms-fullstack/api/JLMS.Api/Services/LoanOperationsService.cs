@@ -569,19 +569,50 @@ public class LoanOperationsService
                 continue;
             }
 
-            var creditAmount = Round2(t.PrincipalAmount + t.InterestAmount + t.PenaltyAmount);
-            interestBal = Math.Max(0m, Round2(interestBal - (t.InterestAmount + t.PenaltyAmount)));
-            principalBal = Math.Max(0m, Round2(principalBal - t.PrincipalAmount));
+            // (ledger interest/principal split): a single payment transaction
+            // that covered both interest and principal (the normal case for the split
+            // Payment Entry fields — see LoanOperationsService.SavePaymentAsync) is now
+            // shown as two ledger rows instead of one combined row, same pattern as the
+            // Processing Fee Debited/Collected split above. If a payment only covered
+            // one side (interest-only or principal-only — also possible now that the
+            // modal lets a teller enter either independently), it still renders as a
+            // single row via DescribeTransaction(t).
+            var interestPortion = Round2(t.InterestAmount + t.PenaltyAmount);
+            var principalPortion = Round2(t.PrincipalAmount);
 
-            rows.Add(new LoanOperationsLedgerRowDto(
-                t.TransactionId, t.TransactionDate, t.TransactionType, DescribeTransaction(t),
-                0, creditAmount, principalBal, interestBal, principalBal + interestBal,
-                t.ReceiptNumber, userName, t.Remarks, true));
+            if (interestPortion > 0 && principalPortion > 0)
+            {
+                // Row A: Interest paid
+                interestBal = Math.Max(0m, Round2(interestBal - interestPortion));
+                rows.Add(new LoanOperationsLedgerRowDto(
+                    t.TransactionId, t.TransactionDate, t.TransactionType, "Interest payment received",
+                    0, interestPortion, principalBal, interestBal, principalBal + interestBal,
+                    t.ReceiptNumber, userName, t.Remarks, true));
+
+                // Row B: Principal paid
+                principalBal = Math.Max(0m, Round2(principalBal - principalPortion));
+                rows.Add(new LoanOperationsLedgerRowDto(
+                    t.TransactionId, t.TransactionDate, t.TransactionType, "Principal payment received",
+                    0, principalPortion, principalBal, interestBal, principalBal + interestBal,
+                    t.ReceiptNumber, userName, t.Remarks, true));
+            }
+            else
+            {
+                var creditAmount = Round2(interestPortion + principalPortion);
+                interestBal = Math.Max(0m, Round2(interestBal - interestPortion));
+                principalBal = Math.Max(0m, Round2(principalBal - principalPortion));
+
+                rows.Add(new LoanOperationsLedgerRowDto(
+                    t.TransactionId, t.TransactionDate, t.TransactionType, DescribeTransaction(t),
+                    0, creditAmount, principalBal, interestBal, principalBal + interestBal,
+                    t.ReceiptNumber, userName, t.Remarks, true));
+            }
         }
 
         var totalCount = rows.Count;
         var safePage = Math.Max(1, page);
-        var safePageSize = pageSize is > 0 and <= 100 ? pageSize : 10;
+        var safePageSize = pageSize == int.MaxValue ? int.MaxValue
+                 : pageSize is > 0 and <= 100 ? pageSize : 10;
         var pagedRows = rows.Skip((safePage - 1) * safePageSize).Take(safePageSize).ToList();
 
         var totalInterestCollected = Round2(transactions.Where(t => t.TransactionType != "Disbursement").Sum(t => t.InterestAmount + t.PenaltyAmount));
@@ -602,10 +633,26 @@ public class LoanOperationsService
         "PrincipalCollection" => "Principal payment received",
         "Renewal" => "Loan renewed",
         "Closure" => "Loan closed - full settlement",
-        LoanOperationsCalculationHelper.PaymentTransactionType => "Payment received (Interest + Principal)",
+        // ★ CHANGE (ledger interest/principal split): only reached here when the split
+        // logic in GetLedgerAsync above found just ONE portion on this transaction (the
+        // other side is already broken into its own row when both are present) — label
+        // it by whichever side is actually non-zero instead of the old fixed
+        // "Interest + Principal" text, which is misleading for e.g. principal-only payments.
+        LoanOperationsCalculationHelper.PaymentTransactionType => DescribePaymentPortion(t),
         LoanOperationsCalculationHelper.ClosureTransactionType => "Loan closed - full settlement",
         _ => t.TransactionType
     };
+
+    private static string DescribePaymentPortion(LoanTransaction t)
+    {
+        var hasInterest = (t.InterestAmount + t.PenaltyAmount) > 0;
+        var hasPrincipal = t.PrincipalAmount > 0;
+
+        if (hasInterest && hasPrincipal) return "Payment received (Interest + Principal)"; // safety fallback; GetLedgerAsync splits this case into two rows before reaching here
+        if (hasInterest) return "Interest payment received";
+        if (hasPrincipal) return "Principal payment received";
+        return "Payment received";
+    }
 
     // ===================================================================
     // Shared helpers
