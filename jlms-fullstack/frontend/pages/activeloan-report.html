@@ -1,52 +1,202 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>JLMS — Active Loans Report</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="View and filter all active loans in JLMS.">
-<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/jlms-core.css">
-<style>
-  .report-cat-item {
-    display:flex; align-items:center; gap:10px;
-    padding:10px 14px; font-size:12.5px; font-weight:600;
-    color:var(--n-700); cursor:pointer;
-    border-left:3px solid transparent; transition:background .15s;
-  }
-  .report-cat-item:hover  { background:var(--n-50); }
-  .report-cat-item.active { background:var(--navy-50); color:var(--navy-700); border-left-color:var(--navy-700); }
+  <meta charset="UTF-8">
+  <title>JLMS — Loan Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View and filter all loans in JLMS.">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/jlms-core.css">
+  <style>
+    .report-cat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--n-700);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background .15s;
+    }
 
-  .summary-cards { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
-  .summary-card  { flex:1; min-width:150px; background:#fff; border:1px solid #eef0f3; border-radius:10px; padding:14px 16px; box-shadow:0 1px 4px rgba(0,0,0,.04); }
-  .summary-card .sc-label { font-size:11px; color:#9aa4b2; font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
-  .summary-card .sc-value { font-size:17px; font-weight:700; color:#1e2a3a; }
-  .summary-card.accent-orange .sc-value { color:#d97706; }
-  .summary-card.accent-red    .sc-value { color:#dc2626; }
-  .summary-card.accent-navy   .sc-value { color:var(--navy-700,#0d3b66); }
-  .summary-card.accent-green  .sc-value { color:#16a34a; }
+    .report-cat-item:hover {
+      background: var(--n-50);
+    }
 
-  .state-panel { text-align:center; padding:52px 20px; color:#9aa4b2; }
-  .state-panel i { font-size:2.8rem; display:block; margin-bottom:12px; }
-  .state-panel p { font-size:14px; margin:0; }
+    .report-cat-item.active {
+      background: var(--navy-50);
+      color: var(--navy-700);
+      border-left-color: var(--navy-700);
+    }
 
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .spin { display:inline-block; animation:spin .8s linear infinite; }
+    .summary-cards {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
 
-  .table-jlms-wrap { overflow-x:auto; }
-  .table-jlms { min-width:2100px; }
-  .nowrap { white-space:nowrap; }
-</style>
+    .summary-card {
+      flex: 1;
+      min-width: 150px;
+      background: #fff;
+      border: 1px solid #eef0f3;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
+    }
+
+    .summary-card .sc-label {
+      font-size: 11px;
+      color: #9aa4b2;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 4px;
+    }
+
+    .summary-card .sc-value {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1e2a3a;
+    }
+
+    .summary-card.accent-orange .sc-value {
+      color: #d97706;
+    }
+
+    .summary-card.accent-red .sc-value {
+      color: #dc2626;
+    }
+
+    .summary-card.accent-navy .sc-value {
+      color: var(--navy-700, #0d3b66);
+    }
+
+    .summary-card.accent-green .sc-value {
+      color: #16a34a;
+    }
+
+    .state-panel {
+      text-align: center;
+      padding: 52px 20px;
+      color: #9aa4b2;
+    }
+
+    .state-panel i {
+      font-size: 2.8rem;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .state-panel p {
+      font-size: 14px;
+      margin: 0;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spin {
+      display: inline-block;
+      animation: spin .8s linear infinite;
+    }
+
+    .table-jlms-wrap {
+      overflow-x: auto;
+    }
+
+    .table-jlms {
+      min-width: 760px;
+    }
+
+    .nowrap {
+      white-space: nowrap;
+    }
+
+    .badge-jlms {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .badge-jlms .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .badge-success {
+      background: #ecfdf3;
+      color: #16a34a;
+    }
+
+    .badge-neutral {
+      background: #f1f3f5;
+      color: #6b7280;
+    }
+
+    .badge-warning {
+      background: #fffbeb;
+      color: #d97706;
+    }
+
+    .badge-danger {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .suggestion-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  max-height: 220px;
+  overflow-y: auto;
+  display: none;
+  margin-top: 2px;
+}
+.suggestion-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.suggestion-item:hover {
+  background: var(--n-50, #f5f7fa);
+}
+.suggestion-item small {
+  color: #9aa4b2;
+  display: block;
+  font-size: 11px;
+}
+  </style>
 </head>
-<body>
-<div class="app-shell">
-  <div id="jlmsSidebarMount"></div>
-  <div class="main-col">
-    <div id="jlmsTopbarMount"></div>
-    <div class="page-content">
 
-      <!-- <div class="page-header">
+<body>
+  <div class="app-shell">
+    <div id="jlmsSidebarMount"></div>
+    <div class="main-col">
+      <div id="jlmsTopbarMount"></div>
+      <div class="page-content">
+
+        <!-- <div class="page-header">
         <div>
           <div class="breadcrumb-jlms">
             <a href="dashboard.html">Home</a><span class="sep">/</span>
@@ -56,419 +206,474 @@
         </div>
       </div> -->
 
-      <div class="row g-3">
-        <!-- Left: categories -->
-        <div class="col-lg-3">
-          <div class="panel">
-            <div class="panel-head"><div class="h4">Report Categories</div></div>
-            <div class="panel-body" style="padding:6px 0;">
-              <!-- <div class="report-cat-item active"><i class="bi bi-folder2-open"></i> Active Loans Report</div> -->
-              <!-- <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i class="bi bi-graph-down"></i> Outstanding Reports</div> -->
-              <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i class="bi bi-cash-coin"></i> Collection Reports</div>
-              <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i class="bi bi-check2-circle"></i> Closed Loans Report</div>
+        <div class="row g-3">
+          <!-- Left: categories -->
+          <div class="col-lg-3">
+            <div class="panel">
+              <div class="panel-head">
+                <div class="h4">Report Categories</div>
+              </div>
+              <div class="panel-body" style="padding:6px 0;">
+                <div class="report-cat-item active"><i class="bi bi-folder2-open"></i> Loan Report</div>
+                <!-- <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i class="bi bi-graph-down"></i> Outstanding Reports</div> -->
+                <!-- <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i class="bi bi-cash-coin"></i> Collection Reports</div> -->
+                <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i
+                    class="bi bi-check2-circle"></i> Closed Loans Report</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Right: filters + grid -->
-        <div class="col-lg-9">
+          <!-- Right: filters + grid -->
+          <div class="col-lg-9">
 
-          <!-- Filters -->
-          <div class="panel mb-3">
-            <div class="panel-head"><div class="h4">Active Loans — Filters</div></div>
-            <div class="panel-body">
-              <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                  <label class="field-label" for="fLoanNo">Loan Number</label>
-                  <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="LN-...">
+            <!-- Filters -->
+            <div class="panel mb-3">
+              <div class="panel-head">
+                <div class="h4"> Loan Report — Filters</div>
+              </div>
+              <div class="panel-body">
+                <div class="row g-3 align-items-end">
+                  <div class="col-md-2">
+                    <label class="field-label" for="fFromDate">From Date</label>
+                    <input id="fFromDate" type="date" class="form-control-jlms">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="field-label" for="fToDate">To Date</label>
+                    <input id="fToDate" type="date" class="form-control-jlms">
+                  </div>
+                  <div class="col-md-3" style="position:relative;">
+                    <label class="field-label" for="fLoanNo">Loan Number</label>
+                    <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="LN-..." autocomplete="off">
+                    <div id="loanNoSuggestions" class="suggestion-list"></div>
+                  </div>
+                  <div class="col-md-3" style="position:relative;">
+                    <label class="field-label" for="fCustomerName">Customer Name</label>
+                    <input id="fCustomerName" type="text" class="form-control-jlms" placeholder="Name"
+                      autocomplete="off">
+                    <div id="customerSuggestions" class="suggestion-list"></div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <label class="field-label" for="fStatus">Status</label>
+                    <select id="fStatus" class="form-select-jlms">
+                      <option value="">All</option>
+                      <option value="Active">Active</option>
+                      <option value="Due">Due</option>
+                      <option value="Overdue">Overdue</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="col-md-3">
-                  <label class="field-label" for="fCustomerName">Customer Name</label>
-                  <input id="fCustomerName" type="text" class="form-control-jlms" placeholder="Name">
-                </div>
-                <div class="col-md-3">
-                  <label class="field-label" for="fMobile">Mobile</label>
-                  <input id="fMobile" type="text" class="form-control-jlms" placeholder="10-digit">
-                </div>
-                <!-- <div class="col-md-2">
-                  <label class="field-label" for="fAadhaar">Aadhaar</label>
-                  <input id="fAadhaar" type="text" class="form-control-jlms" placeholder="XXXX-XXXX">
+                <!-- <div class="row g-3 align-items-end mt-1">
+                  <div class="col-md-2">
+                    <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary"
+                      style="width:100%;justify-content:center;">
+                      <i class="bi bi-funnel"></i> Apply
+                    </button>
+                  </div>
                 </div> -->
-                <div class="col-md-3">
-                  <label class="field-label" for="fScheme">Loan Scheme</label>
-                  <select id="fScheme" class="form-select-jlms"><option value="">All Schemes</option></select>
+                <div class="row g-3 align-items-end mt-1">
+                  <div class="col-12 d-flex justify-content-end">
+                    <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary">
+                      <i class="bi bi-funnel"></i> Apply
+                    </button>
+                  </div>
+                </div>
+                <div id="apiErrorBanner" class="mt-3"
+                  style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:8px;padding:10px 14px;font-size:13px;">
                 </div>
               </div>
-              <div class="row g-3 align-items-end mt-1">
-                <div class="col-md-2">
-                  <label class="field-label" for="fJewelType">Jewel Type</label>
-                  <select id="fJewelType" class="form-select-jlms"><option value="">All Types</option></select>
-                </div>
-                <div class="col-md-2">
-                  <label class="field-label" for="fFromDate">From Date</label>
-                  <input id="fFromDate" type="date" class="form-control-jlms">
-                </div>
-                <div class="col-md-2">
-                  <label class="field-label" for="fToDate">To Date</label>
-                  <input id="fToDate" type="date" class="form-control-jlms">
-                </div>
-                <!-- <div class="col-md-2">
-                  <label class="field-label" for="fBranch">Branch</label>
-                  <select id="fBranch" class="form-select-jlms"><option value="">All Branches</option></select>
-                </div> -->
-                <!-- <div class="col-md-2">
-                  <label class="field-label" for="fStatus">Status</label>
-                  <select id="fStatus" class="form-select-jlms">
-                    <option value="">All</option>
-                    <option value="Active">Active</option>
-                    <option value="Due">Due</option>
-                    <option value="Overdue">Overdue</option>
-                  </select>
-                </div> -->
-                <div class="col-md-2">
-                  <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary" style="width:100%;justify-content:center;">
-                    <i class="bi bi-funnel"></i> Apply
-                  </button>
-                </div>
-              </div>
-              <div id="apiErrorBanner" class="mt-3" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:8px;padding:10px 14px;font-size:13px;"></div>
             </div>
-          </div>
 
-          <!-- Summary cards -->
-          <div class="summary-cards" id="summaryCards" style="display:none;">
-            <div class="summary-card"><div class="sc-label">Total Active Loans</div><div class="sc-value" id="scTotalLoans">—</div></div>
-            <div class="summary-card accent-navy"><div class="sc-label">Total Principal</div><div class="sc-value" id="scPrincipal">—</div></div>
-            <div class="summary-card accent-navy"><div class="sc-label">Total Overall Interest</div><div class="sc-value" id="scOverallInterest">—</div></div>
-            <div class="summary-card accent-orange"><div class="sc-label">Out. Principal</div><div class="sc-value" id="scOutPrincipal">—</div></div>
-            <div class="summary-card accent-orange"><div class="sc-label">Out. Interest</div><div class="sc-value" id="scOutInterest">—</div></div>
-            <div class="summary-card accent-red"><div class="sc-label">Grand Outstanding</div><div class="sc-value" id="scGrandOutstanding">—</div></div>
-          </div>
-
-          <!-- Results grid -->
-          <div class="panel">
-            <div class="grid-toolbar">
-              <div class="grid-toolbar-left">
-                <span class="h4">Results</span>
-                <span class="badge-jlms badge-neutral" id="recordsBadge" style="display:none;"></span>
+            <!-- Summary cards -->
+            <!-- <div class="summary-cards" id="summaryCards" style="display:none;">
+              <div class="summary-card">
+                <div class="sc-label">Total Active Loans</div>
+                <div class="sc-value" id="scTotalLoans">—</div>
               </div>
-              <div class="grid-toolbar-left">
-                <button class="btn-jlms btn-jlms-outline btn-sm" onclick="exportExcel()" id="btnExportExcel" style="display:none;"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
-                <button class="btn-jlms btn-jlms-outline btn-sm" onclick="printReport()" id="btnPrint" style="display:none;"><i class="bi bi-printer"></i> Print</button>
+              <div class="summary-card accent-navy">
+                <div class="sc-label">Total Principal</div>
+                <div class="sc-value" id="scPrincipal">—</div>
+              </div>
+              <div class="summary-card accent-navy">
+                <div class="sc-label">Total Overall Interest</div>
+                <div class="sc-value" id="scOverallInterest">—</div>
+              </div>
+              <div class="summary-card accent-orange">
+                <div class="sc-label">Out. Principal</div>
+                <div class="sc-value" id="scOutPrincipal">—</div>
+              </div>
+              <div class="summary-card accent-orange">
+                <div class="sc-label">Out. Interest</div>
+                <div class="sc-value" id="scOutInterest">—</div>
+              </div>
+              <div class="summary-card accent-red">
+                <div class="sc-label">Grand Outstanding</div>
+                <div class="sc-value" id="scGrandOutstanding">—</div>
+              </div>
+            </div> -->
+            <div class="summary-cards" id="summaryCards" style="display:none;">
+              <div class="summary-card">
+                <div class="sc-label">Total Qty</div>
+                <div class="sc-value" id="scTotalQty">—</div>
+              </div>
+              <div class="summary-card accent-navy">
+                <div class="sc-label">Total Weight (g)</div>
+                <div class="sc-value" id="scTotalWeight">—</div>
+              </div>
+              <div class="summary-card accent-green">
+                <div class="sc-label">Total Loan Amount</div>
+                <div class="sc-value" id="scTotalLoanAmt">—</div>
               </div>
             </div>
-            <div class="panel-body no-pad table-jlms-wrap">
-              <table class="table-jlms" id="reportTable">
-                <thead>
-                  <tr>
-                    <th>S.No</th><th>Loan No</th><th>Customer</th><th>Mobile</th>
-                    <th>Loan Scheme</th><th>Loan Date</th><th>Maturity Date</th><th>Jewel Type</th>
-                    <th class="text-end">Gross Wt (g)</th><th class="text-end">Net Wt (g)</th><th>Purity</th>
-                    <th class="text-end">Principal</th><th class="text-end">Overall Interest</th>
-                    <th class="text-end">Out. Principal</th><th class="text-end">Out. Interest</th>
-                    <th class="text-end">Total Outstanding</th><th>Last Payment</th><th class="text-end">Days Overdue</th>
-                    <!-- <th>Status</th> -->
-                    <th>Branch</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBody">
-                  <tr><td colspan="20"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading active loans…</p></div></td></tr>
-                </tbody>
-                <tfoot id="tableFoot" style="display:none;">
-                  <tr>
-                    <td colspan="11"><strong>Page Total</strong></td>
-                    <td class="text-end" id="footOverallInterest">—</td>
-                    <td class="text-end" id="footOutPrincipal">—</td>
-                    <td class="text-end" id="footOutInterest">—</td>
-                    <td class="text-end" id="footTotalOutstanding">—</td>
-                    <td colspan="4"></td>
-                  </tr>
-                </tfoot>
-              </table>
+            <!-- Results grid -->
+            <div class="panel">
+              <div class="grid-toolbar">
+                <div class="grid-toolbar-left">
+                  <span class="h4">Results</span>
+                  <span class="badge-jlms badge-neutral" id="recordsBadge" style="display:none;"></span>
+                </div>
+                <div class="grid-toolbar-left">
+                  <button class="btn-jlms btn-jlms-outline btn-sm" onclick="exportExcel()" id="btnExportExcel"
+                    style="display:none;"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                  <button class="btn-jlms btn-jlms-outline btn-sm" onclick="printReport()" id="btnPrint"
+                    style="display:none;"><i class="bi bi-printer"></i> Print</button>
+                </div>
+              </div>
+              <div class="panel-body no-pad table-jlms-wrap">
+                <table class="table-jlms" id="reportTable">
+                  <thead>
+                    <tr>
+                      <th>S.No</th>
+                      <th>Loan No</th>
+                      <th>Loan Date</th>
+                      <th>Customer</th>
+                      <th class="text-end">Loan Amt</th>
+                      <th class="text-end">Int Amount</th>
+                      <th class="text-end">Bal Amt</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBody">
+                    <tr>
+                      <td colspan="8">
+                        <div class="state-panel"><i class="bi bi-arrow-repeat spin"></i>
+                          <p>Loading Loan Report…</p>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <tfoot id="tableFoot" style="display:none;">
+                    <tr>
+                      <td colspan="4"><strong>Page Total</strong></td>
+                      <td class="text-end" id="footOverallInterest">—</td>
+                      <td class="text-end" id="footOutInterest">—</td>
+                      <td class="text-end" id="footTotalOutstanding">—</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div class="grid-footer" id="paginationFooter" style="display:none;">
+                <span id="paginationInfo" style="color:#6b7280;font-size:0.85rem;"></span>
+                <div class="pagination-jlms" id="paginationControls"></div>
+              </div>
             </div>
-            <div class="grid-footer" id="paginationFooter" style="display:none;">
-              <span id="paginationInfo" style="color:#6b7280;font-size:0.85rem;"></span>
-              <div class="pagination-jlms" id="paginationControls"></div>
-            </div>
-          </div>
 
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>window.JLMS_ACTIVE = "active-loans-report";</script>
-<script src="js/jlms-shell.js"></script>
-<script src="js/api-client.js"></script>
-<script>
-jlmsInitShell();
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>window.JLMS_ACTIVE = "active-loans-report";</script>
+  <script src="js/jlms-shell.js"></script>
+  <script src="js/api-client.js"></script>
+  <script>
+    jlmsInitShell();
 
-let currentPage   = 1;
-const PAGE_SIZE   = 5;
-let lastResult    = null;
-let activeFilters = {};
+    let currentPage = 1;
+    const PAGE_SIZE = 5;
+    let lastResult = null;
+    let activeFilters = {};
+    // loadReport(activeFilters);
 
-const el = (id) => document.getElementById(id);
+    const el = (id) => document.getElementById(id);
 
-(function () {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  const today = `${y}-${m}-${d}`;
-  el("fFromDate").value = today;
-  el("fToDate").value   = today;
-})();
-const elTBody = el("tableBody"), elTFoot = el("tableFoot"), elBadge = el("recordsBadge"),
+    (function () {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      const today = `${y}-${m}-${d}`;
+      el("fFromDate").value = today;
+      el("fToDate").value = today;
+    })();
+    const elTBody = el("tableBody"), elTFoot = el("tableFoot"), elBadge = el("recordsBadge"),
       elSummary = el("summaryCards"), elPaginFoot = el("paginationFooter"),
       elPaginInfo = el("paginationInfo"), elPaginCtrls = el("paginationControls");
 
-function fmt(n) { return n == null ? "—" : "₹" + Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 }); }
-function fmtNum(n) { return n == null ? "—" : Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 }); }
-function fmtDate(dt) { return dt ? new Date(dt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"; }
-
-// function statusBadge(status, days) {
-//   let cls = "badge-success", label = status;
-//   if (status === "Overdue") { cls = "badge-danger"; label = days > 0 ? `Overdue (${days}d)` : "Overdue"; }
-//   else if (status === "Due") { cls = "badge-warning"; }
-//   return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
-// }
-
-function setExportBtnsVisible(v) {
-  ["btnExportExcel", "btnPrint"].forEach(id => document.getElementById(id).style.display = v ? "" : "none");
-}
-
-async function loadDropdowns() {
-  try {
-    const schemes = await Api.getLoanSchemes(true);
-    el("fScheme").innerHTML = `<option value="">All Schemes</option>` +
-      schemes.map(s => `<option value="${s.loanSchemeId}">${s.schemeName}</option>`).join("");
-  } catch {}
-  try {
-    const types = await Api.getJewelTypes(true);
-    el("fJewelType").innerHTML = `<option value="">All Types</option>` +
-      types.map(t => `<option value="${t.jewelTypeId}">${t.jewelTypeName}</option>`).join("");
-  } catch {}
-  try {
-    const branches = await Api.getBranches();
-    const user = Session.get();
-    // All users are scoped to their branch — lock the dropdown for everyone
-    const userBranch = user && branches.find(b => b.branchId === user.branchId);
-    if (userBranch) {
-      el("fBranch").innerHTML = `<option value="${userBranch.branchId}">${userBranch.branchName}</option>`;
-      el("fBranch").disabled = true;
-    } else {
-      el("fBranch").innerHTML = `<option value="">All Branches</option>` +
-        branches.map(b => `<option value="${b.branchId}">${b.branchName}</option>`).join("");
+    function fmt(n) { return n == null ? "—" : "₹" + Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 }); }
+    function fmtNum(n) { return n == null ? "—" : Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 }); }
+    function fmtDate(dt) {
+      if (!dt) return "—";
+      return new Date(dt).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
     }
-  } catch { /* branches endpoint not available — filter silently disabled */ }
-}
+    // function statusBadge(status, days) {
+    //   let cls = "badge-success", label = status;
+    //   if (status === "Overdue") { cls = "badge-danger"; label = days > 0 ? `Overdue (${days}d)` : "Overdue"; }
+    //   else if (status === "Due") { cls = "badge-warning"; }
+    //   return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
+    // }
+    function statusBadge(status, days) {
+      let cls = "badge-success", label = status;
+      if (status === "Overdue") { cls = "badge-danger"; label = days > 0 ? `Overdue (${days}d)` : "Overdue"; }
+      else if (status === "Due") { cls = "badge-warning"; }
+      else if (status === "Closed") { cls = "badge-danger"; }
+      return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
+    }
+    function setExportBtnsVisible(v) {
+      ["btnExportExcel", "btnPrint"].forEach(id => document.getElementById(id).style.display = v ? "" : "none");
+    }
 
-async function loadReport(filters) {
-  clearApiError();
-  const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
-  elTBody.innerHTML = `<tr><td colspan="20"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
-  elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
-  elBadge.style.display = "none"; elSummary.style.display = "none";
-  setExportBtnsVisible(false);
+    async function loadDropdowns() {
+      try {
+        const schemes = await Api.getLoanSchemes(true);
+        el("fScheme").innerHTML = `<option value="">All Schemes</option>` +
+          schemes.map(s => `<option value="${s.loanSchemeId}">${s.schemeName}</option>`).join("");
+      } catch { }
+      try {
+        const types = await Api.getJewelTypes(true);
+        el("fJewelType").innerHTML = `<option value="">All Types</option>` +
+          types.map(t => `<option value="${t.jewelTypeId}">${t.jewelTypeName}</option>`).join("");
+      } catch { }
+      try {
+        const branches = await Api.getBranches();
+        const user = Session.get();
+        // All users are scoped to their branch — lock the dropdown for everyone
+        const userBranch = user && branches.find(b => b.branchId === user.branchId);
+        if (userBranch) {
+          el("fBranch").innerHTML = `<option value="${userBranch.branchId}">${userBranch.branchName}</option>`;
+          el("fBranch").disabled = true;
+        } else {
+          el("fBranch").innerHTML = `<option value="">All Branches</option>` +
+            branches.map(b => `<option value="${b.branchId}">${b.branchName}</option>`).join("");
+        }
+      } catch { /* branches endpoint not available — filter silently disabled */ }
+    }
 
-  try {
-    const data = await Api.getActiveLoansReport(params);
-    lastResult = data;
-    renderGrid(data);
-  } catch (err) {
-    showApiError(err);
-    elTBody.innerHTML = `<tr><td colspan="20"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
-  }
-}
+    async function loadReport(filters) {
+      clearApiError();
+      const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
+      elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
+      elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
+      elBadge.style.display = "none"; elSummary.style.display = "none";
+      setExportBtnsVisible(false);
 
-el("btnApplyFilters").addEventListener("click", () => {
-  currentPage = 1;
-  activeFilters = {
-    loanNo:       el("fLoanNo").value.trim()       || undefined,
-    customerName: el("fCustomerName").value.trim() || undefined,
-    mobile:       el("fMobile").value.trim()       || undefined,
-    // aadhaar:      el("fAadhaar").value.trim()      || undefined,
-    loanSchemeId: el("fScheme").value              || undefined,
-    jewelTypeId:  el("fJewelType").value           || undefined,
-    fromDate:     el("fFromDate").value            || undefined,
-    toDate:       el("fToDate").value               || undefined,
-    // branchId:     el("fBranch").value              || undefined,
-    // status:       el("fStatus").value               || undefined
+      try {
+        const data = await Api.getActiveLoansReport(params);
+        lastResult = data;
+        renderGrid(data);
+      } catch (err) {
+        showApiError(err);
+        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
+      }
+    }
+
+    el("btnApplyFilters").addEventListener("click", () => {
+      currentPage = 1;
+      activeFilters = {
+        loanNo: el("fLoanNo").value.trim() || undefined,
+        customerName: el("fCustomerName").value.trim() || undefined,
+        // mobile: el("fMobile").value.trim() || undefined,
+        // aadhaar:      el("fAadhaar").value.trim()      || undefined,
+        // loanSchemeId: el("fScheme").value || undefined,
+        // jewelTypeId: el("fJewelType").value || undefined,
+        fromDate: el("fFromDate").value || undefined,
+        toDate: el("fToDate").value || undefined,
+        // branchId:     el("fBranch").value              || undefined,
+        status: el("fStatus").value || undefined
+      };
+      loadReport(activeFilters);
+    });
+function debounce(fn, delay) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), delay);
   };
-  loadReport(activeFilters);
+}
+
+function setupAutocomplete({ inputId, boxId, fetchFn, renderItem, onSelect }) {
+  const input = el(inputId);
+  const box = el(boxId);
+
+  const doSearch = debounce(async () => {
+    const q = input.value.trim();
+    if (q.length < 2) { box.style.display = "none"; box.innerHTML = ""; return; }
+    try {
+      const results = await fetchFn(q);
+      if (!results || results.length === 0) { box.style.display = "none"; box.innerHTML = ""; return; }
+      box.innerHTML = results.map((r, i) => `<div class="suggestion-item" data-idx="${i}">${renderItem(r)}</div>`).join("");
+      box.style.display = "block";
+      box.querySelectorAll(".suggestion-item").forEach((node, i) => {
+        node.addEventListener("click", () => {
+          onSelect(results[i]);
+          box.style.display = "none";
+        });
+      });
+    } catch {
+      box.style.display = "none";
+    }
+  }, 300);
+
+  input.addEventListener("input", doSearch);
+  document.addEventListener("click", (e) => {
+    if (!input.contains(e.target) && !box.contains(e.target)) box.style.display = "none";
+  });
+}
+setupAutocomplete({
+  inputId: "fCustomerName",
+  boxId: "customerSuggestions",
+  fetchFn: (q) => Api.searchCustomersForActiveReport(q),
+  renderItem: (c) => `${c.customerName}<small>${c.customerCode} · ${c.mobile}</small>`,
+  onSelect: (c) => { el("fCustomerName").value = c.customerName; }
 });
 
-function renderGrid(data) {
-  const { items, totalCount, page, pageSize,
-          totalActiveLoans, totalPrincipal, totalOverallInterest,
-          totalOutstandingPrincipal, totalOutstandingInterest, grandOutstanding } = data;
+setupAutocomplete({
+  inputId: "fLoanNo",
+  boxId: "loanNoSuggestions",
+  fetchFn: (q) => Api.searchLoansForActiveReport(q),
+  renderItem: (l) => l.loanNumber,
+  onSelect: (l) => { el("fLoanNo").value = l.loanNumber; }
+});
+    function renderGrid(data) {
+      const { items, totalCount, page, pageSize,
+        totalQuantity, totalWeight, totalLoanAmount } = data;
 
-  el("scTotalLoans").textContent      = totalActiveLoans.toLocaleString("en-IN");
-  el("scPrincipal").textContent       = fmt(totalPrincipal);
-  el("scOverallInterest").textContent = fmt(totalOverallInterest);
-  el("scOutPrincipal").textContent    = fmt(totalOutstandingPrincipal);
-  el("scOutInterest").textContent     = fmt(totalOutstandingInterest);
-  el("scGrandOutstanding").textContent= fmt(grandOutstanding);
-  elSummary.style.display = "flex";
+      el("scTotalQty").textContent = (totalQuantity || 0).toLocaleString("en-IN");
+      el("scTotalWeight").textContent = fmtNum(totalWeight) + " g";
+      el("scTotalLoanAmt").textContent = fmt(totalLoanAmount);
+      elSummary.style.display = "flex";
 
-  elBadge.textContent = `${totalCount.toLocaleString("en-IN")} records`;
-  elBadge.style.display = "";
-  setExportBtnsVisible(totalCount > 0);
+      elBadge.textContent = `${totalCount.toLocaleString("en-IN")} records`;
+      elBadge.style.display = "";
+      setExportBtnsVisible(totalCount > 0);
 
-  if (!items || items.length === 0) {
-    elTBody.innerHTML = `<tr><td colspan="20"><div class="state-panel"><i class="bi bi-inbox"></i><p>No active loans found for the selected filters.</p></div></td></tr>`;
-    elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
-    return;
-  }
+      if (!items || items.length === 0) {
+        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-inbox"></i><p>No  loans found for the selected filters.</p></div></td></tr>`;
+        elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
+        return;
+      }
 
-  let pOI = 0, pOP = 0, pOInt = 0, pTot = 0;
-  const startNo = (page - 1) * pageSize + 1;
-  const rows = items.map((r, i) => {
-    pOI += r.overallInterest || 0; pOP += r.outstandingPrincipal || 0;
-    pOInt += r.outstandingInterest || 0; pTot += r.totalOutstanding || 0;
-    return `<tr>
-      <td>${startNo + i}</td>
-      <td class="nowrap" title="Maturity: ${fmtDate(r.maturityDate)}">${r.loanNumber}</td>
-      <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
-      <td>${r.mobile}</td>
-      <td>${r.schemeDisplay}</td>
-      <td>${fmtDate(r.loanDate)}</td>
-      <td>${fmtDate(r.maturityDate)}</td>
-      <td>${r.jewelTypes || "—"}</td>
-      <td class="text-end">${fmtNum(r.grossWeight)}</td>
-      <td class="text-end">${fmtNum(r.netWeight)}</td>
-      <td>${r.purity || "—"}</td>
-      <td class="text-end">${fmt(r.principalAmount)}</td>
-      <td class="text-end">${fmt(r.overallInterest)}</td>
-      <td class="text-end">${fmt(r.outstandingPrincipal)}</td>
-      <td class="text-end">${fmt(r.outstandingInterest)}</td>
-      <td class="text-end cell-strong">${fmt(r.totalOutstanding)}</td>
-      <td>${fmtDate(r.lastPaymentDate)}</td>
-      <td class="text-end">${r.daysOverdue || 0}</td>
-      <td>${r.branchName || "—"}</td>
-    </tr>`;
-  });
+      let pLoanAmt = 0, pIntAmt = 0, pTot = 0;
+      const startNo = (page - 1) * pageSize + 1;
+      const rows = items.map((r, i) => {
+        pLoanAmt += r.principalAmount || 0;
+        pIntAmt += r.overallInterest || 0;
+        pTot += r.totalOutstanding || 0;
+        return `<tr>
+    <td>${startNo + i}</td>
+    <td class="nowrap" title="Maturity: ${fmtDate(r.maturityDate)}">${r.loanNumber}</td>
+    <td>${fmtDate(r.loanDate)}</td>
+    <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
+    <td class="text-end">${fmt(r.principalAmount)}</td>
+    <td class="text-end">${fmt(r.overallInterest)}</td>
+    <td class="text-end cell-strong">${fmt(r.totalOutstanding)}</td>
+    <td>${statusBadge(r.status, r.daysOverdue)}</td>
+  </tr>`;
+      });
 
-  elTBody.innerHTML = rows.join("");
-  el("footOverallInterest").textContent = fmt(pOI);
-  el("footOutPrincipal").textContent    = fmt(pOP);
-  el("footOutInterest").textContent     = fmt(pOInt);
-  el("footTotalOutstanding").textContent= fmt(pTot);
-  elTFoot.style.display = "";
+      elTBody.innerHTML = rows.join("");
+      el("footOverallInterest").textContent = fmt(pLoanAmt);   // sits under "Loan Amt" column
+      el("footOutInterest").textContent = fmt(pIntAmt);     // sits under "Int Amount" column
+      el("footTotalOutstanding").textContent = fmt(pTot);        // sits under "Bal Amt" column
+      elTFoot.style.display = "";
 
-  renderPagination(totalCount, page, pageSize);
-}
-
-function renderPagination(totalCount, page, pageSize) {
-  const totalPages = Math.ceil(totalCount / pageSize);
-  const from = (page - 1) * pageSize + 1, to = Math.min(page * pageSize, totalCount);
-  elPaginInfo.textContent = `Showing ${from}–${to} of ${totalCount.toLocaleString("en-IN")}`;
-
-  let html = `<div class="page-btn${page === 1 ? " disabled" : ""}" onclick="goPage(${page - 1})"><i class="bi bi-chevron-left"></i></div>`;
-  let sp = Math.max(1, page - 2), ep = Math.min(totalPages, sp + 4);
-  if (ep - sp < 4) sp = Math.max(1, ep - 4);
-  for (let p = sp; p <= ep; p++) html += `<div class="page-btn${p === page ? " active" : ""}" onclick="goPage(${p})">${p}</div>`;
-  html += `<div class="page-btn${page === totalPages ? " disabled" : ""}" onclick="goPage(${page + 1})"><i class="bi bi-chevron-right"></i></div>`;
-  elPaginCtrls.innerHTML = html;
-  elPaginFoot.style.display = "";
-}
-
-function goPage(p) {
-  if (p < 1 || !lastResult) return;
-  if (p > Math.ceil(lastResult.totalCount / PAGE_SIZE)) return;
-  currentPage = p;
-  loadReport(activeFilters);
-}
-
-function exportExcel() {
-  if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
-
-  const header = ["S.No","Loan No","Customer","Mobile","Loan Scheme","Loan Date","Maturity Date",
-    "Jewel Type","Gross Wt (g)","Net Wt (g)","Purity","Principal","Overall Interest",
-    "Out. Principal","Out. Interest","Total Outstanding","Last Payment","Days Overdue","Branch"];
-
-  const startNo = (lastResult.page - 1) * lastResult.pageSize + 1;
-  const rows = lastResult.items.map((r, i) => [
-    startNo + i,
-    r.loanNumber,
-    `${r.customerName} (${r.customerCode})`,
-    r.mobile,
-    r.schemeDisplay,
-    fmtDate(r.loanDate),
-    fmtDate(r.maturityDate),
-    r.jewelTypes || "—",
-    r.grossWeight || 0,
-    r.netWeight || 0,
-    r.purity || "—",
-    r.principalAmount || 0,
-    r.overallInterest || 0,
-    r.outstandingPrincipal || 0,
-    r.outstandingInterest || 0,
-    r.totalOutstanding || 0,
-    fmtDate(r.lastPaymentDate),
-    r.daysOverdue || 0,
-    // r.status,
-    r.branchName || "—"
-  ]);
-
-  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-
-  // Currency columns: Principal(L), Overall Interest(M), Out.Principal(N), Out.Interest(O), Total Outstanding(P)
-  const currencyFmt = '₹#,##,##0';
-  ["L","M","N","O","P"].forEach(col => {
-    for (let r = 2; r <= rows.length + 1; r++) {
-      const cell = ws[`${col}${r}`];
-      if (cell) cell.z = currencyFmt;
+      renderPagination(totalCount, page, pageSize);
     }
-  });
 
-  // Weight columns as 2-decimal numbers
-  ["I","J"].forEach(col => {
-    for (let r = 2; r <= rows.length + 1; r++) {
-      const cell = ws[`${col}${r}`];
-      if (cell) cell.z = '0.00';
+    function renderPagination(totalCount, page, pageSize) {
+      const totalPages = Math.ceil(totalCount / pageSize);
+      const from = (page - 1) * pageSize + 1, to = Math.min(page * pageSize, totalCount);
+      elPaginInfo.textContent = `Showing ${from}–${to} of ${totalCount.toLocaleString("en-IN")}`;
+
+      let html = `<div class="page-btn${page === 1 ? " disabled" : ""}" onclick="goPage(${page - 1})"><i class="bi bi-chevron-left"></i></div>`;
+      let sp = Math.max(1, page - 2), ep = Math.min(totalPages, sp + 4);
+      if (ep - sp < 4) sp = Math.max(1, ep - 4);
+      for (let p = sp; p <= ep; p++) html += `<div class="page-btn${p === page ? " active" : ""}" onclick="goPage(${p})">${p}</div>`;
+      html += `<div class="page-btn${page === totalPages ? " disabled" : ""}" onclick="goPage(${page + 1})"><i class="bi bi-chevron-right"></i></div>`;
+      elPaginCtrls.innerHTML = html;
+      elPaginFoot.style.display = "";
     }
-  });
 
-  ws["!cols"] = [
-    { wch: 6 }, { wch: 16 }, { wch: 26 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 12 },
-    { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 8 }, { wch: 14 }, { wch: 14 },
-    { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 12 }, { wch: 8 }, { wch: 10 }, { wch: 14 }
-  ];
+    function goPage(p) {
+      if (p < 1 || !lastResult) return;
+      if (p > Math.ceil(lastResult.totalCount / PAGE_SIZE)) return;
+      currentPage = p;
+      loadReport(activeFilters);
+    }
+    function exportExcel() {
+      if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
 
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Active Loans");
-  XLSX.writeFile(wb, `Active_Loans_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
-}
+      const header = ["S.No", "Loan No", "Loan Date", "Customer", "Loan Amt", "Int Amount", "Bal Amt", "Status"];
 
-function printReport() {
-  const tbl = document.getElementById("reportTable").outerHTML;
-  const win = window.open("", "_blank");
-  win.document.write(`<!DOCTYPE html><html><head><title>Active Loans Report</title>
+      const startNo = (lastResult.page - 1) * lastResult.pageSize + 1;
+      const rows = lastResult.items.map((r, i) => [
+        startNo + i,
+        r.loanNumber,
+        fmtDate(r.loanDate),
+        `${r.customerName} (${r.customerCode})`,
+        r.principalAmount || 0,
+        r.overallInterest || 0,
+        r.totalOutstanding || 0,
+        r.status
+      ]);
+
+      const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+
+      // Currency columns: Loan Amt(E), Int Amount(F), Bal Amt(G)
+      const currencyFmt = '₹#,##,##0';
+      ["E", "F", "G"].forEach(col => {
+        for (let r = 2; r <= rows.length + 1; r++) {
+          const cell = ws[`${col}${r}`];
+          if (cell) cell.z = currencyFmt;
+        }
+      });
+
+      ws["!cols"] = [
+        { wch: 6 }, { wch: 16 }, { wch: 12 }, { wch: 26 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 12 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Loan Report");
+      XLSX.writeFile(wb, `Loan_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+    function printReport() {
+      const tbl = document.getElementById("reportTable").outerHTML;
+      const win = window.open("", "_blank");
+      win.document.write(`<!DOCTYPE html><html><head><title>Loan Report</title>
     <style>body{font-family:Arial,sans-serif;font-size:11px;}
     table{border-collapse:collapse;width:100%;}
     th,td{border:1px solid #ccc;padding:5px 7px;text-align:left;}
     th{background:#f0f0f0;font-weight:700;}.text-end{text-align:right;}
     </style></head><body>
-    <h2 style="margin-bottom:6px;">Active Loans Report</h2>
+    <h2 style="margin-bottom:6px;">Loan Report</h2>
     <p style="color:#666;margin-bottom:14px;">Generated: ${new Date().toLocaleString("en-IN")}</p>
     ${tbl}</body></html>`);
-  win.document.close(); win.print();
-}
+      win.document.close(); win.print();
+    }
 
-// loadDropdowns();
-// loadReport({});
-
-activeFilters = {
-  fromDate: el("fFromDate").value || undefined,
-  toDate:   el("fToDate").value   || undefined
-};
-loadDropdowns();
-loadReport(activeFilters);
-</script>
+    activeFilters = {
+      fromDate: el("fFromDate").value || undefined,
+      toDate: el("fToDate").value || undefined
+    };
+    loadDropdowns();
+    loadReport(activeFilters);
+  </script>
 </body>
+
 </html>

@@ -17,18 +17,18 @@ const JLMS_MENU = [
     { id: "jewel-type-master", icon: "bi-gem", label: "Jewel Type Master", href: "jewel-type-master.html" },
     { id: "gold-rate-master", icon: "bi-graph-up-arrow", label: "Gold Rate Master", href: "gold-rate-master.html" },
     { id: "loan-scheme-master", icon: "bi-journal-text", label: "Loan Scheme Master", href: "loan-scheme-master.html" },
-     { id: "financial-year", icon: "bi-calendar-range", label: "Financial Year", href: "financial-year.html" },
-    { id: "user-master", icon: "bi-people", label: "User Master", href: "user-master.html" }
+     { id: "financial-year", icon: "bi-calendar-range", label: "Financial Year", href: "financial-year.html" }
+    // { id: "user-master", icon: "bi-people", label: "User Master", href: "user-master.html" }
   ]},
   { section: "Reports", items: [
-    { id: "report-center", icon: "bi-bar-chart-line", label: "Report Center", href: "collection-reports.html" }
+    { id: "report-center", icon: "bi-bar-chart-line", label: "Report Center", href: "activeloan-report.html" }
   ]},
-  { section: "Administration", items: [
-    { id: "roles", icon: "bi-shield-lock", label: "Roles", href: "roles.html" },
-    { id: "permissions", icon: "bi-key", label: "Permissions", href: "permissions.html" },
-    { id: "system-settings", icon: "bi-gear", label: "System Settings", href: "system-settings.html" },
-    { id: "audit-logs", icon: "bi-clipboard-data", label: "Audit Logs", href: "audit-logs.html" }
-  ]}
+  // { section: "Administration", items: [
+  //   { id: "roles", icon: "bi-shield-lock", label: "Roles", href: "roles.html" },
+  //   { id: "permissions", icon: "bi-key", label: "Permissions", href: "permissions.html" },
+  //   { id: "system-settings", icon: "bi-gear", label: "System Settings", href: "system-settings.html" },
+  //   { id: "audit-logs", icon: "bi-clipboard-data", label: "Audit Logs", href: "audit-logs.html" }
+  // ]}
 ];
 
 function stringEqualsIgnoreCase(s1, s2) {

@@ -61,7 +61,13 @@ public class Customer
     public int? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-
+    public string? NomineeName { get; set; }
+    public string? NomineeMobile { get; set; }
+    public string? NomineeAddress { get; set; }
+    public string? NomineeCity { get; set; }
+    public string? NomineeAadhaarNumber { get; set; }
+    public string? NomineePhotoPath { get; set; }
+    public string? NomineeAadhaarDocPath { get; set; }
     public ICollection<Loan> Loans { get; set; } = new List<Loan>();
 }
 

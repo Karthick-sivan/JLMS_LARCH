@@ -72,6 +72,7 @@ public class CollectionReportsController : ControllerBase
             TransactionId: t.TransactionId,
             LoanId: t.LoanId,
             LoanNumber: t.Loan?.LoanNumber ?? "",
+            LoanDate: t.Loan?.LoanDate,
             CustomerName: t.Loan?.Customer?.CustomerName ?? "",
             CustomerCode: t.Loan?.Customer?.CustomerCode ?? "",
             CustomerMobile: t.Loan?.Customer?.Mobile ?? "",

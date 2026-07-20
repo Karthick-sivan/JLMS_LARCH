@@ -39,7 +39,7 @@ public class ActiveLoansReportController : ControllerBase
             .Include(l => l.Customer)
             .Include(l => l.LoanScheme)
             .Include(l => l.JewelItems).ThenInclude(ji => ji.JewelType)
-            .Where(l => l.Status == "Active")
+            //.Where(l => l.Status == "Active")
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(loanNo))
@@ -74,23 +74,27 @@ public class ActiveLoansReportController : ControllerBase
         var totalCount = await query.CountAsync();
 
         // Footer totals — computed on the full filtered set (direct Loan columns, cheap)
-        var totals = await query
-            .GroupBy(_ => 1)
-            .Select(g => new
-            {
-                TotalPrincipal = g.Sum(l => l.LoanAmount),
-                TotalOverallInterest = g.Sum(l => l.OverallInterest),
-                TotalOutPrincipal = g.Sum(l => l.OutstandingPrincipal),
-                TotalOutInterest = g.Sum(l => l.OutstandingInterest)
-            })
-            .FirstOrDefaultAsync();
+        //var totals = await query
+        //    .GroupBy(_ => 1)
+        //    .Select(g => new
+        //    {
+        //        TotalPrincipal = g.Sum(l => l.LoanAmount),
+        //        TotalOverallInterest = g.Sum(l => l.OverallInterest),
+        //        TotalOutPrincipal = g.Sum(l => l.OutstandingPrincipal),
+        //        TotalOutInterest = g.Sum(l => l.OutstandingInterest)
+        //    })
+        //    .FirstOrDefaultAsync();
 
         // Pull the filtered set into memory — needed because "Status" (Active/Due/Overdue)
         // is a derived value based on MaturityDate, not a stored column.
         var loans = await query
-            .OrderByDescending(l => l.LoanDate)
-            .ThenByDescending(l => l.CreatedAt)
-            .ToListAsync();
+     .OrderByDescending(l => l.LoanDate)
+     .ThenByDescending(l => l.CreatedAt)
+     .ToListAsync();
+
+        var totalQuantity = loans.Sum(l => l.JewelItems.Sum(ji => ji.Quantity));
+        var totalWeight = loans.Sum(l => l.JewelItems.Sum(ji => ji.GrossWeightGrams));
+        var totalLoanAmount = loans.Sum(l => l.LoanAmount);
 
         var branchNames = await _db.Branches.AsNoTracking().ToDictionaryAsync(b => b.BranchId, b => b.BranchName);
 
@@ -112,10 +116,15 @@ public class ActiveLoansReportController : ControllerBase
 
             // NOTE: "Due" window is set to 7 days before maturity — adjust to match your
             // actual due-date business rule if different.
-            var derivedStatus = daysOverdue > 0
-                ? "Overdue"
-                : (l.MaturityDate.HasValue && l.MaturityDate.Value.Date <= today.AddDays(7) ? "Due" : "Active");
+            //var derivedStatus = daysOverdue > 0
+            //    ? "Overdue"
+            //    : (l.MaturityDate.HasValue && l.MaturityDate.Value.Date <= today.AddDays(7) ? "Due" : "Active");
 
+            var derivedStatus = !string.Equals(l.Status, "Active", StringComparison.OrdinalIgnoreCase)
+? l.Status  // trust the stored value for Closed / other non-active states
+: (daysOverdue > 0
+? "Overdue"
+: (l.MaturityDate.HasValue && l.MaturityDate.Value.Date <= today.AddDays(7) ? "Due" : "Active"));
             var jewelTypeNames = l.JewelItems.Select(ji => ji.JewelType?.JewelTypeName ?? "").Where(n => n != "").Distinct();
             var purities = l.JewelItems.Select(ji => ji.Purity ?? "").Where(p => p != "").Distinct();
 
@@ -150,17 +159,20 @@ public class ActiveLoansReportController : ControllerBase
         var pagedItems = allRows.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
         var result = new ActiveLoanReportPagedDto(
-            Items: pagedItems,
-            TotalCount: allRows.Count,
-            Page: page,
-            PageSize: pageSize,
-            TotalActiveLoans: totalCount,
-            TotalPrincipal: totals?.TotalPrincipal ?? 0,
-            TotalOverallInterest: totals?.TotalOverallInterest ?? 0,
-            TotalOutstandingPrincipal: totals?.TotalOutPrincipal ?? 0,
-            TotalOutstandingInterest: totals?.TotalOutInterest ?? 0,
-            GrandOutstanding: (totals?.TotalOutPrincipal ?? 0) + (totals?.TotalOutInterest ?? 0)
-        );
+     Items: pagedItems,
+     TotalCount: allRows.Count,
+     Page: page,
+     PageSize: pageSize,
+     TotalActiveLoans: totalCount,
+     TotalQuantity: totalQuantity,
+     TotalWeight: totalWeight,
+     TotalLoanAmount: totalLoanAmount,
+     TotalPrincipal: totalLoanAmount,          // keep in sync if other code reads this
+     TotalOverallInterest: 0,                  // or remove if no longer needed
+     TotalOutstandingPrincipal: 0,
+     TotalOutstandingInterest: 0,
+     GrandOutstanding: 0
+ );
 
         return Ok(result);
     }
@@ -180,5 +192,24 @@ public class ActiveLoansReportController : ControllerBase
             .ToListAsync();
 
         return Ok(customers);
+    }
+
+
+
+    [HttpGet("loan-search")]
+    public async Task<ActionResult<IEnumerable<object>>> LoanSearch([FromQuery] string? q)
+    {
+        if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
+            return Ok(Array.Empty<object>());
+
+        var loans = await _db.Loans
+            .AsNoTracking()
+            .Where(l => l.LoanNumber.Contains(q))
+            .OrderByDescending(l => l.LoanDate)
+            .Take(10)
+            .Select(l => new { l.LoanId, l.LoanNumber })
+            .ToListAsync();
+
+        return Ok(loans);
     }
 }
