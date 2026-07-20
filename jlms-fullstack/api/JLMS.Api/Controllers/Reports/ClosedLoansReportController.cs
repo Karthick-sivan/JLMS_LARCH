@@ -184,4 +184,21 @@ public class ClosedLoansReportController : ControllerBase
 
         return Ok(customers);
     }
+
+    [HttpGet("loan-search")]
+    public async Task<ActionResult<IEnumerable<object>>> LoanSearch([FromQuery] string? q)
+    {
+        if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
+            return Ok(Array.Empty<object>());
+
+        var loans = await _db.Loans
+            .AsNoTracking()
+            .Where(l => l.LoanNumber.Contains(q))
+            .OrderByDescending(l => l.LoanDate)
+            .Take(10)
+            .Select(l => new { l.LoanId, l.LoanNumber })
+            .ToListAsync();
+
+        return Ok(loans);
+    }
 }
