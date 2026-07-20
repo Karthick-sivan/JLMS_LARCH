@@ -131,7 +131,7 @@
         <div class="main-col">
             <div id="jlmsTopbarMount"></div>
             <div class="page-content">
-<!-- 
+                <!-- 
                 <div class="page-header">
                     <div>
                         <div class="breadcrumb-jlms">
@@ -154,12 +154,12 @@
                                 <!--<div class="report-cat-item" onclick="location.href='report-center.html'"><i class="bi bi-folder2-open"></i> Active Loan Report <span class="count">1</span></div>-->
                                 <!--<div class="report-cat-item active"><i class="bi bi-graph-down"></i> Outstanding Reports </div>
                                 <div class="report-cat-item"><i class="bi bi-cash-coin"></i> Collection Reports </div>-->
-                                <!-- <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i
+                                <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i
                                         class="bi bi-folder2-open"></i> Active Loans Report </div>
-                                <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i
+                                <!-- <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i
                                         class="bi bi-graph-down"></i> Outstanding Reports </div> -->
-                                <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> Collection Reports
-                                </div>
+                                <!-- <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> Collection Reports
+                                </div> -->
                                 <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i
                                         class="bi bi-check2-circle"></i> Closed Loans Report</div>
                                 <!--<div class="report-cat-item"><i class="bi bi-arrow-repeat"></i> Renewal Report <span class="count">2</span></div>
@@ -259,6 +259,7 @@
                                         <tr>
                                             <th>Txn Date</th>
                                             <th>Loan No.</th>
+                                            <th>Loan Date</th>
                                             <th>Customer</th>
                                             <th>Scheme</th>
                                             <th class="text-end">Loan Amt</th>
@@ -302,11 +303,11 @@
             </div>
         </div>
     </div>
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>window.JLMS_ACTIVE = "collection-reports";</script>
-<script src="js/jlms-shell.js"></script>
-<script src="js/api-client.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>window.JLMS_ACTIVE = "collection-reports";</script>
+    <script src="js/jlms-shell.js"></script>
+    <script src="js/api-client.js"></script>
     <script>
         jlmsInitShell();
 
@@ -356,11 +357,14 @@
             return "₹" + Number(n).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
+        // function fmtDate(dt) {
+        //     if (!dt) return "—";
+        //     return new Date(dt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+        // }
         function fmtDate(dt) {
             if (!dt) return "—";
-            return new Date(dt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+            return new Date(dt).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
         }
-
         function statusBadge(status, daysOverdue) {
             let cls = "badge-success", label = status;
             if (status === "Overdue") { cls = "badge-danger"; label = daysOverdue > 0 ? `Overdue (${daysOverdue}d)` : "Overdue"; }
@@ -369,7 +373,7 @@
         }
 
         function setExportBtnsVisible(v) {
-            [ "btnExportExcel", "btnPrint"].forEach(id => {
+            ["btnExportExcel", "btnPrint"].forEach(id => {
                 document.getElementById(id).style.display = v ? "" : "none";
             });
         }
@@ -482,6 +486,7 @@
            <td>${fmtDate(row.transactionDate)}</td>
 
           <td class="cell-link" title="Type: ${row.transactionType} | Date: ${fmtDate(row.transactionDate)}">${row.loanNumber}</td>
+          <td>${fmtDate(row.loanDate)}</td>
           <td data-export="${row.customerName} (${row.customerCode} · ${row.customerMobile})">
             <div style="font-weight:600;">${row.customerName}</div>
             <div style="font-size:11px;color:#9aa4b2;">${row.customerCode} · ${row.customerMobile}</div>
@@ -529,43 +534,44 @@
         }
 
         // ── Export / Print ─────────────────────────────────────────────
-       function exportExcel() {
-    if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
+        function exportExcel() {
+            if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
 
-    const header = ["Txn Date","Loan No.","Customer","Scheme","Loan Amt","Principal Amt","Interest Amt","Paid Amount","Bal Amt"];
+            const header = ["Txn Date", "Loan No.", "Loan Date", "Customer", "Scheme", "Loan Amt", "Principal Amt", "Interest Amt", "Paid Amount", "Bal Amt"];
 
-    const rows = lastResult.items.map(row => [
-        fmtDate(row.transactionDate),
-        row.loanNumber,
-        `${row.customerName} (${row.customerCode} · ${row.customerMobile})`,
-        row.schemeName,
-        row.loanAmount || 0,
-        row.principalAmount || 0,
-        row.interestAmount || 0,
-        row.totalAmount || 0,
-        row.balanceAmount || 0
-    ]);
+            const rows = lastResult.items.map(row => [
+                fmtDate(row.transactionDate),
+                row.loanNumber,
+                fmtDate(row.loanDate),
+                `${row.customerName} (${row.customerCode} · ${row.customerMobile})`,
+                row.schemeName,
+                row.loanAmount || 0,
+                row.principalAmount || 0,
+                row.interestAmount || 0,
+                row.totalAmount || 0,
+                row.balanceAmount || 0
+            ]);
 
-    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+            const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
 
-    // Format amount columns (E–I) as ₹ currency
-    const currencyFmt = '₹#,##,##0';
-    ["E","F","G","H","I"].forEach(col => {
-        for (let r = 2; r <= rows.length + 1; r++) {
-            const cell = ws[`${col}${r}`];
-            if (cell) cell.z = currencyFmt;
+            // Format amount columns (E–I) as ₹ currency
+            const currencyFmt = '₹#,##,##0';
+            ["E", "F", "G", "H", "I"].forEach(col => {
+                for (let r = 2; r <= rows.length + 1; r++) {
+                    const cell = ws[`${col}${r}`];
+                    if (cell) cell.z = currencyFmt;
+                }
+            });
+
+            ws["!cols"] = [
+                { wch: 12 }, { wch: 16 }, { wch: 30 }, { wch: 12 },
+                { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
+            ];
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Collection Report");
+            XLSX.writeFile(wb, `Collection_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
         }
-    });
-
-    ws["!cols"] = [
-        { wch: 12 }, { wch: 16 }, { wch: 30 }, { wch: 12 },
-        { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
-    ];
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Collection Report");
-    XLSX.writeFile(wb, `Collection_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
-}
 
         // function exportPdf() {
         //     alert("PDF export requires a server-side PDF library. This feature is planned for a future release.");

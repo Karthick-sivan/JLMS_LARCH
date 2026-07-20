@@ -31,6 +31,14 @@ public class CustomerCreateDto
     public IFormFile? CustomerPhoto { get; set; }
     public IFormFile? AadhaarFile { get; set; }
     public IFormFile? PanFile { get; set; }
+
+    public string? NomineeName { get; set; }
+    public string? NomineeMobile { get; set; }
+    public string? NomineeAddress { get; set; }
+    public string? NomineeCity { get; set; }
+    public string? NomineeAadhaarNumber { get; set; }
+    public IFormFile? NomineePhoto { get; set; }
+    public IFormFile? NomineeAadhaarFile { get; set; }
 }
 
 public record CustomerUpdateDto(
@@ -45,7 +53,12 @@ public record CustomerUpdateDto(
     string? Pincode,
     string? AadhaarNumber,
     string? PanNumber,
-    bool KycVerified
+    bool KycVerified,
+ string? NomineeName,
+ string? NomineeMobile,
+ string? NomineeAddress,
+ string? NomineeCity,
+ string? NomineeAadhaarNumber
 );
 
 public record CustomerListItemDto(
@@ -58,6 +71,8 @@ public record CustomerDetailDto(
     DateTime? DateOfBirth, string Mobile, string? AlternateMobile, string? Address,
     string? City, string? State, string? Pincode, string? AadhaarNumber, string? PanNumber,
     bool KycVerified, int ActiveLoans, decimal TotalOutstanding, int ClosedLoans, DateTime CreatedAt,
+    string? NomineeName, string? NomineeMobile, string? NomineeAddress, string? NomineeCity,
+string? NomineeAadhaarNumber, string? NomineePhotoPath, string? NomineeAadhaarDocPath,
     string? PhotoPath = null, string? AadhaarDocPath = null, string? PanDocPath = null
 );
 
@@ -87,7 +102,7 @@ public record AppraisalResultDto(
 // skips the RequestedLoanAmount > EligibleAmount check. Defaults to false so existing
 // callers that don't send this field keep the old, validated behavior.
 public record NewLoanRequestDto(
-    int CustomerId, int LoanSchemeId, List<JewelItemInputDto> JewelItems,decimal ProcessingFee,
+    int CustomerId, int LoanSchemeId, List<JewelItemInputDto> JewelItems, decimal ProcessingFee,
     decimal RequestedLoanAmount, string? Remarks, bool AllowExceedEligible = false
 );
 
@@ -222,6 +237,7 @@ public record CollectionReportRowDto(
     string CustomerMobile,
     string SchemeName,
     DateTime TransactionDate,
+    DateTime? LoanDate,
     string TransactionType,
     decimal LoanAmount,
     decimal PrincipalAmount,
@@ -464,7 +480,7 @@ public record LoanOperationsPaymentDetailsDto(
 );
 
 // ---------- Customers: lightweight list for the "browse customers" picker ----------
-public record CustomerActiveListItemDto(int CustomerId, string CustomerCode, string CustomerName,string Mobile);
+public record CustomerActiveListItemDto(int CustomerId, string CustomerCode, string CustomerName, string Mobile);
 
 
 
@@ -504,7 +520,10 @@ public record ActiveLoanReportPagedDto(
     decimal TotalOverallInterest,
     decimal TotalOutstandingPrincipal,
     decimal TotalOutstandingInterest,
-    decimal GrandOutstanding
+    decimal GrandOutstanding,
+   int TotalQuantity,
+    decimal TotalWeight,
+    decimal TotalLoanAmount
 );
 
 // ---------- Closed Loans Report ----------

@@ -55,11 +55,14 @@
             <thead>
               <tr>
                 <th>Code</th><th>Type</th><th>From</th><th>To</th>
-                <th>Starts From</th><th>Prefix</th><th>Suffix</th><th>Status</th><th></th>
+                <!-- <th>Starts From</th><th>Prefix</th><th>Suffix</th><th>Status</th><th></th> -->
+                 <th>Starts From</th>
+                 <!-- <th>Prefix</th><th>Suffix</th> -->
+                 <th>Status</th>
               </tr>
             </thead>
             <tbody id="fyTableBody">
-              <tr><td colspan="9" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td></tr>
+              <tr><td colspan="8" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td></tr>
             </tbody>
           </table>
         </div>
@@ -181,7 +184,8 @@ function renderActiveCards() {
 function renderTable() {
   const tbody = document.getElementById('fyTableBody');
   if (fyCache.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted-jlms" style="padding:16px;">No financial years configured yet.</td></tr>';
+    // tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted-jlms" style="padding:16px;">No financial years configured yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:16px;">No financial years configured yet.</td></tr>';
     return;
   }
   tbody.innerHTML = fyCache.map(f => `
@@ -191,21 +195,9 @@ function renderTable() {
       <td>${fmtDate(f.fromDt)}</td>
       <td>${fmtDate(f.toDt)}</td>
       <td>${f.goldLoanNoStartsFrom}</td>
-      <td>${f.prefix}</td>
-      <td>${f.suffix || '—'}</td>
-      <td><span class="status-pill ${f.status === 'A' ? 'active' : 'inactive'}">${f.status === 'A' ? 'Active' : 'Inactive'}</span></td>
-      <td class="text-end">
-        <button class="btn-jlms btn-jlms-outline btn-sm editFyBtn" data-id="${f.financialYearId}" title="Edit"><i class="bi bi-pencil"></i></button>
-        ${f.status === 'A' ? `<button class="btn-jlms btn-jlms-outline btn-sm deactivateFyBtn" data-id="${f.financialYearId}" title="Deactivate"><i class="bi bi-slash-circle"></i></button>` : ''}
-      </td>
+    
+        <td><span class="status-pill ${f.status === 'A' ? 'active' : 'inactive'}">${f.status === 'A' ? 'Active' : 'Inactive'}</span></td>
     </tr>`).join('');
-
-  tbody.querySelectorAll('.editFyBtn').forEach(btn => {
-    btn.addEventListener('click', () => openFyModal(parseInt(btn.dataset.id, 10)));
-  });
-  tbody.querySelectorAll('.deactivateFyBtn').forEach(btn => {
-    btn.addEventListener('click', () => deactivateFy(parseInt(btn.dataset.id, 10)));
-  });
 }
 
 async function loadFinancialYears() {
@@ -295,16 +287,7 @@ async function saveFy() {
   }
 }
 
-async function deactivateFy(id) {
-  clearApiError();
-  if (!confirm('Deactivate this financial year series? New numbers will stop using it.')) return;
-  try {
-await Api.deactivateFinancialYear(id);
-    await loadFinancialYears();
-  } catch (err) {
-    showApiError(err);
-  }
-}
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   Session.requireLogin();

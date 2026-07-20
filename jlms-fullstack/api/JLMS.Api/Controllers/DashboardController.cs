@@ -110,7 +110,7 @@ public class DashboardController : ControllerBase
         var startDate = today.AddDays(-(days - 1));
 
         var raw = await _db.LoanTransactions.AsNoTracking()
-            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "PrincipalCollection" || t.TransactionType == "Closure")
+            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
                         && t.TransactionDate.Date >= startDate)
             .GroupBy(t => t.TransactionDate.Date)
             .Select(g => new { Date = g.Key, Total = g.Sum(t => t.TotalAmount) })

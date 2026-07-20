@@ -33,7 +33,7 @@
   .spin { display:inline-block; animation:spin .8s linear infinite; }
 
   .table-jlms-wrap { overflow-x:auto; }
-  .table-jlms { min-width:2800px; }
+  .table-jlms { min-width:1100px; }
   .nowrap { white-space:nowrap; }
 </style>
 </head>
@@ -44,26 +44,15 @@
     <div id="jlmsTopbarMount"></div>
     <div class="page-content">
 
-      <!-- <div class="page-header">
-        <div>
-          <div class="breadcrumb-jlms">
-            <a href="dashboard.html">Home</a><span class="sep">/</span>
-            <a href="report-center.html">Report Center</a><span class="sep">/</span>
-            <span class="current">Closed Loans Report</span>
-          </div>
-         
-        </div>
-      </div> -->
-
       <div class="row g-3">
         <!-- Left: categories -->
         <div class="col-lg-3">
           <div class="panel">
             <div class="panel-head"><div class="h4">Report Categories</div></div>
             <div class="panel-body" style="padding:6px 0;">
-              <!-- <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i class="bi bi-folder2-open"></i> Active Loans Report</div> -->
-              <!-- <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i class="bi bi-graph-down"></i> Outstanding Reports</div> -->
-              <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i class="bi bi-cash-coin"></i> Collection Reports</div>
+              <!-- <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i class="bi bi-cash-coin"></i> Collection Reports</div> -->
+              <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i class="bi bi-cash-coin"></i> Loan Report</div>
+
               <div class="report-cat-item active"><i class="bi bi-check2-circle"></i> Closed Loans Report</div>
             </div>
           </div>
@@ -77,48 +66,18 @@
             <div class="panel-head"><div class="h4">Closed Loans — Filters</div></div>
             <div class="panel-body">
               <div class="row g-3 align-items-end">
-                <div class="col-md-3">
+                <div class="col-md-4">
                   <label class="field-label" for="fLoanNo">Loan Number</label>
-                  <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="LN-...">
+                  <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="Loan Number">
                 </div>
                 <div class="col-md-3">
-                  <label class="field-label" for="fCustomerName">Customer Name</label>
-                  <input id="fCustomerName" type="text" class="form-control-jlms" placeholder="Name">
-                </div>
-                <div class="col-md-3">
-                  <label class="field-label" for="fMobile">Mobile</label>
-                  <input id="fMobile" type="text" class="form-control-jlms" placeholder="10-digit">
-                </div>
-                <!-- <div class="col-md-2">
-                  <label class="field-label" for="fAadhaar">Aadhaar</label>
-                  <input id="fAadhaar" type="text" class="form-control-jlms" placeholder="XXXX-XXXX">
-                </div> -->
-                <div class="col-md-3">
-                  <label class="field-label" for="fScheme">Loan Scheme</label>
-                  <select id="fScheme" class="form-select-jlms"><option value="">All Schemes</option></select>
-                </div>
-              </div>
-              <div class="row g-3 align-items-end mt-1">
-                <div class="col-md-2">
-                  <label class="field-label" for="fJewelType">Jewel Type</label>
-                  <select id="fJewelType" class="form-select-jlms"><option value="">All Types</option></select>
-                </div>
-                <div class="col-md-2">
                   <label class="field-label" for="fFromDate">Closure Date From</label>
                   <input id="fFromDate" type="date" class="form-control-jlms">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                   <label class="field-label" for="fToDate">Closure Date To</label>
                   <input id="fToDate" type="date" class="form-control-jlms">
                 </div>
-                <!-- <div class="col-md-2">
-                  <label class="field-label" for="fClosedBy">Closed By</label>
-                  <select id="fClosedBy" class="form-select-jlms"><option value="">Anyone</option></select>
-                </div> -->
-                <!-- <div class="col-md-2">
-                  <label class="field-label" for="fBranch">Branch</label>
-                  <select id="fBranch" class="form-select-jlms"><option value="">All Branches</option></select>
-                </div> -->
                 <div class="col-md-2">
                   <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary" style="width:100%;justify-content:center;">
                     <i class="bi bi-funnel"></i> Apply
@@ -154,32 +113,27 @@
               <table class="table-jlms" id="reportTable">
                 <thead>
                   <tr>
-                    <th>S.No</th><th>Loan No</th><th>Customer</th><th>Mobile</th>
-                    <th>Loan Scheme</th><th>Loan Date</th><th>Maturity Date</th><th>Closure Date</th><th class="text-end">Duration (Days)</th>
-                    <th>Jewel Type</th><th class="text-end">Gross Wt (g)</th><th class="text-end">Net Wt (g)</th><th>Purity</th>
-                    <th class="text-end">Principal</th><th class="text-end">Overall Interest</th>
-                    <th class="text-end">Interest Collected</th><th class="text-end">Principal Collected</th><th class="text-end">Total Collected</th>
-                    <!-- <th class="text-end">Closure Charges</th> -->
-                    <!-- <th class="text-end">Final Settlement</th> -->
-                    <th>Payment Mode</th>
-                    <!-- <th>Reference No</th> -->
-                    <th>Closed By</th><th>Branch</th>
-                    <!-- <th>Closure Receipt No</th><th>Status</th><th>Remarks</th> -->
+                    <th>S.No</th>
+                    <th>Loan No</th>
+                    <th>Loan Date</th>
+                    <!-- NOTE: "Book No" has no source field in the current API/DTO.
+                         Using Loan No as a stand-in until a real Book No field is wired up. -->
+                    <th>Book No</th>
+                    <th>Customer</th>
+                    <th class="text-end">Loan Amount</th>
+                    <th class="text-end">Interest Amount</th>
+                    <th>Closure Date</th>
                   </tr>
                 </thead>
                 <tbody id="tableBody">
-                  <tr><td colspan="27"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading closed loans…</p></div></td></tr>
+                  <tr><td colspan="7"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading closed loans…</p></div></td></tr>
                 </tbody>
                 <tfoot id="tableFoot" style="display:none;">
                   <tr>
-                    <td colspan="13"><strong>Page Total</strong></td>
-                    <td class="text-end" id="footOverallInterest">—</td>
+                    <td colspan="4"><strong>Page Total</strong></td>
+                    <td class="text-end" id="footPrincipal">—</td>
                     <td class="text-end" id="footInterestCollected">—</td>
-                    <td class="text-end" id="footPrincipalCollected">—</td>
-                    <td class="text-end" id="footTotalCollected">—</td>
-                    <!-- <td class="text-end" id="footClosureCharges">—</td> -->
-                    <!-- <td class="text-end" id="footFinalSettlement">—</td> -->
-                    <td colspan="6"></td>
+                    <td></td>
                   </tr>
                 </tfoot>
               </table>
@@ -225,46 +179,18 @@ const elTBody = el("tableBody"), elTFoot = el("tableFoot"), elBadge = el("record
       elPaginInfo = el("paginationInfo"), elPaginCtrls = el("paginationControls");
 
 function fmt(n) { return n == null ? "—" : "₹" + Number(n).toLocaleString("en-IN", { maximumFractionDigits: 0 }); }
-function fmtNum(n) { return n == null ? "—" : Number(n).toLocaleString("en-IN", { maximumFractionDigits: 2 }); }
-function fmtDate(dt) { return dt ? new Date(dt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"; }
-
+function fmtDate(dt) {
+  if (!dt) return "—";
+  return new Date(dt).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
 function setExportBtnsVisible(v) {
   ["btnExportExcel", "btnPrint"].forEach(id => document.getElementById(id).style.display = v ? "" : "none");
-}
-
-async function loadDropdowns() {
-  try {
-    const schemes = await Api.getLoanSchemes(false);
-    el("fScheme").innerHTML = `<option value="">All Schemes</option>` +
-      schemes.map(s => `<option value="${s.loanSchemeId}">${s.schemeName}</option>`).join("");
-  } catch {}
-  try {
-    const types = await Api.getJewelTypes(false);
-    el("fJewelType").innerHTML = `<option value="">All Types</option>` +
-      types.map(t => `<option value="${t.jewelTypeId}">${t.jewelTypeName}</option>`).join("");
-  } catch {}
-  try {
-    const branches = await Api.getBranches();
-    const user = Session.get();
-    // All users are scoped to their branch — lock the dropdown for everyone
-    const userBranch = user && branches.find(b => b.branchId === user.branchId);
-    if (userBranch) {
-      el("fBranch").innerHTML = `<option value="${userBranch.branchId}">${userBranch.branchName}</option>`;
-      el("fBranch").disabled = true;
-    } else {
-      el("fBranch").innerHTML = `<option value="">All Branches</option>` +
-        branches.map(b => `<option value="${b.branchId}">${b.branchName}</option>`).join("");
-    }
-  } catch { /* branches endpoint not available — filter silently disabled */ }
-  // NOTE: no "list users" API call exists in api-client.js today, so the
-  // "Closed By" dropdown stays empty unless you wire it to your Users master
-  // endpoint (e.g. Api.getUsers()) — add that call here once available.
 }
 
 async function loadReport(filters) {
   clearApiError();
   const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
-  elTBody.innerHTML = `<tr><td colspan="27"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
+  elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
   elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
   elBadge.style.display = "none"; elSummary.style.display = "none";
   setExportBtnsVisible(false);
@@ -275,23 +201,16 @@ async function loadReport(filters) {
     renderGrid(data);
   } catch (err) {
     showApiError(err);
-    elTBody.innerHTML = `<tr><td colspan="27"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
+    elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
   }
 }
 
 el("btnApplyFilters").addEventListener("click", () => {
   currentPage = 1;
   activeFilters = {
-    loanNo:          el("fLoanNo").value.trim()       || undefined,
-    customerName:    el("fCustomerName").value.trim() || undefined,
-    mobile:          el("fMobile").value.trim()       || undefined,
-    // aadhaar:         el("fAadhaar").value.trim()      || undefined,
-    loanSchemeId:    el("fScheme").value              || undefined,
-    jewelTypeId:     el("fJewelType").value           || undefined,
-    closureFromDate: el("fFromDate").value            || undefined,
-    closureToDate:   el("fToDate").value               || undefined
-    // closedByUserId:  el("fClosedBy").value            || undefined
-    // branchId:        el("fBranch").value              || undefined
+    loanNo:          el("fLoanNo").value.trim() || undefined,
+    closureFromDate: el("fFromDate").value      || undefined,
+    closureToDate:   el("fToDate").value        || undefined
   };
   loadReport(activeFilters);
 });
@@ -313,50 +232,31 @@ function renderGrid(data) {
   setExportBtnsVisible(totalCount > 0);
 
   if (!items || items.length === 0) {
-    elTBody.innerHTML = `<tr><td colspan="27"><div class="state-panel"><i class="bi bi-inbox"></i><p>No closed loans found for the selected filters.</p></div></td></tr>`;
+    elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-inbox"></i><p>No closed loans found for the selected filters.</p></div></td></tr>`;
     elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
     return;
   }
 
-  let pOI = 0, pIC = 0, pPC = 0, pTC = 0, pCC = 0, pFS = 0;
+  let pPrincipal = 0, pIC = 0;
   const startNo = (page - 1) * pageSize + 1;
   const rows = items.map((r, i) => {
-    pOI += r.overallInterest || 0; pIC += r.totalInterestCollected || 0;
-    pPC += r.totalPrincipalCollected || 0; pTC += r.totalAmountCollected || 0;
-    pCC += r.closureCharges || 0; pFS += r.finalSettlementAmount || 0;
+    pPrincipal += r.principalAmount || 0;
+    pIC += r.totalInterestCollected || 0;
     return `<tr>
       <td>${startNo + i}</td>
       <td class="nowrap">${r.loanNumber}</td>
-      <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
-      <td>${r.mobile}</td>
-      <td>${r.schemeDisplay}</td>
       <td>${fmtDate(r.loanDate)}</td>
-      <td>${fmtDate(r.maturityDate)}</td>
-      <td>${fmtDate(r.closureDate)}</td>
-      <td class="text-end">${r.loanDurationDays ?? "—"}</td>
-      <td>${r.jewelTypes || "—"}</td>
-      <td class="text-end">${fmtNum(r.grossWeight)}</td>
-      <td class="text-end">${fmtNum(r.netWeight)}</td>
-      <td>${r.purity || "—"}</td>
+      <td class="nowrap">${r.loanNumber}</td>
+      <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
       <td class="text-end">${fmt(r.principalAmount)}</td>
-      <td class="text-end">${fmt(r.overallInterest)}</td>
       <td class="text-end">${fmt(r.totalInterestCollected)}</td>
-      <td class="text-end">${fmt(r.totalPrincipalCollected)}</td>
-      <td class="text-end cell-strong">${fmt(r.totalAmountCollected)}</td>
-      <td>${r.paymentMode || "—"}</td>
-      <td>${r.closedByName || "—"}</td>
-      <td>${r.branchName || "—"}</td>
-  
+      <td>${fmtDate(r.closureDate)}</td>
     </tr>`;
   });
 
   elTBody.innerHTML = rows.join("");
-  el("footOverallInterest").textContent   = fmt(pOI);
+  el("footPrincipal").textContent         = fmt(pPrincipal);
   el("footInterestCollected").textContent = fmt(pIC);
-  el("footPrincipalCollected").textContent= fmt(pPC);
-  el("footTotalCollected").textContent    = fmt(pTC);
-  // el("footClosureCharges").textContent    = fmt(pCC);
-  // el("footFinalSettlement").textContent   = fmt(pFS);
   elTFoot.style.display = "";
 
   renderPagination(totalCount, page, pageSize);
@@ -386,67 +286,32 @@ function goPage(p) {
 function exportExcel() {
   if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
 
-  const header = ["S.No","Loan No","Customer","Mobile","Loan Scheme","Loan Date","Maturity Date",
-    "Closure Date","Duration (Days)","Jewel Type","Gross Wt (g)","Net Wt (g)","Purity","Principal","Overall Interest",
-    "Interest Collected","Principal Collected","Total Collected",
-    "Payment Mode","Closed By","Branch"];
+  const header = ["S.No","Loan No","Loan Date","Book No","Customer","Loan Amt","Interest Collected","Closure Date"];
 
   const startNo = (lastResult.page - 1) * lastResult.pageSize + 1;
   const rows = lastResult.items.map((r, i) => [
     startNo + i,
     r.loanNumber,
-    `${r.customerName} (${r.customerCode})`,
-    r.mobile,
-    r.schemeDisplay,
     fmtDate(r.loanDate),
-    fmtDate(r.maturityDate),
-    fmtDate(r.closureDate),
-    r.loanDurationDays ?? "—",
-    r.jewelTypes || "—",
-    r.grossWeight || 0,
-    r.netWeight || 0,
-    r.purity || "—",
+    r.loanNumber,
+    `${r.customerName} (${r.customerCode})`,
     r.principalAmount || 0,
-    r.overallInterest || 0,
     r.totalInterestCollected || 0,
-    r.totalPrincipalCollected || 0,
-    r.totalAmountCollected || 0,
-    // r.closureCharges || 0,
-    // r.finalSettlementAmount || 0,
-    r.paymentMode || "—",
-    // r.referenceNo || "—",
-    r.closedByName || "—",
-    r.branchName || "—",
-    // r.closureReceiptNo || "—",
-    // r.status,
-    // r.remarks || "—"
+    fmtDate(r.closureDate)
   ]);
 
   const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
 
-  // Currency columns: Principal(N), Overall Interest(O), Interest Collected(P),
-  // Principal Collected(Q), Total Collected(R), Closure Charges(S), Final Settlement(T)
   const currencyFmt = '₹#,##,##0';
-  ["N","O","P","Q","R","S","T"].forEach(col => {
+  ["F","G"].forEach(col => {
     for (let r = 2; r <= rows.length + 1; r++) {
       const cell = ws[`${col}${r}`];
       if (cell) cell.z = currencyFmt;
     }
   });
 
-  // Weight columns: Gross Wt(K), Net Wt(L)
-  ["K","L"].forEach(col => {
-    for (let r = 2; r <= rows.length + 1; r++) {
-      const cell = ws[`${col}${r}`];
-      if (cell) cell.z = '0.00';
-    }
-  });
-
   ws["!cols"] = [
-    { wch: 6 }, { wch: 16 }, { wch: 26 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 12 },
-    { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 8 },
-    { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
-    { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 10 }, { wch: 20 }
+    { wch: 6 }, { wch: 16 }, { wch: 12 }, { wch: 16 }, { wch: 26 }, { wch: 14 }, { wch: 16 }, { wch: 12 }
   ];
 
   const wb = XLSX.utils.book_new();
@@ -473,7 +338,6 @@ activeFilters = {
   closureFromDate: el("fFromDate").value || undefined,
   closureToDate:   el("fToDate").value   || undefined
 };
-loadDropdowns();
 loadReport(activeFilters);
 </script>
 </body>

@@ -101,19 +101,51 @@ public class CustomersController : ControllerBase
             .Where(l => l.CustomerId == id && (l.Status == "Active" || l.Status == "Disbursed"))
             .SumAsync(l => (decimal?)l.OutstandingPrincipal) ?? 0;
 
-        return Ok(new CustomerDetailDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Gender, c.DateOfBirth,
-            c.Mobile, c.AlternateMobile, c.Address, c.City, c.State, c.Pincode, c.AadhaarNumber, c.PanNumber,
-            c.KycVerified, activeLoans, outstanding, closedLoans, c.CreatedAt,
-            c.PhotoPath, c.AadhaarDocPath, c.PanDocPath));
+        return Ok(new CustomerDetailDto(
+            CustomerId: c.CustomerId,
+            CustomerCode: c.CustomerCode,
+            CustomerName: c.CustomerName,
+            Gender: c.Gender,
+            DateOfBirth: c.DateOfBirth,
+            Mobile: c.Mobile,
+            AlternateMobile: c.AlternateMobile,
+            Address: c.Address,
+            City: c.City,
+            State: c.State,
+            Pincode: c.Pincode,
+            AadhaarNumber: c.AadhaarNumber,
+            PanNumber: c.PanNumber,
+            KycVerified: c.KycVerified,
+            ActiveLoans: activeLoans,
+            TotalOutstanding: outstanding,
+            ClosedLoans: closedLoans,
+            CreatedAt: c.CreatedAt,
+            NomineeName: c.NomineeName,
+            NomineeMobile: c.NomineeMobile,
+            NomineeAddress: c.NomineeAddress,
+            NomineeCity: c.NomineeCity,
+            NomineeAadhaarNumber: c.NomineeAadhaarNumber,
+            NomineePhotoPath: c.NomineePhotoPath,
+            NomineeAadhaarDocPath: c.NomineeAadhaarDocPath,
+            PhotoPath: c.PhotoPath,
+            AadhaarDocPath: c.AadhaarDocPath,
+            PanDocPath: c.PanDocPath));
     }
 
-    // GET /api/customers/5/documents/photo|aadhaar|pan
+    // GET /api/customers/5/documents/photo|aadhaar|pan|nomineephoto|nomineeaadhaar
     [HttpGet("{id:int}/documents/{docType}")]
     public async Task<IActionResult> GetDocument(int id, string docType)
     {
         var c = await _db.Customers.AsNoTracking()
             .Where(x => x.CustomerId == id)
-            .Select(x => new { x.PhotoPath, x.AadhaarDocPath, x.PanDocPath })
+            .Select(x => new
+            {
+                x.PhotoPath,
+                x.AadhaarDocPath,
+                x.PanDocPath,
+                x.NomineePhotoPath,
+                x.NomineeAadhaarDocPath
+            })
             .FirstOrDefaultAsync();
 
         if (c == null) return NotFound(new { message = "Customer not found." });
@@ -123,6 +155,8 @@ public class CustomersController : ControllerBase
             "photo" => c.PhotoPath,
             "aadhaar" => c.AadhaarDocPath,
             "pan" => c.PanDocPath,
+            "nomineephoto" => c.NomineePhotoPath,
+            "nomineeaadhaar" => c.NomineeAadhaarDocPath,
             _ => null
         };
 
@@ -184,10 +218,14 @@ public class CustomersController : ControllerBase
         Directory.CreateDirectory(Path.Combine(uploadsRoot, "CustomerPhotos"));
         Directory.CreateDirectory(Path.Combine(uploadsRoot, "Aadhaar"));
         Directory.CreateDirectory(Path.Combine(uploadsRoot, "PAN"));
+        Directory.CreateDirectory(Path.Combine(uploadsRoot, "NomineePhotos"));
+        Directory.CreateDirectory(Path.Combine(uploadsRoot, "NomineeAadhaar"));
 
         string? photoPath = null;
         string? aadhaarPath = null;
         string? panPath = null;
+        string? nomineePhotoPath = null;
+        string? nomineeAadhaarPath = null;
 
         if (dto.CustomerPhoto != null && dto.CustomerPhoto.Length > 0)
         {
@@ -216,6 +254,25 @@ public class CustomersController : ControllerBase
             panPath = Path.Combine("PAN", fileName).Replace("\\", "/");
         }
 
+        // Nominee documents are optional — only saved if the user actually uploaded them.
+        if (dto.NomineePhoto != null && dto.NomineePhoto.Length > 0)
+        {
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.NomineePhoto.FileName);
+            var filePath = Path.Combine(uploadsRoot, "NomineePhotos", fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+                await dto.NomineePhoto.CopyToAsync(stream);
+            nomineePhotoPath = Path.Combine("NomineePhotos", fileName).Replace("\\", "/");
+        }
+
+        if (dto.NomineeAadhaarFile != null && dto.NomineeAadhaarFile.Length > 0)
+        {
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.NomineeAadhaarFile.FileName);
+            var filePath = Path.Combine(uploadsRoot, "NomineeAadhaar", fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+                await dto.NomineeAadhaarFile.CopyToAsync(stream);
+            nomineeAadhaarPath = Path.Combine("NomineeAadhaar", fileName).Replace("\\", "/");
+        }
+
         var entity = new Customer
         {
             CustomerCode = code,
@@ -236,6 +293,15 @@ public class CustomersController : ControllerBase
             AadhaarDocPath = aadhaarPath,
             PanDocPath = panPath,
 
+            // Nominee fields are all optional — stored as null/blank when not provided.
+            NomineeName = string.IsNullOrWhiteSpace(dto.NomineeName) ? null : dto.NomineeName,
+            NomineeMobile = string.IsNullOrWhiteSpace(dto.NomineeMobile) ? null : dto.NomineeMobile,
+            NomineeAddress = string.IsNullOrWhiteSpace(dto.NomineeAddress) ? null : dto.NomineeAddress,
+            NomineeCity = string.IsNullOrWhiteSpace(dto.NomineeCity) ? null : dto.NomineeCity,
+            NomineeAadhaarNumber = string.IsNullOrWhiteSpace(dto.NomineeAadhaarNumber) ? null : dto.NomineeAadhaarNumber,
+            NomineePhotoPath = nomineePhotoPath,
+            NomineeAadhaarDocPath = nomineeAadhaarPath,
+
             KycVerified = false,
             CreatedAt = DateTime.UtcNow
         };
@@ -245,27 +311,34 @@ public class CustomersController : ControllerBase
 
         return CreatedAtAction(nameof(GetById), new { id = entity.CustomerId },
             new CustomerDetailDto(
-                entity.CustomerId,
-                entity.CustomerCode,
-                entity.CustomerName,
-                entity.Gender,
-                entity.DateOfBirth,
-                entity.Mobile,
-                entity.AlternateMobile,
-                entity.Address,
-                entity.City,
-                entity.State,
-                entity.Pincode,
-                entity.AadhaarNumber,
-                entity.PanNumber,
-                entity.KycVerified,
-                0,
-                0,
-                0,
-                entity.CreatedAt,
-                entity.PhotoPath,
-                entity.AadhaarDocPath,
-                entity.PanDocPath));
+                CustomerId: entity.CustomerId,
+                CustomerCode: entity.CustomerCode,
+                CustomerName: entity.CustomerName,
+                Gender: entity.Gender,
+                DateOfBirth: entity.DateOfBirth,
+                Mobile: entity.Mobile,
+                AlternateMobile: entity.AlternateMobile,
+                Address: entity.Address,
+                City: entity.City,
+                State: entity.State,
+                Pincode: entity.Pincode,
+                AadhaarNumber: entity.AadhaarNumber,
+                PanNumber: entity.PanNumber,
+                KycVerified: entity.KycVerified,
+                ActiveLoans: 0,
+                TotalOutstanding: 0,
+                ClosedLoans: 0,
+                CreatedAt: entity.CreatedAt,
+                NomineeName: entity.NomineeName,
+                NomineeMobile: entity.NomineeMobile,
+                NomineeAddress: entity.NomineeAddress,
+                NomineeCity: entity.NomineeCity,
+                NomineeAadhaarNumber: entity.NomineeAadhaarNumber,
+                NomineePhotoPath: entity.NomineePhotoPath,
+                NomineeAadhaarDocPath: entity.NomineeAadhaarDocPath,
+                PhotoPath: entity.PhotoPath,
+                AadhaarDocPath: entity.AadhaarDocPath,
+                PanDocPath: entity.PanDocPath));
     }
 
     // PUT /api/customers/5
@@ -287,6 +360,15 @@ public class CustomersController : ControllerBase
         entity.AadhaarNumber = dto.AadhaarNumber;
         entity.PanNumber = dto.PanNumber;
         entity.KycVerified = dto.KycVerified;
+
+        // Nominee text fields are optional and editable via this endpoint.
+        // Nominee documents are not updated here — add a dedicated [FromForm] endpoint if needed.
+        entity.NomineeName = string.IsNullOrWhiteSpace(dto.NomineeName) ? null : dto.NomineeName;
+        entity.NomineeMobile = string.IsNullOrWhiteSpace(dto.NomineeMobile) ? null : dto.NomineeMobile;
+        entity.NomineeAddress = string.IsNullOrWhiteSpace(dto.NomineeAddress) ? null : dto.NomineeAddress;
+        entity.NomineeCity = string.IsNullOrWhiteSpace(dto.NomineeCity) ? null : dto.NomineeCity;
+        entity.NomineeAadhaarNumber = string.IsNullOrWhiteSpace(dto.NomineeAadhaarNumber) ? null : dto.NomineeAadhaarNumber;
+
         entity.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();

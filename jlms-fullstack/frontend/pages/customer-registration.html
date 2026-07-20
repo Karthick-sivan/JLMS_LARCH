@@ -15,6 +15,15 @@
   .upload-box .ul-sub { font-size: 10.5px; color: var(--n-400); }
   .doc-thumb { width:100%; height:78px; border-radius:var(--radius-sm); background:var(--n-150); display:flex; align-items:center; justify-content:center; color:var(--n-400); font-size:22px; position:relative; overflow:hidden; }
   .doc-thumb .remove-x { position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.55); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; }
+
+  /* --- Step wizard --- */
+  .step-indicator { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .step-pill { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--n-400); }
+  .step-pill .num { width:22px; height:22px; border-radius:50%; background:var(--n-150); color:var(--n-500); display:flex; align-items:center; justify-content:center; font-size:11.5px; }
+  .step-pill.active { color:var(--navy-700); }
+  .step-pill.active .num { background:var(--navy-700); color:#fff; }
+  .step-pill.done .num { background:#1f9d55; color:#fff; }
+  .step-sep { width:28px; height:1px; background:var(--n-200); }
 </style>
 </head>
 <body>
@@ -38,10 +47,18 @@
       <div id="apiErrorBanner" class="api-error-banner"></div>
       <div id="apiSuccessBanner" class="api-success-banner"></div>
 
+      <div class="step-indicator">
+        <div class="step-pill active" id="stepPill1"><span class="num">1</span> Customer Details</div>
+        <div class="step-sep"></div>
+        <div class="step-pill" id="stepPill2"><span class="num">2</span> Nominee Details</div>
+      </div>
+
       <div class="row g-3">
         <!-- LEFT: FORM -->
         <div class="col-lg-12">
-          <div class="panel mb-3">
+
+          <!-- ================= STEP 1: CUSTOMER DETAILS ================= -->
+          <div class="panel mb-3" id="stepCustomerPanel">
             <div class="panel-body">
 
               <fieldset class="section-fieldset">
@@ -196,30 +213,78 @@
             </div>
             <div class="panel-foot">
               <button class="btn-jlms btn-jlms-ghost" id="btnClear"><i class="bi bi-x-lg"></i> Clear</button>
+              <button class="btn-jlms btn-jlms-primary" id="btnNext">Next: Nominee Details <i class="bi bi-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- ================= STEP 2: NOMINEE DETAILS (OPTIONAL) ================= -->
+          <div class="panel mb-3" id="stepNomineePanel" style="display:none;">
+            <div class="panel-body">
+
+              <fieldset class="section-fieldset">
+                <legend>Nominee Details <span class="opt">optional — skip and save if not applicable</span></legend>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="field-label">Nominee Name<span class="opt">optional</span></label>
+                    <input type="text" class="form-control-jlms" id="nomineeName" placeholder="Full name of nominee">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="field-label">Nominee Mobile<span class="opt">optional</span></label>
+                    <div class="input-affix"><span class="affix">+91</span><input type="text" id="nomineeMobile" maxlength="10" inputmode="numeric" placeholder="10-digit mobile"></div>
+                  </div>
+                  <div class="col-md-12">
+                    <label class="field-label">Nominee Address<span class="opt">optional</span></label>
+                    <textarea class="form-control-jlms" id="nomineeAddress" rows="2" placeholder="Door No, Street, Area"></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="field-label">Nominee City<span class="opt">optional</span></label>
+                    <input type="text" class="form-control-jlms" id="nomineeCity">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="field-label">Nominee Aadhaar Number<span class="opt">optional</span></label>
+                    <div class="input-affix"><span class="affix"><i class="bi bi-credit-card"></i></span><input type="text" id="nomineeAadhaar" placeholder="12-digit Aadhaar"></div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset class="section-fieldset">
+                <legend>Nominee Document Upload <span class="opt">optional</span></legend>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label class="field-label">Nominee Photo</label>
+                    <div class="doc-thumb" id="nomineePhotoPreview">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="upload-box mt-2" id="nomineePhotoUploadBox">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <div class="ul-text" id="nomineePhotoText">Click or drag to upload</div>
+                        <div class="ul-sub">JPG, PNG up to 5MB</div>
+                    </div>
+                    <input type="file" id="nomineePhoto" accept=".jpg,.jpeg,.png" hidden>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="field-label">Nominee Aadhaar Copy</label>
+                    <div class="doc-thumb" id="nomineeAadhaarPreview">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="upload-box mt-2" id="nomineeAadhaarUploadBox">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <div class="ul-text" id="nomineeAadhaarText">Click or drag to upload</div>
+                        <div class="ul-sub">PDF, JPG up to 5MB</div>
+                    </div>
+                    <input type="file" id="nomineeAadhaarFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
+                  </div>
+                </div>
+              </fieldset>
+
+            </div>
+            <div class="panel-foot">
+              <button class="btn-jlms btn-jlms-ghost" id="btnBack"><i class="bi bi-arrow-left"></i> Back</button>
               <button class="btn-jlms btn-jlms-primary" id="btnSaveCustomer"><i class="bi bi-save"></i> Save Customer</button>
             </div>
           </div>
-        </div>
 
-        <!-- RIGHT: SUMMARY -->
-        <!--<div class="col-lg-3">
-          <div class="panel mb-3">
-            <div class="panel-head"><div class="h4">Customer Summary</div></div>
-            <div class="panel-body" style="text-align:center;" id="summaryPanelBody">
-              <div style="width:72px; height:72px; border-radius:50%; background:var(--n-150); color:var(--n-500); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:700; margin:0 auto 10px;">
-                <i class="bi bi-person-plus"></i>
-              </div>
-              <div class="h4 text-muted-jlms">New Customer</div>
-              <div class="text-muted-jlms" style="margin-top:2px;">Fill the form and click Save</div>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><div class="h4">Loan History</div></div>
-            <div class="panel-body" id="loanHistoryBody" style="padding:16px;">
-              <div class="text-muted-jlms" style="font-size:12px; text-align:center;">No loans yet — save the customer first, then create a loan from the New Loan screen.</div>
-            </div>
-          </div>
-        </div>-->
+        </div>
       </div>
     </div>
   </div>
@@ -235,6 +300,15 @@ let selectedGender = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   Session.requireLogin();
+
+  // If we just reloaded after a successful save, show the success banner once.
+  const pendingSuccessMsg = sessionStorage.getItem('customerSavedMsg');
+  if (pendingSuccessMsg) {
+    const successEl = document.getElementById('apiSuccessBanner');
+    successEl.textContent = pendingSuccessMsg;
+    successEl.style.display = 'block';
+    sessionStorage.removeItem('customerSavedMsg');
+  }
 
   let cameraStream = null;
 let capturedPhoto = null;
@@ -440,6 +514,56 @@ document.getElementById("panFile").addEventListener("change", function () {
 
 });
 
+    // ==========================
+    // Nominee Photo Upload
+    // ==========================
+    document.getElementById("nomineePhotoUploadBox").onclick = function () {
+        document.getElementById("nomineePhoto").click();
+    };
+
+    document.getElementById("nomineePhoto").addEventListener("change", function () {
+
+        const file = this.files[0];
+        if (!file) return;
+
+        document.getElementById("nomineePhotoText").innerText = file.name;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("nomineePhotoPreview").innerHTML =
+                `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ==========================
+    // Nominee Aadhaar Upload
+    // ==========================
+    document.getElementById("nomineeAadhaarUploadBox").onclick = function () {
+        document.getElementById("nomineeAadhaarFile").click();
+    };
+
+    document.getElementById("nomineeAadhaarFile").addEventListener("change", function () {
+
+        const file = this.files[0];
+        if (!file) return;
+
+        document.getElementById("nomineeAadhaarText").innerText = file.name;
+
+        if (file.type === "application/pdf") {
+            document.getElementById("nomineeAadhaarPreview").innerHTML =
+                `<i class="bi bi-file-earmark-pdf-fill" style="font-size:34px;color:red;"></i>`;
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("nomineeAadhaarPreview").innerHTML =
+                `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+        };
+        reader.readAsDataURL(file);
+    });
+
   document.querySelectorAll('#genderPills .radio-pill').forEach(pill => {
     pill.addEventListener('click', () => {
       document.querySelectorAll('#genderPills .radio-pill').forEach(p => p.classList.remove('selected'));
@@ -448,8 +572,52 @@ document.getElementById("panFile").addEventListener("change", function () {
     });
   });
 
+  // ==========================
+  // Step navigation
+  // ==========================
+  function validateCustomerStep() {
+    const name = document.getElementById('custName').value.trim();
+    const mobile = document.getElementById('custMobile').value.trim();
+
+    if (!name || !mobile) {
+      showApiError(new Error('Customer Details are required.'));
+      return false;
+    }
+    clearApiError();
+    return true;
+  }
+
+  function goToStep(step) {
+    const custPanel = document.getElementById('stepCustomerPanel');
+    const nomineePanel = document.getElementById('stepNomineePanel');
+    const pill1 = document.getElementById('stepPill1');
+    const pill2 = document.getElementById('stepPill2');
+
+    if (step === 1) {
+      custPanel.style.display = '';
+      nomineePanel.style.display = 'none';
+      pill1.classList.add('active'); pill1.classList.remove('done');
+      pill2.classList.remove('active'); pill2.classList.remove('done');
+    } else {
+      custPanel.style.display = 'none';
+      nomineePanel.style.display = '';
+      pill1.classList.remove('active'); pill1.classList.add('done');
+      pill2.classList.add('active');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.getElementById('btnNext').addEventListener('click', () => {
+    if (!validateCustomerStep()) return;
+    goToStep(2);
+  });
+
+  document.getElementById('btnBack').addEventListener('click', () => {
+    goToStep(1);
+  });
+
   document.getElementById('btnClear').addEventListener('click', () => {
-    document.querySelectorAll('#custName, #custMobile, #custAltMobile, #custDob, #custAddress, #custCity, #custPincode, #custAadhaar, #custPan')
+    document.querySelectorAll('#custName, #custMobile, #custAltMobile, #custDob, #custAddress, #custCity, #custPincode, #custAadhaar, #custPan, #nomineeName, #nomineeMobile, #nomineeAddress, #nomineeCity, #nomineeAadhaar')
       .forEach(el => el.value = '');
     document.getElementById('custState').value = '';
     capturedPhoto = null;
@@ -457,6 +625,9 @@ document.getElementById("panFile").addEventListener("change", function () {
 document.getElementById("customerPhoto").value = "";
 document.getElementById("aadhaarFile").value = "";
 document.getElementById("panFile").value = "";
+document.getElementById("nomineePhoto").value = "";
+document.getElementById("nomineeAadhaarFile").value = "";
+
 document.getElementById("photoPreview").innerHTML =
 '<i class="bi bi-person-circle"></i>';
 
@@ -466,28 +637,43 @@ document.getElementById("aadhaarPreview").innerHTML =
 document.getElementById("panPreview").innerHTML =
 '<i class="bi bi-file-earmark-text"></i>';
 
+document.getElementById("nomineePhotoPreview").innerHTML =
+'<i class="bi bi-person-circle"></i>';
+
+document.getElementById("nomineeAadhaarPreview").innerHTML =
+'<i class="bi bi-file-earmark-text"></i>';
+
 document.getElementById("aadhaarText").innerText =
 'Click or drag to upload';
 
 document.getElementById("panText").innerText =
 'Click or drag to upload';
+
+document.getElementById("nomineePhotoText").innerText =
+'Click or drag to upload';
+
+document.getElementById("nomineeAadhaarText").innerText =
+'Click or drag to upload';
+
     document.querySelectorAll('#genderPills .radio-pill').forEach(p => p.classList.remove('selected'));
     selectedGender = null;
     clearApiError();
     document.getElementById('apiSuccessBanner').style.display = 'none';
+    goToStep(1);
   });
 
   document.getElementById('btnSaveCustomer').addEventListener('click', async () => {
     clearApiError();
     document.getElementById('apiSuccessBanner').style.display = 'none';
 
-    const name = document.getElementById('custName').value.trim();
-    const mobile = document.getElementById('custMobile').value.trim();
-
-    if (!name || !mobile) {
-      showApiError(new Error('Customer Name and Mobile Number are required.'));
+    // Nominee details are optional, so we only re-check the customer step's required fields.
+    if (!validateCustomerStep()) {
+      goToStep(1);
       return;
     }
+
+    const name = document.getElementById('custName').value.trim();
+    const mobile = document.getElementById('custMobile').value.trim();
 
 const formData = new FormData();
 
@@ -529,26 +715,33 @@ const pan = document.getElementById("panFile").files[0];
 if (pan)
     formData.append("PanFile", pan);
 
+// Nominee fields — all optional, sent as-is (empty strings if not filled)
+formData.append("NomineeName", document.getElementById("nomineeName").value.trim());
+formData.append("NomineeMobile", document.getElementById("nomineeMobile").value.trim());
+formData.append("NomineeAddress", document.getElementById("nomineeAddress").value.trim());
+formData.append("NomineeCity", document.getElementById("nomineeCity").value.trim());
+formData.append("NomineeAadhaarNumber", document.getElementById("nomineeAadhaar").value.trim());
+
+const nomineePhoto = document.getElementById("nomineePhoto").files[0];
+if (nomineePhoto)
+    formData.append("NomineePhoto", nomineePhoto);
+
+const nomineeAadhaarFile = document.getElementById("nomineeAadhaarFile").files[0];
+if (nomineeAadhaarFile)
+    formData.append("NomineeAadhaarFile", nomineeAadhaarFile);
+
     const btn = document.getElementById('btnSaveCustomer');
     btn.disabled = true;
     btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
     try {
       const saved = await Api.createCustomer(formData);
-      document.getElementById('custCode').value = saved.customerCode;
 
-      const successEl = document.getElementById('apiSuccessBanner');
-      successEl.textContent = `Customer saved successfully as ${saved.customerCode}. You can now create a loan for them from the New Loan screen.`;
-      successEl.style.display = 'block';
-
-      // const initials = name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
-      // document.getElementById('summaryPanelBody').innerHTML = `
-      //   <div style="width:72px; height:72px; border-radius:50%; background:var(--navy-100); color:var(--navy-700); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:700; margin:0 auto 10px;">${initials}</div>
-      //   <div class="h4">${saved.customerName}</div>
-      //   <div class="text-muted-jlms" style="margin-top:2px;">${saved.customerCode}</div>
-      //   <span class="badge-jlms badge-neutral" style="margin-top:10px;"><span class="dot"></span>KYC Not Verified</span>
-      //   <div class="divider-jlms"></div>
-      //   <div class="summary-row"><span class="label">Active Loans</span><span class="value">0</span></div>
-      //   <div class="summary-row"><span class="label">Total Outstanding</span><span class="value">₹0</span></div>`;
+      // Stash the success message so it survives the reload, then reload the
+      // page to fully clear the form (both Customer and Nominee steps).
+      sessionStorage.setItem('customerSavedMsg',
+        `Customer saved successfully as ${saved.customerCode}. You can now create a loan for them from the New Loan screen.`);
+      window.location.reload();
+      return;
     } catch (err) {
       showApiError(err);
     } finally {
