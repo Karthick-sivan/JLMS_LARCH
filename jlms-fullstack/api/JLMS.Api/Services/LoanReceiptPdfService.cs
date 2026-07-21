@@ -303,16 +303,18 @@ public class LoanReceiptPdfService
                         {
                             table.ColumnsDefinition(c =>
                             {
-                                c.ConstantColumn(40);
+                                
                                 c.RelativeColumn(3);
+                                c.RelativeColumn(1);
                                 c.RelativeColumn(1);
                                 c.RelativeColumn(1);
                             });
 
                             table.Header(h =>
                             {
-                                h.Cell().Element(HeaderCell).Text("S.No");
+                                
                                 h.Cell().Element(HeaderCell).Text("Item");
+                                h.Cell().Element(HeaderCell).Text("Qty");
                                 h.Cell().Element(HeaderCell).Text("Purity");
                                 h.Cell().Element(HeaderCell).Text("Wt (g)");
                             });
@@ -320,8 +322,9 @@ public class LoanReceiptPdfService
                             int sno = 1;
                             foreach (var ji in loan.JewelItems)
                             {
-                                table.Cell().Element(BodyCell).Text(sno.ToString());
+                                
                                 table.Cell().Element(BodyCell).Text(ji.JewelType?.JewelTypeName ?? "-");
+                                table.Cell().Element(BodyCell).Text(ji.Quantity.ToString());
                                 table.Cell().Element(BodyCell).Text(ji.Purity ?? "-");
                                 table.Cell().Element(BodyCell).Text(ji.GrossWeightGrams.ToString("0.000"));
                                 sno++;
