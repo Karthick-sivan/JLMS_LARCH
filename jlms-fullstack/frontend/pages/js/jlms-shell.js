@@ -98,6 +98,11 @@ function jlmsBuildTopbar(pageTitle, breadcrumbs) {
       </div>
       <div class="topbar-right">
         <div class="branch-pill"><i class="bi bi-building"></i> ${user.branchName || 'No Branch'}</div>
+        <div class="rate-pill" id="topbarGoldRatePill" style="display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:600;color:#7a5c00;background:#fefce8;border:1px solid #fde68a;border-radius:20px;padding:3px 12px;white-space:nowrap;">
+          <span><i class="bi bi-coin" style="color:#D4AF37;margin-right:3px;"></i><span id="topbarGold22K">—</span></span>
+          <span style="color:#d7dce3;">|</span>
+          <span><i class="bi bi-gem" style="color:#7B8EA0;margin-right:3px;"></i><span id="topbarSilver">—</span></span>
+        </div>
         <div class="icon-btn"><i class="bi bi-bell"></i><span class="dot"></span></div>
         <div class="user-chip" id="userDropdownTrigger" style="position:relative; cursor:pointer;">
           <div class="user-avatar">${initials}</div>
@@ -142,6 +147,17 @@ function jlmsInitShell(pageTitle, breadcrumbs) {
             });
         }
 
+        (async () => {
+          try {
+            const rate = await Api.getTodayGoldRate();
+            const g = document.getElementById('topbarGold22K');
+            const s = document.getElementById('topbarSilver');
+            if (g) g.textContent = rate.rate22K != null ? '₹' + Number(rate.rate22K).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}) + '/g' : '—';
+            if (s) s.textContent = rate.silverRate != null ? '₹' + Number(rate.silverRate).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}) + '/g' : '—';
+          } catch (e) {
+            // silently fail — rate pill stays at —
+          }
+        })();
         // Logout click handler
         const logoutLink = document.getElementById('logoutLink');
         if (logoutLink) {
