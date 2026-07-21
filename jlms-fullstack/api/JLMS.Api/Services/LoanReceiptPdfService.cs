@@ -684,8 +684,20 @@ public class LoanReceiptPdfService
                         row.ConstantItem(130).Column(c =>
                         {
                             c.Item().AlignCenter().Text("Customer Photo at Closure").FontSize(9).SemiBold();
+                            //if (closurePhoto != null)
+                            //    c.Item().PaddingTop(6).Height(130).Width(130).Border(1).BorderColor(Colors.Grey.Darken1).Image(closurePhoto).FitArea();
+
                             if (closurePhoto != null)
-                                c.Item().PaddingTop(6).Height(130).Width(130).Border(1).BorderColor(Colors.Grey.Darken1).Image(closurePhoto).FitArea();
+                            {
+                                c.Item()
+                                    .PaddingTop(6)
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Darken1)
+                                    .Width(130)
+                                    .Height(130)
+                                    .Image(closurePhoto)
+                                    .FitUnproportionally();
+                            }
                             else
                                 c.Item().PaddingTop(6).Height(130).Width(130).Background(Colors.Grey.Lighten3)
                                  .AlignCenter().AlignMiddle().Text("No Closure Photo").FontSize(8);
