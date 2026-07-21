@@ -137,6 +137,21 @@
                 document.getElementById('lblSilver').innerHTML =
                     '₹' + formatCurrency(rate.silverRate ?? 0) + ' / g';
 
+
+                const topGold = document.getElementById('topbarGold22K');
+                const topSilver = document.getElementById('topbarSilver');
+
+                if (topGold) {
+                    topGold.textContent = rate.rate22K != null 
+                        ? '₹' + formatCurrency(rate.rate22K) + '/g' 
+                        : '—';
+                }
+                if (topSilver) {
+                    topSilver.textContent = rate.silverRate != null 
+                        ? '₹' + formatCurrency(rate.silverRate) + '/g' 
+                        : '—';
+                }
+
             }
             catch (err) {
                 showApiError(err);
