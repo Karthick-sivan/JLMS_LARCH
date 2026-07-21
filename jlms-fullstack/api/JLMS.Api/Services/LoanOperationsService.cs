@@ -206,8 +206,11 @@ public class LoanOperationsService
         //var outstandingInterest = Round2(loan.OutstandingInterest + accruedInterest);
         // lastAnyPaymentDate anchors the daily-accrual window (days since last payment
         // of ANY type, including old-system InterestCollection/PrincipalCollection).
+        //var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
+        //var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
+
         var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
-        var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
+        var lastReferenceDate = (lastAnyPaymentDate ?? GetFirstAccrualReferenceDate(loan)).Date;
 
         var (noOfDays, dailyRate, dailyAmount, accruedInterest) = _calc.CalculateAccruedInterestInfoOnly(
             loan.OutstandingPrincipal, loan.InterestRatePct, lastReferenceDate, asOfDate);
@@ -223,12 +226,13 @@ public class LoanOperationsService
         var outstandingInterest = Round2(genuineCarryForward + accruedInterest);
         var interestPaidToDate = Round2(loan.OverallInterest - outstandingInterest);
         var maxPayable = Round2(outstandingInterest + loan.OutstandingPrincipal);
+        var hasPriorPayment = lastAnyPaymentDate.HasValue;
 
         return new LoanOperationsInterestCalculationDto(
             loan.OverallInterest, interestPaidToDate, outstandingInterest,
             loan.OutstandingPrincipal, maxPayable, asOfDate,
             lastReferenceDate, noOfDays,
-            dailyRate, Math.Round(dailyAmount, 4, MidpointRounding.AwayFromZero), accruedInterest);
+            dailyRate, Math.Round(dailyAmount, 4, MidpointRounding.AwayFromZero), accruedInterest, hasPriorPayment);
     }
 
     // ===================================================================
@@ -308,9 +312,10 @@ public class LoanOperationsService
 
             //var interestDue = Round2(loan.OutstandingInterest + accruedInterest);
             //var maxPayable = Round2(interestDue + loan.OutstandingPrincipal);
+            //var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
+            //var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
             var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
-            var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
-
+            var lastReferenceDate = (lastAnyPaymentDate ?? GetFirstAccrualReferenceDate(loan)).Date;
             var (noOfDays, dailyRate, dailyAmount, accruedInterest) = _calc.CalculateAccruedInterestInfoOnly(
                 loan.OutstandingPrincipal, loan.InterestRatePct, lastReferenceDate, paymentDate);
 
@@ -508,6 +513,8 @@ public class LoanOperationsService
         var rows = new List<LoanOperationsLedgerRowDto>();
         var principalBal = 0m;
         var interestBal = 0m;
+        var firstMonthInterestCollected = 0m;   // ★ NEW — needed for the footer total below
+
 
         foreach (var t in transactions)
         {
@@ -527,6 +534,23 @@ public class LoanOperationsService
                     t.PrincipalAmount, 0, principalBal, interestBal, principalBal,
                     t.ReceiptNumber, userName, t.Remarks, false));
 
+                var firstMonthInterest = Round2(loan.LoanAmount * loan.InterestRatePct / 100m / 12m);
+                if (firstMonthInterest > 0m)
+                {
+                    firstMonthInterestCollected = firstMonthInterest;
+
+                    rows.Add(new LoanOperationsLedgerRowDto(
+                        t.TransactionId, t.TransactionDate, "Interest", "First Month Interest Debited",
+                        firstMonthInterest, 0m, principalBal, interestBal, principalBal + firstMonthInterest,
+                        t.ReceiptNumber, userName,
+                        "First month's interest collected upfront at disbursement", false));
+
+                    rows.Add(new LoanOperationsLedgerRowDto(
+                        t.TransactionId, t.TransactionDate, "Interest", "First Month Interest Collected",
+                        0m, firstMonthInterest, principalBal, interestBal, principalBal,
+                        t.ReceiptNumber, userName,
+                        "First month's interest collected upfront at disbursement", true));
+                }
                 // 2. Add Processing Fee Rows (if a fee exists on this loan)
                 if (loan.ProcessingFee > 0m)
                 {
@@ -615,7 +639,11 @@ public class LoanOperationsService
                  : pageSize is > 0 and <= 100 ? pageSize : 10;
         var pagedRows = rows.Skip((safePage - 1) * safePageSize).Take(safePageSize).ToList();
 
-        var totalInterestCollected = Round2(transactions.Where(t => t.TransactionType != "Disbursement").Sum(t => t.InterestAmount + t.PenaltyAmount));
+        //var totalInterestCollected = Round2(transactions.Where(t => t.TransactionType != "Disbursement").Sum(t => t.InterestAmount + t.PenaltyAmount));
+
+        var totalInterestCollected = Round2(
+    transactions.Where(t => t.TransactionType != "Disbursement").Sum(t => t.InterestAmount + t.PenaltyAmount)
+    + firstMonthInterestCollected);
         var totalPrincipalCollected = Round2(transactions.Where(t => t.TransactionType != "Disbursement").Sum(t => t.PrincipalAmount));
 
         return new LoanOperationsLedgerResponseDto(
@@ -668,8 +696,11 @@ public class LoanOperationsService
         //var (_, _, _, accruedInterest) = _calc.CalculateAccruedInterestInfoOnly(
         //    loan.OutstandingPrincipal, loan.InterestRatePct, lastReferenceDate, asOfDate);
         //return Round2(loan.OutstandingInterest + accruedInterest);
+        //var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
+        //var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
+
         var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
-        var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
+        var lastReferenceDate = (lastAnyPaymentDate ?? GetFirstAccrualReferenceDate(loan)).Date;
 
         var (_, _, _, accruedInterest) = _calc.CalculateAccruedInterestInfoOnly(
             loan.OutstandingPrincipal, loan.InterestRatePct, lastReferenceDate, asOfDate);
@@ -744,4 +775,8 @@ public class LoanOperationsService
     }
 
     private static decimal Round2(decimal value) => Math.Round(value, 2, MidpointRounding.AwayFromZero);
+
+
+    private static DateTime GetFirstAccrualReferenceDate(Loan loan)
+    => (loan.LoanDate?.AddMonths(1) ?? IstClock.Today).Date;
 }

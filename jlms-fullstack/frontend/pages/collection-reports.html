@@ -155,11 +155,11 @@
                                 <!--<div class="report-cat-item active"><i class="bi bi-graph-down"></i> Outstanding Reports </div>
                                 <div class="report-cat-item"><i class="bi bi-cash-coin"></i> Collection Reports </div>-->
                                 <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i
-                                        class="bi bi-folder2-open"></i> Active Loans Report </div>
-                                <!-- <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i
-                                        class="bi bi-graph-down"></i> Outstanding Reports </div> -->
-                                <!-- <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> Collection Reports
-                                </div> -->
+                                        class="bi bi-folder2-open"></i> Loan Report </div>
+                                <div class="report-cat-item" onclick="location.href='loandetails-report.html'"><i
+                                        class="bi bi-graph-down"></i> Loan & Item Reports </div>
+                                <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> Collection Reports
+                                </div>
                                 <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i
                                         class="bi bi-check2-circle"></i> Closed Loans Report</div>
                                 <!--<div class="report-cat-item"><i class="bi bi-arrow-repeat"></i> Renewal Report <span class="count">2</span></div>
@@ -282,12 +282,13 @@
                                     </tbody>
                                     <tfoot id="collectionTableFoot" style="display:none;">
                                         <tr>
-                                            <td colspan="4"><strong>Page Total</strong></td>
-                                            <td class="text-end" id="footPrincipal">—</td>
-                                            <td class="text-end" id="footInterest">—</td>
-                                            <td class="text-end" id="footTotal">—</td>
-                                            <td></td>
-                                            <td></td>
+                                            <td colspan="5"><strong>Page Total</strong></td>
+                                            <!-- Txn Date, Loan No, Loan Date, Customer, Scheme -->
+                                            <td class="text-end" id="footLoanAmt">—</td> <!-- Loan Amt -->
+                                            <td class="text-end" id="footPrincipal">—</td> <!-- Principal Amt -->
+                                            <td class="text-end" id="footInterest">—</td> <!-- Interest Amt -->
+                                            <td class="text-end" id="footTotal">—</td> <!-- Paid Amount -->
+                                            <td class="text-end" id="footBalAmt">—</td> <!-- Bal Amt -->
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -477,34 +478,37 @@
                 return;
             }
 
-            let pgPrinc = 0, pgInt = 0, pgTotal = 0;
+            let pgLoanAmt = 0, pgPrinc = 0, pgInt = 0, pgTotal = 0, pgBal = 0;
             const rows = items.map(row => {
+                pgLoanAmt += row.loanAmount || 0;
                 pgPrinc += row.principalAmount || 0;
                 pgInt += row.interestAmount || 0;
                 pgTotal += row.totalAmount || 0;
+                pgBal += row.balanceAmount || 0;
                 return `<tr>
-           <td>${fmtDate(row.transactionDate)}</td>
-
-          <td class="cell-link" title="Type: ${row.transactionType} | Date: ${fmtDate(row.transactionDate)}">${row.loanNumber}</td>
-          <td>${fmtDate(row.loanDate)}</td>
-          <td data-export="${row.customerName} (${row.customerCode} · ${row.customerMobile})">
-            <div style="font-weight:600;">${row.customerName}</div>
-            <div style="font-size:11px;color:#9aa4b2;">${row.customerCode} · ${row.customerMobile}</div>
-          </td>
-          <td>${row.schemeName}</td>
-          <td class="text-end">${fmt(row.loanAmount)}</td>
-          <td class="text-end">${fmt(row.principalAmount)}</td>
-          <td class="text-end">${fmt(row.interestAmount)}</td>
-          <td class="text-end cell-strong">${fmt(row.totalAmount)}</td>
-          <td class="text-end">${fmt(row.balanceAmount)}</td>
-        </tr>`;
+       <td>${fmtDate(row.transactionDate)}</td>
+      <td class="cell-link" title="Type: ${row.transactionType} | Date: ${fmtDate(row.transactionDate)}">${row.loanNumber}</td>
+      <td>${fmtDate(row.loanDate)}</td>
+      <td data-export="${row.customerName} (${row.customerCode} · ${row.customerMobile})">
+        <div style="font-weight:600;">${row.customerName}</div>
+        <div style="font-size:11px;color:#9aa4b2;">${row.customerCode} · ${row.customerMobile}</div>
+      </td>
+      <td>${row.schemeName}</td>
+      <td class="text-end">${fmt(row.loanAmount)}</td>
+      <td class="text-end">${fmt(row.principalAmount)}</td>
+      <td class="text-end">${fmt(row.interestAmount)}</td>
+      <td class="text-end cell-strong">${fmt(row.totalAmount)}</td>
+      <td class="text-end">${fmt(row.balanceAmount)}</td>
+    </tr>`;
             });
 
             elTBody.innerHTML = rows.join("");
 
+            document.getElementById("footLoanAmt").textContent = fmt(pgLoanAmt);
             document.getElementById("footPrincipal").textContent = fmt(pgPrinc);
             document.getElementById("footInterest").textContent = fmt(pgInt);
             document.getElementById("footTotal").textContent = fmt(pgTotal);
+            document.getElementById("footBalAmt").textContent = fmt(pgBal);
             elTFoot.style.display = "";
 
             renderPagination(totalCount, page, pageSize);
