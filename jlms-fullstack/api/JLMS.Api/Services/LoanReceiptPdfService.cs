@@ -468,7 +468,7 @@ public class LoanReceiptPdfService
                             table.Header(h =>
                             {
                                 h.Cell().Element(HeaderCell).Text("பொருள்");
-                                h.Cell().Element(HeaderCell).Text("எண்ணிக்கை");
+                                h.Cell().Element(HeaderCell).Text("எண்ணம்");
                                 h.Cell().Element(HeaderCell).Text("வடிவம்");
                                 h.Cell().Element(HeaderCell).Text("வகை");
                                 h.Cell().Element(HeaderCell).Text("எடை (கி)");
