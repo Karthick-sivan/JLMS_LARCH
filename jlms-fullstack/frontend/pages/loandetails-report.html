@@ -217,9 +217,9 @@
                 <div class="h4">Report Categories</div>
               </div>
               <div class="panel-body" style="padding:6px 0;">
-                <div class="report-cat-item active"><i class="bi bi-folder2-open"></i> Loan Report</div>
-                <div class="report-cat-item" onclick="location.href='loandetails-report.html'"><i
-                    class="bi bi-graph-down"></i> Loan & Item Reports </div>
+                <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i
+                    class="bi bi-check2-circle"></i> Loan Report</div>
+                <div class="report-cat-item active"><i class="bi bi-folder2-open"></i> Loan & Item Report</div>
                 <!-- <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i class="bi bi-graph-down"></i> Outstanding Reports</div> -->
                 <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i
                     class="bi bi-cash-coin"></i> Collection Reports</div>
@@ -354,10 +354,14 @@
                       <th>S.No</th>
                       <th>Loan No</th>
                       <th>Loan Date</th>
-                      <th>Customer</th>
                       <th class="text-end">Loan Amt</th>
-                      <th class="text-end">Int Amount</th>
-                      <th class="text-end">Bal Amt</th>
+                      <th>Customer</th>
+                      <th>Area</th>
+                      <th>Jewel Type</th>
+                      <th>Model</th>
+                      <th>Variant</th>
+                      <th class="text-end">Qty</th>
+                      <th class="text-end">Weight</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -372,11 +376,16 @@
                   </tbody>
                   <tfoot id="tableFoot" style="display:none;">
                     <tr>
-                      <td colspan="4"><strong>Page Total</strong></td>
-                      <td class="text-end" id="footOverallInterest">—</td>
-                      <td class="text-end" id="footOutInterest">—</td>
-                      <td class="text-end" id="footTotalOutstanding">—</td>
-                      <td></td>
+                      <td colspan="3"><strong>Page Total</strong></td>
+                      <td class="text-end" id="footLoanAmt">—</td> <!-- Loan Amt -->
+                      <td></td> <!-- Customer -->
+                      <td></td> <!-- Area -->
+                      <td></td> <!-- Jewel Type -->
+                      <td></td> <!-- Model -->
+                      <td></td> <!-- Variant -->
+                      <td class="text-end" id="footQty">—</td> <!-- Qty -->
+                      <td class="text-end" id="footGrossWt">—</td> <!-- Weight -->
+                      <td></td> <!-- Status -->
                     </tr>
                   </tfoot>
                 </table>
@@ -480,7 +489,7 @@
       setExportBtnsVisible(false);
 
       try {
-        const data = await Api.getActiveLoansReport(params);
+        const data = await Api.getLoanDetailsReport(params);
         lastResult = data;
         renderGrid(data);
       } catch (err) {
@@ -544,7 +553,7 @@
     setupAutocomplete({
       inputId: "fCustomerName",
       boxId: "customerSuggestions",
-      fetchFn: (q) => Api.searchCustomersForActiveReport(q),
+      fetchFn: (q) => Api.searchCustomersForLoanDetailsReport(q),
       renderItem: (c) => `${c.customerName}<small>${c.customerCode} · ${c.mobile}</small>`,
       onSelect: (c) => { el("fCustomerName").value = c.customerName; }
     });
@@ -552,7 +561,7 @@
     setupAutocomplete({
       inputId: "fLoanNo",
       boxId: "loanNoSuggestions",
-      fetchFn: (q) => Api.searchLoansForActiveReport(q),
+      fetchFn: (q) => Api.searchLoansForLoanDetailsReport(q),
       renderItem: (l) => l.loanNumber,
       onSelect: (l) => { el("fLoanNo").value = l.loanNumber; }
     });
@@ -575,28 +584,33 @@
         return;
       }
 
-      let pLoanAmt = 0, pIntAmt = 0, pTot = 0;
+      let pQty = 0, pGrossWt = 0, pLoanAmt = 0;
       const startNo = (page - 1) * pageSize + 1;
       const rows = items.map((r, i) => {
+        pQty += r.quantity || 0;
+        pGrossWt += r.grossWeight || 0;
         pLoanAmt += r.principalAmount || 0;
-        pIntAmt += r.overallInterest || 0;
-        pTot += r.totalOutstanding || 0;
         return `<tr>
     <td>${startNo + i}</td>
     <td class="nowrap" title="Maturity: ${fmtDate(r.maturityDate)}">${r.loanNumber}</td>
     <td>${fmtDate(r.loanDate)}</td>
-    <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
     <td class="text-end">${fmt(r.principalAmount)}</td>
-    <td class="text-end">${fmt(r.overallInterest)}</td>
-    <td class="text-end cell-strong">${fmt(r.totalOutstanding)}</td>
+
+    <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
+    <td>${r.address || "—"}</td>
+    <td>${r.jewelTypes || "—"}</td>
+    <td>${r.model || "—"}</td>
+    <td>${r.variant || "—"}</td>
+    <td class="text-end">${r.quantity ?? "—"}</td>
+    <td class="text-end">${fmtNum(r.grossWeight)}</td>
     <td>${statusBadge(r.status, r.daysOverdue)}</td>
   </tr>`;
       });
 
       elTBody.innerHTML = rows.join("");
-      el("footOverallInterest").textContent = fmt(pLoanAmt);   // sits under "Loan Amt" column
-      el("footOutInterest").textContent = fmt(pIntAmt);     // sits under "Int Amount" column
-      el("footTotalOutstanding").textContent = fmt(pTot);        // sits under "Bal Amt" column
+      el("footLoanAmt").textContent = fmt(pLoanAmt);
+      el("footQty").textContent = pQty.toLocaleString("en-IN");
+      el("footGrossWt").textContent = fmtNum(pGrossWt) + " g";
       elTFoot.style.display = "";
 
       renderPagination(totalCount, page, pageSize);
@@ -625,25 +639,29 @@
     function exportExcel() {
       if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
 
-      const header = ["S.No", "Loan No", "Loan Date", "Customer", "Loan Amt", "Int Amount", "Bal Amt", "Status"];
+      const header = ["S.No", "Loan No", "Loan Date", "Loan Amt", "Customer", "Address", "Jewel Type", "Model", "Variant", "Qty", "Gross Wt (g)", "Status"];
 
       const startNo = (lastResult.page - 1) * lastResult.pageSize + 1;
       const rows = lastResult.items.map((r, i) => [
         startNo + i,
         r.loanNumber,
         fmtDate(r.loanDate),
-        `${r.customerName} (${r.customerCode})`,
         r.principalAmount || 0,
-        r.overallInterest || 0,
-        r.totalOutstanding || 0,
+
+        `${r.customerName} (${r.customerCode})`,
+        r.address || "",
+        r.jewelTypes || "",
+        r.model || "",
+        r.variant || "",
+        r.quantity || 0,
+        r.grossWeight || 0,
         r.status
       ]);
 
       const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
 
-      // Currency columns: Loan Amt(E), Int Amount(F), Bal Amt(G)
       const currencyFmt = '₹#,##,##0';
-      ["E", "F", "G"].forEach(col => {
+      ["F"].forEach(col => {   // Loan Amt is now column F, not E
         for (let r = 2; r <= rows.length + 1; r++) {
           const cell = ws[`${col}${r}`];
           if (cell) cell.z = currencyFmt;
@@ -651,14 +669,14 @@
       });
 
       ws["!cols"] = [
-        { wch: 6 }, { wch: 16 }, { wch: 12 }, { wch: 26 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 12 }
+        { wch: 6 }, { wch: 16 }, { wch: 12 }, { wch: 26 }, { wch: 28 }, { wch: 14 },
+        { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 8 }, { wch: 12 }, { wch: 12 }
       ];
 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Loan Report");
       XLSX.writeFile(wb, `Loan_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
-
     function printReport() {
       const tbl = document.getElementById("reportTable").outerHTML;
       const win = window.open("", "_blank");

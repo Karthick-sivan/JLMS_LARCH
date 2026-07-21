@@ -174,6 +174,9 @@ public class JewelItem
     public decimal StoneWeightGrams { get; set; }
     public decimal NetWeightGrams { get; set; }
     public string? Purity { get; set; }
+
+    public string? Model { get; set; }
+    public string? Varient { get; set; }
     public decimal MarketValue { get; set; }
     public string? PhotoPath { get; set; }
     public bool ConditionVerified { get; set; }

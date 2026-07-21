@@ -93,6 +93,8 @@ public class LoansController : ControllerBase
                 ji.JewelItemId,
                 JewelTypeName = ji.JewelType?.JewelTypeName,
                 ji.Quantity,
+                ji.Model,
+                ji.Varient,
                 ji.GrossWeightGrams,
                 ji.StoneWeightGrams,
                 ji.NetWeightGrams,
@@ -152,7 +154,9 @@ public class LoansController : ControllerBase
                 JewelTypeName = j.JewelType.JewelTypeName,
                 j.Quantity,
                 j.NetWeightGrams,
-                j.Purity
+                j.Purity,
+                j.Model,
+                j.Varient
             })
         });
     }
@@ -382,6 +386,8 @@ public class LoansController : ControllerBase
                 StoneWeightGrams = item.StoneWeightGrams,
                 NetWeightGrams = netWeight,
                 Purity = purity,
+                Model = item.Model,
+                Varient = item.Varient,
                 MarketValue = lineMarketValue,
                 CreatedAt = DateTime.UtcNow
             });

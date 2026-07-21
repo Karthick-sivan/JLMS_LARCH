@@ -201,6 +201,19 @@ getCollectionReport: (params = {}) => {
     searchCustomersForActiveReport: (q) => apiRequest(`/active-loans-report/customer-search?q=${encodeURIComponent(q)}`),
 searchLoansForActiveReport: (q) => apiRequest(`/active-loans-report/loan-search?q=${encodeURIComponent(q)}`),
 
+
+    // ----  Loan Details Report ----
+    getLoanDetailsReport: (params = {}) => {
+        const qs = new URLSearchParams(
+            Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""))
+        ).toString();
+        return apiRequest(`/loandetails-report${qs ? "?" + qs : ""}`);
+    },
+    searchCustomersForLoanDetailsReport: (q) => apiRequest(`/loandetails-report/customer-search?q=${encodeURIComponent(q)}`),
+
+    searchCustomersForLoanDetailsReport: (q) => apiRequest(`/loandetails-report/customer-search?q=${encodeURIComponent(q)}`),
+searchLoansForLoanDetailsReport: (q) => apiRequest(`/loandetails-report/loan-search?q=${encodeURIComponent(q)}`),
+
     // ---- Closed Loans Report ----
     getClosedLoansReport: (params = {}) => {
         const qs = new URLSearchParams(
@@ -264,14 +277,19 @@ async downloadPaymentReceiptPdf(receiptData) {
 },
 
 // Closure receipt — POST closure data, get PDF blob back
-async downloadClosureReceiptPdf(receiptData) {
-  return this._fetchBlob('/loan-operations/closure-receipt-pdf', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(receiptData)
-  });
-},
+// async downloadClosureReceiptPdf(receiptData) {
+//   return this._fetchBlob('/loan-operations/closure-receipt-pdf', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify(receiptData)
+//   });
+// },
 
+// Closure receipt — GET by loanId, server pulls loan/customer/jewel items/
+// closure photo from the DB itself (same pattern as downloadTransactionReceiptPdf).
+async downloadClosureReceiptPdf(loanId) {
+  return this._fetchBlob(`/loan-operations/${loanId}/closure-receipt-pdf`);
+},
 // Ledger row receipt — GET by transactionId, server does DB lookup
 async downloadTransactionReceiptPdf(transactionId) {
   return this._fetchBlob(

@@ -179,11 +179,48 @@ public class LoanOperationsController : ControllerBase
 
     // POST /api/loan-operations/closure-receipt-pdf
     // Body: ClosureReceiptPdfDto (matches fields of LoanOperationsClosureResponseDto)
-    [HttpPost("closure-receipt-pdf")]
-    public IActionResult DownloadClosureReceiptPdf([FromBody] ClosureReceiptPdfDto dto)
+    //[HttpPost("closure-receipt-pdf")]
+    //public IActionResult DownloadClosureReceiptPdf([FromBody] ClosureReceiptPdfDto dto)
+    //{
+    //    var bytes = _pdfService.GenerateClosureReceipt(dto);
+    //    return File(bytes, "application/pdf", $"Closure-Receipt-{dto.ReceiptNumber}.pdf");
+    //}
+
+    // GET /api/loan-operations/5/closure-receipt-pdf
+    // Pulls the full loan (jewel items, customer, closure photo) from the DB —
+    // unlike the old POST version, nothing needs to be supplied by the client.
+    [HttpGet("{loanId:int}/closure-receipt-pdf")]
+    public async Task<IActionResult> DownloadClosureReceiptPdf(int loanId)
     {
-        var bytes = _pdfService.GenerateClosureReceipt(dto);
-        return File(bytes, "application/pdf", $"Closure-Receipt-{dto.ReceiptNumber}.pdf");
+        var loan = await _db.Loans
+            .Include(l => l.Customer)
+            .Include(l => l.LoanScheme)
+            .Include(l => l.JewelItems).ThenInclude(ji => ji.JewelType)
+            .FirstOrDefaultAsync(l => l.LoanId == loanId);
+
+        if (loan == null) return NotFound();
+        if (loan.Status != "Closed") return BadRequest("Loan is not closed.");
+
+        var closureTxn = await _db.LoanTransactions
+            .Where(t => t.LoanId == loanId && t.TransactionType == "Closure")
+            .OrderByDescending(t => t.TransactionDate)
+            .FirstOrDefaultAsync();
+
+        var dto = new ClosureReceiptPdfDto(
+            ReceiptNumber: closureTxn?.ReceiptNumber ?? loan.LoanNumber,
+            LoanNo: loan.LoanNumber,
+            CustomerName: loan.Customer!.CustomerName,
+            Mobile: loan.Customer.Mobile,
+            LoanScheme: loan.LoanScheme?.SchemeName,
+            TransactionDate: loan.ClosedAt ?? DateTime.UtcNow,
+            OutstandingPrincipal: 0,
+            OutstandingInterest: 0,
+            OtherCharges: closureTxn?.ChargesAmount ?? 0,
+            GrandTotal: closureTxn?.TotalAmount ?? 0
+        );
+
+        var bytes = _pdfService.GenerateClosureReceiptWithDetails(loan, dto);
+        return File(bytes, "application/pdf", $"Closure-Receipt-{dto.ReceiptNumber}-{loan.LoanNumber}.pdf");
     }
 
     // GET /api/loan-operations/transaction-receipt-pdf/{transactionId}
@@ -222,4 +259,5 @@ public class LoanOperationsController : ControllerBase
         return File(bytes, "application/pdf",
             $"Receipt-{dto.ReceiptNumber}-{dto.LoanNo}.pdf");
     }
+
 }

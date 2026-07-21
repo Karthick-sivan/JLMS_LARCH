@@ -87,7 +87,7 @@ public record LoanSchemeDto(int LoanSchemeId, string SchemeName, decimal Interes
 public record LoanSchemeCreateDto(string SchemeName, decimal InterestRatePct, int TenureMonths, decimal MaxLtvPercent, decimal ProcessingFee, decimal PenaltyRatePerDay, bool IsActive);
 
 // ---------- Jewel Appraisal ----------
-public record JewelItemInputDto(int JewelTypeId, int Quantity, decimal GrossWeightGrams, decimal StoneWeightGrams, string? Purity);
+public record JewelItemInputDto(int JewelTypeId, int Quantity, decimal GrossWeightGrams, decimal StoneWeightGrams, string? Purity, string? Model = null, string? Varient = null);
 public record JewelItemResultDto(int JewelItemId, string JewelTypeName, int Quantity, decimal GrossWeightGrams, decimal StoneWeightGrams, decimal NetWeightGrams, string? Purity, decimal MarketValue);
 
 public record AppraisalRequestDto(int CustomerId, List<JewelItemInputDto> Items);
@@ -317,7 +317,8 @@ public record LoanOperationsInterestCalculationDto(
     int NoOfDaysInfoOnly,
     decimal DailyInterestRateInfoOnly,
     decimal DailyInterestAmountInfoOnly,
-    decimal AccruedInterestInfoOnly
+    decimal AccruedInterestInfoOnly,
+     bool HasPriorPayment
 );
 
 
@@ -512,6 +513,50 @@ public record ActiveLoanReportRowDto(
 
 public record ActiveLoanReportPagedDto(
     List<ActiveLoanReportRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    int TotalActiveLoans,
+    decimal TotalPrincipal,
+    decimal TotalOverallInterest,
+    decimal TotalOutstandingPrincipal,
+    decimal TotalOutstandingInterest,
+    decimal GrandOutstanding,
+   int TotalQuantity,
+    decimal TotalWeight,
+    decimal TotalLoanAmount
+);
+
+// ----------  Loan Details Report ----------
+public record LoanDetailsReportRowDto(
+    int LoanId,
+    string LoanNumber,
+    string CustomerCode,
+    string CustomerName,
+    string Mobile,
+        string Address,
+    string SchemeDisplay,
+    DateTime? LoanDate,
+    DateTime? MaturityDate,
+    string JewelTypes,
+    int Quantity,
+    decimal GrossWeight,
+    decimal NetWeight,
+    string Purity,
+    string Model,
+    string Variant,
+    decimal PrincipalAmount,
+    decimal OverallInterest,
+    decimal OutstandingPrincipal,
+    decimal OutstandingInterest,
+    decimal TotalOutstanding,
+    DateTime? LastPaymentDate,
+    int DaysOverdue,
+    string Status,
+    string BranchName
+);
+public record LoanDetailsReportPagedDto(
+    List<LoanDetailsReportRowDto> Items,
     int TotalCount,
     int Page,
     int PageSize,

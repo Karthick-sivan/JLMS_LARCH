@@ -1,1252 +1,1446 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>JLMS — New Loan</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
-<link rel="stylesheet" href="css/jlms-core.css">
-<style>
-  .appraisal-table input { width:100%; border:1px solid var(--n-200); border-radius:3px; padding:5px 7px; font-size:12px; text-align:right; }
-  .appraisal-table select { width:100%; min-width:140px; border:1px solid var(--n-200); border-radius:3px; padding:5px 6px; font-size:11.5px; }
+  <meta charset="UTF-8">
+  <title>JLMS — New Loan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/jlms-core.css">
+  <style>
+    .appraisal-table input {
+      width: 100%;
+      border: 1px solid var(--n-200);
+      border-radius: 3px;
+      padding: 5px 7px;
+      font-size: 12px;
+      text-align: right;
+    }
 
-  .customer-photo-box {
-    width:100%; height:150px; border:1px dashed var(--n-300); border-radius:8px;
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-    background:var(--n-50); cursor:default;
-  }
-  .customer-photo-box.has-photo { cursor:pointer; border-style:solid; }
-  .customer-photo-box img { width:100%; height:100%; object-fit:cover; }
-  .customer-photo-placeholder { color:var(--n-400); text-align:center; font-size:11.5px; }
-  .customer-photo-placeholder i { font-size:28px; display:block; margin-bottom:4px; }
+    .appraisal-table select {
+      width: 100%;
+      min-width: 140px;
+      border: 1px solid var(--n-200);
+      border-radius: 3px;
+      padding: 5px 6px;
+      font-size: 11.5px;
+    }
 
-  /* ---- Customer detail card: darker, label-above-value, address gets its own full-width row ---- */
-  .customer-detail-card {
-    display:none;
-    padding:16px 18px;
-    background:var(--navy-50);
-    border:1px solid var(--navy-100);
-    border-radius:8px;
-    margin-top:10px;
-  }
-  .customer-detail-card .cdc-name {
-    font-size:16px;
-    font-weight:700;
-    color:#151b26;
-    margin-top:3px;
-    margin-bottom:12px;
-    padding-bottom:10px;
-    border-bottom:1px solid var(--navy-100);
-  }
-  .customer-detail-card .cdc-grid {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px 20px;
-  }
-  .customer-detail-card .cdc-field {
-    display:flex;
-    flex-direction:column;
-    gap:3px;
-    min-width:0;
-  }
-  .customer-detail-card .cdc-field-full {
-    grid-column:1 / -1;
-  }
-  .customer-detail-card .cdc-label {
-    font-size:10.5px;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:.04em;
-    color:#5b6474;
-  }
-  .customer-detail-card .cdc-value {
-    font-size:13.5px;
-    font-weight:600;
-    color:#12161f;
-    line-height:1.4;
-    word-break:break-word;
-  }
+    .customer-photo-box {
+      width: 100%;
+      height: 150px;
+      border: 1px dashed var(--n-300);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--n-50);
+      cursor: default;
+    }
 
-  .webcam-box {
-    width:100%; min-height:220px; border:1px dashed var(--n-300); border-radius:8px;
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-    background:var(--n-50); position:relative;
-  }
-  .webcam-box.has-photo { border-style:solid; }
-  .webcam-box video, .webcam-box img { width:100%; height:220px; object-fit:cover; display:block; }
-  .webcam-placeholder { color:var(--n-400); text-align:center; font-size:11.5px; padding:16px; }
-  .webcam-placeholder i { font-size:30px; display:block; margin-bottom:6px; }
-  .webcam-captured-badge {
-    position:absolute; top:8px; right:8px; background:#1a7f4e; color:#fff;
-    font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:10px;
-  }
+    .customer-photo-box.has-photo {
+      cursor: pointer;
+      border-style: solid;
+    }
 
-  /* ---- Customer browse (Eye icon) modal ---- */
-  .customer-list-row:hover { background:var(--n-50); }
+    .customer-photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .customer-photo-placeholder {
+      color: var(--n-400);
+      text-align: center;
+      font-size: 11.5px;
+    }
+
+    .customer-photo-placeholder i {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* ---- Customer detail card: darker, label-above-value, address gets its own full-width row ---- */
+    .customer-detail-card {
+      display: none;
+      padding: 16px 18px;
+      background: var(--navy-50);
+      border: 1px solid var(--navy-100);
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .customer-detail-card .cdc-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #151b26;
+      margin-top: 3px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--navy-100);
+    }
+
+    .customer-detail-card .cdc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+    }
+
+    .customer-detail-card .cdc-field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .customer-detail-card .cdc-field-full {
+      grid-column: 1 / -1;
+    }
+
+    .customer-detail-card .cdc-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #5b6474;
+    }
+
+    .customer-detail-card .cdc-value {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #12161f;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .webcam-box {
+      width: 100%;
+      min-height: 220px;
+      border: 1px dashed var(--n-300);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--n-50);
+      position: relative;
+    }
+
+    .webcam-box.has-photo {
+      border-style: solid;
+    }
+
+    .webcam-box video,
+    .webcam-box img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .webcam-placeholder {
+      color: var(--n-400);
+      text-align: center;
+      font-size: 11.5px;
+      padding: 16px;
+    }
+
+    .webcam-placeholder i {
+      font-size: 30px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .webcam-captured-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #1a7f4e;
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* ---- Customer browse (Eye icon) modal ---- */
+    .customer-list-row:hover {
+      background: var(--n-50);
+    }
 
 
     /* Two-column layout: both columns scroll with the page */
     .row.g-3 {
-        align-items: flex-start; /* stop bootstrap from stretching columns to equal height */
+      align-items: flex-start;
+      /* stop bootstrap from stretching columns to equal height */
     }
 
     @media (min-width: 992px) {
-        .sticky-sidebar {
-            position: sticky;
-            top: calc(var(--topbar-h) + 12px);
-        }
-        .sticky-sidebar .panel {
-            margin-bottom: 10px !important;
-        }
-        .sticky-sidebar .panel-body {
-            padding: 12px 15px !important;
-        }
-        .sticky-sidebar .panel-head {
-            padding: 10px 15px !important;
-        }
-        .sticky-sidebar .summary-row {
-            padding: 4px 0 !important;
-        }
-        .sticky-sidebar .summary-row.total {
-            margin-top: 4px !important;
-            padding-top: 6px !important;
-        }
-        .sticky-sidebar .d-flex.flex-column.gap-2 {
-            gap: 6px !important;
-        }
+      .sticky-sidebar {
+        position: sticky;
+        top: calc(var(--topbar-h) + 12px);
+      }
+
+      .sticky-sidebar .panel {
+        margin-bottom: 10px !important;
+      }
+
+      .sticky-sidebar .panel-body {
+        padding: 12px 15px !important;
+      }
+
+      .sticky-sidebar .panel-head {
+        padding: 10px 15px !important;
+      }
+
+      .sticky-sidebar .summary-row {
+        padding: 4px 0 !important;
+      }
+
+      .sticky-sidebar .summary-row.total {
+        margin-top: 4px !important;
+        padding-top: 6px !important;
+      }
+
+      .sticky-sidebar .d-flex.flex-column.gap-2 {
+        gap: 6px !important;
+      }
     }
 
     /* Premium Requested Loan Amount Panel */
     .requested-amount-panel {
-        border: 1px solid var(--n-200);
-        border-left: 4px solid var(--gold-600) !important;
-        background: linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
-        transition: all 0.3s ease;
-        margin-top: 4px;
-        margin-bottom: 8px;
+      border: 1px solid var(--n-200);
+      border-left: 4px solid var(--gold-600) !important;
+      background: linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
+      transition: all 0.3s ease;
+      margin-top: 4px;
+      margin-bottom: 8px;
     }
+
     .requested-amount-panel:focus-within {
-        border-color: var(--navy-500);
-        box-shadow: var(--shadow-md);
+      border-color: var(--navy-500);
+      box-shadow: var(--shadow-md);
     }
+
     .badge-percent {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--navy-700);
-        background: rgba(30,58,138,0.06);
-        padding: 2px 7px;
-        border-radius: 12px;
-        border: 1px solid rgba(30,58,138,0.12);
-        transition: all 0.2s ease;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--navy-700);
+      background: rgba(30, 58, 138, 0.06);
+      padding: 2px 7px;
+      border-radius: 12px;
+      border: 1px solid rgba(30, 58, 138, 0.12);
+      transition: all 0.2s ease;
     }
+
     .badge-percent.warning {
-        color: var(--warning-700);
-        background: var(--warning-100);
-        border-color: rgba(217,154,20,0.3);
+      color: var(--warning-700);
+      background: var(--warning-100);
+      border-color: rgba(217, 154, 20, 0.3);
     }
+
     .badge-percent.danger {
-        color: var(--danger-700);
-        background: var(--danger-100);
-        border-color: rgba(212,40,40,0.3);
+      color: var(--danger-700);
+      background: var(--danger-100);
+      border-color: rgba(212, 40, 40, 0.3);
     }
+
     .premium-amount-input-wrap {
-        display: flex;
-        align-items: center;
-        border-bottom: 2px solid var(--n-200);
-        padding-bottom: 4px;
-        margin-top: 6px;
-        transition: border-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid var(--n-200);
+      padding-bottom: 4px;
+      margin-top: 6px;
+      transition: border-color 0.2s ease;
     }
+
     .premium-amount-input-wrap:focus-within {
-        border-color: var(--navy-700);
+      border-color: var(--navy-700);
     }
+
     .premium-amount-input-wrap .currency-symbol {
-        font-size: 26px;
-        font-weight: 700;
-        color: var(--navy-900);
-        margin-right: 6px;
-        user-select: none;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy-900);
+      margin-right: 6px;
+      user-select: none;
     }
+
     .premium-amount-input-wrap input {
-        font-size: 26px;
-        font-weight: 700;
-        color: var(--navy-900);
-        border: none;
-        background: transparent;
-        width: 100%;
-        outline: none;
-        padding: 0;
-        margin: 0;
-        text-align: left;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy-900);
+      border: none;
+      background: transparent;
+      width: 100%;
+      outline: none;
+      padding: 0;
+      margin: 0;
+      text-align: left;
     }
+
     .premium-amount-input-wrap input::placeholder {
-        color: var(--n-300);
+      color: var(--n-300);
     }
+
     /* Remove number arrows */
     .premium-amount-input-wrap input::-webkit-outer-spin-button,
     .premium-amount-input-wrap input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
+      -webkit-appearance: none;
+      margin: 0;
     }
+
     .premium-amount-input-wrap input[type=number] {
-        -moz-appearance: textfield;
+      -moz-appearance: textfield;
     }
 
     /* Range Slider Styling */
     .premium-slider {
-        -webkit-appearance: none;
-        width: 100%;
-        height: 6px;
-        border-radius: 3px;
-        background: var(--n-200);
-        outline: none;
-        margin: 8px 0;
-        transition: background 0.2s ease;
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--n-200);
+      outline: none;
+      margin: 8px 0;
+      transition: background 0.2s ease;
     }
+
     .premium-slider:not(:disabled) {
-        background: linear-gradient(to right, var(--gold-600) 0%, var(--gold-600) var(--slider-val, 0%), var(--n-200) var(--slider-val, 0%), var(--n-200) 100%);
+      background: linear-gradient(to right, var(--gold-600) 0%, var(--gold-600) var(--slider-val, 0%), var(--n-200) var(--slider-val, 0%), var(--n-200) 100%);
     }
+
     .premium-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--gold-600);
-        cursor: pointer;
-        border: 2px solid #fff;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-        transition: transform 0.1s ease, background-color 0.2s ease;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--gold-600);
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      transition: transform 0.1s ease, background-color 0.2s ease;
     }
+
     .premium-slider::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        background: var(--gold-700);
+      transform: scale(1.2);
+      background: var(--gold-700);
     }
+
     .premium-slider:disabled::-webkit-slider-thumb {
-        background: var(--n-300);
-        border-color: var(--n-150);
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
+      background: var(--n-300);
+      border-color: var(--n-150);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
+
     .premium-slider::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: var(--gold-600);
-        cursor: pointer; 
-        border: 2px solid #fff;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-        transition: transform 0.1s ease;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--gold-600);
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      transition: transform 0.1s ease;
     }
+
     .premium-slider:disabled::-moz-range-thumb {
-        background: var(--n-300);
-        border-color: var(--n-150);
-        cursor: not-allowed;
+      background: var(--n-300);
+      border-color: var(--n-150);
+      cursor: not-allowed;
     }
 
     /* Preset Buttons styling */
     .btn-preset {
-        flex: 1;
-        border: 1px solid var(--n-200);
-        background: #fff;
-        color: var(--n-700);
-        font-size: 10px;
-        font-weight: 700;
-        padding: 5px 2px;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        transition: all 0.15s ease;
-        text-align: center;
+      flex: 1;
+      border: 1px solid var(--n-200);
+      background: #fff;
+      color: var(--n-700);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 5px 2px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
     }
+
     .btn-preset:hover:not(:disabled) {
-        background: var(--navy-50);
-        color: var(--navy-700);
-        border-color: var(--navy-300);
+      background: var(--navy-50);
+      color: var(--navy-700);
+      border-color: var(--navy-300);
     }
+
     .btn-preset.active:not(:disabled) {
-        background: var(--navy-700);
-        color: #fff;
-        border-color: var(--navy-700);
+      background: var(--navy-700);
+      color: #fff;
+      border-color: var(--navy-700);
     }
+
     .btn-preset:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-        background: var(--n-50);
-        border-color: var(--n-200);
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: var(--n-50);
+      border-color: var(--n-200);
     }
+
     .limit-status-info {
-        font-size: 11px;
-        color: var(--n-600);
-        font-weight: 500;
-        line-height: 1.4;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        padding: 4px;
-        border-radius: 4px;
-        background: rgba(0,0,0,0.02);
-        transition: all 0.2s ease;
+      font-size: 11px;
+      color: var(--n-600);
+      font-weight: 500;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 4px;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
     }
+
     .limit-status-info.text-success {
-        background: rgba(34,139,76,0.06);
+      background: rgba(34, 139, 76, 0.06);
     }
+
     .limit-status-info.text-warning {
-        background: rgba(217,154,20,0.06);
+      background: rgba(217, 154, 20, 0.06);
     }
+
     .limit-status-info.text-danger {
-        background: rgba(212,40,40,0.06);
+      background: rgba(212, 40, 40, 0.06);
     }
-</style>
+  </style>
 </head>
+
 <body>
-<div class="app-shell">
-  <div id="jlmsSidebarMount"></div>
-  <div class="main-col">
-    <div id="jlmsTopbarMount"></div>
-    <div class="page-content">
+  <div class="app-shell">
+    <div id="jlmsSidebarMount"></div>
+    <div class="main-col">
+      <div id="jlmsTopbarMount"></div>
+      <div class="page-content">
         <!--<div class="page-header">
             <div>
                 <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">New Loan</span></div>-->
-                <!--<div class="h1">New Loan Creation</div>-->
-            <!--</div>
+        <!--<div class="h1">New Loan Creation</div>-->
+        <!--</div>
             <div class="page-actions">
                 <button class="btn-jlms btn-jlms-outline" id="btnRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
             </div>
         </div>-->
 
-      <div id="apiErrorBanner" class="api-error-banner"></div>
-      <div id="apiSuccessBanner" class="api-success-banner"></div>
+        <div id="apiErrorBanner" class="api-error-banner"></div>
+        <div id="apiSuccessBanner" class="api-success-banner"></div>
 
-      <div class="row g-3">
-        <div class="col-lg-9">
+        <div class="row g-3">
+          <div class="col-lg-9">
 
-          <fieldset class="section-fieldset" style="background:#fff; padding-top:18px;">
-            <legend>Step 1 — Select Customer</legend>
-            <div class="row g-3">
-              <div class="col-md-8">
-                <label class="field-label">Search customer by name, mobile, or code<span class="req">*</span></label>
-                <div class="d-flex gap-2">
-                  <input type="text" class="form-control-jlms" id="customerSearchInput" placeholder="Start typing to search..." style="flex:1;">
-                  <button class="btn-jlms btn-jlms-outline" type="button" id="btnBrowseCustomers" title="Browse all active customers">
-                    <i class="bi bi-eye"></i>
-                  </button>
+            <fieldset class="section-fieldset" style="background:#fff; padding-top:18px;">
+              <legend>Step 1 — Select Customer</legend>
+              <div class="row g-3">
+                <div class="col-md-8">
+                  <label class="field-label">Search customer by name, mobile, or code<span class="req">*</span></label>
+                  <div class="d-flex gap-2">
+                    <input type="text" class="form-control-jlms" id="customerSearchInput"
+                      placeholder="Start typing to search..." style="flex:1;">
+                    <button class="btn-jlms btn-jlms-outline" type="button" id="btnBrowseCustomers"
+                      title="Browse all active customers">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                  <div id="customerSearchResults"
+                    style="border:1px solid var(--n-200); border-radius:6px; margin-top:4px; max-height:180px; overflow-y:auto; display:none; background:#fff; position:relative; z-index:10;">
+                  </div>
+
+                  <div id="selectedCustomerCard" class="customer-detail-card">
+                    <span class="cdc-label">Customer Name</span>
+                    <div class="cdc-name" id="selCustName"></div>
+                    <div class="cdc-grid">
+                      <div class="cdc-field">
+                        <span class="cdc-label">Code</span>
+                        <span class="cdc-value" id="selCustCode"></span>
+                      </div>
+                      <div class="cdc-field">
+                        <span class="cdc-label">Mobile</span>
+                        <span class="cdc-value" id="selCustMobile"></span>
+                      </div>
+                      <div class="cdc-field">
+                        <span class="cdc-label">Alt. Mobile</span>
+                        <span class="cdc-value" id="selCustAltMobile"></span>
+                      </div>
+                      <div class="cdc-field">
+                        <span class="cdc-label">Active Loans</span>
+                        <span class="cdc-value" id="selCustActiveLoans"></span>
+                      </div>
+                      <div class="cdc-field">
+                        <span class="cdc-label">City</span>
+                        <span class="cdc-value" id="selCustCity"></span>
+                      </div>
+                      <div class="cdc-field">
+                        <span class="cdc-label">State</span>
+                        <span class="cdc-value" id="selCustState"></span>
+                      </div>
+                      <div class="cdc-field">
+                        <span class="cdc-label">Aadhaar No</span>
+                        <span class="cdc-value" id="selCustAadhaar"></span>
+                      </div>
+                      <div class="cdc-field">
+                        <span class="cdc-label">PAN No</span>
+                        <span class="cdc-value" id="selCustPan"></span>
+                      </div>
+                      <div class="cdc-field cdc-field-full">
+                        <span class="cdc-label">Address</span>
+                        <span class="cdc-value" id="selCustAddress"></span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div id="customerSearchResults" style="border:1px solid var(--n-200); border-radius:6px; margin-top:4px; max-height:180px; overflow-y:auto; display:none; background:#fff; position:relative; z-index:10;"></div>
-
-                <div id="selectedCustomerCard" class="customer-detail-card">
-                  <span class="cdc-label">Customer Name</span>
-                  <div class="cdc-name" id="selCustName"></div>
-                  <div class="cdc-grid">
-                    <div class="cdc-field">
-                      <span class="cdc-label">Code</span>
-                      <span class="cdc-value" id="selCustCode"></span>
-                    </div>
-                    <div class="cdc-field">
-                      <span class="cdc-label">Mobile</span>
-                      <span class="cdc-value" id="selCustMobile"></span>
-                    </div>
-                    <div class="cdc-field">
-                      <span class="cdc-label">Alt. Mobile</span>
-                      <span class="cdc-value" id="selCustAltMobile"></span>
-                    </div>
-                    <div class="cdc-field">
-                      <span class="cdc-label">Active Loans</span>
-                      <span class="cdc-value" id="selCustActiveLoans"></span>
-                    </div>
-                    <div class="cdc-field">
-                      <span class="cdc-label">City</span>
-                      <span class="cdc-value" id="selCustCity"></span>
-                    </div>
-                    <div class="cdc-field">
-                      <span class="cdc-label">State</span>
-                      <span class="cdc-value" id="selCustState"></span>
-                    </div>
-                    <div class="cdc-field">
-                      <span class="cdc-label">Aadhaar No</span>
-                      <span class="cdc-value" id="selCustAadhaar"></span>
-                    </div>
-                    <div class="cdc-field">
-                      <span class="cdc-label">PAN No</span>
-                      <span class="cdc-value" id="selCustPan"></span>
-                    </div>
-                    <div class="cdc-field cdc-field-full">
-                      <span class="cdc-label">Address</span>
-                      <span class="cdc-value" id="selCustAddress"></span>
+                <div class="col-md-4">
+                  <label class="field-label">Customer Photo</label>
+                  <div class="customer-photo-box" id="customerPhotoBox">
+                    <div class="customer-photo-placeholder" id="customerPhotoPlaceholder">
+                      <i class="bi bi-person-circle"></i>
+                      No customer selected
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-4">
-                <label class="field-label">Customer Photo</label>
-                <div class="customer-photo-box" id="customerPhotoBox">
-                  <div class="customer-photo-placeholder" id="customerPhotoPlaceholder">
-                    <i class="bi bi-person-circle"></i>
-                    No customer selected
-                  </div>
+            </fieldset>
+
+            <fieldset class="section-fieldset" style="background:#fff;">
+              <legend>Step 2 — Jewel Items &amp; Appraisal</legend>
+              <div class="table-jlms-wrap appraisal-table">
+                <table class="table-jlms">
+                  <thead>
+                    <tr>
+                      <th style="width:36px;">#</th>
+                      <th>Jewel Type</th>
+                      <th class="text-center">Qty</th>
+                      <th>Model</th>
+                      <th>Variant</th>
+                      <th class="text-end">Gross Wt (g)</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="jewelItemsBody"></tbody>
+                  <tfoot>
+                    <tr style="font-weight:700; background:var(--n-50);">
+                      <td colspan="2" class="text-end">Total</td>
+                      <td class="text-center" id="totalQty">0</td>
+                      <td colspan="2"></td>
+                      <td class="text-end" id="totalGrossWt">0.000</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <button class="btn-jlms btn-jlms-outline btn-sm mt-2" id="btnAddItem"><i class="bi bi-plus-lg"></i> Add
+                Jewel Item</button>
+            </fieldset>
+
+            <fieldset class="section-fieldset" style="background:#fff;">
+              <legend>Step 3 — Loan Terms</legend>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="field-label">Loan Scheme<span class="req">*</span></label>
+                  <select class="form-select-jlms" id="schemeSelect"></select>
+                </div>
+                <div class="col-md-6">
+                  <label class="field-label">Processing Fee<span class="req">*</span></label>
+                  <input type="number" class="form-control-jlms" id="processingFeeInput" placeholder="0" step="any"
+                    min="0" value="0">
+                </div>
+                <div class="col-md-12">
+                  <label class="field-label">Remarks <span class="opt">optional</span></label>
+                  <textarea class="form-control-jlms" id="loanRemarks" rows="2" placeholder="Internal notes"></textarea>
                 </div>
               </div>
-            </div>
-          </fieldset>
+            </fieldset>
 
-          <fieldset class="section-fieldset" style="background:#fff;">
-            <legend>Step 2 — Jewel Items &amp; Appraisal</legend>
-            <div class="table-jlms-wrap appraisal-table">
-              <table class="table-jlms">
-                <thead>
-                  <tr><th style="width:36px;">#</th><th>Jewel Type</th><th class="text-center">Qty</th><th class="text-end">Gross Wt (g)</th><th class="text-end">Stone Wt (g)</th><th>Purity</th><th></th></tr>
-                </thead>
-                <tbody id="jewelItemsBody"></tbody>
-              </table>
-            </div>
-            <button class="btn-jlms btn-jlms-outline btn-sm mt-2" id="btnAddItem"><i class="bi bi-plus-lg"></i> Add Jewel Item</button>
-          </fieldset>
-
-          <fieldset class="section-fieldset" style="background:#fff;">
-            <legend>Step 3 — Loan Terms</legend>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="field-label">Loan Scheme<span class="req">*</span></label>
-                <select class="form-select-jlms" id="schemeSelect"></select>
-              </div>
-              <div class="col-md-6">
-  <label class="field-label">Processing Fee<span class="req">*</span></label>
-  <input type="number" class="form-control-jlms" id="processingFeeInput" placeholder="0" step="any" min="0">
-</div>
-              <div class="col-md-12">
-                <label class="field-label">Remarks <span class="opt">optional</span></label>
-                <textarea class="form-control-jlms" id="loanRemarks" rows="2" placeholder="Internal notes"></textarea>
-              </div>
-            </div>
-          </fieldset>
-
-          <fieldset class="section-fieldset" style="background:#fff;">
-            <legend>Step 4 — Jewel Items Photo (Web Capture)</legend>
-            <div class="text-caption mb-2">Capture a single photo covering all the jewel items listed above using your webcam. This one photo is attached to the loan and uploads right after it is created.</div>
-            <div class="row g-3">
-              <div class="col-md-7">
-                <div class="webcam-box" id="webcamBox">
-                  <video id="webcamVideo" autoplay playsinline muted style="display:none;"></video>
-                  <img id="capturedPhotoPreview" style="display:none;" alt="Captured jewel items photo">
-                  <div class="webcam-placeholder" id="webcamPlaceholder">
-                    <i class="bi bi-camera-video"></i>
-                    Camera not started
+            <fieldset class="section-fieldset" style="background:#fff;">
+              <legend>Step 4 — Jewel Items Photo (Web Capture)</legend>
+              <div class="text-caption mb-2">Capture a single photo covering all the jewel items listed above using your
+                webcam. This one photo is attached to the loan and uploads right after it is created.</div>
+              <div class="row g-3">
+                <div class="col-md-7">
+                  <div class="webcam-box" id="webcamBox">
+                    <video id="webcamVideo" autoplay playsinline muted style="display:none;"></video>
+                    <img id="capturedPhotoPreview" style="display:none;" alt="Captured jewel items photo">
+                    <div class="webcam-placeholder" id="webcamPlaceholder">
+                      <i class="bi bi-camera-video"></i>
+                      Camera not started
+                    </div>
+                    <span class="webcam-captured-badge" id="webcamCapturedBadge" style="display:none;">Captured</span>
                   </div>
-                  <span class="webcam-captured-badge" id="webcamCapturedBadge" style="display:none;">Captured</span>
+                  <canvas id="captureCanvas" style="display:none;"></canvas>
                 </div>
-                <canvas id="captureCanvas" style="display:none;"></canvas>
+                <div class="col-md-5 d-flex flex-column gap-2 justify-content-center">
+                  <button type="button" class="btn-jlms btn-jlms-outline" id="btnStartCamera"><i
+                      class="bi bi-camera-video"></i> Start Camera</button>
+                  <button type="button" class="btn-jlms btn-jlms-primary" id="btnCapturePhoto" disabled><i
+                      class="bi bi-camera"></i> Capture Photo</button>
+                  <button type="button" class="btn-jlms btn-jlms-outline" id="btnRetakePhoto" style="display:none;"><i
+                      class="bi bi-arrow-counterclockwise"></i> Retake</button>
+                </div>
               </div>
-              <div class="col-md-5 d-flex flex-column gap-2 justify-content-center">
-                <button type="button" class="btn-jlms btn-jlms-outline" id="btnStartCamera"><i class="bi bi-camera-video"></i> Start Camera</button>
-                <button type="button" class="btn-jlms btn-jlms-primary" id="btnCapturePhoto" disabled><i class="bi bi-camera"></i> Capture Photo</button>
-                <button type="button" class="btn-jlms btn-jlms-outline" id="btnRetakePhoto" style="display:none;"><i class="bi bi-arrow-counterclockwise"></i> Retake</button>
-              </div>
-            </div>
-          </fieldset>
+            </fieldset>
 
-        </div>
-
-        <div class="col-lg-3 sticky-sidebar">
-          <div class="panel mb-3">
-            <div class="panel-head"><div class="h4">Loan Summary</div></div>
-            <div class="panel-body">
-              <div class="summary-panel">
-                <div class="summary-row"><span class="label">Loan Scheme</span><span class="value" id="sumScheme">—</span></div>
-                <div class="summary-row"><span class="label">Total Weight</span><span class="value" id="sumTotalWeight">0.000 g</span></div>
-                <div class="summary-row"><span class="label">Gold Rate (per gram)</span><span class="value" id="sumGoldRate">—</span></div>
-                <div class="summary-row"><span class="label">Total Market Value</span><span class="value" id="sumMarketValue">₹0</span></div>
-                <div class="summary-row"><span class="label">Scheme Max LTV(Loan Limit %)</span><span class="value" id="sumLtv">—</span></div>
-                <div class="summary-row"><span class="label">Processing Fee Amount</span><span class="value" id="sumProcessingFee">₹0</span></div>
-                <div class="summary-row total"><span class="label">Eligible Amount</span><span class="value" id="sumEligible">₹0</span></div>
-              </div>
-              <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="chkAllowExceed">
-                <label class="form-check-label" for="chkAllowExceed" style="font-size:11.5px; line-height:1.4;">
-                  Don't validate — allow requested amount to exceed eligible amount
-                </label>
-              </div>
-            </div>
           </div>
-          <div class="d-flex flex-column gap-2">
-            <button class="btn-jlms btn-jlms-outline" id="btnCalculate" style="width:100%; justify-content:center;"><i class="bi bi-calculator"></i> Calculate Valuation</button>
-            <div class="panel requested-amount-panel" id="requestedAmountWrap">
-              <div class="panel-body" style="padding: 14px 16px;">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                  <label class="field-label mb-0" style="font-weight: 700; color: var(--navy-800); font-size: 11.5px;">Requested Loan Amount <span class="req">*</span></label>
-                  <span id="requestedAmountPercent" class="badge-percent">0% of Max</span>
-                </div>
-                
-                <div class="premium-amount-input-wrap">
-                  <span class="currency-symbol">₹</span>
-                  <input type="number" id="requestedAmount" placeholder="0" step="any" autocomplete="off">
-                </div>
 
-                <!-- Slider -->
-                <div class="slider-wrap mt-2">
-                  <input type="range" id="requestedAmountSlider" min="0" max="100" value="0" class="premium-slider" disabled>
+          <div class="col-lg-3 sticky-sidebar">
+            <div class="panel mb-3">
+              <div class="panel-head">
+                <div class="h4">Loan Summary</div>
+              </div>
+              <div class="panel-body">
+                <div class="summary-panel">
+                  <div class="summary-row"><span class="label">Loan Scheme</span><span class="value"
+                      id="sumScheme">—</span></div>
+                  <div class="summary-row"><span class="label">Total Weight</span><span class="value"
+                      id="sumTotalWeight">0.000 g</span></div>
+                  <div class="summary-row"><span class="label">Gold Rate (per gram)</span><span class="value"
+                      id="sumGoldRate">—</span></div>
+                  <div class="summary-row"><span class="label">Total Market Value</span><span class="value"
+                      id="sumMarketValue">₹0</span></div>
+                  <div class="summary-row"><span class="label">Scheme Max LTV(Loan Limit %)</span><span class="value"
+                      id="sumLtv">—</span></div>
+                  <div class="summary-row"><span class="label">Processing Fee Amount</span><span class="value"
+                      id="sumProcessingFee">₹0</span></div>
+                  <div class="summary-row total"><span class="label">Eligible Amount</span><span class="value"
+                      id="sumEligible">₹0</span></div>
                 </div>
-
-                <!-- Preset Options -->
-                <div class="d-flex justify-content-between gap-1 mt-2">
-                  <button type="button" class="btn-preset" data-pct="25" disabled>25%</button>
-                  <button type="button" class="btn-preset" data-pct="50" disabled>50%</button>
-                  <button type="button" class="btn-preset" data-pct="75" disabled>75%</button>
-                  <button type="button" class="btn-preset" data-pct="100" disabled>100% (Max)</button>
-                </div>
-
-                <!-- Limit Warning/Status -->
-                <div id="limitStatusText" class="limit-status-info mt-2 text-center text-muted-jlms">
-                  <i class="bi bi-info-circle"></i> Add jewel items &amp; calculate valuation first
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" id="chkAllowExceed">
+                  <label class="form-check-label" for="chkAllowExceed" style="font-size:11.5px; line-height:1.4;">
+                    Don't validate — allow requested amount to exceed eligible amount
+                  </label>
                 </div>
               </div>
             </div>
-            <button class="btn-jlms btn-jlms-primary btn-lg" id="btnSubmitLoan" style="width:100%; justify-content:center;"><i class="bi bi-send-check"></i> Submit for Approval</button>
+            <div class="d-flex flex-column gap-2">
+              <button class="btn-jlms btn-jlms-outline" id="btnCalculate" style="width:100%; justify-content:center;"><i
+                  class="bi bi-calculator"></i> Calculate Valuation</button>
+              <div class="panel requested-amount-panel" id="requestedAmountWrap">
+                <div class="panel-body" style="padding: 14px 16px;">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="field-label mb-0"
+                      style="font-weight: 700; color: var(--navy-800); font-size: 11.5px;">Requested Loan Amount <span
+                        class="req">*</span></label>
+                    <span id="requestedAmountPercent" class="badge-percent">0% of Max</span>
+                  </div>
+
+                  <div class="premium-amount-input-wrap">
+                    <span class="currency-symbol">₹</span>
+                    <input type="number" id="requestedAmount" placeholder="0" step="any" autocomplete="off">
+                  </div>
+
+                  <!-- Slider -->
+                  <div class="slider-wrap mt-2">
+                    <input type="range" id="requestedAmountSlider" min="0" max="100" value="0" class="premium-slider"
+                      disabled>
+                  </div>
+
+                  <!-- Preset Options -->
+                  <div class="d-flex justify-content-between gap-1 mt-2">
+                    <button type="button" class="btn-preset" data-pct="25" disabled>25%</button>
+                    <button type="button" class="btn-preset" data-pct="50" disabled>50%</button>
+                    <button type="button" class="btn-preset" data-pct="75" disabled>75%</button>
+                    <button type="button" class="btn-preset" data-pct="100" disabled>100% (Max)</button>
+                  </div>
+
+                  <!-- Limit Warning/Status -->
+                  <div id="limitStatusText" class="limit-status-info mt-2 text-center text-muted-jlms">
+                    <i class="bi bi-info-circle"></i> Add jewel items &amp; calculate valuation first
+                  </div>
+                </div>
+              </div>
+              <button class="btn-jlms btn-jlms-primary btn-lg" id="btnSubmitLoan"
+                style="width:100%; justify-content:center;"><i class="bi bi-send-check"></i> Submit for
+                Approval</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Browse-customers modal (Eye icon on Step 1) -->
-<div class="modal fade" id="customerListModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h6 class="modal-title">Select Customer</h6>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <input type="text" class="form-control-jlms mb-2" id="customerListFilter" placeholder="Filter by code or name...">
-        <div class="table-jlms-wrap" style="max-height:360px; overflow-y:auto;">
+  <!-- Browse-customers modal (Eye icon on Step 1) -->
+  <div class="modal fade" id="customerListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title">Select Customer</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control-jlms mb-2" id="customerListFilter"
+            placeholder="Filter by code or name...">
+          <div class="table-jlms-wrap" style="max-height:360px; overflow-y:auto;">
             <table class="table-jlms">
-                <!--<thead><tr><th>Customer Code</th><th>Customer Name</th></tr></thead>-->
-                <thead><tr><th>Customer Code</th><th>Customer Name</th><th>Mobile</th></tr></thead>
-                <tbody id="customerListModalBody">
-                    <tr><td colspan="3" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td></tr>
-                </tbody>
+              <!--<thead><tr><th>Customer Code</th><th>Customer Name</th></tr></thead>-->
+              <thead>
+                <tr>
+                  <th>Customer Code</th>
+                  <th>Customer Name</th>
+                  <th>Mobile</th>
+                </tr>
+              </thead>
+              <tbody id="customerListModalBody">
+                <tr>
+                  <td colspan="3" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td>
+                </tr>
+              </tbody>
             </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Lightbox modal for customer photo -->
-<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h6 class="modal-title" id="lightboxTitle">Photo</h6>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img id="lightboxImg" src="" alt="Photo" style="max-width:100%; max-height:70vh; border-radius:6px;">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-jlms btn-jlms-outline" id="lightboxDownloadBtn"><i class="bi bi-download"></i> Download</button>
-        <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal">Close</button>
+  <!-- Lightbox modal for customer photo -->
+  <div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title" id="lightboxTitle">Photo</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="lightboxImg" src="" alt="Photo" style="max-width:100%; max-height:70vh; border-radius:6px;">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-jlms btn-jlms-outline" id="lightboxDownloadBtn"><i
+              class="bi bi-download"></i> Download</button>
+          <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal">Close</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script>window.JLMS_ACTIVE = "new-loan";</script>
-<script src="js/jlms-shell.js"></script>
-<script src="js/api-client.js"></script>
-<script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script>window.JLMS_ACTIVE = "new-loan";</script>
+  <script src="js/jlms-shell.js"></script>
+  <script src="js/api-client.js"></script>
+  <script>
     jlmsInitShell();
 
-   function watchBannerAndScroll(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const observer = new MutationObserver(() => {
-    // banner just got populated/shown
-    if (el.style.display !== 'none' && el.textContent.trim() !== '') {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    function watchBannerAndScroll(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const observer = new MutationObserver(() => {
+        // banner just got populated/shown
+        if (el.style.display !== 'none' && el.textContent.trim() !== '') {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+      observer.observe(el, { attributes: true, attributeFilter: ['style'], childList: true, characterData: true, subtree: true });
     }
-  });
-  observer.observe(el, { attributes: true, attributeFilter: ['style'], childList: true, characterData: true, subtree: true });
-}
 
-watchBannerAndScroll('apiErrorBanner');
-watchBannerAndScroll('apiSuccessBanner');
-let selectedCustomer = null;
-let jewelTypesCache = [];
-let schemesCache = [];
-let itemRowCount = 0;
-let lastAppraisalResult = null;
-let activeCustomersCache = [];
+    watchBannerAndScroll('apiErrorBanner');
+    watchBannerAndScroll('apiSuccessBanner');
+    let selectedCustomer = null;
+    let jewelTypesCache = [];
+    let schemesCache = [];
+    let itemRowCount = 0;
+    let lastAppraisalResult = null;
+    let activeCustomersCache = [];
 
-function jewelRowHtml(rowId) {
-  const options = jewelTypesCache.map(jt => `<option value="${jt.jewelTypeId}" data-purity="${jt.defaultPurity || ''}">${jt.jewelTypeName}</option>`).join('');
-  return `
+    function jewelRowHtml(rowId) {
+      const options = jewelTypesCache.map(jt => `<option value="${jt.jewelTypeId}" data-purity="${jt.defaultPurity || ''}">${jt.jewelTypeName}</option>`).join('');
+      return `
     <tr data-row-id="${rowId}">
       <td class="text-muted-jlms">${rowId}</td>
       <td><select class="jewelTypeSelect">${options}</select></td>
       <td><input type="number" class="qtyInput" value="1" min="1" style="text-align:center;"></td>
+      <td><input type="text" class="modelInput" placeholder="Enter Model"></td>
+      <td><input type="text" class="varientInput" placeholder="Enter Variant"></td>
       <td><input type="number" step="0.001" class="grossInput" value="0.000"></td>
-      <td><input type="number" step="0.001" class="stoneInput" value="0.000"></td>
-      <td><input type="text" class="purityInput" value="22K" readonly style="text-align:center; background:var(--n-50); color:var(--n-600); cursor:not-allowed;"></td>
+      <input type="hidden" class="stoneInput" value="0.000">
+      <input type="hidden" class="purityInput" value="22K">
       <td><i class="bi bi-trash removeRowBtn" style="color:var(--danger-600); cursor:pointer;"></i></td>
     </tr>`;
-}
+    }
 
-function addJewelRow() {
-  itemRowCount++;
-  document.getElementById('jewelItemsBody').insertAdjacentHTML('beforeend', jewelRowHtml(itemRowCount));
-  wireRow(document.querySelector(`tr[data-row-id="${itemRowCount}"]`));
-}
+    function addJewelRow() {
+      itemRowCount++;
+      document.getElementById('jewelItemsBody').insertAdjacentHTML('beforeend', jewelRowHtml(itemRowCount));
+      wireRow(document.querySelector(`tr[data-row-id="${itemRowCount}"]`));
+      updateGridTotals();
+    }
+    function wireRow(tr) {
+      tr.querySelector('.removeRowBtn').addEventListener('click', () => {
+        tr.remove();
+        updateGridTotals();
+      });
+      tr.querySelector('.jewelTypeSelect').addEventListener('change', (e) => {
+        const purity = e.target.selectedOptions[0].dataset.purity;
+        if (purity) tr.querySelector('.purityInput').value = purity;
+      });
+      tr.querySelector('.qtyInput').addEventListener('input', updateGridTotals);
+      tr.querySelector('.grossInput').addEventListener('input', updateGridTotals);
+    }
+    function updateGridTotals() {
+      const rows = document.querySelectorAll('#jewelItemsBody tr[data-row-id]');
+      let totalQty = 0;
+      let totalGross = 0;
+      rows.forEach(tr => {
+        totalQty += parseInt(tr.querySelector('.qtyInput').value, 10) || 0;
+        totalGross += parseFloat(tr.querySelector('.grossInput').value) || 0;
+      });
+      document.getElementById('totalQty').textContent = totalQty;
+      document.getElementById('totalGrossWt').textContent = totalGross.toFixed(3);
+    }
+    function collectJewelItems() {
+      const rows = document.querySelectorAll('#jewelItemsBody tr[data-row-id]');
+      const items = [];
+      rows.forEach(tr => {
+        const jewelTypeId = parseInt(tr.querySelector('.jewelTypeSelect').value, 10);
+        const quantity = parseInt(tr.querySelector('.qtyInput').value, 10) || 1;
+        const grossWeightGrams = parseFloat(tr.querySelector('.grossInput').value) || 0;
+        const stoneWeightGrams = parseFloat(tr.querySelector('.stoneInput').value) || 0;
+        const purity = tr.querySelector('.purityInput').value;
+        const model = tr.querySelector('.modelInput').value.trim() || null;
+        const varient = tr.querySelector('.varientInput').value.trim() || null;
+        if (grossWeightGrams > 0) items.push({ jewelTypeId, quantity, grossWeightGrams, stoneWeightGrams, purity, model, varient });
+      });
+      return items;
+    }
 
-function wireRow(tr) {
-  tr.querySelector('.removeRowBtn').addEventListener('click', () => {
-    tr.remove();
-  });
-  tr.querySelector('.jewelTypeSelect').addEventListener('change', (e) => {
-    const purity = e.target.selectedOptions[0].dataset.purity;
-    if (purity) tr.querySelector('.purityInput').value = purity;
-  });
-}
+    async function loadLookups() {
+      jewelTypesCache = await Api.getJewelTypes(true);
+      schemesCache = await Api.getLoanSchemes(true);
 
-function collectJewelItems() {
-  const rows = document.querySelectorAll('#jewelItemsBody tr[data-row-id]');
-  const items = [];
-  rows.forEach(tr => {
-    const jewelTypeId = parseInt(tr.querySelector('.jewelTypeSelect').value, 10);
-    const quantity = parseInt(tr.querySelector('.qtyInput').value, 10) || 1;
-    const grossWeightGrams = parseFloat(tr.querySelector('.grossInput').value) || 0;
-    const stoneWeightGrams = parseFloat(tr.querySelector('.stoneInput').value) || 0;
-    const purity = tr.querySelector('.purityInput').value;
-    if (grossWeightGrams > 0) items.push({ jewelTypeId, quantity, grossWeightGrams, stoneWeightGrams, purity });
-  });
-  return items;
-}
+      const schemeSelect = document.getElementById('schemeSelect');
+      if (schemesCache.length === 0) {
+        schemeSelect.innerHTML = '<option value="">No active loan schemes — add one in Loan Scheme Master</option>';
+      } else {
+        schemeSelect.innerHTML = schemesCache.map(s =>
+          `<option value="${s.loanSchemeId}">${s.schemeName} — ${s.interestRatePct}% / ${s.tenureMonths}mo / LTV ${s.maxLtvPercent}%</option>`).join('');
+      }
 
-async function loadLookups() {
-  jewelTypesCache = await Api.getJewelTypes(true);
-  schemesCache = await Api.getLoanSchemes(true);
+      if (jewelTypesCache.length === 0) {
+        document.getElementById('jewelItemsBody').innerHTML =
+          '<tr><td colspan="7" class="text-center text-muted-jlms" style="padding:16px;">No jewel types configured yet — add one in Jewel Type Master, then come back here.</td></tr>';
+      } else {
+        addJewelRow();
+      }
+    }
 
-  const schemeSelect = document.getElementById('schemeSelect');
-  if (schemesCache.length === 0) {
-    schemeSelect.innerHTML = '<option value="">No active loan schemes — add one in Loan Scheme Master</option>';
-  } else {
-    schemeSelect.innerHTML = schemesCache.map(s =>
-      `<option value="${s.loanSchemeId}">${s.schemeName} — ${s.interestRatePct}% / ${s.tenureMonths}mo / LTV ${s.maxLtvPercent}%</option>`).join('');
-  }
+    // ---------------- Step 1: type-to-search ----------------
 
-  if (jewelTypesCache.length === 0) {
-    document.getElementById('jewelItemsBody').innerHTML =
-      '<tr><td colspan="7" class="text-center text-muted-jlms" style="padding:16px;">No jewel types configured yet — add one in Jewel Type Master, then come back here.</td></tr>';
-  } else {
-    addJewelRow();
-  }
-}
+    async function searchCustomersLive(query) {
+      const resultsBox = document.getElementById('customerSearchResults');
+      if (!query || query.length < 2) { resultsBox.style.display = 'none'; return; }
+      try {
+        const searchResult = await Api.searchCustomers({ search: query });
+        const mobileResult = await Api.searchCustomers({ mobile: query });
 
-// ---------------- Step 1: type-to-search ----------------
+        const rows = searchResult.items || [];
+        const mobileRows = mobileResult.items || [];
 
-async function searchCustomersLive(query) {
-  const resultsBox = document.getElementById('customerSearchResults');
-  if (!query || query.length < 2) { resultsBox.style.display = 'none'; return; }
-  try {
-    const searchResult = await Api.searchCustomers({ search: query });
-    const mobileResult = await Api.searchCustomers({ mobile: query });
+        const merged = [...rows, ...mobileRows].filter(
+          (r, i, arr) => arr.findIndex(x => x.customerId === r.customerId) === i
+        );
 
-    const rows = searchResult.items || [];
-    const mobileRows = mobileResult.items || [];
-
-    const merged = [...rows, ...mobileRows].filter(
-      (r, i, arr) => arr.findIndex(x => x.customerId === r.customerId) === i
-    );
-
-    if (merged.length === 0) {
-      resultsBox.innerHTML = '<div style="padding:10px 14px; color:var(--n-500); font-size:12px;">No matching customers. <a href="customer-registration.html">Register a new customer</a>.</div>';
-    } else {
-      resultsBox.innerHTML = merged.map(c => `
+        if (merged.length === 0) {
+          resultsBox.innerHTML = '<div style="padding:10px 14px; color:var(--n-500); font-size:12px;">No matching customers. <a href="customer-registration.html">Register a new customer</a>.</div>';
+        } else {
+          resultsBox.innerHTML = merged.map(c => `
         <div class="customerResultRow" data-id="${c.customerId}" data-name="${c.customerName}" data-code="${c.customerCode}" data-mobile="${c.mobile}"
              style="padding:9px 14px; cursor:pointer; border-bottom:1px solid var(--n-150); font-size:12.5px;">
           <strong>${c.customerName}</strong> &middot; ${c.customerCode} &middot; ${c.mobile}
         </div>`).join('');
-      resultsBox.querySelectorAll('.customerResultRow').forEach(row => {
+          resultsBox.querySelectorAll('.customerResultRow').forEach(row => {
+            row.addEventListener('click', () => {
+              selectedCustomer = { id: parseInt(row.dataset.id, 10), name: row.dataset.name, code: row.dataset.code, mobile: row.dataset.mobile };
+              document.getElementById('customerSearchInput').value = `${selectedCustomer.code} - ${selectedCustomer.name}`;
+              resultsBox.style.display = 'none';
+              loadSelectedCustomerDetails(selectedCustomer.id);
+            });
+          });
+        }
+        resultsBox.style.display = 'block';
+      } catch (err) {
+        showApiError(err);
+      }
+    }
+
+    // ---------------- Step 1: browse-all-customers (Eye icon) ----------------
+
+    async function openCustomerListModal() {
+      new bootstrap.Modal(document.getElementById('customerListModal')).show();
+      const tbody = document.getElementById('customerListModalBody');
+      tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td></tr>';
+      try {
+        if (activeCustomersCache.length === 0) {
+          activeCustomersCache = await fetch(`${API_BASE_URL}/customers/active`).then(r => {
+            if (!r.ok) throw new Error('Failed to load active customers.');
+            return r.json();
+          });
+        }
+        renderCustomerListModal(activeCustomersCache);
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted-jlms" style="padding:16px;">Could not load customers.</td></tr>';
+        showApiError(err);
+      }
+    }
+    function renderCustomerListModal(list) {
+      const tbody = document.getElementById('customerListModalBody');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted-jlms" style="padding:16px;">No active customers found.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(c => `
+    <tr class="customer-list-row" data-id="${c.customerId}" data-code="${c.customerCode}" data-name="${c.customerName}" data-mobile="${c.mobile || ''}" style="cursor:pointer;">
+      <td>${c.customerCode}</td><td>${c.customerName}</td><td>${c.mobile || '—'}</td>
+    </tr>`).join('');
+      tbody.querySelectorAll('.customer-list-row').forEach(row => {
         row.addEventListener('click', () => {
           selectedCustomer = { id: parseInt(row.dataset.id, 10), name: row.dataset.name, code: row.dataset.code, mobile: row.dataset.mobile };
           document.getElementById('customerSearchInput').value = `${selectedCustomer.code} - ${selectedCustomer.name}`;
-          resultsBox.style.display = 'none';
+          const modalEl = document.getElementById('customerListModal');
+          bootstrap.Modal.getInstance(modalEl)?.hide();
           loadSelectedCustomerDetails(selectedCustomer.id);
         });
       });
     }
-    resultsBox.style.display = 'block';
-  } catch (err) {
-    showApiError(err);
-  }
-}
 
-// ---------------- Step 1: browse-all-customers (Eye icon) ----------------
-
-async function openCustomerListModal() {
-  new bootstrap.Modal(document.getElementById('customerListModal')).show();
-  const tbody = document.getElementById('customerListModalBody');
-  tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted-jlms" style="padding:16px;">Loading...</td></tr>';
-  try {
-    if (activeCustomersCache.length === 0) {
-      activeCustomersCache = await fetch(`${API_BASE_URL}/customers/active`).then(r => {
-        if (!r.ok) throw new Error('Failed to load active customers.');
-        return r.json();
-      });
-    }
-    renderCustomerListModal(activeCustomersCache);
-  } catch (err) {
-    tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted-jlms" style="padding:16px;">Could not load customers.</td></tr>';
-    showApiError(err);
-  }
-}
-    function renderCustomerListModal(list) {
-        const tbody = document.getElementById('customerListModalBody');
-        if (list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted-jlms" style="padding:16px;">No active customers found.</td></tr>';
-            return;
-        }
-        tbody.innerHTML = list.map(c => `
-    <tr class="customer-list-row" data-id="${c.customerId}" data-code="${c.customerCode}" data-name="${c.customerName}" data-mobile="${c.mobile || ''}" style="cursor:pointer;">
-      <td>${c.customerCode}</td><td>${c.customerName}</td><td>${c.mobile || '—'}</td>
-    </tr>`).join('');
-        tbody.querySelectorAll('.customer-list-row').forEach(row => {
-            row.addEventListener('click', () => {
-                selectedCustomer = { id: parseInt(row.dataset.id, 10), name: row.dataset.name, code: row.dataset.code, mobile: row.dataset.mobile };
-                document.getElementById('customerSearchInput').value = `${selectedCustomer.code} - ${selectedCustomer.name}`;
-                const modalEl = document.getElementById('customerListModal');
-                bootstrap.Modal.getInstance(modalEl)?.hide();
-                loadSelectedCustomerDetails(selectedCustomer.id);
-            });
+    async function loadSelectedCustomerDetails(customerId) {
+      const card = document.getElementById('selectedCustomerCard');
+      try {
+        const c = await fetch(`${API_BASE_URL}/customers/${customerId}`).then(r => {
+          if (!r.ok) throw new Error('Failed to load customer details.');
+          return r.json();
         });
-    }
 
-async function loadSelectedCustomerDetails(customerId) {
-  const card = document.getElementById('selectedCustomerCard');
-  try {
-    const c = await fetch(`${API_BASE_URL}/customers/${customerId}`).then(r => {
-      if (!r.ok) throw new Error('Failed to load customer details.');
-      return r.json();
-    });
+        document.getElementById('selCustName').textContent = c.customerName;
+        document.getElementById('selCustCode').textContent = c.customerCode;
+        document.getElementById('selCustMobile').textContent = c.mobile || '—';
+        document.getElementById('selCustAltMobile').textContent = c.alternateMobile || '—';
+        document.getElementById('selCustAddress').textContent = c.address || '—';
+        document.getElementById('selCustCity').textContent = c.city || '—';
+        document.getElementById('selCustState').textContent = c.state || '—';
+        document.getElementById('selCustAadhaar').textContent = c.aadhaarNumber || '—';
+        document.getElementById('selCustPan').textContent = c.panNumber || '—';
+        document.getElementById('selCustActiveLoans').textContent = c.activeLoans;
+        card.style.display = 'block';
 
-    document.getElementById('selCustName').textContent = c.customerName;
-    document.getElementById('selCustCode').textContent = c.customerCode;
-    document.getElementById('selCustMobile').textContent = c.mobile || '—';
-    document.getElementById('selCustAltMobile').textContent = c.alternateMobile || '—';
-    document.getElementById('selCustAddress').textContent = c.address || '—';
-    document.getElementById('selCustCity').textContent = c.city || '—';
-    document.getElementById('selCustState').textContent = c.state || '—';
-    document.getElementById('selCustAadhaar').textContent = c.aadhaarNumber || '—';
-    document.getElementById('selCustPan').textContent = c.panNumber || '—';
-    document.getElementById('selCustActiveLoans').textContent = c.activeLoans;
-    card.style.display = 'block';
-
-    renderCustomerPhoto(customerId, c.customerName);
-  } catch (err) {
-    showApiError(err);
-  }
-}
-
-function renderCustomerPhoto(customerId, customerName) {
-  const box = document.getElementById('customerPhotoBox');
-  const photoUrl = `${API_BASE_URL}/customers/${customerId}/documents/photo`;
-  const probeImg = new Image();
-  probeImg.onload = () => {
-    box.innerHTML = `<img src="${photoUrl}" alt="Customer photo">`;
-    box.classList.add('has-photo');
-    box.onclick = () => openLightbox(photoUrl, `${customerName} — Photo`);
-  };
-  probeImg.onerror = () => {
-    box.innerHTML = `<div class="customer-photo-placeholder"><i class="bi bi-person-circle"></i>No photo on file</div>`;
-    box.classList.remove('has-photo');
-    box.onclick = null;
-  };
-  probeImg.src = photoUrl;
-}
-
-// ---------------- Step 4: single web-captured jewel items photo ----------------
-let webcamStream = null;
-let capturedPhotoBlob = null;
-let capturedPhotoUrl = null;
-
-async function startWebcam() {
-  clearApiError();
-  try {
-    webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-  } catch (err) {
-    try {
-      webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
-    } catch (err2) {
-      showApiError(new Error('Could not access the camera. Please allow camera permission and try again.'));
-      return;
-    }
-  }
-
-  const video = document.getElementById('webcamVideo');
-  video.srcObject = webcamStream;
-  video.style.display = 'block';
-  document.getElementById('webcamPlaceholder').style.display = 'none';
-  document.getElementById('capturedPhotoPreview').style.display = 'none';
-  document.getElementById('webcamCapturedBadge').style.display = 'none';
-  document.getElementById('webcamBox').classList.remove('has-photo');
-
-  document.getElementById('btnStartCamera').style.display = 'none';
-  document.getElementById('btnCapturePhoto').disabled = false;
-  document.getElementById('btnRetakePhoto').style.display = 'none';
-}
-
-function stopWebcam() {
-  if (webcamStream) {
-    webcamStream.getTracks().forEach(t => t.stop());
-    webcamStream = null;
-  }
-}
-
-function capturePhoto() {
-  const video = document.getElementById('webcamVideo');
-  const canvas = document.getElementById('captureCanvas');
-  canvas.width = video.videoWidth || 640;
-  canvas.height = video.videoHeight || 480;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  canvas.toBlob((blob) => {
-    if (!blob) {
-      showApiError(new Error('Could not capture photo. Please try again.'));
-      return;
-    }
-    if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
-    capturedPhotoBlob = blob;
-    capturedPhotoUrl = URL.createObjectURL(blob);
-
-    const preview = document.getElementById('capturedPhotoPreview');
-    preview.src = capturedPhotoUrl;
-    preview.style.display = 'block';
-    document.getElementById('webcamVideo').style.display = 'none';
-    document.getElementById('webcamCapturedBadge').style.display = 'inline-block';
-    document.getElementById('webcamBox').classList.add('has-photo');
-
-    stopWebcam();
-    document.getElementById('btnCapturePhoto').disabled = true;
-    document.getElementById('btnStartCamera').style.display = 'none';
-    document.getElementById('btnRetakePhoto').style.display = 'inline-flex';
-  }, 'image/jpeg', 0.9);
-}
-
-function retakePhoto() {
-  if (capturedPhotoUrl) { URL.revokeObjectURL(capturedPhotoUrl); capturedPhotoUrl = null; }
-  capturedPhotoBlob = null;
-
-  document.getElementById('capturedPhotoPreview').style.display = 'none';
-  document.getElementById('webcamCapturedBadge').style.display = 'none';
-  document.getElementById('webcamBox').classList.remove('has-photo');
-  document.getElementById('webcamPlaceholder').style.display = 'block';
-  document.getElementById('btnRetakePhoto').style.display = 'none';
-  document.getElementById('btnStartCamera').style.display = 'inline-flex';
-  document.getElementById('btnCapturePhoto').disabled = true;
-
-  startWebcam();
-}
-
-// ---------------- Lightbox helpers (customer photo) ----------------
-
-function openLightbox(url, title) {
-  document.getElementById('lightboxImg').src = url;
-  document.getElementById('lightboxTitle').textContent = title || 'Photo';
-  document.getElementById('lightboxDownloadBtn').onclick = () => downloadImage(url, (title || 'photo').replace(/\s+/g, '-') + '.jpg');
-  const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
-  modal.show();
-}
-
-async function downloadImage(url, filename) {
-  try {
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error('Download failed.');
-    const blob = await resp.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(blobUrl);
-  } catch (err) {
-    showApiError(err);
-  }
-}
-
-// ---------------- Loan Summary: scheme-driven fields ----------------
-
-function formatEligibleAmount(val) {
-  const num = Number(val);
-  if (isNaN(num)) return '0';
-  if (num % 1 !== 0) {
-    return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-  return num.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
-
-function getCurrentEligibleAmount() {
-  if (!lastAppraisalResult) return 0;
-  const schemeSelect = document.getElementById('schemeSelect');
-  if (!schemeSelect) return 0;
-  const schemeId = parseInt(schemeSelect.value, 10);
-  const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
-  if (!scheme) return 0;
-  const rawEligible = lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100);
-  return Math.round(rawEligible * 100) / 100;
-}
-
-function updateRequestedAmountWidget() {
-  const input = document.getElementById('requestedAmount');
-  const slider = document.getElementById('requestedAmountSlider');
-  const pctBadge = document.getElementById('requestedAmountPercent');
-  const statusText = document.getElementById('limitStatusText');
-  const chkAllowExceed = document.getElementById('chkAllowExceed');
-
-  const eligible = getCurrentEligibleAmount();
-  const value = parseFloat(input.value) || 0;
-  const presetButtons = document.querySelectorAll('.btn-preset');
-
-  if (eligible <= 0) {
-    slider.disabled = true;
-    slider.value = 0;
-    slider.style.setProperty('--slider-val', '0%');
-    pctBadge.textContent = '0% of Max';
-    pctBadge.className = 'badge-percent text-muted-jlms';
-    statusText.innerHTML = '<i class="bi bi-info-circle"></i> Add jewel items &amp; calculate valuation first';
-    statusText.className = 'limit-status-info mt-2 text-center text-muted-jlms';
-    presetButtons.forEach(btn => {
-      btn.disabled = true;
-      btn.classList.remove('active');
-    });
-    return;
-  }
-
-  // Enable slider & presets
-  slider.disabled = false;
-  presetButtons.forEach(btn => btn.disabled = false);
-
-  // Set slider value based on percentage of eligible amount
-  const pct = Math.round((value / eligible) * 100);
-  const cappedPct = Math.min(pct, 100);
-  slider.value = cappedPct;
-  slider.style.setProperty('--slider-val', cappedPct + '%');
-
-  // Update badge
-  pctBadge.textContent = pct + '% of Max';
-
-  // Highlight active preset button if the current value matches exactly a preset percentage
-  presetButtons.forEach(btn => {
-    const btnPct = parseInt(btn.dataset.pct, 10);
-    if (value > 0 && Math.abs(pct - btnPct) < 1) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
-  });
-
-  if (value === 0) {
-    pctBadge.className = 'badge-percent text-muted-jlms';
-    statusText.innerHTML = `<i class="bi bi-wallet2 text-primary"></i> Max Eligible: <strong>₹${formatEligibleAmount(eligible)}</strong>`;
-    statusText.className = 'limit-status-info mt-2 text-center text-muted-jlms';
-  } else if (value <= eligible) {
-    pctBadge.className = 'badge-percent';
-    statusText.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Within eligible limit (Max: ₹${formatEligibleAmount(eligible)})`;
-    statusText.className = 'limit-status-info text-success mt-2 text-center';
-  } else {
-    // value > eligible
-    if (chkAllowExceed.checked) {
-      pctBadge.className = 'badge-percent warning';
-      statusText.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Exceeds limit by <strong>₹${formatEligibleAmount(value - eligible)}</strong> (Override active)`;
-      statusText.className = 'limit-status-info text-warning mt-2 text-center';
-    } else {
-      pctBadge.className = 'badge-percent danger';
-      statusText.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> Exceeds eligible limit of <strong>₹${formatEligibleAmount(eligible)}</strong>`;
-      statusText.className = 'limit-status-info text-danger mt-2 text-center';
-    }
-  }
-}
-
-function applySchemeToSummary() {
-  const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
-  const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
-  if (!scheme) return;
-
-  document.getElementById('sumScheme').textContent = scheme.schemeName;
-  document.getElementById('sumLtv').textContent = scheme.maxLtvPercent + '%';
-  // document.getElementById('sumProcessingFee').textContent = '₹' + Number(scheme.processingFee).toLocaleString('en-IN');
-
-  if (lastAppraisalResult) {
-    const eligible = Math.round((lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100)) * 100) / 100;
-    document.getElementById('sumEligible').textContent = '₹' + formatEligibleAmount(eligible);
-    if (!document.getElementById('chkAllowExceed').checked) {
-      document.getElementById('requestedAmount').max = eligible;
-    }
-  }
-  updateRequestedAmountWidget();
-}
-
-// ---------------- Valuation ----------------
-
-async function calculateValuation() {
-  clearApiError();
-  const items = collectJewelItems();
-  if (items.length === 0) {
-    showApiError(new Error('Add at least one jewel item with a gross weight greater than zero.'));
-    return null;
-  }
-  try {
-    const result = await Api.calculateAppraisal({ customerId: selectedCustomer ? selectedCustomer.id : 0, items });
-    lastAppraisalResult = result;
-
-    document.getElementById('sumTotalWeight').textContent = Number(result.totalNetWeight).toFixed(3) + ' g';
-    document.getElementById('sumGoldRate').textContent = '₹' + Number(result.goldRateUsed).toLocaleString('en-IN', { maximumFractionDigits: 2 }) + '/g';
-    document.getElementById('sumMarketValue').textContent = '₹' + Number(result.totalMarketValue).toLocaleString('en-IN');
-
-    applySchemeToSummary();
-
-    return result;
-  } catch (err) {
-    showApiError(err);
-    return null;
-  }
-}
-function updateProcessingFeeSummary() {
-  const val = parseFloat(document.getElementById('processingFeeInput').value) || 0;
-  document.getElementById('sumProcessingFee').textContent = '₹' + val.toLocaleString('en-IN');
-}
-function resetFormForNewLoan() {
-  // Customer
-  selectedCustomer = null;
-  document.getElementById('customerSearchInput').value = '';
-  document.getElementById('customerSearchResults').style.display = 'none';
-  document.getElementById('selectedCustomerCard').style.display = 'none';
-  document.getElementById('processingFeeInput').value = '';
-document.getElementById('sumProcessingFee').textContent = '₹0';
-  const photoBox = document.getElementById('customerPhotoBox');
-  photoBox.innerHTML = '<div class="customer-photo-placeholder" id="customerPhotoPlaceholder"><i class="bi bi-person-circle"></i>No customer selected</div>';
-  photoBox.classList.remove('has-photo');
-  photoBox.onclick = null;
-
-  // Jewel items
-  document.getElementById('jewelItemsBody').innerHTML = '';
-  itemRowCount = 0;
-  if (jewelTypesCache.length > 0) addJewelRow();
-
-  // Loan terms
-  document.getElementById('schemeSelect').selectedIndex = 0;
-  document.getElementById('loanRemarks').value = '';
-  document.getElementById('requestedAmount').value = '';
-  document.getElementById('requestedAmount').removeAttribute('max');
-  document.getElementById('chkAllowExceed').checked = false;
-
-  // Summary
-  lastAppraisalResult = null;
-  document.getElementById('sumTotalWeight').textContent = '0.000 g';
-  document.getElementById('sumGoldRate').textContent = '—';
-  document.getElementById('sumMarketValue').textContent = '₹0';
-  document.getElementById('sumEligible').textContent = '₹0';
-  applySchemeToSummary();
-
-  // Webcam / captured photo
-  stopWebcam();
-  if (capturedPhotoUrl) { URL.revokeObjectURL(capturedPhotoUrl); capturedPhotoUrl = null; }
-  capturedPhotoBlob = null;
-  document.getElementById('webcamVideo').style.display = 'none';
-  document.getElementById('capturedPhotoPreview').style.display = 'none';
-  document.getElementById('webcamCapturedBadge').style.display = 'none';
-  document.getElementById('webcamBox').classList.remove('has-photo');
-  document.getElementById('webcamPlaceholder').style.display = 'block';
-  document.getElementById('btnStartCamera').style.display = 'inline-flex';
-  document.getElementById('btnCapturePhoto').disabled = true;
-  document.getElementById('btnRetakePhoto').style.display = 'none';
-
-  clearApiError();
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-    Session.requireLogin();
-    //document.getElementById('btnRefresh').addEventListener('click', () => location.reload());
-  document.getElementById('btnAddItem').addEventListener('click', addJewelRow);
-  document.getElementById('btnCalculate').addEventListener('click', calculateValuation);
-
-  document.getElementById('btnStartCamera').addEventListener('click', startWebcam);
-  document.getElementById('btnCapturePhoto').addEventListener('click', capturePhoto);
-  document.getElementById('btnRetakePhoto').addEventListener('click', retakePhoto);
-document.getElementById('processingFeeInput').addEventListener('input', updateProcessingFeeSummary);
-  document.getElementById('btnBrowseCustomers').addEventListener('click', openCustomerListModal);
-    document.getElementById('customerListFilter').addEventListener('input', (e) => {
-        const q = e.target.value.trim().toLowerCase();
-        renderCustomerListModal(activeCustomersCache.filter(c =>
-            c.customerCode.toLowerCase().includes(q) ||
-            c.customerName.toLowerCase().includes(q) ||
-            (c.mobile || '').toLowerCase().includes(q)));
-    });
-
-  document.getElementById('chkAllowExceed').addEventListener('change', (e) => {
-    document.getElementById('requestedAmount').removeAttribute('max');
-    if (!e.target.checked) calculateValuation();
-    updateRequestedAmountWidget();
-  });
-
-  // Requested Amount Widget setup
-  const requestedAmtInput = document.getElementById('requestedAmount');
-  const requestedAmtSlider = document.getElementById('requestedAmountSlider');
-
-  requestedAmtInput.addEventListener('input', updateRequestedAmountWidget);
-
-  requestedAmtSlider.addEventListener('input', () => {
-    const eligible = getCurrentEligibleAmount();
-    if (eligible > 0) {
-      const pct = parseInt(requestedAmtSlider.value, 10);
-      requestedAmtInput.value = Number((eligible * (pct / 100)).toFixed(2));
-      updateRequestedAmountWidget();
-    }
-  });
-
-  document.querySelectorAll('.btn-preset').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const eligible = getCurrentEligibleAmount();
-      if (eligible > 0) {
-        const pct = parseInt(e.currentTarget.dataset.pct, 10);
-        requestedAmtInput.value = Number((eligible * (pct / 100)).toFixed(2));
-        updateRequestedAmountWidget();
+        renderCustomerPhoto(customerId, c.customerName);
+      } catch (err) {
+        showApiError(err);
       }
-    });
-  });
-
-  let searchDebounce;
-  document.getElementById('customerSearchInput').addEventListener('input', (e) => {
-    clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => searchCustomersLive(e.target.value.trim()), 300);
-  });
-
-  try {
-    await loadLookups();
-  } catch (err) {
-    showApiError(err);
-  }
-
-  // Scheme is chosen by default before any calculation — seed Scheme/LTV/Processing Fee
-  // immediately, then keep them (and the eligible amount, if already calculated) live.
-  document.getElementById('schemeSelect').addEventListener('change', applySchemeToSummary);
-  applySchemeToSummary();
-
-  document.getElementById('btnSubmitLoan').addEventListener('click', async () => {
-    clearApiError();
-    document.getElementById('apiSuccessBanner').style.display = 'none';
-
-    if (!selectedCustomer) { showApiError(new Error('Please select a customer first.')); return; }
-    const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
-    if (!schemeId) { showApiError(new Error('Please select a loan scheme.')); return; }
-
-    if (!lastAppraisalResult) {
-      showApiError(new Error('Please click "Calculate Valuation" before submitting.'));
-      return;
     }
 
-    const requestedAmount = parseFloat(document.getElementById('requestedAmount').value);
-    if (!requestedAmount || requestedAmount <= 0) { showApiError(new Error('Please enter a valid requested loan amount.')); return; }
-
-    const items = collectJewelItems();
-    if (items.length === 0) { showApiError(new Error('Add at least one jewel item.')); return; }
-
-    const allowExceedEligible = document.getElementById('chkAllowExceed').checked;
-
-      const processingFee = parseFloat(document.getElementById('processingFeeInput').value);
-    if (isNaN(processingFee) || processingFee < 0) {
-      showApiError(new Error('Please enter a valid processing fee.'));
-      return;
+    function renderCustomerPhoto(customerId, customerName) {
+      const box = document.getElementById('customerPhotoBox');
+      const photoUrl = `${API_BASE_URL}/customers/${customerId}/documents/photo`;
+      const probeImg = new Image();
+      probeImg.onload = () => {
+        box.innerHTML = `<img src="${photoUrl}" alt="Customer photo">`;
+        box.classList.add('has-photo');
+        box.onclick = () => openLightbox(photoUrl, `${customerName} — Photo`);
+      };
+      probeImg.onerror = () => {
+        box.innerHTML = `<div class="customer-photo-placeholder"><i class="bi bi-person-circle"></i>No photo on file</div>`;
+        box.classList.remove('has-photo');
+        box.onclick = null;
+      };
+      probeImg.src = photoUrl;
     }
-    // Client-side pre-check against the last calculated eligible amount, purely to save a round trip.
-    if (!allowExceedEligible) {
-      const eligibleText = document.getElementById('sumEligible').textContent.replace(/[₹,]/g, '');
-      const eligibleAmount = parseFloat(eligibleText);
-      if (eligibleAmount > 0 && requestedAmount > eligibleAmount) {
-        showApiError(new Error(`Requested amount exceeds the eligible amount of ₹${formatEligibleAmount(eligibleAmount)}. Check "Don't validate" to override, or lower the amount.`));
+
+    // ---------------- Step 4: single web-captured jewel items photo ----------------
+    let webcamStream = null;
+    let capturedPhotoBlob = null;
+    let capturedPhotoUrl = null;
+
+    async function startWebcam() {
+      clearApiError();
+      try {
+        webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      } catch (err) {
+        try {
+          webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        } catch (err2) {
+          showApiError(new Error('Could not access the camera. Please allow camera permission and try again.'));
+          return;
+        }
+      }
+
+      const video = document.getElementById('webcamVideo');
+      video.srcObject = webcamStream;
+      video.style.display = 'block';
+      document.getElementById('webcamPlaceholder').style.display = 'none';
+      document.getElementById('capturedPhotoPreview').style.display = 'none';
+      document.getElementById('webcamCapturedBadge').style.display = 'none';
+      document.getElementById('webcamBox').classList.remove('has-photo');
+
+      document.getElementById('btnStartCamera').style.display = 'none';
+      document.getElementById('btnCapturePhoto').disabled = false;
+      document.getElementById('btnRetakePhoto').style.display = 'none';
+    }
+
+    function stopWebcam() {
+      if (webcamStream) {
+        webcamStream.getTracks().forEach(t => t.stop());
+        webcamStream = null;
+      }
+    }
+
+    function capturePhoto() {
+      const video = document.getElementById('webcamVideo');
+      const canvas = document.getElementById('captureCanvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          showApiError(new Error('Could not capture photo. Please try again.'));
+          return;
+        }
+        if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
+        capturedPhotoBlob = blob;
+        capturedPhotoUrl = URL.createObjectURL(blob);
+
+        const preview = document.getElementById('capturedPhotoPreview');
+        preview.src = capturedPhotoUrl;
+        preview.style.display = 'block';
+        document.getElementById('webcamVideo').style.display = 'none';
+        document.getElementById('webcamCapturedBadge').style.display = 'inline-block';
+        document.getElementById('webcamBox').classList.add('has-photo');
+
+        stopWebcam();
+        document.getElementById('btnCapturePhoto').disabled = true;
+        document.getElementById('btnStartCamera').style.display = 'none';
+        document.getElementById('btnRetakePhoto').style.display = 'inline-flex';
+      }, 'image/jpeg', 0.9);
+    }
+
+    function retakePhoto() {
+      if (capturedPhotoUrl) { URL.revokeObjectURL(capturedPhotoUrl); capturedPhotoUrl = null; }
+      capturedPhotoBlob = null;
+
+      document.getElementById('capturedPhotoPreview').style.display = 'none';
+      document.getElementById('webcamCapturedBadge').style.display = 'none';
+      document.getElementById('webcamBox').classList.remove('has-photo');
+      document.getElementById('webcamPlaceholder').style.display = 'block';
+      document.getElementById('btnRetakePhoto').style.display = 'none';
+      document.getElementById('btnStartCamera').style.display = 'inline-flex';
+      document.getElementById('btnCapturePhoto').disabled = true;
+
+      startWebcam();
+    }
+
+    // ---------------- Lightbox helpers (customer photo) ----------------
+
+    function openLightbox(url, title) {
+      document.getElementById('lightboxImg').src = url;
+      document.getElementById('lightboxTitle').textContent = title || 'Photo';
+      document.getElementById('lightboxDownloadBtn').onclick = () => downloadImage(url, (title || 'photo').replace(/\s+/g, '-') + '.jpg');
+      const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+      modal.show();
+    }
+
+    async function downloadImage(url, filename) {
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('Download failed.');
+        const blob = await resp.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        showApiError(err);
+      }
+    }
+
+    // ---------------- Loan Summary: scheme-driven fields ----------------
+
+    function formatEligibleAmount(val) {
+      const num = Number(val);
+      if (isNaN(num)) return '0';
+      if (num % 1 !== 0) {
+        return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      return num.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function getCurrentEligibleAmount() {
+      if (!lastAppraisalResult) return 0;
+      const schemeSelect = document.getElementById('schemeSelect');
+      if (!schemeSelect) return 0;
+      const schemeId = parseInt(schemeSelect.value, 10);
+      const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
+      if (!scheme) return 0;
+      const rawEligible = lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100);
+      return Math.round(rawEligible * 100) / 100;
+    }
+
+    function updateRequestedAmountWidget() {
+      const input = document.getElementById('requestedAmount');
+      const slider = document.getElementById('requestedAmountSlider');
+      const pctBadge = document.getElementById('requestedAmountPercent');
+      const statusText = document.getElementById('limitStatusText');
+      const chkAllowExceed = document.getElementById('chkAllowExceed');
+
+      const eligible = getCurrentEligibleAmount();
+      const value = parseFloat(input.value) || 0;
+      const presetButtons = document.querySelectorAll('.btn-preset');
+
+      if (eligible <= 0) {
+        slider.disabled = true;
+        slider.value = 0;
+        slider.style.setProperty('--slider-val', '0%');
+        pctBadge.textContent = '0% of Max';
+        pctBadge.className = 'badge-percent text-muted-jlms';
+        statusText.innerHTML = '<i class="bi bi-info-circle"></i> Add jewel items &amp; calculate valuation first';
+        statusText.className = 'limit-status-info mt-2 text-center text-muted-jlms';
+        presetButtons.forEach(btn => {
+          btn.disabled = true;
+          btn.classList.remove('active');
+        });
         return;
       }
-    }
 
-    const currentUser = Session.get();
-    if (!currentUser || !currentUser.userId) {
-      showApiError(new Error('Your session is missing user info. Please log out and log in again.'));
-      return;
-    }
+      // Enable slider & presets
+      slider.disabled = false;
+      presetButtons.forEach(btn => btn.disabled = false);
 
-    const btn = document.getElementById('btnSubmitLoan');
-    if (btn.dataset.busy === '1') return;
-    btn.dataset.busy = '1';
-    btn.disabled = true;
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating loan...';
-    try {
-      const loan = await Api.createLoan({
-        customerId: selectedCustomer.id,
-        loanSchemeId: schemeId,
-        jewelItems: items,
-        requestedLoanAmount: requestedAmount,
-          processingFee: processingFee,   
-        remarks: document.getElementById('loanRemarks').value.trim() || null,
-        allowExceedEligible: allowExceedEligible
+      // Set slider value based on percentage of eligible amount
+      const pct = Math.round((value / eligible) * 100);
+      const cappedPct = Math.min(pct, 100);
+      slider.value = cappedPct;
+      slider.style.setProperty('--slider-val', cappedPct + '%');
+
+      // Update badge
+      pctBadge.textContent = pct + '% of Max';
+
+      // Highlight active preset button if the current value matches exactly a preset percentage
+      presetButtons.forEach(btn => {
+        const btnPct = parseInt(btn.dataset.pct, 10);
+        if (value > 0 && Math.abs(pct - btnPct) < 1) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
       });
 
-      // Upload the single web-captured jewel-items photo now that we have a real LoanId.
-      if (capturedPhotoBlob && loan.loanId) {
-        try {
-          const fd = new FormData();
-          fd.append('photo', capturedPhotoBlob, 'jewel-items-capture.jpg');
-          await fetch(`${API_BASE_URL}/loans/${loan.loanId}/photo`, { method: 'POST', body: fd });
-        } catch (uploadErr) {
-          console.error('Loan photo upload failed for loan', loan.loanId, uploadErr);
+      if (value === 0) {
+        pctBadge.className = 'badge-percent text-muted-jlms';
+        statusText.innerHTML = `<i class="bi bi-wallet2 text-primary"></i> Max Eligible: <strong>₹${formatEligibleAmount(eligible)}</strong>`;
+        statusText.className = 'limit-status-info mt-2 text-center text-muted-jlms';
+      } else if (value <= eligible) {
+        pctBadge.className = 'badge-percent';
+        statusText.innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Within eligible limit (Max: ₹${formatEligibleAmount(eligible)})`;
+        statusText.className = 'limit-status-info text-success mt-2 text-center';
+      } else {
+        // value > eligible
+        if (chkAllowExceed.checked) {
+          pctBadge.className = 'badge-percent warning';
+          statusText.innerHTML = `<i class="bi bi-exclamation-triangle-fill text-warning"></i> Exceeds limit by <strong>₹${formatEligibleAmount(value - eligible)}</strong> (Override active)`;
+          statusText.className = 'limit-status-info text-warning mt-2 text-center';
+        } else {
+          pctBadge.className = 'badge-percent danger';
+          statusText.innerHTML = `<i class="bi bi-x-circle-fill text-danger"></i> Exceeds eligible limit of <strong>₹${formatEligibleAmount(eligible)}</strong>`;
+          statusText.className = 'limit-status-info text-danger mt-2 text-center';
         }
       }
+    }
 
-      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Approving & disbursing...';
+    function applySchemeToSummary() {
+      const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
+      const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
+      if (!scheme) return;
 
-      // const result = await Api.submitForApproval(loan.loanId, {
-      //   submittedByUserId: currentUser.userId
-      // });
+      document.getElementById('sumScheme').textContent = scheme.schemeName;
+      document.getElementById('sumLtv').textContent = scheme.maxLtvPercent + '%';
+      // document.getElementById('sumProcessingFee').textContent = '₹' + Number(scheme.processingFee).toLocaleString('en-IN');
 
-      // window.open(`${API_BASE_URL}/loans/${result.loanId}/receipt-pdf`, '_blank');
-      // resetFormForNewLoan();
+      if (lastAppraisalResult) {
+        const eligible = Math.round((lastAppraisalResult.totalMarketValue * (scheme.maxLtvPercent / 100)) * 100) / 100;
+        document.getElementById('sumEligible').textContent = '₹' + formatEligibleAmount(eligible);
+        if (!document.getElementById('chkAllowExceed').checked) {
+          document.getElementById('requestedAmount').max = eligible;
+        }
+      }
+      updateRequestedAmountWidget();
+    }
 
-      const result = await Api.submitForApproval(loan.loanId, {
-        submittedByUserId: currentUser.userId
+    // ---------------- Valuation ----------------
+
+    async function calculateValuation() {
+      clearApiError();
+      const items = collectJewelItems();
+      if (items.length === 0) {
+        showApiError(new Error('Add at least one jewel item with a gross weight greater than zero.'));
+        return null;
+      }
+      try {
+        const result = await Api.calculateAppraisal({ customerId: selectedCustomer ? selectedCustomer.id : 0, items });
+        lastAppraisalResult = result;
+
+        document.getElementById('sumTotalWeight').textContent = Number(result.totalNetWeight).toFixed(3) + ' g';
+        document.getElementById('sumGoldRate').textContent = '₹' + Number(result.goldRateUsed).toLocaleString('en-IN', { maximumFractionDigits: 2 }) + '/g';
+        document.getElementById('sumMarketValue').textContent = '₹' + Number(result.totalMarketValue).toLocaleString('en-IN');
+
+        applySchemeToSummary();
+
+        return result;
+      } catch (err) {
+        showApiError(err);
+        return null;
+      }
+    }
+    function updateProcessingFeeSummary() {
+      const val = parseFloat(document.getElementById('processingFeeInput').value) || 0;
+      document.getElementById('sumProcessingFee').textContent = '₹' + val.toLocaleString('en-IN');
+    }
+    function resetFormForNewLoan() {
+      // Customer
+      selectedCustomer = null;
+      document.getElementById('customerSearchInput').value = '';
+      document.getElementById('customerSearchResults').style.display = 'none';
+      document.getElementById('selectedCustomerCard').style.display = 'none';
+      // document.getElementById('processingFeeInput').value = '';
+      document.getElementById('processingFeeInput').value = '0';
+      document.getElementById('sumProcessingFee').textContent = '₹0';
+      const photoBox = document.getElementById('customerPhotoBox');
+      photoBox.innerHTML = '<div class="customer-photo-placeholder" id="customerPhotoPlaceholder"><i class="bi bi-person-circle"></i>No customer selected</div>';
+      photoBox.classList.remove('has-photo');
+      photoBox.onclick = null;
+
+      // Jewel items
+      document.getElementById('jewelItemsBody').innerHTML = '';
+      itemRowCount = 0;
+      if (jewelTypesCache.length > 0) addJewelRow();
+      updateGridTotals();
+
+      // Loan terms
+      document.getElementById('schemeSelect').selectedIndex = 0;
+      document.getElementById('loanRemarks').value = '';
+      document.getElementById('requestedAmount').value = '';
+      document.getElementById('requestedAmount').removeAttribute('max');
+      document.getElementById('chkAllowExceed').checked = false;
+
+      // Summary
+      lastAppraisalResult = null;
+      document.getElementById('sumTotalWeight').textContent = '0.000 g';
+      document.getElementById('sumGoldRate').textContent = '—';
+      document.getElementById('sumMarketValue').textContent = '₹0';
+      document.getElementById('sumEligible').textContent = '₹0';
+      applySchemeToSummary();
+
+      // Webcam / captured photo
+      stopWebcam();
+      if (capturedPhotoUrl) { URL.revokeObjectURL(capturedPhotoUrl); capturedPhotoUrl = null; }
+      capturedPhotoBlob = null;
+      document.getElementById('webcamVideo').style.display = 'none';
+      document.getElementById('capturedPhotoPreview').style.display = 'none';
+      document.getElementById('webcamCapturedBadge').style.display = 'none';
+      document.getElementById('webcamBox').classList.remove('has-photo');
+      document.getElementById('webcamPlaceholder').style.display = 'block';
+      document.getElementById('btnStartCamera').style.display = 'inline-flex';
+      document.getElementById('btnCapturePhoto').disabled = true;
+      document.getElementById('btnRetakePhoto').style.display = 'none';
+
+      clearApiError();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      Session.requireLogin();
+      //document.getElementById('btnRefresh').addEventListener('click', () => location.reload());
+      document.getElementById('btnAddItem').addEventListener('click', addJewelRow);
+      document.getElementById('btnCalculate').addEventListener('click', calculateValuation);
+
+      document.getElementById('btnStartCamera').addEventListener('click', startWebcam);
+      document.getElementById('btnCapturePhoto').addEventListener('click', capturePhoto);
+      document.getElementById('btnRetakePhoto').addEventListener('click', retakePhoto);
+      document.getElementById('processingFeeInput').addEventListener('input', updateProcessingFeeSummary);
+      document.getElementById('btnBrowseCustomers').addEventListener('click', openCustomerListModal);
+      document.getElementById('customerListFilter').addEventListener('input', (e) => {
+        const q = e.target.value.trim().toLowerCase();
+        renderCustomerListModal(activeCustomersCache.filter(c =>
+          c.customerCode.toLowerCase().includes(q) ||
+          c.customerName.toLowerCase().includes(q) ||
+          (c.mobile || '').toLowerCase().includes(q)));
       });
 
-      window.open(`${API_BASE_URL}/loans/${result.loanId}/receipt-pdf`, '_blank');
+      document.getElementById('chkAllowExceed').addEventListener('change', (e) => {
+        document.getElementById('requestedAmount').removeAttribute('max');
+        if (!e.target.checked) calculateValuation();
+        updateRequestedAmountWidget();
+      });
 
-      // Show a success message and bring it into view — the PDF opens in a new tab,
-      // so this tab needs an explicit scroll (opening a new tab can leave the
-      // current page scrolled wherever the user last was).
-      const successBanner = document.getElementById('apiSuccessBanner');
-      successBanner.textContent = `Loan ${result.loanNumber} approved and disbursed successfully.`;
-      successBanner.style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Requested Amount Widget setup
+      const requestedAmtInput = document.getElementById('requestedAmount');
+      const requestedAmtSlider = document.getElementById('requestedAmountSlider');
 
-      resetFormForNewLoan();
-      
-      btn.innerHTML = '<i class="bi bi-send-check"></i> Submit for Approval';
-      btn.disabled = false;
-      btn.dataset.busy = '0';
-    } catch (err) {
-      showApiError(err);
-      btn.disabled = false;
-      btn.dataset.busy = '0';
-      btn.innerHTML = '<i class="bi bi-send-check"></i> Submit for Approval';
-    }
-  });
-});
+      requestedAmtInput.addEventListener('input', updateRequestedAmountWidget);
 
-window.addEventListener('beforeunload', () => {
-  stopWebcam();
-  if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
-});
-</script>
+      requestedAmtSlider.addEventListener('input', () => {
+        const eligible = getCurrentEligibleAmount();
+        if (eligible > 0) {
+          const pct = parseInt(requestedAmtSlider.value, 10);
+          requestedAmtInput.value = Number((eligible * (pct / 100)).toFixed(2));
+          updateRequestedAmountWidget();
+        }
+      });
+
+      document.querySelectorAll('.btn-preset').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const eligible = getCurrentEligibleAmount();
+          if (eligible > 0) {
+            const pct = parseInt(e.currentTarget.dataset.pct, 10);
+            requestedAmtInput.value = Number((eligible * (pct / 100)).toFixed(2));
+            updateRequestedAmountWidget();
+          }
+        });
+      });
+
+      let searchDebounce;
+      document.getElementById('customerSearchInput').addEventListener('input', (e) => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => searchCustomersLive(e.target.value.trim()), 300);
+      });
+
+      try {
+        await loadLookups();
+      } catch (err) {
+        showApiError(err);
+      }
+
+      // Scheme is chosen by default before any calculation — seed Scheme/LTV/Processing Fee
+      // immediately, then keep them (and the eligible amount, if already calculated) live.
+      document.getElementById('schemeSelect').addEventListener('change', applySchemeToSummary);
+      applySchemeToSummary();
+
+      document.getElementById('btnSubmitLoan').addEventListener('click', async () => {
+        clearApiError();
+        document.getElementById('apiSuccessBanner').style.display = 'none';
+        const receiptWindow = window.open('', '_blank');
+        if (!selectedCustomer) { showApiError(new Error('Please select a customer first.')); return; }
+        const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
+        if (!schemeId) { showApiError(new Error('Please select a loan scheme.')); return; }
+
+        if (!lastAppraisalResult) {
+          showApiError(new Error('Please click "Calculate Valuation" before submitting.'));
+          return;
+        }
+
+        const requestedAmount = parseFloat(document.getElementById('requestedAmount').value);
+        if (!requestedAmount || requestedAmount <= 0) { showApiError(new Error('Please enter a valid requested loan amount.')); return; }
+
+        const items = collectJewelItems();
+        if (items.length === 0) { showApiError(new Error('Add at least one jewel item.')); return; }
+
+        const allowExceedEligible = document.getElementById('chkAllowExceed').checked;
+
+        const processingFeeRaw = document.getElementById('processingFeeInput').value.trim();
+        const processingFee = processingFeeRaw === '' ? 0 : parseFloat(processingFeeRaw);
+        if (isNaN(processingFee) || processingFee < 0) {
+          showApiError(new Error('Please enter a valid processing fee.'));
+          return;
+        }
+        // Client-side pre-check against the last calculated eligible amount, purely to save a round trip.
+        if (!allowExceedEligible) {
+          const eligibleText = document.getElementById('sumEligible').textContent.replace(/[₹,]/g, '');
+          const eligibleAmount = parseFloat(eligibleText);
+          if (eligibleAmount > 0 && requestedAmount > eligibleAmount) {
+            showApiError(new Error(`Requested amount exceeds the eligible amount of ₹${formatEligibleAmount(eligibleAmount)}. Check "Don't validate" to override, or lower the amount.`));
+            return;
+          }
+        }
+
+        const currentUser = Session.get();
+        if (!currentUser || !currentUser.userId) {
+          showApiError(new Error('Your session is missing user info. Please log out and log in again.'));
+          return;
+        }
+
+        const btn = document.getElementById('btnSubmitLoan');
+        if (btn.dataset.busy === '1') return;
+        btn.dataset.busy = '1';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Creating loan...';
+        try {
+          const loan = await Api.createLoan({
+            customerId: selectedCustomer.id,
+            loanSchemeId: schemeId,
+            jewelItems: items,
+            requestedLoanAmount: requestedAmount,
+            processingFee: processingFee,
+            remarks: document.getElementById('loanRemarks').value.trim() || null,
+            allowExceedEligible: allowExceedEligible
+          });
+
+          // Upload the single web-captured jewel-items photo now that we have a real LoanId.
+          if (capturedPhotoBlob && loan.loanId) {
+            try {
+              const fd = new FormData();
+              fd.append('photo', capturedPhotoBlob, 'jewel-items-capture.jpg');
+              await fetch(`${API_BASE_URL}/loans/${loan.loanId}/photo`, { method: 'POST', body: fd });
+            } catch (uploadErr) {
+              console.error('Loan photo upload failed for loan', loan.loanId, uploadErr);
+            }
+          }
+
+          btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Approving & disbursing...';
+
+          // const result = await Api.submitForApproval(loan.loanId, {
+          //   submittedByUserId: currentUser.userId
+          // });
+
+          // window.open(`${API_BASE_URL}/loans/${result.loanId}/receipt-pdf`, '_blank');
+          // resetFormForNewLoan();
+
+          const result = await Api.submitForApproval(loan.loanId, {
+            submittedByUserId: currentUser.userId
+          });
+
+          // window.open(`${API_BASE_URL}/loans/${result.loanId}/receipt-pdf`, '_blank');
+          if (receiptWindow) {
+            receiptWindow.location.href = `${API_BASE_URL}/loans/${result.loanId}/receipt-pdf`;
+          }
+
+          // Show a success message and bring it into view — the PDF opens in a new tab,
+          // so this tab needs an explicit scroll (opening a new tab can leave the
+          // current page scrolled wherever the user last was).
+          const successBanner = document.getElementById('apiSuccessBanner');
+          successBanner.textContent = `Loan ${result.loanNumber} approved and disbursed successfully.`;
+          successBanner.style.display = 'block';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          resetFormForNewLoan();
+
+          btn.innerHTML = '<i class="bi bi-send-check"></i> Submit for Approval';
+          btn.disabled = false;
+          btn.dataset.busy = '0';
+        } catch (err) {
+          showApiError(err);
+          btn.disabled = false;
+          btn.dataset.busy = '0';
+          btn.innerHTML = '<i class="bi bi-send-check"></i> Submit for Approval';
+        }
+      });
+    });
+
+    window.addEventListener('beforeunload', () => {
+      stopWebcam();
+      if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
+    });
+  </script>
 </body>
+
 </html>

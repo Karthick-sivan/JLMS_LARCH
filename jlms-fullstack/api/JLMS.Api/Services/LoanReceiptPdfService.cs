@@ -271,14 +271,15 @@ public class LoanReceiptPdfService
 
                             c.Item().Text(t => { t.Span("Loan No: ").SemiBold(); t.Span(loan.LoanNumber); });
                             c.Item().Text(t => { t.Span("Loan Amount: ").SemiBold(); t.Span($"Rs. {loan.LoanAmount:N2}"); });
+                            c.Item().Text(t => { t.Span("Loan Scheme: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
                             c.Item().Text(t => { t.Span("Loan Date: ").SemiBold(); t.Span(loan.LoanDate?.ToString("dd-MM-yyyy") ?? "-"); });
                             c.Item().Text(t => { t.Span("Due Date: ").SemiBold(); t.Span(loan.MaturityDate?.ToString("dd-MM-yyyy") ?? "-"); });
                         });
 
                         row.ConstantItem(30); // Spacer
 
-                        
-                        
+
+
 
                         // Photo Block (Right)
                         row.ConstantItem(85).Column(c =>
@@ -303,29 +304,29 @@ public class LoanReceiptPdfService
                         {
                             table.ColumnsDefinition(c =>
                             {
-                                
-                                c.RelativeColumn(3);
+                                c.RelativeColumn(2.5f);
                                 c.RelativeColumn(1);
-                                c.RelativeColumn(1);
+                                c.RelativeColumn(1.5f);
+                                c.RelativeColumn(1.5f);
                                 c.RelativeColumn(1);
                             });
 
                             table.Header(h =>
                             {
-                                
                                 h.Cell().Element(HeaderCell).Text("Item");
                                 h.Cell().Element(HeaderCell).Text("Qty");
-                                h.Cell().Element(HeaderCell).Text("Purity");
+                                h.Cell().Element(HeaderCell).Text("Model");
+                                h.Cell().Element(HeaderCell).Text("Variant");
                                 h.Cell().Element(HeaderCell).Text("Wt (g)");
                             });
 
                             int sno = 1;
                             foreach (var ji in loan.JewelItems)
                             {
-                                
                                 table.Cell().Element(BodyCell).Text(ji.JewelType?.JewelTypeName ?? "-");
                                 table.Cell().Element(BodyCell).Text(ji.Quantity.ToString());
-                                table.Cell().Element(BodyCell).Text(ji.Purity ?? "-");
+                                table.Cell().Element(BodyCell).Text(ji.Model ?? "-");
+                                table.Cell().Element(BodyCell).Text(ji.Varient ?? "-");
                                 table.Cell().Element(BodyCell).Text(ji.GrossWeightGrams.ToString("0.000"));
                                 sno++;
                             }
@@ -337,23 +338,23 @@ public class LoanReceiptPdfService
                         });
                     });
 
-                    // ---- Amount details ----
-                    col.Item().PaddingTop(12).Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Table(table =>
-                    {
-                        table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); });
+                    //// ---- Amount details ----
+                    //col.Item().PaddingTop(12).Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Table(table =>
+                    //{
+                    //    table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); });
 
-                        void Row(string label, string value)
-                        {
-                            table.Cell().Padding(3).Text(label).SemiBold();
-                            table.Cell().Padding(3).AlignRight().Text(value);
-                        }
+                    //    void Row(string label, string value)
+                    //    {
+                    //        table.Cell().Padding(3).Text(label).SemiBold();
+                    //        table.Cell().Padding(3).AlignRight().Text(value);
+                    //    }
 
-                        Row("Loan Scheme", loan.LoanScheme?.SchemeName ?? "-");
-                        Row("Interest Rate", $"{loan.InterestRatePct}% p.a.");
-                        Row("Tenure", $"{loan.TenureMonths} months");
-                        Row("Loan Amount", $"Rs. {loan.LoanAmount:N2}");
-                        Row("Processing Fee", $"Rs. {loan.ProcessingFee:N2}");
-                    });
+                    //    Row("Loan Scheme", loan.LoanScheme?.SchemeName ?? "-");
+                    //    Row("Interest Rate", $"{loan.InterestRatePct}% p.a.");
+                    //    Row("Tenure", $"{loan.TenureMonths} months");
+                    //    Row("Loan Amount", $"Rs. {loan.LoanAmount:N2}");
+                    //    Row("Processing Fee", $"Rs. {loan.ProcessingFee:N2}");
+                    //});
                 });
 
                 // 2. PINNED FOOTER REGION 
@@ -530,8 +531,8 @@ public class LoanReceiptPdfService
                         ack.Item().Text("I hereby acknowledge receipt of all my pledged gold ornaments/articles in safe, intact, and original condition upon full closure of this loan account.").Italic().FontSize(7.5f);
                     });
 
-                    // ---- Signatures ----
-                    RenderSignatureRow(foot, paddingTop: 50, rightLabel: "Authorized Signatory - Sri Meenakshi Bankers");
+                        // ---- Signatures ----
+                        RenderSignatureRow(foot, paddingTop: 50, rightLabel: "Authorized Signatory - Sri Meenakshi Bankers");
 
                         // ---- Closure footer ----
                         foot.Item().PaddingTop(10).Text(
@@ -539,13 +540,195 @@ public class LoanReceiptPdfService
                         "No further outstanding amounts are due under this loan number.")
                         .FontSize(8f).FontColor(Colors.Green.Darken3).Bold();
                     });
-                
+
             });
         });
 
         return document.GeneratePdf();
     }
 
+    public byte[] GenerateClosureReceiptWithDetails(Loan loan, ClosureReceiptPdfDto r)
+    {
+        var customer = loan.Customer!;
+        var customerPhoto = ReadPhotoBytes(customer.PhotoPath);
+        var jewelPhoto = ReadPhotoBytes(loan.GroupPhotoPath);
+        var closurePhoto = ReadPhotoBytes(loan.ClosePhotoPath);   // ★ NEW
+
+        var document = Document.Create(container =>
+        {
+            // ================= PAGE 1 — same layout as GenerateReceipt() =================
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(28);
+                page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
+
+                page.Content().Column(col =>
+                {
+                    col.Item().Border(1).BorderColor(Colors.Grey.Darken1).Padding(12).Column(head =>
+                    {
+                        head.Item().AlignCenter().Text("Sri Masangaruppar Thunai").FontSize(9).Italic();
+                        head.Item().AlignCenter().Text("SRI MEENAKSHI BANKERS").FontSize(22).Bold().FontColor("#7a1f2b");
+                        head.Item().AlignCenter().Text("Government Approved | PBL. No. 01/2021-2022, Dt: 16.07.2021").FontSize(9).FontColor(Colors.Blue.Darken2);
+                        head.Item().AlignCenter().Text("3/39, Mangulam Main Road, Poosaripatti, Madurai - 625122 | Ph: 9943155324").FontSize(8.5f);
+                    });
+
+                    col.Item().PaddingTop(12).Row(row =>
+                    {
+                        row.RelativeItem(3).Column(c =>
+                        {
+                            c.Item().Text(t => { t.Span("Customer Name: ").SemiBold(); t.Span(customer.CustomerName); });
+                            c.Item().Text(t =>
+                            {
+                                t.Span("Address: ").SemiBold();
+                                t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.State, customer.Pincode }
+                                    .Where(s => !string.IsNullOrWhiteSpace(s))));
+                            });
+                            c.Item().Text(t => { t.Span("Mobile: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
+
+                            c.Item().Text(t => { t.Span("Loan No: ").SemiBold(); t.Span(loan.LoanNumber); });
+                            c.Item().Text(t => { t.Span("Loan Amount: ").SemiBold(); t.Span($"Rs. {loan.LoanAmount:N2}"); });
+                            c.Item().Text(t => { t.Span("Loan Scheme: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
+                            c.Item().Text(t => { t.Span("Loan Date: ").SemiBold(); t.Span(loan.LoanDate?.ToString("dd-MM-yyyy") ?? "-"); });
+                            c.Item().Text(t => { t.Span("Due Date: ").SemiBold(); t.Span(loan.MaturityDate?.ToString("dd-MM-yyyy") ?? "-"); });
+                        });
+
+                        row.ConstantItem(30);
+
+                        row.ConstantItem(85).Column(c =>
+                        {
+                            c.Item().AlignCenter().Text("Customer Photo").FontSize(8).SemiBold();
+                            if (customerPhoto != null) c.Item().Height(65).Image(customerPhoto).FitArea();
+                            else c.Item().Height(65).Background(Colors.Grey.Lighten3).AlignCenter().AlignMiddle().Text("No Photo").FontSize(8);
+                        });
+                    });
+
+                    col.Item().PaddingTop(10).Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Row(row =>
+                    {
+                        row.ConstantItem(130).Column(c =>
+                        {
+                            c.Item().AlignCenter().Text("Item Photo").FontSize(8).SemiBold();
+                            if (jewelPhoto != null) c.Item().Height(100).Image(jewelPhoto).FitArea();
+                            else c.Item().Height(100).Background(Colors.Grey.Lighten3).AlignCenter().AlignMiddle().Text("No Photo").FontSize(8);
+                        });
+
+                        row.RelativeItem().PaddingLeft(10).Table(table =>
+                        {
+                            table.ColumnsDefinition(c =>
+                            {
+                                c.RelativeColumn(2.5f);
+                                c.RelativeColumn(1);
+                                c.RelativeColumn(1.5f);
+                                c.RelativeColumn(1.5f);
+                                c.RelativeColumn(1);
+                            });
+
+                            table.Header(h =>
+                            {
+                                h.Cell().Element(HeaderCell).Text("Item");
+                                h.Cell().Element(HeaderCell).Text("Qty");
+                                h.Cell().Element(HeaderCell).Text("Model");
+                                h.Cell().Element(HeaderCell).Text("Variant");
+                                h.Cell().Element(HeaderCell).Text("Wt (g)");
+                            });
+
+                            foreach (var ji in loan.JewelItems)
+                            {
+                                table.Cell().Element(BodyCell).Text(ji.JewelType?.JewelTypeName ?? "-");
+                                table.Cell().Element(BodyCell).Text(ji.Quantity.ToString());
+                                table.Cell().Element(BodyCell).Text(ji.Model ?? "-");
+                                table.Cell().Element(BodyCell).Text(ji.Varient ?? "-");
+                                table.Cell().Element(BodyCell).Text(ji.GrossWeightGrams.ToString("0.000"));
+                            }
+
+                            static IContainer HeaderCell(IContainer c) =>
+                                c.Background(Colors.Grey.Lighten2).Padding(4).BorderBottom(1).BorderColor(Colors.Grey.Darken1);
+                            static IContainer BodyCell(IContainer c) =>
+                                c.Padding(4).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
+                        });
+                    });
+                });
+
+                page.Footer().Column(foot =>
+                {
+                    RenderSignatureRow(foot, paddingTop: 20, rightLabel: "For Sri Meenakshi Bankers", fontSize: 8);
+                    RenderAuctionFooter(foot, fontSize: 7.5f);
+                });
+            });
+
+            // ================= PAGE 2 — Closure confirmation + photo =================
+            // ================= PAGE 2 — Closure confirmation + photo =================
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(28);
+                page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
+
+                page.Content().Column(col =>
+                {
+                    col.Item().AlignCenter().PaddingTop(10)
+                        .Text("LOAN CLOSURE CONFIRMATION").FontSize(16).Bold().FontColor("#7a1f2b");
+
+                    col.Item().PaddingTop(30).Row(row =>
+                    {
+                        row.RelativeItem().Column(c =>
+                        {
+                            var closedAt = loan.ClosedAt ?? r.TransactionDate;
+                            c.Item().Text(t => { t.Span("Closed Date: ").SemiBold().FontSize(11); t.Span(closedAt.ToString("dd-MM-yyyy")).FontSize(11); });
+                            c.Item().PaddingTop(6).Text(t => { t.Span("Closed Time: ").SemiBold().FontSize(11); t.Span(closedAt.ToString("hh:mm tt")).FontSize(11); });
+                        });
+
+                        row.ConstantItem(30); // spacer
+
+                        // ★ CHANGE: photo shrunk from 220x220 to 130x130
+                        row.ConstantItem(130).Column(c =>
+                        {
+                            c.Item().AlignCenter().Text("Customer Photo at Closure").FontSize(9).SemiBold();
+                            //if (closurePhoto != null)
+                            //    c.Item().PaddingTop(6).Height(130).Width(130).Border(1).BorderColor(Colors.Grey.Darken1).Image(closurePhoto).FitArea();
+
+                            if (closurePhoto != null)
+                            {
+                                c.Item()
+                                    .PaddingTop(6)
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Darken1)
+                                    .Width(130)
+                                    .Height(130)
+                                    .Image(closurePhoto)
+                                    .FitUnproportionally();
+                            }
+                            else
+                                c.Item().PaddingTop(6).Height(130).Width(130).Background(Colors.Grey.Lighten3)
+                                 .AlignCenter().AlignMiddle().Text("No Closure Photo").FontSize(8);
+                        });
+                    });
+
+                    // ★ CHANGE: Declaration moved out of page.Footer() into normal content flow,
+                    // right after the photo row — this removes the big pinned-to-bottom gap.
+                    col.Item().PaddingTop(24).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
+                    {
+                        ack.Item().Text("Declaration:").Bold().FontSize(7.5f);
+                        ack.Item().Text("I hereby acknowledge receipt of all my pledged gold ornaments/articles in safe, intact, and original condition upon full closure of this loan account.").Italic().FontSize(7.5f);
+                    });
+                });
+
+                // ★ CHANGE: footer now holds only the signature row + thank-you note,
+                // still pinned to the bottom of the page as before.
+                page.Footer().Column(foot =>
+                {
+                    RenderSignatureRow(foot, paddingTop: 20, rightLabel: "Authorized Signatory - Sri Meenakshi Bankers");
+
+                    foot.Item().PaddingTop(10).Text(
+                        "Thank you for your business. This loan account has been fully settled and closed. " +
+                        "No further outstanding amounts are due under this loan number.")
+                        .FontSize(8f).FontColor(Colors.Green.Darken3).Bold();
+                });
+            });
+        });
+
+        return document.GeneratePdf();
+    }
     private byte[]? ReadPhotoBytes(string? relativePath)
     {
         if (string.IsNullOrWhiteSpace(relativePath)) return null;
