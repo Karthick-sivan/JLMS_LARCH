@@ -9,6 +9,7 @@ namespace JLMS.Api.Services;
 public class LoanReceiptPdfService
 {
     private readonly string _uploadsRoot;
+    private readonly byte[]? _logoBytes;
 
     // IMPORTANT: Arial has no Tamil glyphs. Use a Tamil-capable font
     // (e.g. "Noto Sans Tamil") and register it once at app startup:
@@ -24,8 +25,20 @@ public class LoanReceiptPdfService
     public LoanReceiptPdfService()
     {
         _uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        _logoBytes = LoadLogoBytes();
     }
 
+    private static byte[]? LoadLogoBytes()
+    {
+        var assetsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Assets");
+        foreach (var ext in new[] { ".png", ".jpg", ".jpeg" })
+        {
+            var path = Path.Combine(assetsRoot, "company-logo" + ext);
+            if (File.Exists(path))
+                return File.ReadAllBytes(path);
+        }
+        return null;
+    }
     // -------------------------------------------------------------------------
     // Shared layout helpers
     // -------------------------------------------------------------------------
@@ -34,19 +47,119 @@ public class LoanReceiptPdfService
     /// Renders the centered company letterhead block inside a bordered box.
     /// Call as: col.Item().Element(c => RenderLetterhead(c, padding, fontSize));
     /// </summary>
-    private static void RenderLetterhead(IContainer container, float padding = 10, float fontSize = 8)
+    private void RenderLetterhead(IContainer container, float padding = 10, float fontSize = 8)
     {
         container
             .Border(1).BorderColor(Colors.Grey.Darken1)
             .Padding(padding)
-            .Column(head =>
+            .Row(row =>
             {
-                head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்   துணை").FontSize(fontSize).Italic();
-                head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(fontSize + 6).Bold().FontColor("#7a1f2b");
-                head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(fontSize - 0.5f);
-                head.Item().AlignCenter().Text("3/39, மாங்குளம் மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(fontSize - 0.5f);
-                head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(fontSize - 8.5f);
+                // ---- Logo (left) ----
+                row.ConstantItem(50).AlignMiddle().Element(e =>
+                {
+                    if (_logoBytes != null)
+                        e.Image(_logoBytes).FitArea();
+                });
+
+                // ---- Company block (center, takes remaining width) ----
+                row.RelativeItem().Column(head =>
+                {
+                    head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்   துணை").FontSize(fontSize).Italic();
+                    head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(fontSize + 6).Bold().FontColor("#7a1f2b");
+                    head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(fontSize - 0.5f);
+                    head.Item().AlignCenter().Text("3/39, மாங்குளம் மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(fontSize - 0.5f);
+                    head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(fontSize - 0.5f);
+                });
+
+                // ---- Spacer to visually balance the logo on the left (keeps text centered) ----
+                row.ConstantItem(50);
             });
+    }
+
+    /// <summary>
+    /// Renders the letterhead box PLUS a right-hand info column (loan number / amount / date),
+    /// matching the "அடகு எண் / அடகு ரூபாய் / அடகு தேதி" layout shown in the sample receipt.
+    /// Call as: col.Item().Element(c => RenderLetterheadWithInfo(c, loan.LoanNumber, loan.LoanAmount, loan.LoanDate, loan.MaturityDate));
+    /// </summary>
+    private void RenderLetterheadWithInfo(IContainer container, string? loanNumber, decimal loanAmount, DateTime? loanDate,
+        DateTime? maturityDate, float padding = 12, float fontSize = 9)
+    {
+        container
+            .Border(1).BorderColor(Colors.Grey.Darken1)
+            .Padding(padding)
+            .Row(row =>
+            {
+                // ---- Logo (left) ---- ★ NEW
+                row.ConstantItem(60).AlignMiddle().Element(e =>
+                {
+                    if (_logoBytes != null)
+                        e.Image(_logoBytes).FitArea();
+                });
+
+                row.ConstantItem(8);
+
+                // ---- Company block (center) ----
+                row.RelativeItem(3).Column(head =>
+                {
+                    head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்  துணை").FontSize(fontSize).Italic();
+                    head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(fontSize + 13).Bold().FontColor("#7a1f2b");
+                    head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(fontSize).FontColor(Colors.Blue.Darken2);
+                    head.Item().AlignCenter().Text("3/39, மாங்குளம்  மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(fontSize - 0.5f);
+                    head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(fontSize - 0.5f);
+                });
+
+                row.ConstantItem(10);
+
+                // ---- Loan number / Amount / Date block (right, unchanged) ----
+                row.RelativeItem(1).AlignMiddle().Column(info =>
+                {
+                    info.Item().Text(t =>
+                    {
+                        t.Span("அடகு எண்: ").SemiBold().FontSize(8.5f);
+                        t.Span(loanNumber ?? "-").FontSize(8.5f);
+                    });
+                    info.Item().PaddingTop(3).Text(t =>
+                    {
+                        t.Span("அசல் தொகை: ").SemiBold().FontSize(8.5f);
+                        t.Span($"ரூ. {loanAmount:N2}").FontSize(8.5f);
+                    });
+                    info.Item().PaddingTop(3).Text(t =>
+                    {
+                        t.Span("அடகு தேதி: ").SemiBold().FontSize(8.5f);
+                        t.Span(loanDate?.ToString("dd-MM-yyyy") ?? DateTime.Now.ToString("dd-MM-yyyy")).FontSize(8.5f);
+                    });
+                    info.Item().PaddingTop(3).Text(t =>
+                    {
+                        t.Span("செலுத்த வேண்டிய தேதி: ").SemiBold().FontSize(8.5f);
+                        t.Span(maturityDate?.ToString("dd-MM-yyyy") ?? "-").FontSize(8.5f);
+                    });
+                });
+            });
+    }
+    /// <summary>
+    /// Renders a labelled, bordered photo box (used for jewel photo / customer photo),
+    /// matching the framed-photo look in the sample receipt.
+    /// </summary>
+    private static void RenderPhotoBox(IContainer container, string label, byte[]? photoBytes,
+        float width = 85, float height = 95, float labelFontSize = 8)
+    {
+        container.Width(width).Column(c =>
+        {
+            c.Item().AlignCenter().Text(label).FontSize(labelFontSize).SemiBold();
+            c.Item().PaddingTop(3)
+                .Border(1).BorderColor(Colors.Grey.Darken2)
+                .Background(Colors.White)
+                .Width(width).Height(height)
+                .Padding(2)
+                .AlignCenter().AlignMiddle()
+                .Element(e =>
+                {
+                    if (photoBytes != null)
+                        e.Image(photoBytes).FitArea();
+                    else
+                        e.Text("புகைப்படம் இல்லை").FontSize(labelFontSize - 0.5f).FontColor(Colors.Grey.Darken1);
+                });
+        });
     }
 
     /// <summary>
@@ -105,77 +218,46 @@ public class LoanReceiptPdfService
                 // 1. MAIN CONTENT REGION (Root level of page)
                 page.Content().Column(col =>
                 {
-                    // ---- Letterhead (Clean Centered Layout) ----
-                    col.Item().Border(1).BorderColor(Colors.Grey.Darken1).Padding(12).Column(head =>
+                    // ---- Letterhead (with loan number / amount / date on the right, like the sample) ----
+                    col.Item().Element(c => RenderLetterheadWithInfo(c, loan.LoanNumber, loan.LoanAmount, loan.LoanDate, loan.MaturityDate));
+
+                    // ---- Customer Details (full width text block) ----
+                    col.Item().PaddingTop(12).Column(c =>
                     {
-                        head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்  துணை").FontSize(9).Italic();
-                        head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(22).Bold().FontColor("#7a1f2b");
-                        head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(9).FontColor(Colors.Blue.Darken2);
-                        head.Item().AlignCenter().Text("3/39, மாங்குளம்  மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(8.5f);
-                        head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(8.5f);
-
-                    });
-                
-                // ---- Customer Details + Loan Details Brought Down + Customer Photo ----
-                col.Item().PaddingTop(12).Row(row =>
-                    {
-                        // Customer Block (Left)
-                        row.RelativeItem(3).Column(c =>
+                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
+                        c.Item().Text(t =>
                         {
-                            c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
-                            c.Item().Text(t =>
-                            {
-                                t.Span("முகவரி: ").SemiBold();
-                                t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.State, customer.Pincode }
-                                    .Where(s => !string.IsNullOrWhiteSpace(s))));
-                            });
-                            c.Item().Text(t => { t.Span("மொபைல்: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
-
-                            // Loan Details Block
-
-                            //c.Item().Text(t => { t.Span("கடன் எண்: ").SemiBold(); t.Span(loan.LoanNumber); });
-                            c.Item().Text(t => { t.Span("அசல்  தொகை: ").SemiBold(); t.Span($"ரூ. {loan.LoanAmount:N2}"); });
-                            //c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
-                            c.Item().Text(t => { t.Span("தேதி: ").SemiBold(); t.Span(loan.LoanDate?.ToString("dd-MM-yyyy") ?? "-"); });
-                            c.Item().Text(t => { t.Span("செலுத்த வேண்டிய தேதி: ").SemiBold(); t.Span(loan.MaturityDate?.ToString("dd-MM-yyyy") ?? "-"); });
+                            t.Span("முகவரி: ").SemiBold();
+                            t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.State, customer.Pincode }
+                                .Where(s => !string.IsNullOrWhiteSpace(s))));
                         });
-
-                        row.ConstantItem(30); // Spacer
-
-                        // Photo Block (Right)
-                        row.ConstantItem(85).Column(c =>
-                        {
-                            c.Item().AlignCenter().Text("வாடிக்கையாளர் புகைப்படம்").FontSize(8).SemiBold();
-                            if (customerPhoto != null) c.Item().Height(65).Image(customerPhoto).FitArea();
-                            else c.Item().Height(65).Background(Colors.Grey.Lighten3).AlignCenter().AlignMiddle().Text("புகைப்படம் இல்லை").FontSize(8);
-                        });
+                        c.Item().Text(t => { t.Span("தொலைபேசி: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
+                        //c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
+                        // NOTE: அடகு எண் / அசல் தொகை / தேதி are shown once, in the letterhead box above — not repeated here.
                     });
 
-                    // ---- Item Photo + jewel item table ----
+                    // ---- Item Photo + jewel item table + Customer Photo (2nd box, right side) ----
                     col.Item().PaddingTop(10).Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Row(row =>
                     {
-                        row.ConstantItem(130).Column(c =>
-                        {
-                            c.Item().AlignCenter().Text("பொருள் புகைப்படம்").FontSize(8).SemiBold();
-                            if (jewelPhoto != null) c.Item().Height(100).Image(jewelPhoto).FitArea();
-                            else c.Item().Height(100).Background(Colors.Grey.Lighten3).AlignCenter().AlignMiddle().Text("புகைப்படம் இல்லை").FontSize(8);
-                        });
+                        // Jewel photo (left) — kept small so the table gets more room
+                        row.ConstantItem(75).Element(e =>
+                            RenderPhotoBox(e, "பொருள் படம்", jewelPhoto, width: 68, height: 78, labelFontSize: 7));
 
-                        row.RelativeItem().PaddingLeft(10).Table(table =>
+                        // Jewel item table (middle)
+                        row.RelativeItem().PaddingHorizontal(10).Table(table =>
                         {
                             table.ColumnsDefinition(c =>
                             {
-                                c.RelativeColumn(2.5f);
-                                c.RelativeColumn(1);
+                                c.RelativeColumn(2f);
+                                c.RelativeColumn(1.9f);   // wider so "எண்ணிக்கை" fits on one line
                                 c.RelativeColumn(1.5f);
                                 c.RelativeColumn(1.5f);
-                                c.RelativeColumn(1);
+                                c.RelativeColumn(1.3f);
                             });
-
                             table.Header(h =>
                             {
                                 h.Cell().Element(HeaderCell).Text("பொருள்");
-                                h.Cell().Element(HeaderCell).Text("எண்ணிக்கை ");
+                                h.Cell().Element(HeaderCell).Text("எண்ணிக்கை").FontSize(8);
                                 h.Cell().Element(HeaderCell).Text("வடிவம்");
                                 h.Cell().Element(HeaderCell).Text("வகை");
                                 h.Cell().Element(HeaderCell).Text("எடை (கி)");
@@ -192,11 +274,18 @@ public class LoanReceiptPdfService
                                 sno++;
                             }
 
+                            // Full grid borders (all sides). IMPORTANT: Border() must come BEFORE
+                            // Padding() so the border sits at the cell's outer edge and touches the
+                            // neighboring cell's border directly — no gap between cells.
                             static IContainer HeaderCell(IContainer c) =>
-                                c.Background(Colors.Grey.Lighten2).Padding(4).BorderBottom(1).BorderColor(Colors.Grey.Darken1);
+                                c.Border(1).BorderColor(Colors.Grey.Darken1).Background(Colors.Grey.Lighten2).Padding(4);
                             static IContainer BodyCell(IContainer c) =>
-                                c.Padding(4).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
+                                c.Border(1).BorderColor(Colors.Grey.Darken1).Padding(4);
                         });
+
+                        // Customer photo (right)
+                        row.ConstantItem(90).Element(e =>
+                            RenderPhotoBox(e, "வாடிக்கையாளர் புகைப்படம்", customerPhoto, width: 80, height: 95));
                     });
                 });
 
@@ -239,7 +328,7 @@ public class LoanReceiptPdfService
                             t.ColumnsDefinition(c => { c.ConstantColumn(58); c.RelativeColumn(); });
                             t.Cell().Text("வாடிக்கையாளர்:").SemiBold();
                             t.Cell().Text(r.CustomerName);
-                            t.Cell().Text("மொபைல்:").SemiBold();
+                            t.Cell().Text("தொலைபேசி:").SemiBold();
                             t.Cell().Text(r.Mobile ?? "-");
                         });
 
@@ -409,70 +498,46 @@ public class LoanReceiptPdfService
 
                 page.Content().Column(col =>
                 {
-                    col.Item().Border(1).BorderColor(Colors.Grey.Darken1).Padding(12).Column(head =>
-                    {
-                        head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்  துணை").FontSize(9).Italic();
-                        head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(22).Bold().FontColor("#7a1f2b");
-                        head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(9).FontColor(Colors.Blue.Darken2);
-                        head.Item().AlignCenter().Text("3/39, மாங்குளம்  மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(8.5f);
-                        head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(8.5f);
+                    // ---- Letterhead (with loan number / amount / date on the right, like the sample) ----
+                    col.Item().Element(c => RenderLetterheadWithInfo(c, loan.LoanNumber, loan.LoanAmount, loan.LoanDate, loan.MaturityDate));
 
+                    // ---- Customer Details (full width text block) ----
+                    col.Item().PaddingTop(12).Column(c =>
+                    {
+                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
+                        c.Item().Text(t =>
+                        {
+                            t.Span("முகவரி: ").SemiBold();
+                            t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.State, customer.Pincode }
+                                .Where(s => !string.IsNullOrWhiteSpace(s))));
+                        });
+                        c.Item().Text(t => { t.Span("தொலைபேசி: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
+                        //c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
+                        // NOTE: அடகு எண் / அசல் தொகை / தேதி are shown once, in the letterhead box above — not repeated here.
                     });
 
-                    col.Item().PaddingTop(12).Row(row =>
-                    {
-                        row.RelativeItem(3).Column(c =>
-                        {
-                            c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
-                            c.Item().Text(t =>
-                            {
-                                t.Span("முகவரி: ").SemiBold();
-                                t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.State, customer.Pincode }
-                                    .Where(s => !string.IsNullOrWhiteSpace(s))));
-                            });
-                            c.Item().Text(t => { t.Span("மொபைல்: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
-
-                            //c.Item().Text(t => { t.Span("கடன் எண்: ").SemiBold(); t.Span(loan.LoanNumber); });
-                            c.Item().Text(t => { t.Span("அசல்  தொகை: ").SemiBold(); t.Span($"ரூ. {loan.LoanAmount:N2}"); });
-                            //c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
-                            c.Item().Text(t => { t.Span("தேதி: ").SemiBold(); t.Span(loan.LoanDate?.ToString("dd-MM-yyyy") ?? "-"); });
-                            c.Item().Text(t => { t.Span("செலுத்த வேண்டிய தேதி: ").SemiBold(); t.Span(loan.MaturityDate?.ToString("dd-MM-yyyy") ?? "-"); });
-                        });
-
-                        row.ConstantItem(30);
-
-                        row.ConstantItem(85).Column(c =>
-                        {
-                            c.Item().AlignCenter().Text("வாடிக்கையாளர் புகைப்படம்").FontSize(8).SemiBold();
-                            if (customerPhoto != null) c.Item().Height(65).Image(customerPhoto).FitArea();
-                            else c.Item().Height(65).Background(Colors.Grey.Lighten3).AlignCenter().AlignMiddle().Text("புகைப்படம் இல்லை").FontSize(8);
-                        });
-                    });
-
+                    // ---- Item Photo + jewel item table + Customer Photo (2nd box, right side) ----
                     col.Item().PaddingTop(10).Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Row(row =>
                     {
-                        row.ConstantItem(130).Column(c =>
-                        {
-                            c.Item().AlignCenter().Text("பொருள் புகைப்படம்").FontSize(8).SemiBold();
-                            if (jewelPhoto != null) c.Item().Height(100).Image(jewelPhoto).FitArea();
-                            else c.Item().Height(100).Background(Colors.Grey.Lighten3).AlignCenter().AlignMiddle().Text("புகைப்படம் இல்லை").FontSize(8);
-                        });
+                        // Jewel photo (left) — kept small so the table gets more room
+                        row.ConstantItem(75).Element(e =>
+                            RenderPhotoBox(e, "பொருள் படம்", jewelPhoto, width: 68, height: 78, labelFontSize: 7));
 
-                        row.RelativeItem().PaddingLeft(10).Table(table =>
+                        // Jewel item table (middle)
+                        row.RelativeItem().PaddingHorizontal(10).Table(table =>
                         {
                             table.ColumnsDefinition(c =>
                             {
-                                c.RelativeColumn(2.5f);
+                                c.RelativeColumn(2f);
+                                c.RelativeColumn(1.9f);   // wider so "எண்ணிக்கை" fits on one line
                                 c.RelativeColumn(1.5f);
                                 c.RelativeColumn(1.5f);
-                                c.RelativeColumn(1.5f);
-                                c.RelativeColumn(1);
+                                c.RelativeColumn(1.3f);
                             });
-
                             table.Header(h =>
                             {
                                 h.Cell().Element(HeaderCell).Text("பொருள்");
-                                h.Cell().Element(HeaderCell).Text("எண்ணிக்கை ");
+                                h.Cell().Element(HeaderCell).Text("எண்ணிக்கை").FontSize(8);
                                 h.Cell().Element(HeaderCell).Text("வடிவம்");
                                 h.Cell().Element(HeaderCell).Text("வகை");
                                 h.Cell().Element(HeaderCell).Text("எடை (கி)");
@@ -487,11 +552,18 @@ public class LoanReceiptPdfService
                                 table.Cell().Element(BodyCell).Text(ji.GrossWeightGrams.ToString("0.000"));
                             }
 
+                            // Full grid borders (all sides). IMPORTANT: Border() must come BEFORE
+                            // Padding() so the border sits at the cell's outer edge and touches the
+                            // neighboring cell's border directly — no gap between cells.
                             static IContainer HeaderCell(IContainer c) =>
-                                c.Background(Colors.Grey.Lighten2).Padding(4).BorderBottom(1).BorderColor(Colors.Grey.Darken1);
+                                c.Border(1).BorderColor(Colors.Grey.Darken1).Background(Colors.Grey.Lighten2).Padding(4);
                             static IContainer BodyCell(IContainer c) =>
-                                c.Padding(4).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
+                                c.Border(1).BorderColor(Colors.Grey.Darken1).Padding(4);
                         });
+
+                        // Customer photo (right)
+                        row.ConstantItem(90).Element(e =>
+                            RenderPhotoBox(e, "வாடிக்கையாளர் புகைப்படம்", customerPhoto, width: 80, height: 95));
                     });
                 });
 
@@ -525,25 +597,8 @@ public class LoanReceiptPdfService
 
                         row.ConstantItem(30); // spacer
 
-                        row.ConstantItem(130).Column(c =>
-                        {
-                            c.Item().AlignCenter().Text("முடிவின் போது வாடிக்கையாளர் புகைப்படம்").FontSize(9).SemiBold();
-
-                            if (closurePhoto != null)
-                            {
-                                c.Item()
-                                    .PaddingTop(6)
-                                    .Border(1)
-                                    .BorderColor(Colors.Grey.Darken1)
-                                    .Width(130)
-                                    .Height(130)
-                                    .Image(closurePhoto)
-                                    .FitUnproportionally();
-                            }
-                            else
-                                c.Item().PaddingTop(6).Height(130).Width(130).Background(Colors.Grey.Lighten3)
-                                 .AlignCenter().AlignMiddle().Text("முடிவு புகைப்படம் இல்லை").FontSize(8);
-                        });
+                        row.ConstantItem(130).Element(e =>
+                            RenderPhotoBox(e, "முடிவின் போது வாடிக்கையாளர் புகைப்படம்", closurePhoto, width: 130, height: 130, labelFontSize: 9));
                     });
 
                     col.Item().PaddingTop(24).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
