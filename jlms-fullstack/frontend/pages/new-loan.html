@@ -660,6 +660,15 @@
                   </div>
                 </div>
               </div>
+              <div id="firstMonthInterestWrap" style="display:none; border:1px solid var(--n-200); border-left:4px solid var(--navy-500); border-radius:6px; background:var(--navy-50); padding:10px 14px;">
+                <div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#5b6474; margin-bottom:4px;">
+                  <i class="bi bi-calendar-month" style="margin-right:4px;"></i>First Month Interest
+                </div>
+                <div style="font-size:20px; font-weight:700; color:var(--navy-900);">
+                  ₹<span id="firstMonthInterestValue">0</span>
+                </div>
+                <div style="font-size:10.5px; color:var(--n-500); margin-top:2px;" id="firstMonthInterestNote"></div>
+              </div>
               <button class="btn-jlms btn-jlms-primary btn-lg" id="btnSubmitLoan"
                 style="width:100%; justify-content:center;"><i class="bi bi-send-check"></i> Submit for
                 Approval</button>
@@ -1159,6 +1168,26 @@
       }
     }
 
+    function updateFirstMonthInterest() {
+      const wrap = document.getElementById('firstMonthInterestWrap');
+      const valueEl = document.getElementById('firstMonthInterestValue');
+      const noteEl = document.getElementById('firstMonthInterestNote');
+
+      const loanAmount = parseFloat(document.getElementById('requestedAmount').value) || 0;
+      const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
+      const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
+
+      if (!scheme || loanAmount <= 0) {
+        wrap.style.display = 'none';
+        return;
+      }
+
+      const interest = Math.round((loanAmount * scheme.interestRatePct / 100 / scheme.tenureMonths) * 100) / 100;
+      valueEl.textContent = interest.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      noteEl.textContent = `${scheme.interestRatePct}% p.a. ÷ ${scheme.tenureMonths} months (${scheme.schemeName})`;
+      wrap.style.display = 'block';
+    }
+
     function applySchemeToSummary() {
       const schemeId = parseInt(document.getElementById('schemeSelect').value, 10);
       const scheme = schemesCache.find(s => s.loanSchemeId === schemeId);
@@ -1176,6 +1205,7 @@
         }
       }
       updateRequestedAmountWidget();
+      updateFirstMonthInterest(); 
     }
 
     // ---------------- Valuation ----------------
@@ -1255,6 +1285,8 @@
       document.getElementById('btnCapturePhoto').disabled = true;
       document.getElementById('btnRetakePhoto').style.display = 'none';
 
+      document.getElementById('firstMonthInterestWrap').style.display = 'none';
+
       clearApiError();
     }
 
@@ -1287,7 +1319,7 @@
       const requestedAmtInput = document.getElementById('requestedAmount');
       const requestedAmtSlider = document.getElementById('requestedAmountSlider');
 
-      requestedAmtInput.addEventListener('input', updateRequestedAmountWidget);
+      requestedAmtInput.addEventListener('input', () => { updateRequestedAmountWidget(); updateFirstMonthInterest(); });
 
       requestedAmtSlider.addEventListener('input', () => {
         const eligible = getCurrentEligibleAmount();
@@ -1295,6 +1327,7 @@
           const pct = parseInt(requestedAmtSlider.value, 10);
           requestedAmtInput.value = Number((eligible * (pct / 100)).toFixed(2));
           updateRequestedAmountWidget();
+          updateFirstMonthInterest();
         }
       });
 
@@ -1305,6 +1338,7 @@
             const pct = parseInt(e.currentTarget.dataset.pct, 10);
             requestedAmtInput.value = Number((eligible * (pct / 100)).toFixed(2));
             updateRequestedAmountWidget();
+            updateFirstMonthInterest();
           }
         });
       });

@@ -235,6 +235,8 @@ public class LoansController : ControllerBase
                 var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
                 var receiptNo = _calc.GenerateReceiptNumber(seq);
 
+                var firstMonthInterest = Math.Round(loan.LoanAmount * loan.InterestRatePct / 100m / loan.TenureMonths, 2, MidpointRounding.AwayFromZero);
+
                 txn = new LoanTransaction
                 {
                     LoanId = loan.LoanId,
@@ -252,7 +254,8 @@ public class LoansController : ControllerBase
                     ProcessedBy = request.SubmittedByUserId,
                     BranchId = loan.BranchId,
                     Remarks = "Auto-approved and disbursed via Submit for Approval",
-                    CreatedAt = now
+                    CreatedAt = now,
+                    FirstMonthInt = firstMonthInterest
                 };
 
                 _db.LoanTransactions.Add(txn);
@@ -641,6 +644,8 @@ public class LoansController : ControllerBase
 
         var seq = await _db.LoanTransactions.CountAsync() + 1;
         var receiptNo = _calc.GenerateReceiptNumber(seq);
+        
+        var firstMonthInt = Math.Round(loan.LoanAmount * loan.InterestRatePct / 100m / loan.TenureMonths, 2, MidpointRounding.AwayFromZero);
 
         var txn = new LoanTransaction
         {
@@ -656,7 +661,8 @@ public class LoansController : ControllerBase
             BalancePrincipalAfter = loan.OutstandingPrincipal,
             ProcessedBy = request.ProcessedByUserId,
             BranchId = loan.BranchId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            FirstMonthInt = firstMonthInt
         };
         _db.LoanTransactions.Add(txn);
         await _db.SaveChangesAsync();
