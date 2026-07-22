@@ -99,9 +99,9 @@ function jlmsBuildTopbar(pageTitle, breadcrumbs) {
       <div class="topbar-right">
         <div class="branch-pill"><i class="bi bi-building"></i> ${user.branchName || 'No Branch'}</div>
         <div class="rate-pill" id="topbarGoldRatePill" style="display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:600;color:#7a5c00;background:#fefce8;border:1px solid #fde68a;border-radius:20px;padding:3px 12px;white-space:nowrap;">
-          <span><i class="bi bi-coin" style="color:#D4AF37;margin-right:3px;"></i><span id="topbarGold22K">—</span></span>
+          <span>Gold: <span id="topbarGold22K">—</span></span>
           <span style="color:#d7dce3;">|</span>
-          <span><i class="bi bi-gem" style="color:#7B8EA0;margin-right:3px;"></i><span id="topbarSilver">—</span></span>
+          <span>Silver: <span id="topbarSilver">—</span></span>
         </div>
         <div class="icon-btn"><i class="bi bi-bell"></i><span class="dot"></span></div>
         <div class="user-chip" id="userDropdownTrigger" style="position:relative; cursor:pointer;">
