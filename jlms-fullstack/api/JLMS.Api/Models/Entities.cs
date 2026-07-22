@@ -208,7 +208,7 @@ public class LoanTransaction
     public int? BranchId { get; set; }
     public string? Remarks { get; set; }
     public DateTime CreatedAt { get; set; }
-
+    public decimal? FirstMonthInt { get; set; }
     public Loan Loan { get; set; } = null!;
 }
 
