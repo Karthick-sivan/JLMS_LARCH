@@ -16,7 +16,8 @@ public class CollectionReportsController : ControllerBase
         _db = db;
     }
 
-    private static readonly string[] CollectionTypes = { "PrincipalCollection", "InterestCollection", "LoanOpsPayment" };
+    //private static readonly string[] CollectionTypes = { "PrincipalCollection", "InterestCollection", "LoanOpsPayment" };
+    private static readonly string[] CollectionTypes = { "PrincipalCollection", "InterestCollection", "LoanOpsPayment", "Disbursement" };
 
     // GET /api/collection-reports?fromDate=2026-01-01&toDate=2026-12-31&customerId=5&page=1&pageSize=25
     [HttpGet]
@@ -35,6 +36,7 @@ public class CollectionReportsController : ControllerBase
             .Include(t => t.Loan)
                 .ThenInclude(l => l.LoanScheme)
             .Where(t => CollectionTypes.Contains(t.TransactionType))
+              .Where(t => t.TransactionType != "Disbursement" ||(t.FirstMonthInt.HasValue && t.FirstMonthInt.Value > 0))
             .AsQueryable();
 
         if (fromDate.HasValue)
@@ -55,9 +57,12 @@ public class CollectionReportsController : ControllerBase
             .GroupBy(_ => 1)
             .Select(g => new
             {
-                TotalPrincipal = g.Sum(t => t.PrincipalAmount),
-                TotalInterest = g.Sum(t => t.InterestAmount),
-                TotalCollected = g.Sum(t => t.TotalAmount)
+                //TotalPrincipal = g.Sum(t => t.PrincipalAmount),
+                //TotalInterest = g.Sum(t => t.InterestAmount),
+                //TotalCollected = g.Sum(t => t.TotalAmount)
+                TotalPrincipal = g.Sum(t => t.TransactionType == "Disbursement" ? 0 : t.PrincipalAmount),
+                TotalInterest = g.Sum(t => t.TransactionType == "Disbursement" ? (t.FirstMonthInt ?? 0) : t.InterestAmount),
+                TotalCollected = g.Sum(t => t.TransactionType == "Disbursement" ? (t.FirstMonthInt ?? 0) : t.TotalAmount)
             })
             .FirstOrDefaultAsync();
 
@@ -68,8 +73,11 @@ public class CollectionReportsController : ControllerBase
             .Take(pageSize)
             .ToListAsync();
 
-        var items = transactions.Select(t => new CollectionReportRowDto(
-            TransactionId: t.TransactionId,
+        var items = transactions.Select(t =>
+         {
+            bool isDisbursement = t.TransactionType == "Disbursement";
+                 return new CollectionReportRowDto(
+                        TransactionId: t.TransactionId,
             LoanId: t.LoanId,
             LoanNumber: t.Loan?.LoanNumber ?? "",
             LoanDate: t.Loan?.LoanDate,
@@ -80,14 +88,16 @@ public class CollectionReportsController : ControllerBase
             TransactionDate: t.TransactionDate,
             TransactionType: t.TransactionType,
             LoanAmount: t.Loan?.LoanAmount ?? 0,
-            PrincipalAmount: t.PrincipalAmount,
-            InterestAmount: t.InterestAmount,
-            TotalAmount: t.TotalAmount,
-          BalanceAmount: t.BalancePrincipalAfter ?? 0
+             PrincipalAmount: isDisbursement ? 0 : t.PrincipalAmount,
+            InterestAmount: isDisbursement ? (t.FirstMonthInt ?? 0) : t.InterestAmount,
+            TotalAmount: isDisbursement ? (t.FirstMonthInt ?? 0) : t.TotalAmount,
+            BalanceAmount: t.BalancePrincipalAfter ?? 0
+                
 
-        )).ToList();
+            );
+         }).ToList();
 
-        var result = new CollectionReportPagedDto(
+    var result = new CollectionReportPagedDto(
             Items: items,
             TotalCount: totalCount,
             Page: page,
