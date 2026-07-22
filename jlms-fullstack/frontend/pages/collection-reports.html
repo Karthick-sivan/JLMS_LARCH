@@ -111,7 +111,59 @@
             font-size: 14px;
             margin: 0;
         }
+/* Transaction-type badges shown next to Loan No. */
+       /* Amount pills — wrap the Principal/Interest/1st-Mo-Int value itself */
+        .amt-badge {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
 
+        .amt-badge.principal {
+            background: #dbeafe;
+            color: #2b9730;
+        }
+
+        .amt-badge.interest {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .amt-badge.fmi {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        /* Legend row above the results grid */
+        .amt-legend {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 10px 16px;
+            font-size: 12px;
+            color: #6b7280;
+            border-bottom: 1px solid #eef0f3;
+            flex-wrap: wrap;
+        }
+
+        .amt-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .amt-legend .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .amt-legend .legend-dot.principal { background: #2b9730; }
+        .amt-legend .legend-dot.interest { background: #b45309; }
+        .amt-legend .legend-dot.fmi { background: #6d28d9; }
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -254,6 +306,11 @@
                                 </div>
                             </div>
                             <div class="panel-body no-pad table-jlms-wrap">
+                                <div class="amt-legend">
+                                <span class="legend-item"><span class="legend-dot principal"></span>Principal</span>
+                                <span class="legend-item"><span class="legend-dot interest"></span>Interest</span>
+                                <span class="legend-item"><span class="legend-dot fmi"></span>1st Month Interest</span>
+                            </div>
                                 <table class="table-jlms" id="CollectionTable">
                                     <thead>
                                         <tr>
@@ -366,6 +423,22 @@
             if (!dt) return "—";
             return new Date(dt).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
         }
+// Wraps a Principal Amt value in a colored pill. Renders plain "—"/0
+        // (via fmt) with no pill when there's nothing to highlight.
+        function principalCell(row) {
+            if (!row.principalAmount) return fmt(row.principalAmount);
+            return `<span class="amt-badge principal">${fmt(row.principalAmount)}</span>`;
+        }
+
+        // Wraps an Interest Amt value in a colored pill. "Disbursement" rows
+        // in this report ONLY represent first-month-interest collected at
+        // loan creation, so they get the distinct "fmi" (purple) color
+        // instead of the regular interest (amber) color.
+        function interestCell(row) {
+            if (!row.interestAmount) return fmt(row.interestAmount);
+            const cls = row.transactionType === "Disbursement" ? "fmi" : "interest";
+            return `<span class="amt-badge ${cls}">${fmt(row.interestAmount)}</span>`;
+        }
         function statusBadge(status, daysOverdue) {
             let cls = "badge-success", label = status;
             if (status === "Overdue") { cls = "badge-danger"; label = daysOverdue > 0 ? `Overdue (${daysOverdue}d)` : "Overdue"; }
@@ -428,7 +501,7 @@
             clearApiError();
             const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
 
-            elTBody.innerHTML = `<tr><td colspan="9"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
+            elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
             elTFoot.style.display = "none";
             elPaginFoot.style.display = "none";
             elBadge.style.display = "none";
@@ -441,7 +514,7 @@
                 renderGrid(data);
             } catch (err) {
                 showApiError(err);
-                elTBody.innerHTML = `<tr><td colspan="9"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;display:block;margin-bottom:12px;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
+                elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;display:block;margin-bottom:12px;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
             }
         }
 
@@ -473,7 +546,7 @@
             setExportBtnsVisible(totalCount > 0);
 
             if (!items || items.length === 0) {
-                elTBody.innerHTML = `<tr><td colspan="8"><div class="state-panel"><i class="bi bi-inbox"></i><p>No collections found for the selected filters.</p></div></td></tr>`;
+                elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-inbox"></i><p>No collections found for the selected filters.</p></div></td></tr>`;
                 elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
                 return;
             }
@@ -487,16 +560,16 @@
                 pgBal += row.balanceAmount || 0;
                 return `<tr>
        <td>${fmtDate(row.transactionDate)}</td>
-      <td class="cell-link" title="Type: ${row.transactionType} | Date: ${fmtDate(row.transactionDate)}">${row.loanNumber}</td>
-      <td>${fmtDate(row.loanDate)}</td>
+       <td class="cell-link" title="Type: ${row.transactionType} | Date: ${fmtDate(row.transactionDate)}">${row.loanNumber}</td>
+       <td>${fmtDate(row.loanDate)}</td>
       <td data-export="${row.customerName} (${row.customerCode} · ${row.customerMobile})">
         <div style="font-weight:600;">${row.customerName}</div>
         <div style="font-size:11px;color:#9aa4b2;">${row.customerCode} · ${row.customerMobile}</div>
       </td>
       <td>${row.schemeName}</td>
       <td class="text-end">${fmt(row.loanAmount)}</td>
-      <td class="text-end">${fmt(row.principalAmount)}</td>
-      <td class="text-end">${fmt(row.interestAmount)}</td>
+     <td class="text-end">${principalCell(row)}</td>
+     <td class="text-end">${interestCell(row)}</td>
       <td class="text-end cell-strong">${fmt(row.totalAmount)}</td>
       <td class="text-end">${fmt(row.balanceAmount)}</td>
     </tr>`;

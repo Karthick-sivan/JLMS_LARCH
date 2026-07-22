@@ -3,6 +3,7 @@ using JLMS.Api.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace JLMS.Api.Services;
 
@@ -66,9 +67,9 @@ public class LoanReceiptPdfService
                 {
                     head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்   துணை").FontSize(fontSize).Italic();
                     head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(fontSize + 6).Bold().FontColor("#7a1f2b");
-                    head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(fontSize - 0.5f);
-                    head.Item().AlignCenter().Text("3/39, மாங்குளம் மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(fontSize - 0.5f);
-                    head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(fontSize - 0.5f);
+                    head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண்., நாள்: 16.07.2021").FontSize(fontSize - 0.5f);
+                    head.Item().AlignCenter().Text("மாங்குளம் மெயின் ரோடு,ராமராஜபுரம், மதுரை - 625122").FontSize(fontSize - 0.5f);
+                    head.Item().AlignCenter().Text("தொலைபேசி எண் : 7550098326").FontSize(fontSize - 0.5f);
                 });
 
                 // ---- Spacer to visually balance the logo on the left (keeps text centered) ----
@@ -103,9 +104,9 @@ public class LoanReceiptPdfService
                 {
                     head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்  துணை").FontSize(fontSize).Italic();
                     head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(fontSize + 13).Bold().FontColor("#7a1f2b");
-                    head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(fontSize).FontColor(Colors.Blue.Darken2);
-                    head.Item().AlignCenter().Text("3/39, மாங்குளம்  மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(fontSize - 0.5f);
-                    head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(fontSize - 0.5f);
+                    head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண்., நாள்: 16.07.2021").FontSize(fontSize).FontColor(Colors.Blue.Darken2);
+                    head.Item().AlignCenter().Text("மாங்குளம்  மெயின் ரோடு, ராமராஜபுரம், மதுரை - 625122").FontSize(fontSize - 0.5f);
+                    head.Item().AlignCenter().Text("தொலைபேசி எண் : 7550098326").FontSize(fontSize - 0.5f);
                 });
 
                 row.ConstantItem(10);
@@ -130,7 +131,7 @@ public class LoanReceiptPdfService
                     });
                     info.Item().PaddingTop(3).Text(t =>
                     {
-                        t.Span("செலுத்த வேண்டிய தேதி: ").SemiBold().FontSize(8.5f);
+                        t.Span("மீட்கப்பட வேண்டிய தேதி: ").SemiBold().FontSize(8.5f);
                         t.Span(maturityDate?.ToString("dd-MM-yyyy") ?? "-").FontSize(8.5f);
                     });
                 });
@@ -188,15 +189,21 @@ public class LoanReceiptPdfService
     /// <summary>
     /// Renders the red auction-warning footer line.
     /// </summary>
+    //private static void RenderAuctionFooter(ColumnDescriptor col, float fontSize = 7f)
+    //{
+    //    col.Item().PaddingTop(10).Text(
+    //        "அலுவலக நேரம்: காலை 7:00 மணி முதல் இரவு 8:00 மணி வரை, அனைத்து நாட்களிலும். இந்த ரசீதை பத்திரமாக பாதுகாக்கவும். " +
+    //        "6 மாதங்களுக்கு ஒருமுறை ரசீதை புதுப்பிக்கவும். " +
+    //        "1 வருடம் 7 நாட்களுக்குள் மீட்கப்படாவிட்டால், அடகு வைக்கப்பட்ட பொருள் ஏலம் மூலம் விற்கப்படும்.")
+    //        .FontSize(fontSize).FontColor(Colors.Red.Darken2);
+    //}
     private static void RenderAuctionFooter(ColumnDescriptor col, float fontSize = 7f)
     {
         col.Item().PaddingTop(10).Text(
-            "அலுவலக நேரம்: காலை 7:00 மணி முதல் இரவு 8:00 மணி வரை, அனைத்து நாட்களிலும். இந்த ரசீதை பத்திரமாக பாதுகாக்கவும். " +
-            "6 மாதங்களுக்கு ஒருமுறை ரசீதை புதுப்பிக்கவும். " +
-            "1 வருடம் 7 நாட்களுக்குள் மீட்கப்படாவிட்டால், அடகு வைக்கப்பட்ட பொருள் ஏலம் மூலம் விற்கப்படும்.")
+            "ஆபிஸ் நேரம் : காலை 7 மணி முதல் இரவு 8 மணி வரை அனைத்து நாட்களும் செயல்படும். இந்த ரசீதை நகையை போல் பாதுகாக்கவும் " +
+            "6 மாதத்திற்கு ஒரு முறை ரசீதை புதுப்பித்துக்கொள்ளவும் . இல்லை எனில் 1 வருடம் 7 நாட்களுக்குள் திருப்ப தவறினால் அடகு பொருள் ஏலம் மூலம் விற்கப்படும்.")
             .FontSize(fontSize).FontColor(Colors.Red.Darken2);
     }
-
     // -------------------------------------------------------------------------
     // PDF generators
     // -------------------------------------------------------------------------
@@ -228,7 +235,7 @@ public class LoanReceiptPdfService
                         c.Item().Text(t =>
                         {
                             t.Span("முகவரி: ").SemiBold();
-                            t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.State, customer.Pincode }
+                            t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.Pincode }
                                 .Where(s => !string.IsNullOrWhiteSpace(s))));
                         });
                         c.Item().Text(t => { t.Span("தொலைபேசி: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
@@ -250,9 +257,9 @@ public class LoanReceiptPdfService
                             {
                                 c.RelativeColumn(2f);
                                 c.RelativeColumn(1.9f);   // wider so "எண்ணிக்கை" fits on one line
-                                c.RelativeColumn(1.5f);
-                                c.RelativeColumn(1.5f);
-                                c.RelativeColumn(1.3f);
+                                c.RelativeColumn(1.6f);
+                                c.RelativeColumn(1.6f);
+                                c.RelativeColumn(1.1f);
                             });
                             table.Header(h =>
                             {
@@ -266,10 +273,15 @@ public class LoanReceiptPdfService
                             int sno = 1;
                             foreach (var ji in loan.JewelItems)
                             {
+                                var text = (ji.Varient ?? "-")
+    .Replace(" ", "\n");
                                 table.Cell().Element(BodyCell).Text(ji.JewelType?.JewelTypeName ?? "-");
                                 table.Cell().Element(BodyCell).Text(ji.Quantity.ToString());
                                 table.Cell().Element(BodyCell).Text(ji.Model ?? "-");
-                                table.Cell().Element(BodyCell).Text(ji.Varient ?? "-");
+                                //table.Cell().Element(BodyCell).Text(ji.Varient ?? "-");
+                                table.Cell()
+    .Element(BodyCell)
+    .Text(text);
                                 table.Cell().Element(BodyCell).Text(ji.GrossWeightGrams.ToString("0.000"));
                                 sno++;
                             }
@@ -285,7 +297,7 @@ public class LoanReceiptPdfService
 
                         // Customer photo (right)
                         row.ConstantItem(90).Element(e =>
-                            RenderPhotoBox(e, "வாடிக்கையாளர் புகைப்படம்", customerPhoto, width: 80, height: 95));
+                            RenderPhotoBox(e, "புகைப்படம்", customerPhoto, width: 80, height: 95));
                     });
                 });
 
@@ -351,7 +363,7 @@ public class LoanReceiptPdfService
                             }
                             if (r.MaturityDate.HasValue)
                             {
-                                t.Cell().Text("செலுத்த வேண்டிய தேதி:").SemiBold();
+                                t.Cell().Text("மீட்கப்பட வேண்டிய தேதி:").SemiBold();
                                 t.Cell().Text(r.MaturityDate.Value.ToString("dd-MM-yyyy"));
                             }
                         });
@@ -416,7 +428,7 @@ public class LoanReceiptPdfService
                             t.ColumnsDefinition(c => { c.ConstantColumn(58); c.RelativeColumn(); });
                             t.Cell().Text("வாடிக்கையாளர்:").SemiBold();
                             t.Cell().Text(r.CustomerName);
-                            t.Cell().Text("மொபைல்:").SemiBold();
+                            t.Cell().Text("தொலைபேசி:").SemiBold();
                             t.Cell().Text(r.Mobile ?? "-");
                         });
 
@@ -458,12 +470,18 @@ public class LoanReceiptPdfService
                 page.Footer().Column(foot =>
                 {
                     // ---- Declaration ----
+                    //foot.Item().PaddingTop(12).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
+                    //{
+                    //    ack.Item().Text("அறிவிப்பு:").Bold().FontSize(7.5f);
+                    //    ack.Item().Text("இந்த கணக்கு முழுவதுமாக முடிக்கப்பட்டதன் மூலம், அடகு வைக்கப்பட்ட தங்க நகைகள்/பொருட்கள் அனைத்தையும் பாதுகாப்பாக, சேதமின்றி, மூல நிலையில் பெற்றுக்கொண்டதாக இதன் மூலம் உறுதிப்படுத்துகிறேன்.").Italic().FontSize(7.5f);
+                    //});
                     foot.Item().PaddingTop(12).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
                     {
-                        ack.Item().Text("அறிவிப்பு:").Bold().FontSize(7.5f);
-                        ack.Item().Text("இந்த கணக்கு முழுவதுமாக முடிக்கப்பட்டதன் மூலம், அடகு வைக்கப்பட்ட தங்க நகைகள்/பொருட்கள் அனைத்தையும் பாதுகாப்பாக, சேதமின்றி, மூல நிலையில் பெற்றுக்கொண்டதாக இதன் மூலம் உறுதிப்படுத்துகிறேன்.").Italic().FontSize(7.5f);
+                        ack.Item().Text("1. ஒவ்வொரு நகையும் 1 வருடத் தவணைக்குள் மீட்கப்பட வேண்டும். மீட்க தவறினால் அடகு மீட்க ஒப்புக்கொண்ட கால அளவுக்கு மேல் 7 நாட்களுக்குள் மேற்படி மீட்பு அங்கீகரிக்கப்படும். மேலும் தவறினால் அடகு வைத்தவருக்கு நோட்டீஸ்  கொடுத்துவிட்டு அதன் பிறகு பகிரங்க ஏலத்தில் நகைகள் ஏலம் போடப்படும்.").FontSize(7.5f);
+                        ack.Item().PaddingTop(4).Text("2. வீடு மாறினாலோ அல்லது ரசீது தவறினாலோ உடனடியாக தெரிவிக்க வேண்டும். தவறினால் நாங்கள்  ஜவாப்தாரியல்ல.").FontSize(7.5f);
+                        ack.Item().PaddingTop(4).Text("3. அடகு பொருட்களின் விலை மதிப்பு குறைந்தால் (Depreciation of Price) அடகு வைத்தவர் உடனே மார்ஜின் தொகை கட்ட வேண்டும். தவறினால் அடகு வைத்தவருக்கு தெரியப்படுத்தி அடகு பொருட்கள் பகிரங்க ஏலம் போடப்படும்.").FontSize(7.5f);
+                        ack.Item().PaddingTop(4).Text("4. இதில் கண்ட அசல் வட்டி தொகைகளை செலுத்தி முன் பக்கத்தில் கண்ட அடகு பொருட்களை சரிபார்த்து பெற்று கொண்டேன் .").FontSize(7.5f);
                     });
-
                     // ---- Signatures ----
                     RenderSignatureRow(foot, paddingTop: 50, rightLabel: "அங்கீகரிக்கப்பட்ட கையொப்பமிடுபவர் - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்");
 
@@ -508,7 +526,7 @@ public class LoanReceiptPdfService
                         c.Item().Text(t =>
                         {
                             t.Span("முகவரி: ").SemiBold();
-                            t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.State, customer.Pincode }
+                            t.Span(string.Join(", ", new[] { customer.Address, customer.City, customer.Pincode }
                                 .Where(s => !string.IsNullOrWhiteSpace(s))));
                         });
                         c.Item().Text(t => { t.Span("தொலைபேசி: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
@@ -530,9 +548,9 @@ public class LoanReceiptPdfService
                             {
                                 c.RelativeColumn(2f);
                                 c.RelativeColumn(1.9f);   // wider so "எண்ணிக்கை" fits on one line
-                                c.RelativeColumn(1.5f);
-                                c.RelativeColumn(1.5f);
-                                c.RelativeColumn(1.3f);
+                                c.RelativeColumn(1.6f);
+                                c.RelativeColumn(1.6f);
+                                c.RelativeColumn(1.1f);
                             });
                             table.Header(h =>
                             {
@@ -545,10 +563,15 @@ public class LoanReceiptPdfService
 
                             foreach (var ji in loan.JewelItems)
                             {
+                                var text = (ji.Varient ?? "-")
+                                 .Replace(" ", "\n");
                                 table.Cell().Element(BodyCell).Text(ji.JewelType?.JewelTypeName ?? "-");
                                 table.Cell().Element(BodyCell).Text(ji.Quantity.ToString());
                                 table.Cell().Element(BodyCell).Text(ji.Model ?? "-");
-                                table.Cell().Element(BodyCell).Text(ji.Varient ?? "-");
+                                //table.Cell().Element(BodyCell).Text(ji.Varient ?? "-");
+                                table.Cell()
+                                      .Element(BodyCell)
+                                      .Text(text);
                                 table.Cell().Element(BodyCell).Text(ji.GrossWeightGrams.ToString("0.000"));
                             }
 
@@ -563,7 +586,7 @@ public class LoanReceiptPdfService
 
                         // Customer photo (right)
                         row.ConstantItem(90).Element(e =>
-                            RenderPhotoBox(e, "வாடிக்கையாளர் புகைப்படம்", customerPhoto, width: 80, height: 95));
+                            RenderPhotoBox(e, " புகைப்படம்", customerPhoto, width: 80, height: 95));
                     });
                 });
 
@@ -601,10 +624,66 @@ public class LoanReceiptPdfService
                             RenderPhotoBox(e, "முடிவின் போது வாடிக்கையாளர் புகைப்படம்", closurePhoto, width: 130, height: 130, labelFontSize: 9));
                     });
 
+                    //col.Item().PaddingTop(24).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
+                    //{
+                    //    ack.Item().Text("அறிவிப்பு:").Bold().FontSize(7.5f);
+                    //    ack.Item().Text("இந்த கணக்கு முழுவதுமாக முடிக்கப்பட்டதன் மூலம், அடகு வைக்கப்பட்ட தங்க நகைகள்/பொருட்கள் அனைத்தையும் பாதுகாப்பாக, சேதமின்றி, மூல நிலையில் பெற்றுக்கொண்டதாக இதன் மூலம் உறுதிப்படுத்துகிறேன்.").Italic().FontSize(7.5f);
+                    //});
                     col.Item().PaddingTop(24).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
                     {
-                        ack.Item().Text("அறிவிப்பு:").Bold().FontSize(7.5f);
-                        ack.Item().Text("இந்த கணக்கு முழுவதுமாக முடிக்கப்பட்டதன் மூலம், அடகு வைக்கப்பட்ட தங்க நகைகள்/பொருட்கள் அனைத்தையும் பாதுகாப்பாக, சேதமின்றி, மூல நிலையில் பெற்றுக்கொண்டதாக இதன் மூலம் உறுதிப்படுத்துகிறேன்.").Italic().FontSize(7.5f);
+                        //ack.Item().Text("1. ஒவ்வொரு நகையும் 1 வருடத் தவணைக்குள் மீட்கப்பட வேண்டும். மீட்க தவறினால் அடகு மீட்க ஒப்புக்கொண்ட கால அளவுக்கு மேல் 7 நாட்களுக்குள் மேற்படி மீட்பு அங்கீகரிக்கப்படும். மேலும் தவறினால் அடகு வைத்தவருக்கு நோட்டீஸ் கொடுத்துவிட்டு அதன் பிறகு பகிரங்க ஏலத்தில் நகைகள் ஏலம் போடப்படும்.").FontSize(7.5f);
+                        //ack.Item().PaddingTop(4).Text("2. வீடு மாறினாலோ அல்லது ரசீது தவறினாலோ உடனடியாக தெரிவிக்க வேண்டும். தவறினால் நாங்கள் ஜவாப்தாரியல்ல.").FontSize(7.5f);
+                        //ack.Item().PaddingTop(4).Text("3. அடகு பொருட்களின் விலை மதிப்பு குறைந்தால் (Depreciation of Price) அடகு வைத்தவர் உடனே மார்ஜின் தொகை கட்ட வேண்டும். தவறினால் அடகு வைத்தவருக்கு தெரியப்படுத்தி அடகு பொருட்கள் பகிரங்க ஏலம் போடப்படும்.").FontSize(7.5f);
+                        //ack.Item().PaddingTop(4).Text("4. இதில் கண்ட அசல் வட்டி தொகைகளை செலுத்தி முன் பக்கத்தில் கண்ட அடகு பொருட்களை சரிபார்த்து பெற்று கொண்டேன் .").FontSize(7.5f);
+                        ack.Item().Row(row =>
+                        {
+                            row.ConstantItem(18)
+                                .Text("1.")
+                                .FontSize(7.5f);
+
+                            row.RelativeItem()
+                                .Text("ஒவ்வொரு நகையும் 1 வருடத் தவணைக்குள் மீட்கப்பட வேண்டும். மீட்க தவறினால் அடகு மீட்க ஒப்புக்கொண்ட கால அளவுக்கு மேல் 7 நாட்களுக்குள் மேற்படி மீட்பு அங்கீகரிக்கப்படும். மேலும் தவறினால் அடகு வைத்தவருக்கு நோட்டீஸ் கொடுத்துவிட்டு அதன் பிறகு பகிரங்க ஏலத்தில் நகைகள் ஏலம் போடப்படும்.")
+                                .FontSize(7.5f)
+                                .Justify();
+                        });
+
+                        ack.Item().PaddingTop(5).Row(row =>
+                        {
+                            row.ConstantItem(18)
+                                .Text("2.")
+                                .FontSize(7.5f);
+
+                            row.RelativeItem()
+                                .Text("வீடு மாறினாலோ அல்லது ரசீது தவறினாலோ உடனடியாக தெரிவிக்க வேண்டும். தவறினால் நாங்கள் ஜவாப்தாரியல்ல.")
+                                .FontSize(7.5f)
+                                .Justify();
+                        });
+
+                        ack.Item().PaddingTop(5).Row(row =>
+                        {
+                            row.ConstantItem(18)
+                                .Text("3.")
+                                .FontSize(7.5f);
+
+                            row.RelativeItem()
+                                .Text("அடகு பொருட்களின் விலை மதிப்பு குறைந்தால் (Depreciation of Price) அடகு வைத்தவர் உடனே மார்ஜின் தொகை கட்ட வேண்டும். தவறினால் அடகு வைத்தவருக்கு தெரியப்படுத்தி அடகு பொருட்கள் பகிரங்க ஏலம் போடப்படும்.")
+                                .FontSize(7.5f)
+                                .Justify();
+                        });
+
+                        ack.Item().PaddingTop(5).Row(row =>
+                        {
+                            row.ConstantItem(18)
+                                .Text("4.")
+                                .FontSize(7.5f);
+
+                            row.RelativeItem()
+                                .Text("இதில் கண்ட அசல் வட்டி தொகைகளை செலுத்தி முன் பக்கத்தில் கண்ட அடகு பொருட்களை சரிபார்த்து பெற்று கொண்டேன்.")
+                                .FontSize(7.5f)
+                                .Justify();
+                        });
+
+
                     });
                 });
 
