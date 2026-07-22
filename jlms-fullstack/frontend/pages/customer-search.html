@@ -131,7 +131,7 @@
           <table class="table-jlms">
             <thead>
               <tr>
-                <th style="width: 150px; min-width: 150px;">Customer Code</th><th>Customer Name</th><th style="display: none;">Loan No.</th><th>Aadhaar Number</th><th style="width: 140px;">Mobile</th><th class="text-center" style="display: none;">Active Loans</th><th class="text-end" style="width: 140px;">Outstanding</th><th style="width: 160px; display:none">Status</th><th class="text-center" style="width: 90px;">Actions</th>
+                <th class="text-center" style="width: 90px;">Actions</th><th style="width: 150px; min-width: 150px;">Customer Code</th><th>Customer Name</th><th style="display: none;">Loan No.</th><th>Aadhaar Number</th><th style="width: 140px;">Mobile</th><th class="text-center" style="display: none;">Active Loans</th><th class="text-end" style="width: 140px;">Outstanding</th><th style="width: 160px; display:none">Status</th>
               </tr>
             </thead>
             <tbody id="resultsBody">
@@ -224,6 +224,10 @@ function initials(name) {
   return name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
 }
 
+function editCustomer(customerId) {
+  window.location.href = `customer-registration.html?editId=${customerId}`;
+}
+
 async function runSearch(page = 1) {
   clearApiError();
   currentPage = page;
@@ -256,6 +260,16 @@ async function runSearch(page = 1) {
 
     body.innerHTML = rows.map(c => `
       <tr>
+        <td class="text-center">
+            <div style="display:flex;align-items:center;justify-content:center;gap:2px;">
+              <button class="btn-icon-jlms" title="View documents" onclick="openDocsModal(${c.customerId}, '${c.customerName.replace(/'/g, "\\'")}')">
+                <i class="bi bi-eye"></i>
+              </button>
+              <button class="btn-icon-jlms" title="Edit customer" onclick="editCustomer(${c.customerId})">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+            </div>
+        </td>
         <td class="cell-link">${c.customerCode}</td>
         <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(c.customerName)}</div>${c.customerName}</div></td>
         <td>${c.aadhaarNumber ? c.aadhaarNumber : '<span class="text-muted-jlms">—</span>'}</td>
@@ -264,11 +278,7 @@ async function runSearch(page = 1) {
         <td class="text-center" style="display: none;">${c.activeLoans}</td>
         <td class="text-end cell-strong">₹${Number(c.totalOutstanding).toLocaleString('en-IN')}</td>
         <td style="display: none;">${statusBadge(c.status)}</td>
-        <td class="text-center">
-          <button class="btn-icon-jlms" title="View documents" onclick="openDocsModal(${c.customerId}, '${c.customerName.replace(/'/g, "\\'")}')">
-            <i class="bi bi-eye"></i>
-          </button>
-        </td>
+        
       </tr>`).join('');
 
     totalPages = Math.max(1, Math.ceil(totalCount / pageSize));

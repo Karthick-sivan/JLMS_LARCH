@@ -16,6 +16,11 @@
   .doc-thumb { width:100%; height:78px; border-radius:var(--radius-sm); background:var(--n-150); display:flex; align-items:center; justify-content:center; color:var(--n-400); font-size:22px; position:relative; overflow:hidden; }
   .doc-thumb .remove-x { position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.55); color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; }
 
+  /* --- Edit mode: document upload disabled look --- */
+  .upload-disabled { opacity: 0.45; pointer-events: none; cursor: not-allowed; }
+  .edit-doc-badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;
+    color:#1f9d55; background:#edf9f0; border:1px solid #a3e4b7; border-radius:20px;
+    padding:3px 10px; margin-top:6px; }
   /* --- Step wizard --- */
   .step-indicator { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
   .step-pill { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--n-400); }
@@ -37,7 +42,7 @@
           <div class="breadcrumb-jlms">
            <!-- <a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Customer Master</span> -->
           </div>
-          <div class="h1">Customer Registration</div>
+          <div class="h1" id="pageTitle">Customer Registration</div>
         </div>
         <div class="page-actions">
           <a href="customer-search.html" class="btn-jlms btn-jlms-ghost"><i class="bi bi-list-ul"></i> View All / Search</a>
@@ -132,6 +137,7 @@
                     <label class="field-label">PAN Number<span class="opt">optional</span></label>
                     <div class="input-affix"><span class="affix"><i class="bi bi-credit-card-2-front"></i></span><input type="text" id="custPan" placeholder="ABCDE1234F" style="text-transform:uppercase;"></div>
                   </div>
+                  <!-- EDIT MODE NOTE: Aadhaar & PAN are read-only in edit mode (set via JS) -->
                 </div>
               </fieldset>
 
@@ -145,7 +151,7 @@
         <i class="bi bi-person-circle"></i>
     </div>
 
-    <div class="d-grid gap-2 mt-2">
+    <div class="d-grid gap-2 mt-2" id="photoUploadControls">
 
         <button type="button"
                 class="btn btn-outline-primary"
@@ -161,6 +167,10 @@
             Capture Photo
         </button>
 
+    </div>
+    <!-- EDIT MODE: badge shown instead of upload buttons -->
+    <div id="photoEditBadge" style="display:none;" class="mt-2">
+      <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be changed</span>
     </div>
 
     <input
@@ -181,6 +191,10 @@
         <div class="ul-text" id="aadhaarText">Click or drag to upload</div>
         <div class="ul-sub">PDF, JPG up to 5MB</div>
     </div>
+    <!-- EDIT MODE: badge shown, upload box hidden -->
+    <div id="aadhaarEditBadge" style="display:none;" class="mt-2">
+      <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be changed</span>
+    </div>
 
     <input
         type="file"
@@ -199,6 +213,10 @@
         <i class="bi bi-cloud-arrow-up"></i>
         <div class="ul-text" id="panText">Click or drag to upload</div>
         <div class="ul-sub">PDF, JPG up to 5MB</div>
+    </div>
+    <!-- EDIT MODE: badge shown, upload box hidden -->
+    <div id="panEditBadge" style="display:none;" class="mt-2">
+      <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be changed</span>
     </div>
 
     <input
@@ -260,6 +278,10 @@
                         <div class="ul-text" id="nomineePhotoText">Click or drag to upload</div>
                         <div class="ul-sub">JPG, PNG up to 5MB</div>
                     </div>
+                    <!-- EDIT MODE: badge shown in edit mode -->
+                    <div id="nomineePhotoEditBadge" style="display:none;" class="mt-2">
+                      <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be changed</span>
+                    </div>
                     <input type="file" id="nomineePhoto" accept=".jpg,.jpeg,.png" hidden>
                   </div>
                   <div class="col-md-4">
@@ -272,6 +294,10 @@
                         <div class="ul-text" id="nomineeAadhaarText">Click or drag to upload</div>
                         <div class="ul-sub">PDF, JPG up to 5MB</div>
                     </div>
+                    <!-- EDIT MODE: badge shown in edit mode -->
+                    <div id="nomineeAadhaarEditBadge" style="display:none;" class="mt-2">
+                      <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be changed</span>
+                    </div>
                     <input type="file" id="nomineeAadhaarFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
                   </div>
                 </div>
@@ -280,7 +306,7 @@
             </div>
             <div class="panel-foot">
               <button class="btn-jlms btn-jlms-ghost" id="btnBack"><i class="bi bi-arrow-left"></i> Back</button>
-              <button class="btn-jlms btn-jlms-primary" id="btnSaveCustomer"><i class="bi bi-save"></i> Save Customer</button>
+              <button class="btn-jlms btn-jlms-primary" id="btnSaveCustomer"><i class="bi bi-save"></i> <span id="btnSaveLabel">Save Customer</span></button>
             </div>
           </div>
 
@@ -298,8 +324,147 @@
 jlmsInitShell();
 let selectedGender = null;
 
+// ── EDIT MODE: fetch customer by ID and pre-fill all form fields ───────────
+async function loadCustomerForEdit(customerId) {
+  try {
+    const c = await Api.getCustomer(customerId);
+
+    // ---- Customer Information ----
+    document.getElementById('custCode').value = c.customerCode || '';
+    document.getElementById('custName').value = c.customerName || '';
+    document.getElementById('custMobile').value = c.mobile || '';
+    document.getElementById('custAltMobile').value = c.alternateMobile || '';
+    if (c.dateOfBirth) {
+      // API returns ISO datetime; take only the date part
+      document.getElementById('custDob').value = c.dateOfBirth.substring(0, 10);
+    }
+
+    // Gender pill selection
+    if (c.gender) {
+      selectedGender = c.gender;
+      document.querySelectorAll('#genderPills .radio-pill').forEach(p => {
+        p.classList.toggle('selected', p.dataset.value === c.gender);
+      });
+    }
+
+    // ---- Address ----
+    document.getElementById('custAddress').value = c.address || '';
+    document.getElementById('custCity').value = c.city || '';
+    document.getElementById('custState').value = c.state || '';
+    document.getElementById('custPincode').value = c.pincode || '';
+
+    // ---- KYC (read-only in edit mode — already locked above) ----
+    document.getElementById('custAadhaar').value = c.aadhaarNumber || '';
+    document.getElementById('custPan').value = c.panNumber || '';
+
+    // ---- Existing document previews (show server-stored files) ----
+    if (c.photoPath) {
+      const url = `${API_BASE_URL}/customers/${customerId}/documents/photo`;
+      document.getElementById('photoPreview').innerHTML =
+        `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-person-circle\\'></i>'">`;
+    }
+    if (c.aadhaarDocPath) {
+      document.getElementById('aadhaarPreview').innerHTML =
+        `<i class="bi bi-file-earmark-check-fill" style="font-size:34px;color:#1f9d55;" title="Aadhaar uploaded"></i>`;
+    }
+    if (c.panDocPath) {
+      document.getElementById('panPreview').innerHTML =
+        `<i class="bi bi-file-earmark-check-fill" style="font-size:34px;color:#1f9d55;" title="PAN uploaded"></i>`;
+    }
+
+    // ---- Nominee Details ----
+    document.getElementById('nomineeName').value = c.nomineeName || '';
+    document.getElementById('nomineeMobile').value = c.nomineeMobile || '';
+    document.getElementById('nomineeAddress').value = c.nomineeAddress || '';
+    document.getElementById('nomineeCity').value = c.nomineeCity || '';
+    document.getElementById('nomineeAadhaar').value = c.nomineeAadhaarNumber || '';
+
+    // Nominee document previews
+    if (c.nomineePhotoPath) {
+      const url = `${API_BASE_URL}/customers/${customerId}/documents/nomineephoto`;
+      document.getElementById('nomineePhotoPreview').innerHTML =
+        `<img src="${url}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-person-circle\\'></i>'">`;
+      document.getElementById('nomineePhotoText').innerText = 'Already uploaded (upload new to replace)';
+    }
+    if (c.nomineeAadhaarDocPath) {
+      document.getElementById('nomineeAadhaarPreview').innerHTML =
+        `<i class="bi bi-file-earmark-check-fill" style="font-size:34px;color:#1f9d55;" title="Nominee Aadhaar uploaded"></i>`;
+      document.getElementById('nomineeAadhaarText').innerText = 'Already uploaded (upload new to replace)';
+    }
+
+  } catch (err) {
+    showApiError(err);
+  }
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', () => {
   Session.requireLogin();
+
+  // ── EDIT MODE DETECTION ────────────────────────────────────────────────────
+  const _urlParams = new URLSearchParams(window.location.search);
+  const editId = _urlParams.get('editId');   // null when registering a new customer
+  const isEditMode = !!editId;
+
+  if (isEditMode) {
+    // Update page chrome
+    document.getElementById('pageTitle').textContent = 'Edit Customer';
+    document.title = 'JLMS — Edit Customer';
+    document.getElementById('btnSaveLabel').textContent = 'Update Customer';
+
+    // Lock Customer Name in edit mode
+    const custNameInput = document.getElementById('custName');
+    custNameInput.readOnly = true;
+    custNameInput.style.background = '#f3f4f6';
+
+    // Lock: Aadhaar & PAN text inputs — read-only in edit mode
+    document.getElementById('custAadhaar').readOnly = true;
+    document.getElementById('custAadhaar').style.background = '#f3f4f6';
+    document.getElementById('custPan').readOnly = true;
+    document.getElementById('custPan').style.background = '#f3f4f6';
+
+    const photoControls = document.getElementById('photoUploadControls');
+    if (photoControls) {
+      photoControls.style.setProperty('display', 'none', 'important');
+    }
+    
+    // Show Customer Photo Lock Badge
+    const photoBadge = document.getElementById('photoEditBadge');
+    if (photoBadge) {
+      photoBadge.style.display = 'block';
+    }
+
+    // Lock: document upload controls — hide upload UI, show lock badge
+    // document.getElementById('photoUploadControls').style.display = 'none';
+    // document.getElementById('photoEditBadge').style.display = 'block';
+    document.getElementById('aadhaarUploadBox').style.display = 'none';
+    document.getElementById('aadhaarEditBadge').style.display = 'block';
+    document.getElementById('panUploadBox').style.display = 'none';
+    document.getElementById('panEditBadge').style.display = 'block';
+
+    // Lock: Nominee Photo Upload & Nominee Aadhaar Upload
+    const nomineePhotoBox = document.getElementById('nomineePhotoUploadBox');
+    if (nomineePhotoBox) {
+      nomineePhotoBox.style.setProperty('display', 'none', 'important');
+    }
+    const nomineePhotoBadge = document.getElementById('nomineePhotoEditBadge');
+    if (nomineePhotoBadge) {
+      nomineePhotoBadge.style.display = 'block';
+    }
+
+    const nomineeAadhaarBox = document.getElementById('nomineeAadhaarUploadBox');
+    if (nomineeAadhaarBox) {
+      nomineeAadhaarBox.style.setProperty('display', 'none', 'important');
+    }
+    const nomineeAadhaarBadge = document.getElementById('nomineeAadhaarEditBadge');
+    if (nomineeAadhaarBadge) {
+      nomineeAadhaarBadge.style.display = 'block';
+    }
+
+    // Load and populate the form
+    loadCustomerForEdit(editId);
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 
   // If we just reloaded after a successful save, show the success banner once.
   const pendingSuccessMsg = sessionStorage.getItem('customerSavedMsg');
@@ -734,19 +899,49 @@ if (nomineeAadhaarFile)
     btn.disabled = true;
     btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
     try {
-      const saved = await Api.createCustomer(formData);
-
-      // Stash the success message so it survives the reload, then reload the
-      // page to fully clear the form (both Customer and Nominee steps).
-      sessionStorage.setItem('customerSavedMsg',
-        `Customer saved successfully as ${saved.customerCode}. You can now create a loan for them from the New Loan screen.`);
-      window.location.reload();
-      return;
+      if (isEditMode) {
+        // ── EDIT MODE: PUT with JSON body (documents not changed) ──────────
+        const dto = {
+          customerName: name,
+          gender: selectedGender || '',
+          dateOfBirth: document.getElementById('custDob').value || null,
+          mobile,
+          alternateMobile: document.getElementById('custAltMobile').value.trim(),
+          address: document.getElementById('custAddress').value.trim(),
+          city: document.getElementById('custCity').value.trim(),
+          state: document.getElementById('custState').value,
+          pincode: document.getElementById('custPincode').value.trim(),
+          // Aadhaar & PAN are read-only; send existing values so the PUT doesn't blank them
+          aadhaarNumber: document.getElementById('custAadhaar').value.trim(),
+          panNumber: document.getElementById('custPan').value.trim().toUpperCase(),
+          kycVerified: false,
+          // Nominee text fields
+          nomineeName: document.getElementById('nomineeName').value.trim(),
+          nomineeMobile: document.getElementById('nomineeMobile').value.trim(),
+          nomineeAddress: document.getElementById('nomineeAddress').value.trim(),
+          nomineeCity: document.getElementById('nomineeCity').value.trim(),
+          nomineeAadhaarNumber: document.getElementById('nomineeAadhaar').value.trim()
+        };
+        await Api.updateCustomer(editId, dto);
+        const successEl = document.getElementById('apiSuccessBanner');
+        successEl.textContent = 'Customer updated successfully.';
+        successEl.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // ───────────────────────────────────────────────────────────────────
+      } else {
+        // ── CREATE MODE: POST with multipart/form-data ─────────────────────
+        const saved = await Api.createCustomer(formData);
+        sessionStorage.setItem('customerSavedMsg',
+          `Customer saved successfully as ${saved.customerCode}. You can now create a loan for them from the New Loan screen.`);
+        window.location.reload();
+        return;
+        // ───────────────────────────────────────────────────────────────────
+      }
     } catch (err) {
       showApiError(err);
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<i class="bi bi-save"></i> Save Customer';
+      btn.innerHTML = `<i class="bi bi-save"></i> <span id="btnSaveLabel">${isEditMode ? 'Update Customer' : 'Save Customer'}</span>`;
     }
   });
 });
