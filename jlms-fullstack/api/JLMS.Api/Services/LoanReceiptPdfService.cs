@@ -41,11 +41,11 @@ public class LoanReceiptPdfService
             .Padding(padding)
             .Column(head =>
             {
-                head.Item().AlignCenter().Text("ஸ்ரீ மசான்குருப்பர் துணை").FontSize(fontSize).Italic();
+                head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்   துணை").FontSize(fontSize).Italic();
                 head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(fontSize + 6).Bold().FontColor("#7a1f2b");
                 head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(fontSize - 0.5f);
-                head.Item().AlignCenter().Text("3/39, மங்குளம் மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(fontSize - 0.5f);
-                head.Item().AlignCenter().Text("தொ.பே: 9943155324").FontSize(fontSize - 0.5f);
+                head.Item().AlignCenter().Text("3/39, மாங்குளம் மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(fontSize - 0.5f);
+                head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(fontSize - 8.5f);
             });
     }
 
@@ -108,14 +108,16 @@ public class LoanReceiptPdfService
                     // ---- Letterhead (Clean Centered Layout) ----
                     col.Item().Border(1).BorderColor(Colors.Grey.Darken1).Padding(12).Column(head =>
                     {
-                        head.Item().AlignCenter().Text("ஸ்ரீ மசான்குருப்பர் துணை").FontSize(9).Italic();
+                        head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்  துணை").FontSize(9).Italic();
                         head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(22).Bold().FontColor("#7a1f2b");
                         head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(9).FontColor(Colors.Blue.Darken2);
-                        head.Item().AlignCenter().Text("3/39, மங்குளம் மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122 | தொ.பே: 9943155324").FontSize(8.5f);
-                    });
+                        head.Item().AlignCenter().Text("3/39, மாங்குளம்  மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(8.5f);
+                        head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(8.5f);
 
-                    // ---- Customer Details + Loan Details Brought Down + Customer Photo ----
-                    col.Item().PaddingTop(12).Row(row =>
+                    });
+                
+                // ---- Customer Details + Loan Details Brought Down + Customer Photo ----
+                col.Item().PaddingTop(12).Row(row =>
                     {
                         // Customer Block (Left)
                         row.RelativeItem(3).Column(c =>
@@ -131,10 +133,10 @@ public class LoanReceiptPdfService
 
                             // Loan Details Block
 
-                            c.Item().Text(t => { t.Span("கடன் எண்: ").SemiBold(); t.Span(loan.LoanNumber); });
-                            c.Item().Text(t => { t.Span("கடன் தொகை: ").SemiBold(); t.Span($"ரூ. {loan.LoanAmount:N2}"); });
-                            c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
-                            c.Item().Text(t => { t.Span("கடன் தேதி: ").SemiBold(); t.Span(loan.LoanDate?.ToString("dd-MM-yyyy") ?? "-"); });
+                            //c.Item().Text(t => { t.Span("கடன் எண்: ").SemiBold(); t.Span(loan.LoanNumber); });
+                            c.Item().Text(t => { t.Span("அசல்  தொகை: ").SemiBold(); t.Span($"ரூ. {loan.LoanAmount:N2}"); });
+                            //c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
+                            c.Item().Text(t => { t.Span("தேதி: ").SemiBold(); t.Span(loan.LoanDate?.ToString("dd-MM-yyyy") ?? "-"); });
                             c.Item().Text(t => { t.Span("செலுத்த வேண்டிய தேதி: ").SemiBold(); t.Span(loan.MaturityDate?.ToString("dd-MM-yyyy") ?? "-"); });
                         });
 
@@ -173,7 +175,7 @@ public class LoanReceiptPdfService
                             table.Header(h =>
                             {
                                 h.Cell().Element(HeaderCell).Text("பொருள்");
-                                h.Cell().Element(HeaderCell).Text("எண்ணம்");
+                                h.Cell().Element(HeaderCell).Text("எண்ணிக்கை ");
                                 h.Cell().Element(HeaderCell).Text("வடிவம்");
                                 h.Cell().Element(HeaderCell).Text("வகை");
                                 h.Cell().Element(HeaderCell).Text("எடை (கி)");
@@ -247,7 +249,7 @@ public class LoanReceiptPdfService
                             t.ColumnsDefinition(c => { c.ConstantColumn(68); c.RelativeColumn(); });
                             t.Cell().Text("ரசீது எண்:").SemiBold();
                             t.Cell().Text(r.ReceiptNumber);
-                            t.Cell().Text("கடன் எண்:").SemiBold();
+                            t.Cell().Text("எண்:").SemiBold();
                             t.Cell().Text(r.LoanNo);
                             t.Cell().Text("தேதி:").SemiBold();
                             t.Cell().Text(r.TransactionDate.ToString("dd-MM-yyyy HH:mm"));
@@ -333,12 +335,12 @@ public class LoanReceiptPdfService
                         row.RelativeItem().Table(t =>
                         {
                             t.ColumnsDefinition(c => { c.ConstantColumn(68); c.RelativeColumn(); });
-                            t.Cell().Text("ரசீது எண்:").SemiBold();
-                            t.Cell().Text(r.ReceiptNumber);
-                            t.Cell().Text("கடன் எண்:").SemiBold();
+                            //t.Cell().Text("ரசீது எண்:").SemiBold();
+                            //t.Cell().Text(r.ReceiptNumber);
+                            t.Cell().Text("எண்:").SemiBold();
                             t.Cell().Text(r.LoanNo);
-                            t.Cell().Text("திட்டம்:").SemiBold();
-                            t.Cell().Text(r.LoanScheme ?? "-");
+                            //t.Cell().Text("திட்டம்:").SemiBold();
+                            //t.Cell().Text(r.LoanScheme ?? "-");
                             t.Cell().Text("முடிவு தேதி:").SemiBold();
                             t.Cell().Text(r.TransactionDate.ToString("dd-MM-yyyy"));
                         });
@@ -370,7 +372,7 @@ public class LoanReceiptPdfService
                     foot.Item().PaddingTop(12).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
                     {
                         ack.Item().Text("அறிவிப்பு:").Bold().FontSize(7.5f);
-                        ack.Item().Text("இந்த கடன் கணக்கு முழுவதுமாக முடிக்கப்பட்டதன் மூலம், அடகு வைக்கப்பட்ட தங்க நகைகள்/பொருட்கள் அனைத்தையும் பாதுகாப்பாக, சேதமின்றி, மூல நிலையில் பெற்றுக்கொண்டதாக இதன் மூலம் உறுதிப்படுத்துகிறேன்.").Italic().FontSize(7.5f);
+                        ack.Item().Text("இந்த கணக்கு முழுவதுமாக முடிக்கப்பட்டதன் மூலம், அடகு வைக்கப்பட்ட தங்க நகைகள்/பொருட்கள் அனைத்தையும் பாதுகாப்பாக, சேதமின்றி, மூல நிலையில் பெற்றுக்கொண்டதாக இதன் மூலம் உறுதிப்படுத்துகிறேன்.").Italic().FontSize(7.5f);
                     });
 
                     // ---- Signatures ----
@@ -378,8 +380,8 @@ public class LoanReceiptPdfService
 
                     // ---- Closure footer ----
                     foot.Item().PaddingTop(10).Text(
-                    "உங்கள் வணிகத்திற்கு நன்றி. இந்த கடன் கணக்கு முழுவதுமாக தீர்க்கப்பட்டு முடிக்கப்பட்டுள்ளது. " +
-                    "இந்த கடன் எண்ணின் கீழ் மேலும் நிலுவைத் தொகை எதுவும் இல்லை.")
+                    "உங்கள் வணிகத்திற்கு நன்றி. இந்த கணக்கு முழுவதுமாக தீர்க்கப்பட்டு முடிக்கப்பட்டுள்ளது. " +
+                    "இந்த எண்ணின் கீழ் மேலும் நிலுவைத் தொகை எதுவும் இல்லை.")
                     .FontSize(8f).FontColor(Colors.Green.Darken3).Bold();
                 });
 
@@ -409,10 +411,12 @@ public class LoanReceiptPdfService
                 {
                     col.Item().Border(1).BorderColor(Colors.Grey.Darken1).Padding(12).Column(head =>
                     {
-                        head.Item().AlignCenter().Text("ஸ்ரீ மசான்குருப்பர் துணை").FontSize(9).Italic();
+                        head.Item().AlignCenter().Text("ஸ்ரீ மாசங்கருப்பர்  துணை").FontSize(9).Italic();
                         head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(22).Bold().FontColor("#7a1f2b");
                         head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். 01/2021-2022, நாள்: 16.07.2021").FontSize(9).FontColor(Colors.Blue.Darken2);
-                        head.Item().AlignCenter().Text("3/39, மங்குளம் மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122 | தொ.பே: 9943155324").FontSize(8.5f);
+                        head.Item().AlignCenter().Text("3/39, மாங்குளம்  மெயின் ரோடு, பூசாரிபட்டி, மதுரை - 625122").FontSize(8.5f);
+                        head.Item().AlignCenter().Text("தொலைபேசி எண் : 9943155324").FontSize(8.5f);
+
                     });
 
                     col.Item().PaddingTop(12).Row(row =>
@@ -428,10 +432,10 @@ public class LoanReceiptPdfService
                             });
                             c.Item().Text(t => { t.Span("மொபைல்: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
 
-                            c.Item().Text(t => { t.Span("கடன் எண்: ").SemiBold(); t.Span(loan.LoanNumber); });
-                            c.Item().Text(t => { t.Span("கடன் தொகை: ").SemiBold(); t.Span($"ரூ. {loan.LoanAmount:N2}"); });
-                            c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
-                            c.Item().Text(t => { t.Span("கடன் தேதி: ").SemiBold(); t.Span(loan.LoanDate?.ToString("dd-MM-yyyy") ?? "-"); });
+                            //c.Item().Text(t => { t.Span("கடன் எண்: ").SemiBold(); t.Span(loan.LoanNumber); });
+                            c.Item().Text(t => { t.Span("அசல்  தொகை: ").SemiBold(); t.Span($"ரூ. {loan.LoanAmount:N2}"); });
+                            //c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
+                            c.Item().Text(t => { t.Span("தேதி: ").SemiBold(); t.Span(loan.LoanDate?.ToString("dd-MM-yyyy") ?? "-"); });
                             c.Item().Text(t => { t.Span("செலுத்த வேண்டிய தேதி: ").SemiBold(); t.Span(loan.MaturityDate?.ToString("dd-MM-yyyy") ?? "-"); });
                         });
 
@@ -459,7 +463,7 @@ public class LoanReceiptPdfService
                             table.ColumnsDefinition(c =>
                             {
                                 c.RelativeColumn(2.5f);
-                                c.RelativeColumn(1);
+                                c.RelativeColumn(1.5f);
                                 c.RelativeColumn(1.5f);
                                 c.RelativeColumn(1.5f);
                                 c.RelativeColumn(1);
@@ -468,7 +472,7 @@ public class LoanReceiptPdfService
                             table.Header(h =>
                             {
                                 h.Cell().Element(HeaderCell).Text("பொருள்");
-                                h.Cell().Element(HeaderCell).Text("எண்ணம்");
+                                h.Cell().Element(HeaderCell).Text("எண்ணிக்கை ");
                                 h.Cell().Element(HeaderCell).Text("வடிவம்");
                                 h.Cell().Element(HeaderCell).Text("வகை");
                                 h.Cell().Element(HeaderCell).Text("எடை (கி)");
@@ -508,7 +512,7 @@ public class LoanReceiptPdfService
                 page.Content().Column(col =>
                 {
                     col.Item().AlignCenter().PaddingTop(10)
-                        .Text("கடன் முடிவு உறுதிப்படுத்தல்").FontSize(16).Bold().FontColor("#7a1f2b");
+                        .Text("கணக்கு  முடிவு உறுதிப்படுத்தல்").FontSize(16).Bold().FontColor("#7a1f2b");
 
                     col.Item().PaddingTop(30).Row(row =>
                     {
@@ -545,7 +549,7 @@ public class LoanReceiptPdfService
                     col.Item().PaddingTop(24).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
                     {
                         ack.Item().Text("அறிவிப்பு:").Bold().FontSize(7.5f);
-                        ack.Item().Text("இந்த கடன் கணக்கு முழுவதுமாக முடிக்கப்பட்டதன் மூலம், அடகு வைக்கப்பட்ட தங்க நகைகள்/பொருட்கள் அனைத்தையும் பாதுகாப்பாக, சேதமின்றி, மூல நிலையில் பெற்றுக்கொண்டதாக இதன் மூலம் உறுதிப்படுத்துகிறேன்.").Italic().FontSize(7.5f);
+                        ack.Item().Text("இந்த கணக்கு முழுவதுமாக முடிக்கப்பட்டதன் மூலம், அடகு வைக்கப்பட்ட தங்க நகைகள்/பொருட்கள் அனைத்தையும் பாதுகாப்பாக, சேதமின்றி, மூல நிலையில் பெற்றுக்கொண்டதாக இதன் மூலம் உறுதிப்படுத்துகிறேன்.").Italic().FontSize(7.5f);
                     });
                 });
 
@@ -554,8 +558,8 @@ public class LoanReceiptPdfService
                     RenderSignatureRow(foot, paddingTop: 20, rightLabel: "அங்கீகரிக்கப்பட்ட கையொப்பமிடுபவர் - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்");
 
                     foot.Item().PaddingTop(10).Text(
-                        "உங்கள் வணிகத்திற்கு நன்றி. இந்த கடன் கணக்கு முழுவதுமாக தீர்க்கப்பட்டு முடிக்கப்பட்டுள்ளது. " +
-                        "இந்த கடன் எண்ணின் கீழ் மேலும் நிலுவைத் தொகை எதுவும் இல்லை.")
+                        "உங்கள் வணிகத்திற்கு நன்றி. இந்த கணக்கு முழுவதுமாக தீர்க்கப்பட்டு முடிக்கப்பட்டுள்ளது. " +
+                        "இந்த எண்ணின் கீழ் மேலும் நிலுவைத் தொகை எதுவும் இல்லை.")
                         .FontSize(8f).FontColor(Colors.Green.Darken3).Bold();
                 });
             });
