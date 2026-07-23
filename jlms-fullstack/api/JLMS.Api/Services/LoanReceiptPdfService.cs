@@ -34,7 +34,7 @@ public class LoanReceiptPdfService
         var assetsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Assets");
         foreach (var ext in new[] { ".png", ".jpg", ".jpeg" })
         {
-            var path = Path.Combine(assetsRoot, "company-logo" + ext);
+            var path = Path.Combine(assetsRoot, "Meenakshi" + ext);
             if (File.Exists(path))
                 return File.ReadAllBytes(path);
         }
