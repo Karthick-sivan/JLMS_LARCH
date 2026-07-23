@@ -216,7 +216,8 @@ public class LoanOperationsController : ControllerBase
             OutstandingPrincipal: 0,
             OutstandingInterest: 0,
             OtherCharges: closureTxn?.ChargesAmount ?? 0,
-            GrandTotal: closureTxn?.TotalAmount ?? 0
+            GrandTotal: closureTxn?.TotalAmount ?? 0,
+            GuardianName: loan.Customer.GuardianName
         );
 
         var bytes = _pdfService.GenerateClosureReceiptWithDetails(loan, dto);
@@ -252,7 +253,8 @@ public class LoanOperationsController : ControllerBase
             PrincipalPaid: txn.PrincipalAmount,
             AmountReceived: txn.TotalAmount,
             RemainingInterest: txn.Loan.OutstandingInterest,   // balance at time of ledger view
-            RemainingPrincipal: txn.Loan.OutstandingPrincipal
+            RemainingPrincipal: txn.Loan.OutstandingPrincipal,
+              GuardianName: txn.Loan.Customer.GuardianName
         );
 
         var bytes = _pdfService.GeneratePaymentReceipt(dto);
