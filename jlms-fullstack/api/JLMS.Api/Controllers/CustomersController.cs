@@ -105,6 +105,7 @@ public class CustomersController : ControllerBase
             CustomerId: c.CustomerId,
             CustomerCode: c.CustomerCode,
             CustomerName: c.CustomerName,
+            GuardianName: c.GuardianName,
             Gender: c.Gender,
             DateOfBirth: c.DateOfBirth,
             Mobile: c.Mobile,
@@ -277,6 +278,7 @@ public class CustomersController : ControllerBase
         {
             CustomerCode = code,
             CustomerName = dto.CustomerName,
+            GuardianName = string.IsNullOrWhiteSpace(dto.GuardianName) ? null : dto.GuardianName,
             Gender = dto.Gender,
             DateOfBirth = dto.DateOfBirth,
             Mobile = dto.Mobile,
@@ -314,6 +316,7 @@ public class CustomersController : ControllerBase
                 CustomerId: entity.CustomerId,
                 CustomerCode: entity.CustomerCode,
                 CustomerName: entity.CustomerName,
+                GuardianName: entity.GuardianName,
                 Gender: entity.Gender,
                 DateOfBirth: entity.DateOfBirth,
                 Mobile: entity.Mobile,
@@ -349,6 +352,7 @@ public class CustomersController : ControllerBase
         if (entity == null) return NotFound();
 
         entity.CustomerName = dto.CustomerName;
+        entity.GuardianName = string.IsNullOrWhiteSpace(dto.GuardianName) ? null : dto.GuardianName;
         entity.Gender = dto.Gender;
         entity.DateOfBirth = dto.DateOfBirth;
         entity.Mobile = dto.Mobile;

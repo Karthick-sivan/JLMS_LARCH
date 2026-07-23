@@ -69,14 +69,21 @@
               <fieldset class="section-fieldset">
                 <legend>Customer Information</legend>
                 <div class="row g-3">
-                  <div class="col-md-3">
+                  <!-- Row 1 -->
+                  <div class="col-md-4">
                     <label class="field-label">Customer Code</label>
                     <input type="text" class="form-control-jlms" id="custCode" value="(auto-generated)" disabled>
                   </div>
-                  <div class="col-md-5">
+                  <div class="col-md-4">
                     <label class="field-label">Customer Name<span class="req">*</span></label>
                     <input type="text" class="form-control-jlms" id="custName" placeholder="As per ID proof">
                   </div>
+                  <div class="col-md-4">
+                    <label class="field-label">Guardian Name<span class="opt">optional</span></label>
+                    <input type="text" class="form-control-jlms" id="custGuardianName" placeholder="Father / Spouse name">
+                  </div>
+
+                  <!-- Row 2 -->
                   <div class="col-md-4">
                     <label class="field-label">Gender<span class="req">*</span></label>
                     <div class="radio-pill-group" id="genderPills">
@@ -93,6 +100,8 @@
                     <label class="field-label">Alternate Mobile<span class="opt">optional</span></label>
                     <div class="input-affix"><span class="affix">+91</span><input type="text" id="custAltMobile" maxlength="10" inputmode="numeric" placeholder="Alternate contact"></div>
                   </div>
+
+                  <!-- Row 3 -->
                   <div class="col-md-4">
                     <label class="field-label">Date of Birth<span class="opt">optional</span></label>
                     <input type="date" class="form-control-jlms" id="custDob">
@@ -332,6 +341,7 @@ async function loadCustomerForEdit(customerId) {
     // ---- Customer Information ----
     document.getElementById('custCode').value = c.customerCode || '';
     document.getElementById('custName').value = c.customerName || '';
+    document.getElementById('custGuardianName').value = c.guardianName || '';
     document.getElementById('custMobile').value = c.mobile || '';
     document.getElementById('custAltMobile').value = c.alternateMobile || '';
     if (c.dateOfBirth) {
@@ -412,10 +422,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.title = 'JLMS — Edit Customer';
     document.getElementById('btnSaveLabel').textContent = 'Update Customer';
 
-    // Lock Customer Name in edit mode
+    // Lock Customer Name in edit mode (Guardian Name remains editable)
     const custNameInput = document.getElementById('custName');
     custNameInput.readOnly = true;
     custNameInput.style.background = '#f3f4f6';
+    custNameInput.title = 'Customer name cannot be changed after registration';
 
     // Lock: Aadhaar & PAN text inputs — read-only in edit mode
     document.getElementById('custAadhaar').readOnly = true;
@@ -782,7 +793,7 @@ document.getElementById("panFile").addEventListener("change", function () {
   });
 
   document.getElementById('btnClear').addEventListener('click', () => {
-    document.querySelectorAll('#custName, #custMobile, #custAltMobile, #custDob, #custAddress, #custCity, #custPincode, #custAadhaar, #custPan, #nomineeName, #nomineeMobile, #nomineeAddress, #nomineeCity, #nomineeAadhaar')
+    document.querySelectorAll('#custName, #custGuardianName, #custMobile, #custAltMobile, #custDob, #custAddress, #custCity, #custPincode, #custAadhaar, #custPan, #nomineeName, #nomineeMobile, #nomineeAddress, #nomineeCity, #nomineeAadhaar')
       .forEach(el => el.value = '');
     document.getElementById('custState').value = '';
     capturedPhoto = null;
@@ -843,6 +854,7 @@ document.getElementById("nomineeAadhaarText").innerText =
 const formData = new FormData();
 
 formData.append("CustomerName", name);
+formData.append("GuardianName", document.getElementById("custGuardianName").value.trim());
 formData.append("Gender", selectedGender || "");
 formData.append("DateOfBirth", document.getElementById("custDob").value);
 formData.append("Mobile", mobile);
@@ -903,6 +915,7 @@ if (nomineeAadhaarFile)
         // ── EDIT MODE: PUT with JSON body (documents not changed) ──────────
         const dto = {
           customerName: name,
+          guardianName: document.getElementById('custGuardianName').value.trim(),
           gender: selectedGender || '',
           dateOfBirth: document.getElementById('custDob').value || null,
           mobile,

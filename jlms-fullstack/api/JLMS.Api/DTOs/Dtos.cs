@@ -15,6 +15,7 @@ public record PagedResultDto<T>(List<T> Items, int TotalCount, int Page, int Pag
 public class CustomerCreateDto
 {
     public string CustomerName { get; set; } = "";
+    public string? GuardianName { get; set; }
     public string? Gender { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string Mobile { get; set; } = "";
@@ -43,6 +44,7 @@ public class CustomerCreateDto
 
 public record CustomerUpdateDto(
     string CustomerName,
+    string? GuardianName,
     string? Gender,
     DateTime? DateOfBirth,
     string Mobile,
@@ -67,7 +69,7 @@ public record CustomerListItemDto(
 );
 
 public record CustomerDetailDto(
-    int CustomerId, string CustomerCode, string CustomerName, string? Gender,
+    int CustomerId, string CustomerCode, string CustomerName, string? GuardianName, string? Gender,
     DateTime? DateOfBirth, string Mobile, string? AlternateMobile, string? Address,
     string? City, string? State, string? Pincode, string? AadhaarNumber, string? PanNumber,
     bool KycVerified, int ActiveLoans, decimal TotalOutstanding, int ClosedLoans, DateTime CreatedAt,

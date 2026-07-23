@@ -43,6 +43,7 @@ public class Customer
     public int CustomerId { get; set; }
     public string CustomerCode { get; set; } = "";
     public string CustomerName { get; set; } = "";
+    public string? GuardianName { get; set; }
     public string? Gender { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string Mobile { get; set; } = "";
