@@ -237,7 +237,13 @@ public class LoanReceiptPdfService
                     col.Item().PaddingTop(12).Column(c =>
                     {
                         //c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
-                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(CustomerNameWithGuardian(customer.CustomerName, customer.GuardianName)); });
+                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
+
+                        if (!string.IsNullOrWhiteSpace(customer.GuardianName))
+                        {
+                            c.Item().Text(t => { t.Span("பாதுகாவலர் பெயர்: ").SemiBold(); t.Span(customer.GuardianName); });
+                        }
+
                         c.Item().Text(t =>
                         {
                             t.Span("முகவரி: ").SemiBold();
@@ -346,7 +352,13 @@ public class LoanReceiptPdfService
                         //t.Cell().Text(r.CustomerName).FontSize(8.5f);
 
                         t.Cell().Text("வாடிக்கையாளர்:").SemiBold().FontSize(8.5f);
-                        t.Cell().Text(CustomerNameWithGuardian(r.CustomerName, r.GuardianName)).FontSize(8.5f);
+                        t.Cell().Text(r.CustomerName).FontSize(8.5f);
+
+                        if (!string.IsNullOrWhiteSpace(r.GuardianName))
+                        {
+                            t.Cell().Text("பாதுகாவலர் பெயர்:").SemiBold().FontSize(8.5f);
+                            t.Cell().Text(r.GuardianName).FontSize(8.5f);
+                        }
 
                         t.Cell().Text("தொலைபேசி:").SemiBold().FontSize(8.5f);
                         t.Cell().Text(r.Mobile ?? "-").FontSize(8.5f);
@@ -425,7 +437,14 @@ public class LoanReceiptPdfService
                         {
                             t.ColumnsDefinition(c => { c.ConstantColumn(58); c.RelativeColumn(); });
                             t.Cell().Text("வாடிக்கையாளர்:").SemiBold();
-                            t.Cell().Text(CustomerNameWithGuardian(r.CustomerName, r.GuardianName));
+                            t.Cell().Text(r.CustomerName);
+
+                            if (!string.IsNullOrWhiteSpace(r.GuardianName))
+                            {
+                                t.Cell().Text("பாதுகாவலர் பெயர்:").SemiBold();
+                                t.Cell().Text(r.GuardianName);
+                            }
+
                             t.Cell().Text("தொலைபேசி:").SemiBold();
                             t.Cell().Text(r.Mobile ?? "-");
                         });
@@ -521,7 +540,12 @@ public class LoanReceiptPdfService
                     col.Item().PaddingTop(12).Column(c =>
                     {
                         //c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
-                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(CustomerNameWithGuardian(customer.CustomerName, customer.GuardianName)); });
+                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
+
+                        if (!string.IsNullOrWhiteSpace(customer.GuardianName))
+                        {
+                            c.Item().Text(t => { t.Span("பாதுகாவலர் பெயர்: ").SemiBold(); t.Span(customer.GuardianName); });
+                        }
                         c.Item().Text(t =>
                         {
                             t.Span("முகவரி: ").SemiBold();
