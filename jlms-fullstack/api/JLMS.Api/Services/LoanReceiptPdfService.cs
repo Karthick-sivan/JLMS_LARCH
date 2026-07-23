@@ -162,7 +162,12 @@ public class LoanReceiptPdfService
                 });
         });
     }
-
+    private static string CustomerNameWithGuardian(string customerName, string? guardianName)
+    {
+        return string.IsNullOrWhiteSpace(guardianName)
+            ? customerName
+            : $"{customerName}   S/O. {guardianName}";
+    }
     /// <summary>
     /// Renders the two-column signature row (pledger left, authorised signatory right).
     /// rightLabel examples: "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக", "அங்கீகரிக்கப்பட்ட கையொப்பமிடுபவர் - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்"
@@ -231,7 +236,8 @@ public class LoanReceiptPdfService
                     // ---- Customer Details (full width text block) ----
                     col.Item().PaddingTop(12).Column(c =>
                     {
-                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
+                        //c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
+                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(CustomerNameWithGuardian(customer.CustomerName, customer.GuardianName)); });
                         c.Item().Text(t =>
                         {
                             t.Span("முகவரி: ").SemiBold();
@@ -331,42 +337,34 @@ public class LoanReceiptPdfService
                     // ---- Letterhead ----
                     col.Item().Element(c => RenderLetterhead(c, padding: 10, fontSize: 8));
 
-                    // ---- Customer (left) + Receipt details (right, label/value columns aligned) ----
-                    col.Item().PaddingTop(8).Row(row =>
+                    // ---- Customer + Receipt details (single column, left aligned) ----
+                    col.Item().PaddingTop(8).Table(t =>
                     {
-                        // Customer block — left half
-                        row.RelativeItem().Table(t =>
-                        {
-                            t.ColumnsDefinition(c => { c.ConstantColumn(58); c.RelativeColumn(); });
-                            t.Cell().Text("வாடிக்கையாளர்:").SemiBold();
-                            t.Cell().Text(r.CustomerName);
-                            t.Cell().Text("தொலைபேசி:").SemiBold();
-                            t.Cell().Text(r.Mobile ?? "-");
-                        });
+                        t.ColumnsDefinition(c => { c.ConstantColumn(130); c.RelativeColumn(); });
 
-                        // Receipt details — right half
-                        row.RelativeItem().Table(t =>
+                        //t.Cell().Text("வாடிக்கையாளர்:").SemiBold().FontSize(8.5f);
+                        //t.Cell().Text(r.CustomerName).FontSize(8.5f);
+
+                        t.Cell().Text("வாடிக்கையாளர்:").SemiBold().FontSize(8.5f);
+                        t.Cell().Text(CustomerNameWithGuardian(r.CustomerName, r.GuardianName)).FontSize(8.5f);
+
+                        t.Cell().Text("தொலைபேசி:").SemiBold().FontSize(8.5f);
+                        t.Cell().Text(r.Mobile ?? "-").FontSize(8.5f);
+
+                        t.Cell().Text("ரசீது எண்:").SemiBold().FontSize(8.5f);
+                        t.Cell().Text(r.ReceiptNumber).FontSize(8.5f);
+
+                        t.Cell().Text("அடகு எண்:").SemiBold().FontSize(8.5f);
+                        t.Cell().Text(r.LoanNo).FontSize(8.5f);
+
+                        t.Cell().Text("தேதி:").SemiBold().FontSize(8.5f);
+                        t.Cell().Text(r.TransactionDate.ToString("dd-MM-yyyy HH:mm")).FontSize(8.5f);
+
+                        if (r.MaturityDate.HasValue)
                         {
-                            t.ColumnsDefinition(c => { c.ConstantColumn(68); c.RelativeColumn(); });
-                            t.Cell().Text("ரசீது எண்:").SemiBold();
-                            t.Cell().Text(r.ReceiptNumber);
-                            t.Cell().Text("எண்:").SemiBold();
-                            t.Cell().Text(r.LoanNo);
-                            t.Cell().Text("தேதி:").SemiBold();
-                            t.Cell().Text(r.TransactionDate.ToString("dd-MM-yyyy HH:mm"));
-                            t.Cell().Text("முறை:").SemiBold();
-                            t.Cell().Text(r.PaymentMode);
-                            if (r.LoanScheme != null)
-                            {
-                                t.Cell().Text("திட்டம்:").SemiBold();
-                                t.Cell().Text(r.LoanScheme);
-                            }
-                            if (r.MaturityDate.HasValue)
-                            {
-                                t.Cell().Text("மீட்கப்பட வேண்டிய தேதி:").SemiBold();
-                                t.Cell().Text(r.MaturityDate.Value.ToString("dd-MM-yyyy"));
-                            }
-                        });
+                            t.Cell().Text("மீட்கப்பட வேண்டிய தேதி:").SemiBold().FontSize(8.5f);
+                            t.Cell().Text(r.MaturityDate.Value.ToString("dd-MM-yyyy")).FontSize(8.5f);
+                        }
                     });
 
                     // ---- Amount details ----
@@ -427,7 +425,7 @@ public class LoanReceiptPdfService
                         {
                             t.ColumnsDefinition(c => { c.ConstantColumn(58); c.RelativeColumn(); });
                             t.Cell().Text("வாடிக்கையாளர்:").SemiBold();
-                            t.Cell().Text(r.CustomerName);
+                            t.Cell().Text(CustomerNameWithGuardian(r.CustomerName, r.GuardianName));
                             t.Cell().Text("தொலைபேசி:").SemiBold();
                             t.Cell().Text(r.Mobile ?? "-");
                         });
@@ -522,7 +520,8 @@ public class LoanReceiptPdfService
                     // ---- Customer Details (full width text block) ----
                     col.Item().PaddingTop(12).Column(c =>
                     {
-                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
+                        //c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(customer.CustomerName); });
+                        c.Item().Text(t => { t.Span("வாடிக்கையாளர் பெயர்: ").SemiBold(); t.Span(CustomerNameWithGuardian(customer.CustomerName, customer.GuardianName)); });
                         c.Item().Text(t =>
                         {
                             t.Span("முகவரி: ").SemiBold();
