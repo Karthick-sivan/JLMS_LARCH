@@ -632,7 +632,8 @@ public record PaymentReceiptPdfDto(
     decimal PrincipalPaid,
     decimal AmountReceived,
     decimal RemainingInterest,
-    decimal RemainingPrincipal
+    decimal RemainingPrincipal,
+    string? GuardianName = null
 );
 
 // ---- Closure Receipt PDF ----
@@ -647,7 +648,8 @@ public record ClosureReceiptPdfDto(
     decimal OutstandingPrincipal,
     decimal OutstandingInterest,
     decimal OtherCharges,
-    decimal GrandTotal
+    decimal GrandTotal,
+      string? GuardianName = null
 );
 
 
