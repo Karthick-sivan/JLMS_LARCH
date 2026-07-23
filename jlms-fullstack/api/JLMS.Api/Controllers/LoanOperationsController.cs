@@ -226,21 +226,83 @@ public class LoanOperationsController : ControllerBase
 
     // GET /api/loan-operations/transaction-receipt-pdf/{transactionId}
     // Ledger row download — server looks up the transaction to build the receipt
-    [HttpGet("transaction-receipt-pdf/{transactionId:int}")]
-    public async Task<IActionResult> DownloadTransactionReceiptPdf(int transactionId)
+    //[HttpGet("transaction-receipt-pdf/{transactionId:int}")]
+    //public async Task<IActionResult> DownloadTransactionReceiptPdf(int transactionId)
+    //{
+    //    var txn = await _db.LoanTransactions
+    //        .Include(t => t.Loan)
+    //            .ThenInclude(l => l.Customer)
+    //        .Include(t => t.Loan)
+    //            .ThenInclude(l => l.LoanScheme)
+    //        .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
+
+    //    if (txn == null) return NotFound();
+
+    //    // Map LoanTransaction → PaymentReceiptPdfDto
+    //    // InterestAmount and PrincipalAmount are stored on the transaction entity
+    //    var dto = new PaymentReceiptPdfDto(
+    //        ReceiptNumber: txn.ReceiptNumber ?? txn.TransactionId.ToString(),
+    //        LoanNo: txn.Loan.LoanNumber,
+    //        CustomerName: txn.Loan.Customer!.CustomerName,
+    //        Mobile: txn.Loan.Customer.Mobile,
+    //        TransactionDate: txn.TransactionDate,
+    //        PaymentMode: txn.PaymentMode ?? "-",
+    //        LoanScheme: txn.Loan.LoanScheme?.SchemeName,
+    //        MaturityDate: txn.Loan.MaturityDate,
+    //        InterestPaid: txn.InterestAmount,
+    //        PrincipalPaid: txn.PrincipalAmount,
+    //        AmountReceived: txn.TotalAmount,
+    //        RemainingInterest: txn.Loan.OutstandingInterest,   // balance at time of ledger view
+    //        RemainingPrincipal: txn.Loan.OutstandingPrincipal,
+    //          GuardianName: txn.Loan.Customer.GuardianName
+    //    );
+
+    //    var bytes = _pdfService.GeneratePaymentReceipt(dto);
+    //    return File(bytes, "application/pdf",
+    //        $"Receipt-{dto.ReceiptNumber}-{dto.LoanNo}.pdf");
+    //}
+
+[HttpGet("transaction-receipt-pdf/{transactionId:int}")]
+public async Task<IActionResult> DownloadTransactionReceiptPdf(int transactionId)
+{
+    var txn = await _db.LoanTransactions
+        .Include(t => t.Loan).ThenInclude(l => l.Customer)
+        .Include(t => t.Loan).ThenInclude(l => l.LoanScheme)
+        .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
+
+    if (txn == null) return NotFound();
+
+    PaymentReceiptPdfDto dto;
+
+    if (txn.TransactionType == "Disbursement")
     {
-        var txn = await _db.LoanTransactions
-            .Include(t => t.Loan)
-                .ThenInclude(l => l.Customer)
-            .Include(t => t.Loan)
-                .ThenInclude(l => l.LoanScheme)
-            .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
-
-        if (txn == null) return NotFound();
-
-        // Map LoanTransaction → PaymentReceiptPdfDto
-        // InterestAmount and PrincipalAmount are stored on the transaction entity
-        var dto = new PaymentReceiptPdfDto(
+        // This single row represents TWO ledger lines: the principal disbursed
+        // and the first-month interest collected upfront. A receipt download
+        // from the ledger's "First Month Interest Collected" row should only
+        // reflect the interest portion — not the disbursed principal.
+        dto = new PaymentReceiptPdfDto(
+            ReceiptNumber: txn.ReceiptNumber ?? txn.TransactionId.ToString(),
+            LoanNo: txn.Loan.LoanNumber,
+            CustomerName: txn.Loan.Customer!.CustomerName,
+            Mobile: txn.Loan.Customer.Mobile,
+            TransactionDate: txn.TransactionDate,
+            PaymentMode: txn.PaymentMode ?? "-",
+            LoanScheme: txn.Loan.LoanScheme?.SchemeName,
+            MaturityDate: txn.Loan.MaturityDate,
+            InterestPaid: txn.FirstMonthInt ?? 0,
+            PrincipalPaid: 0,
+            AmountReceived: txn.FirstMonthInt ?? 0,
+            // Snapshot as-of this transaction: full principal still outstanding
+            // (nothing repaid yet), interest fully cleared by this same collection.
+            RemainingInterest: 0,
+            //RemainingPrincipal: txn.BalancePrincipalAfter,
+            RemainingPrincipal: txn.BalancePrincipalAfter ?? 0,
+            GuardianName: txn.Loan.Customer.GuardianName
+        );
+    }
+    else
+    {
+        dto = new PaymentReceiptPdfDto(
             ReceiptNumber: txn.ReceiptNumber ?? txn.TransactionId.ToString(),
             LoanNo: txn.Loan.LoanNumber,
             CustomerName: txn.Loan.Customer!.CustomerName,
@@ -252,14 +314,18 @@ public class LoanOperationsController : ControllerBase
             InterestPaid: txn.InterestAmount,
             PrincipalPaid: txn.PrincipalAmount,
             AmountReceived: txn.TotalAmount,
-            RemainingInterest: txn.Loan.OutstandingInterest,   // balance at time of ledger view
-            RemainingPrincipal: txn.Loan.OutstandingPrincipal,
-              GuardianName: txn.Loan.Customer.GuardianName
+            // Use the historical snapshot instead of the loan's CURRENT live
+            // balance, so old receipts don't show today's (possibly ₹0) balance.
+            RemainingInterest: 0, // see note below
+            //RemainingPrincipal: txn.BalancePrincipalAfter,
+            RemainingPrincipal: txn.BalancePrincipalAfter ?? 0,
+            GuardianName: txn.Loan.Customer.GuardianName
         );
-
-        var bytes = _pdfService.GeneratePaymentReceipt(dto);
-        return File(bytes, "application/pdf",
-            $"Receipt-{dto.ReceiptNumber}-{dto.LoanNo}.pdf");
     }
+
+    var bytes = _pdfService.GeneratePaymentReceipt(dto);
+    return File(bytes, "application/pdf", $"Receipt-{dto.ReceiptNumber}-{txn.Loan.LoanNumber}.pdf");
+}
+
 
 }

@@ -216,8 +216,11 @@ public class LoansController : ControllerBase
             loan.ApprovedBy = request.SubmittedByUserId;
             loan.ApprovedAt = now;
 
+            //var today = now.Date;
+            //var maturity = today.AddMonths(loan.TenureMonths);
+            //var netDisbursement = loan.LoanAmount - loan.ProcessingFee;
             var today = now.Date;
-            var maturity = today.AddMonths(loan.TenureMonths);
+            var maturity = today.AddMonths(loan.TenureMonths).AddDays(7);
             var netDisbursement = loan.LoanAmount - loan.ProcessingFee;
 
             loan.LoanDate = today;
@@ -631,9 +634,13 @@ public class LoansController : ControllerBase
         if (loan.Status != "Approved")
             return BadRequest($"Loan must be Approved before disbursement. Current status: {loan.Status}");
 
+        //var netDisbursement = loan.LoanAmount - loan.ProcessingFee;
+        //var today = DateTime.UtcNow.Date;
+        //var maturity = today.AddMonths(loan.TenureMonths);
+
         var netDisbursement = loan.LoanAmount - loan.ProcessingFee;
         var today = DateTime.UtcNow.Date;
-        var maturity = today.AddMonths(loan.TenureMonths);
+        var maturity = today.AddMonths(loan.TenureMonths).AddDays(7);
 
         loan.Status = "Active";
         loan.LoanDate = today;
