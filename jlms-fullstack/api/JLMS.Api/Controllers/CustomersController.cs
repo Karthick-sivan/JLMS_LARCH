@@ -378,4 +378,59 @@ public class CustomersController : ControllerBase
         await _db.SaveChangesAsync();
         return NoContent();
     }
+
+    // POST /api/customers/5/documents/photo|aadhaar|pan|nomineephoto|nomineeaadhaar
+[HttpPost("{id:int}/documents/{docType}")]
+public async Task<IActionResult> UploadDocument(int id, string docType, IFormFile file)
+{
+    if (file == null || file.Length == 0)
+        return BadRequest(new { message = "No file provided." });
+
+    var entity = await _db.Customers.FindAsync(id);
+    if (entity == null) return NotFound(new { message = "Customer not found." });
+
+    string folder;
+    string? existingPath;
+    Action<string> setPath;
+
+    switch (docType.ToLowerInvariant())
+    {
+        case "photo":
+            folder = "CustomerPhotos"; existingPath = entity.PhotoPath;
+            setPath = p => entity.PhotoPath = p; break;
+        case "aadhaar":
+            folder = "Aadhaar"; existingPath = entity.AadhaarDocPath;
+            setPath = p => entity.AadhaarDocPath = p; break;
+        case "pan":
+            folder = "PAN"; existingPath = entity.PanDocPath;
+            setPath = p => entity.PanDocPath = p; break;
+        case "nomineephoto":
+            folder = "NomineePhotos"; existingPath = entity.NomineePhotoPath;
+            setPath = p => entity.NomineePhotoPath = p; break;
+        case "nomineeaadhaar":
+            folder = "NomineeAadhaar"; existingPath = entity.NomineeAadhaarDocPath;
+            setPath = p => entity.NomineeAadhaarDocPath = p; break;
+        default:
+            return BadRequest(new { message = "Invalid document type." });
+    }
+
+    // Server-side enforcement: never allow overwriting a doc that's already there.
+    if (!string.IsNullOrEmpty(existingPath))
+        return BadRequest(new { message = "This document is already uploaded and locked." });
+
+    var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+    Directory.CreateDirectory(Path.Combine(uploadsRoot, folder));
+
+    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+    var filePath = Path.Combine(uploadsRoot, folder, fileName);
+    using (var stream = new FileStream(filePath, FileMode.Create))
+        await file.CopyToAsync(stream);
+
+    var relativePath = Path.Combine(folder, fileName).Replace("\\", "/");
+    setPath(relativePath);
+    entity.UpdatedAt = DateTime.UtcNow;
+    await _db.SaveChangesAsync();
+
+    return Ok(new { path = relativePath });
+}
 }
