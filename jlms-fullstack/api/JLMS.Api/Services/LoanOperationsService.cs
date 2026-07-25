@@ -539,11 +539,11 @@ public class LoanOperationsService
                 {
                     firstMonthInterestCollected = firstMonthInterest;
 
-                    rows.Add(new LoanOperationsLedgerRowDto(
-                        t.TransactionId, t.TransactionDate, "Interest", "First Month Interest Debited",
-                        firstMonthInterest, 0m, principalBal, interestBal, principalBal + firstMonthInterest,
-                        t.ReceiptNumber, userName,
-                        "First month's interest collected upfront at disbursement", false));
+                    //rows.Add(new LoanOperationsLedgerRowDto(
+                    //    t.TransactionId, t.TransactionDate, "Interest", "First Month Interest Debited",
+                    //    firstMonthInterest, 0m, principalBal, interestBal, principalBal + firstMonthInterest,
+                    //    t.ReceiptNumber, userName,
+                    //    "First month's interest collected upfront at disbursement", false));
 
                     rows.Add(new LoanOperationsLedgerRowDto(
                         t.TransactionId, t.TransactionDate, "Interest", "First Month Interest Collected",
