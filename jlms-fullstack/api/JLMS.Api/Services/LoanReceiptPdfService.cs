@@ -36,7 +36,7 @@ public class LoanReceiptPdfService
         var assetsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Assets");
         foreach (var ext in new[] { ".png", ".jpg", ".jpeg" })
         {
-            var path = Path.Combine(assetsRoot, "Banker Logo" + ext);
+            var path = Path.Combine(assetsRoot, "Darkgreen" + ext);
             if (File.Exists(path))
                 return File.ReadAllBytes(path);
         }
@@ -73,13 +73,13 @@ public class LoanReceiptPdfService
                 // ---- Corner line, flush to top border, tight left/right ----
                 outer.Item().PaddingTop(2).Row(top =>
                 {
-                    top.RelativeItem().AlignLeft().Text("ஸ்ரீ மாசங்கருப்பர் துணை").FontSize(fontSize);
+                    top.RelativeItem().AlignLeft().Text("ஸ்ரீ மாசங்கருப்பர் துணை!!").FontSize(fontSize);
                     top.ConstantItem(16).AlignCenter().Height(12).Element(e =>
                     {
                         if (_pillaiyarSuzhiBytes != null)
                             e.Image(_pillaiyarSuzhiBytes).FitHeight();
                     });
-                    top.RelativeItem().AlignRight().Text("ஸ்ரீ முத்துமாரியம்மன் துணை").FontSize(fontSize);
+                    top.RelativeItem().AlignRight().Text("ஸ்ரீ முத்துமாரியம்மன் துணை!!").FontSize(fontSize);
                 });
 
                 outer.Item().PaddingTop(4).Row(row =>
@@ -93,7 +93,7 @@ public class LoanReceiptPdfService
                     row.RelativeItem().Column(head =>
                     {
                         head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(fontSize + 6).Bold().FontColor("#7a1f2b");
-                        head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். - | நாள்: 16.07.2021").FontSize(fontSize - 0.5f);
+                        head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். - ").FontSize(fontSize - 0.5f);
                         head.Item().AlignCenter().Text("மாங்குளம் மெயின் ரோடு,ராமராஜபுரம், மதுரை - 625122").FontSize(fontSize - 0.5f);
                         head.Item().AlignCenter().Text("தொலைபேசி எண் : 7550098326").FontSize(fontSize - 0.5f);
                     });
@@ -119,13 +119,13 @@ public class LoanReceiptPdfService
                 // ---- Corner line, flush to top border, tight left/right ----
                 outer.Item().PaddingTop(2).Row(top =>
                 {
-                    top.RelativeItem().AlignLeft().Text("ஸ்ரீ மாசங்கருப்பர் துணை").FontSize(fontSize);
+                    top.RelativeItem().AlignLeft().Text("ஸ்ரீ மாசங்கருப்பர் துணை!!").FontSize(fontSize);
                     top.ConstantItem(18).AlignCenter().Height(14).Element(e =>
                     {
                         if (_pillaiyarSuzhiBytes != null)
                             e.Image(_pillaiyarSuzhiBytes).FitHeight();
                     });
-                    top.RelativeItem().AlignRight().Text("ஸ்ரீ முத்துமாரியம்மன் துணை").FontSize(fontSize);
+                    top.RelativeItem().AlignRight().Text("ஸ்ரீ முத்துமாரியம்மன் துணை!!").FontSize(fontSize);
                 });
 
                 outer.Item().PaddingTop(5).Row(row =>
@@ -141,7 +141,7 @@ public class LoanReceiptPdfService
                     row.RelativeItem(3).Column(head =>
                     {
                         head.Item().AlignCenter().Text("ஸ்ரீ மீனாட்சி பேங்கர்ஸ்").FontSize(fontSize + 13).Bold().FontColor("#7a1f2b");
-                        head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். - | நாள்: 16.07.2021").FontSize(fontSize).FontColor(Colors.Blue.Darken2);
+                        head.Item().AlignCenter().Text("அரசு அங்கீகாரம் பெற்றது | பதிவு எண். - ").FontSize(fontSize).FontColor(Colors.Blue.Darken2);
                         head.Item().AlignCenter().Text("மாங்குளம்  மெயின் ரோடு, ராமராஜபுரம், மதுரை - 625122").FontSize(fontSize - 0.5f);
                         head.Item().AlignCenter().Text("தொலைபேசி எண் : 7550098326").FontSize(fontSize - 0.5f);
                     });
@@ -210,20 +210,23 @@ public class LoanReceiptPdfService
     /// rightLabel examples: "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக", "அங்கீகரிக்கப்பட்ட கையொப்பமிடுபவர் - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்"
     /// </summary>
     private static void RenderSignatureRow(ColumnDescriptor col, float paddingTop = 24,
-        string rightLabel = "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக", float fontSize = 7.5f)
+         string rightLabelLine1 = "அடகு பிடிப்பவரின் கையெழுத்து",
+         string rightLabelLine2 = "ஸ்ரீ மீனாட்சி பேங்கர்ஸ்",
+         float fontSize = 7.5f)
     {
         col.Item().PaddingTop(paddingTop).Row(row =>
         {
             row.RelativeItem().Column(c =>
             {
                 c.Item().LineHorizontal(0.5f);
-                c.Item().PaddingTop(2).Text("அடகு வைப்பவரின் கையொப்பம் / இடது கட்டைவிரல் ரேகை").FontSize(fontSize);
+                c.Item().PaddingTop(2).Text("அடகு வைப்பவர் கையெழுத்து அல்லது இடது கை பெருவிரல் ரேகை").FontSize(fontSize);
             });
             row.ConstantItem(20);
             row.RelativeItem().Column(c =>
             {
                 c.Item().LineHorizontal(0.5f);
-                c.Item().PaddingTop(2).Text(rightLabel).FontSize(fontSize);
+                c.Item().PaddingTop(2).Text(rightLabelLine1).FontSize(fontSize);
+                c.Item().Text(rightLabelLine2).FontSize(fontSize);
             });
         });
     }
@@ -337,7 +340,9 @@ public class LoanReceiptPdfService
 
                 page.Footer().Column(foot =>
                 {
-                    RenderSignatureRow(foot, paddingTop: 20, rightLabel: "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக", fontSize: 8);
+                    //RenderSignatureRow(foot, paddingTop: 20, rightLabel: "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக", fontSize: 8);
+                    //RenderSignatureRow(foot, paddingTop: 16, rightLabel: "அடகு பிடிப்பவரின் கையெழுத்து - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்");
+                    RenderSignatureRow(foot, paddingTop: 16, fontSize: 8);
                     RenderAuctionFooter(foot, fontSize: 7.5f);
                 });
             });
@@ -425,7 +430,10 @@ public class LoanReceiptPdfService
                 // ---- Signatures + footer pinned to page bottom via page.Footer() ----
                 page.Footer().Column(foot =>
                 {
-                    RenderSignatureRow(foot, paddingTop: 16, rightLabel: "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக");
+                    //RenderSignatureRow(foot, paddingTop: 16, rightLabel: "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக");
+                    //RenderSignatureRow(foot, paddingTop: 16, rightLabel: "அடகு பிடிப்பவரின் கையெழுத்து - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்");
+                    RenderSignatureRow(foot, paddingTop: 16);
+
                     RenderAuctionFooter(foot);
                 });
             });
@@ -520,8 +528,9 @@ public class LoanReceiptPdfService
                         ack.Item().PaddingTop(4).Text("4. இதில் கண்ட அசல் வட்டி தொகைகளை செலுத்தி முன் பக்கத்தில் கண்ட அடகு பொருட்களை சரிபார்த்து பெற்று கொண்டேன் .").FontSize(7.5f);
                     });
                     // ---- Signatures ----
-                    RenderSignatureRow(foot, paddingTop: 50, rightLabel: "அங்கீகரிக்கப்பட்ட கையொப்பமிடுபவர் - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்");
-
+                    //RenderSignatureRow(foot, paddingTop: 50, rightLabel: "அங்கீகரிக்கப்பட்ட கையொப்பமிடுபவர் - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்");
+                    //RenderSignatureRow(foot, paddingTop: 50, rightLabel: "அடகு பிடிப்பவரின் கையெழுத்து - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்");
+                    RenderSignatureRow(foot, paddingTop: 50);
                     // ---- Closure footer ----
                     foot.Item().PaddingTop(10).Text(
                     "உங்கள் வணிகத்திற்கு நன்றி. இந்த கணக்கு முழுவதுமாக தீர்க்கப்பட்டு முடிக்கப்பட்டுள்ளது. " +
@@ -635,7 +644,9 @@ public class LoanReceiptPdfService
 
                 page.Footer().Column(foot =>
                 {
-                    RenderSignatureRow(foot, paddingTop: 20, rightLabel: "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக", fontSize: 8);
+                    //RenderSignatureRow(foot, paddingTop: 20, rightLabel: "ஸ்ரீ மீனாட்சி பேங்கர்ஸ் சார்பாக", fontSize: 8);
+                    //RenderSignatureRow(foot, paddingTop: 20, rightLabel: "அடகு பிடிப்பவரின் கையெழுத்து - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்", fontSize: 8);
+                    RenderSignatureRow(foot, paddingTop: 20, fontSize: 8);
                     RenderAuctionFooter(foot, fontSize: 7.5f);
                 });
             });
@@ -665,34 +676,68 @@ public class LoanReceiptPdfService
 
             page.Content().Column(col =>
             {
-                col.Item().AlignCenter().PaddingTop(10)
-                    .Text("கணக்கு  முடிவு உறுதிப்படுத்தல்").FontSize(16).Bold().FontColor("#7a1f2b");
-
-                col.Item().PaddingTop(30).Row(row =>
-                {
-                    row.RelativeItem().Column(c =>
-                    {
-                        c.Item().Text(t =>
-                        {
-                            t.Span("முடிவு தேதி: ").SemiBold().FontSize(11);
-                            t.Span(closedAt.HasValue ? closedAt.Value.ToString("dd-MM-yyyy") : "-").FontSize(11);
-                        });
-                        c.Item().PaddingTop(6).Text(t =>
-                        {
-                            t.Span("முடிவு நேரம்: ").SemiBold().FontSize(11);
-                            t.Span(closedAt.HasValue ? closedAt.Value.ToString("hh:mm tt") : "-").FontSize(11);
-                        });
-                    });
-
-                    row.ConstantItem(30); // spacer
-
-                    row.ConstantItem(130).Element(e =>
-                        RenderPhotoBox(e, "முடிவின் போது வாடிக்கையாளர் புகைப்படம்", closurePhoto, width: 130, height: 130, labelFontSize: 9));
-                });
                 if (isClosure)
                 {
-                    // Closure receipt: single declaration line, no numbering
-                    col.Item().PaddingTop(24).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
+                    col.Item().AlignCenter().PaddingTop(10)
+                        .Text("கணக்கு  முடிவு உறுதிப்படுத்தல்").FontSize(16).Bold().FontColor("#7a1f2b");
+                }
+
+                // ---- Repayment tracking grid ----
+                // 4 columns per block (தேதி / வட்டி வரவு மாதம் / அசல் / கை எழுத்து) x 2 blocks = 8 columns total
+                col.Item().PaddingTop(16).Border(1).BorderColor(Colors.Grey.Darken1).Table(table =>
+                {
+                    table.ColumnsDefinition(c =>
+                    {
+                        c.RelativeColumn(1.1f);
+                        c.RelativeColumn(1.3f);
+                        c.RelativeColumn(1.0f);
+                        c.RelativeColumn(1.3f);
+                        c.RelativeColumn(1.1f);
+                        c.RelativeColumn(1.3f);
+                        c.RelativeColumn(1.0f);
+                        c.RelativeColumn(1.3f);
+                    });
+
+                    table.Header(h =>
+                    {
+                        h.Cell().Element(HeaderCell).Text("தேதி").FontSize(7.5f);
+                        h.Cell().Element(HeaderCell).Text("வட்டி\nவரவு\nமாதம்").FontSize(7.5f);
+                        h.Cell().Element(HeaderCell).Text("அசல்").FontSize(7.5f);
+                        h.Cell().Element(HeaderCell).Text("கை\nஎழுத்து").FontSize(7.5f);
+                        h.Cell().Element(HeaderCell).Text("தேதி").FontSize(7.5f);
+                        h.Cell().Element(HeaderCell).Text("வட்டி\nவரவு\nமாதம்").FontSize(7.5f);
+                        h.Cell().Element(HeaderCell).Text("அசல்").FontSize(7.5f);
+                        h.Cell().Element(HeaderCell).Text("கை\nஎழுத்து").FontSize(7.5f);
+                    });
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        for (int j = 0; j < 8; j++)
+                        {
+                            // j == 3 is "கை எழுத்து" (end of the first 4-col block) and MUST keep
+                            // its right border so the vertical divider between it and the next
+                            // "தேதி" column (j == 4) still renders. Only j == 7, the true outer
+                            // last column, skips the right border.
+                            bool isLastCol = (j == 7);
+                            table.Cell().Element(isLastCol ? LastBodyCell : BodyCell).Text(" ");
+                        }
+                    }
+
+                    // Uniform full border on every header cell — guarantees vertical AND
+                    // horizontal lines render the same way the body grid box does.
+                    static IContainer HeaderCell(IContainer c) =>
+                        c.Border(1).BorderColor(Colors.Grey.Darken1)
+                            .Background(Colors.Grey.Lighten2).Padding(3).AlignCenter();
+
+                    static IContainer BodyCell(IContainer c) =>
+                        c.BorderRight(1).BorderBottom(1).BorderColor(Colors.Grey.Darken1).Height(20);
+                    static IContainer LastBodyCell(IContainer c) =>
+                        c.BorderBottom(1).BorderColor(Colors.Grey.Darken1).Height(20);
+                });
+
+                if (isClosure)
+                {
+                    col.Item().PaddingTop(16).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
                     {
                         ack.Item().Text("இதில் கண்ட அசல் வட்டி தொகைகளை செலுத்தி முன் பக்கத்தில் கண்ட அடகு பொருட்களை சரிபார்த்து பெற்று கொண்டேன்.")
                             .FontSize(7.5f).Justify();
@@ -700,8 +745,7 @@ public class LoanReceiptPdfService
                 }
                 else
                 {
-                    // Loan creation receipt: items 1, 2, 3 only
-                    col.Item().PaddingTop(24).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
+                    col.Item().PaddingTop(16).Border(0.5f).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(ack =>
                     {
                         ack.Item().Row(row =>
                         {
@@ -732,8 +776,34 @@ public class LoanReceiptPdfService
 
             page.Footer().Column(foot =>
             {
-                RenderSignatureRow(foot, paddingTop: 20, rightLabel: "அங்கீகரிக்கப்பட்ட கையொப்பமிடுபவர் - ஸ்ரீ மீனாட்சி பேங்கர்ஸ்");
+                foot.Item().PaddingTop(10).Row(row =>
+                {
+                    row.RelativeItem(2).AlignBottom().Column(c =>
+                    {
+                        c.Item().LineHorizontal(0.5f);
+                        c.Item().PaddingTop(2).Text("அடகு வைப்பவர் கையெழுத்து அல்லது இடது கை பெருவிரல் ரேகை").FontSize(7.5f);
+                    });
 
+                    row.RelativeItem(1); // gap between the two blocks
+
+                    row.ConstantItem(130).Column(c =>
+                    {
+                        c.Item().Element(e =>
+                            RenderPhotoBox(e, "முடிவின் போது வாடிக்கையாளர் புகைப்படம்", closurePhoto, width: 130, height: 130, labelFontSize: 9));
+
+                        c.Item().PaddingTop(6).Text(t =>
+                        {
+                            t.Span("முடிவு தேதி: ").SemiBold().FontSize(10);
+                            t.Span(closedAt.HasValue ? closedAt.Value.ToString("dd-MM-yyyy") : "-").FontSize(10);
+                        });
+
+                        c.Item().PaddingTop(2).Text(t =>
+                        {
+                            t.Span("முடிவு நேரம்: ").SemiBold().FontSize(10);
+                            t.Span(closedAt.HasValue ? closedAt.Value.ToString("hh:mm tt") : "-").FontSize(10);
+                        });
+                    });
+                });
                 foot.Item().PaddingTop(10).Text(
                     "உங்கள் வணிகத்திற்கு நன்றி. இந்த கணக்கு முழுவதுமாக தீர்க்கப்பட்டு முடிக்கப்பட்டுள்ளது. " +
                     "இந்த எண்ணின் கீழ் மேலும் நிலுவைத் தொகை எதுவும் இல்லை.")
