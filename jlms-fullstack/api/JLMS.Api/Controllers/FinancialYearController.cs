@@ -13,12 +13,13 @@ public class FinancialYearController : ControllerBase
     private readonly JlmsDbContext _db;
     public FinancialYearController(JlmsDbContext db) => _db = db;
 
-    // GET /api/financial-years?activeOnly=true
+    // GET /api/financial-years?activeOnly=true&branchId=1
     [HttpGet]
-    public async Task<ActionResult<List<FinancialYearDto>>> GetAll([FromQuery] bool activeOnly = false)
+    public async Task<ActionResult<List<FinancialYearDto>>> GetAll([FromQuery] bool activeOnly = false, [FromQuery] int? branchId = null)
     {
         var query = _db.FinancialYears.AsNoTracking().AsQueryable();
         if (activeOnly) query = query.Where(f => f.Status == "A");
+        if (branchId.HasValue) query = query.Where(f => f.BranchId == branchId.Value);
 
         var rows = await query
             .OrderByDescending(f => f.FromDt).ThenBy(f => f.GoldLoanType)
@@ -46,13 +47,13 @@ public class FinancialYearController : ControllerBase
         if (dto.ToDt < dto.FromDt)
             return BadRequest("ToDt cannot be before FromDt.");
 
-        // Guard against two overlapping ACTIVE ranges for the same numbering type —
+        // Guard against two overlapping ACTIVE ranges for the same numbering type and branch —
         // that would make GetActiveAsync ambiguous about which prefix to use.
         var overlap = await _db.FinancialYears.AnyAsync(f =>
-            f.GoldLoanType == dto.GoldLoanType && f.Status == "A" &&
+            f.GoldLoanType == dto.GoldLoanType && f.Status == "A" && f.BranchId == dto.BranchId &&
             f.FromDt <= dto.ToDt && f.ToDt >= dto.FromDt);
         if (overlap)
-            return Conflict($"An active '{dto.GoldLoanType}' financial year already covers part of that date range.");
+            return Conflict($"An active '{dto.GoldLoanType}' financial year already covers part of that date range for this branch.");
 
         var entity = new FinancialYear
         {
@@ -65,7 +66,8 @@ public class FinancialYearController : ControllerBase
             Suffix = dto.Suffix,
             Status = "A",
             CreatedDt = DateTime.UtcNow,
-            CreatedBy = dto.CreatedBy
+            CreatedBy = dto.CreatedBy,
+            BranchId = dto.BranchId
         };
 
         _db.FinancialYears.Add(entity);
@@ -88,10 +90,10 @@ public class FinancialYearController : ControllerBase
         {
             var overlap = await _db.FinancialYears.AnyAsync(f =>
                 f.FinancialYearId != id &&
-                f.GoldLoanType == dto.GoldLoanType && f.Status == "A" &&
+                f.GoldLoanType == dto.GoldLoanType && f.Status == "A" && f.BranchId == dto.BranchId &&
                 f.FromDt <= dto.ToDt && f.ToDt >= dto.FromDt);
             if (overlap)
-                return Conflict($"An active '{dto.GoldLoanType}' financial year already covers part of that date range.");
+                return Conflict($"An active '{dto.GoldLoanType}' financial year already covers part of that date range for this branch.");
         }
 
         entity.Code = dto.Code;
@@ -102,6 +104,7 @@ public class FinancialYearController : ControllerBase
         entity.Prefix = dto.Prefix;
         entity.Suffix = dto.Suffix;
         entity.Status = dto.Status;
+        entity.BranchId = dto.BranchId;
 
         await _db.SaveChangesAsync();
         return NoContent();
@@ -121,5 +124,5 @@ public class FinancialYearController : ControllerBase
 
     private static FinancialYearDto ToDto(FinancialYear f) => new(
         f.FinancialYearId, f.Code, f.GoldLoanType, f.FromDt, f.ToDt,
-        f.GoldLoanNoStartsFrom, f.Prefix, f.Suffix, f.Status, f.CreatedDt, f.CreatedBy);
+        f.GoldLoanNoStartsFrom, f.Prefix, f.Suffix, f.Status, f.CreatedDt, f.CreatedBy, f.BranchId);
 }

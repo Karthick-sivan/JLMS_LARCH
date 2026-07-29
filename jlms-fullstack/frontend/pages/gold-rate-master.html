@@ -18,7 +18,7 @@
                 <div class="page-header">
                     <div>
                         <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Gold Rate Master</span></div> -->
-                        <div class="h1">Gold Rate Master</div>
+                        <div class="h1" data-i18n="goldRateMaster">Gold Rate Master</div>
                     </div>
                 </div>
                 <div id="apiErrorBanner" class="api-error-banner"></div>
@@ -33,11 +33,11 @@
                 <div class="row g-3">
                     <div class="col-lg-4">
                         <div class="panel mb-3">
-                            <div class="panel-head"><div class="h4">Update Today's Rate</div></div>
+                            <div class="panel-head"><div class="h4" data-i18n="updateTodaysRate">Update Today's Rate</div></div>
                             <div class="panel-body">
-                                <div class="field-group"><label class="field-label">Effective Date</label><input class="form-control-jlms" id="effectiveDate" disabled></div>
-                                <div class="field-group"><label class="field-label">22K Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rate22K"></div></div>
-                                <div class="field-group"><label class="field-label">Silver Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rateSilver"></div></div>
+                                <div class="field-group"><label class="field-label" data-i18n="effectiveDate">Effective Date</label><input class="form-control-jlms" id="effectiveDate" disabled></div>
+                                <div class="field-group"><label class="field-label" data-i18n="rate22K">22K Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rate22K"></div></div>
+                                <div class="field-group"><label class="field-label" data-i18n="silverRate">Silver Rate (per gram)<span class="req">*</span></label><div class="input-affix"><span class="affix">₹</span><input id="rateSilver"></div></div>
                                 <!-- Hidden fields kept for API payload -->
                                 <input type="hidden" id="rate24K">
                                 <input type="hidden" id="rate18K">
@@ -48,7 +48,7 @@
                     <div class="col-lg-8">
                         <div class="panel mb-3">
                             <div class="panel-head" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                                <div class="h4">Rate Trend — 22K &amp; Silver (Last 30 Days)</div>
+                                <div class="h4" data-i18n="rateTrend">Rate Trend — 22K &amp; Silver (Last 30 Days)</div>
                                 <div style="display:flex; gap:16px; align-items:center; font-size:13px;">
                                     <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#D4AF37;margin-right:5px;"></span>22K Gold</span>
                                     <span><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#7B8EA0;margin-right:5px;"></span>Silver</span>
@@ -60,10 +60,10 @@
                 </div>
 
                 <div class="panel">
-                    <div class="panel-head"><div class="h4">Rate History</div></div>
+                    <div class="panel-head"><div class="h4" data-i18n="rateHistory">Rate History</div></div>
                     <div class="panel-body no-pad table-jlms-wrap">
                         <table class="table-jlms">
-                            <thead><tr><th>Effective Date</th><th class="text">22K Rate</th><th class="text">Silver Rate</th></tr></thead>
+                            <thead id="goldRateHistoryThead"><tr><th data-i18n="effectiveDate">Effective Date</th><th class="text" data-i18n="22kRate">22K Rate</th><th class="text" data-i18n="silverRate">Silver Rate</th></tr></thead>
                             <tbody id="historyBody">
                                 <tr><td colspan="3" class="text-muted-jlms">Loading history…</td></tr>
                             </tbody>
@@ -75,8 +75,9 @@
     </div>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>window.JLMS_ACTIVE = "gold-rate-master";</script>
-    <script src="js/jlms-shell.js"></script>
+    <script src="../js/language.js"></script>
     <script src="js/api-client.js"></script>
+    <script src="js/jlms-shell.js"></script>
     <script>
 
         window.JLMS_ACTIVE = "gold-rate-master";
@@ -114,6 +115,27 @@
             const d = new Date(value);
             if (isNaN(d.getTime())) return value;
             return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function applyTranslationsToTableHeaders() {
+            const headerElements = document.querySelectorAll('#goldRateHistoryThead th[data-i18n]');
+            headerElements.forEach(th => {
+                const key = th.getAttribute('data-i18n');
+                if (lang[key]) {
+                    th.textContent = lang[key];
+                }
+            });
+
+            // Re-apply when language changes
+            registerLanguageCallback(() => {
+                const updatedHeaders = document.querySelectorAll('#goldRateHistoryThead th[data-i18n]');
+                updatedHeaders.forEach(th => {
+                    const key = th.getAttribute('data-i18n');
+                    if (lang[key]) {
+                        th.textContent = lang[key];
+                    }
+                });
+            });
         }
 
         async function loadGoldRate() {
@@ -331,6 +353,9 @@
 
                 document.getElementById('historyBody').innerHTML =
                     html || '<tr><td colspan="3" class="text-muted-jlms">No rate history yet.</td></tr>';
+
+                // Apply translations to table headers
+                applyTranslationsToTableHeaders();
 
                 // Chart wants oldest -> newest for a left-to-right trend line
                 const rowsAscending = [...rowsDescending].reverse();

@@ -17,7 +17,7 @@
       <div class="page-header">
         <div>
           <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Disbursement</span></div>
-          <div class="h1">Loan Disbursement</div>
+          <div class="h1" data-i18n="loanDisbursement">Loan Disbursement</div>
         </div>
       </div>
 
@@ -28,11 +28,11 @@
         <div class="col-lg-7">
           <!--
           <div class="panel mb-3">
-            <div class="panel-head"><div class="h4">Find Approved Loan</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="findApprovedLoan">Find Approved Loan</div></div>
             <div class="panel-body">
               <div class="row g-3 align-items-end">
                 <div class="col-md-8">
-                  <label class="field-label">Loan Number</label>
+                  <label class="field-label" data-i18n="loanNumber">Loan Number</label>
                   <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input id="loanNumberInput" placeholder="e.g. JL-20260001"></div>
                 </div>
                 <div class="col-md-2">
@@ -47,7 +47,7 @@
         -->
           <div class="panel mb-3" id="lookupPanel">
             <div class="panel-head">
-              <div class="h4" id="lookupTitle">Approved Loans</div>
+              <div class="h4" id="lookupTitle" data-i18n="approvedLoans">Approved Loans</div>
               <span class="text-caption" id="lookupCount"></span>
             </div>
             <div class="panel-body">
@@ -91,7 +91,7 @@
 
           <div class="panel mb-3" id="detailPanel" style="display:none;">
             <div class="panel-head">
-              <div class="h4">Loan Details</div>
+              <div class="h4" data-i18n="loanDetails">Loan Details</div>
               <span class="badge-jlms badge-success" id="statusBadge"><span class="dot"></span>Approved</span>
             </div>
             <div class="panel-body">
@@ -109,7 +109,7 @@
           </div>
 
           <div class="panel" id="paymentPanel" style="display:none;">
-            <div class="panel-head"><div class="h4">Payment Mode</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="paymentMode">Payment Mode</div></div>
             <div class="panel-body">
               <div class="radio-pill-group mb-3" id="paymentModePills">
                 <div class="radio-pill selected" data-value="Cash"><i class="bi bi-cash-stack"></i> Cash</div>
@@ -118,7 +118,7 @@
               </div>
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="field-label">Reference / Cheque No. <span class="opt">optional</span></label>
+                  <label class="field-label" data-i18n="referenceChequeNo">Reference / Cheque No. <span class="opt">optional</span></label>
                   <input class="form-control-jlms" id="refNoInput" placeholder="Transaction reference">
                 </div>
               </div>
@@ -136,6 +136,7 @@
 </div>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "loan-disbursement";</script>
+<script src="../js/language.js"></script>
 <script src="js/jlms-shell.js"></script>
 <script src="js/api-client.js"></script>
 <script>

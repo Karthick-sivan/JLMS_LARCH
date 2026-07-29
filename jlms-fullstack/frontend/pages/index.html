@@ -61,18 +61,13 @@
 
       <div id="apiErrorBanner" class="api-error-banner"></div>
       <form id="loginForm">
-        <div class="field-group">
-          <label class="field-label">Branch<span class="req">*</span></label>
-          <select class="form-select-jlms" id="branchSelect">
-            <option value="1">Madurai Main Branch (BR-001)</option>
-          </select>
-        </div>
+        <!-- Branch dropdown removed per request -->
 
         <div class="field-group">
           <label class="field-label">Username / Employee ID<span class="req">*</span></label>
           <div class="input-affix">
             <span class="affix"><i class="bi bi-person"></i></span>
-            <input type="text" id="usernameInput" placeholder="e.g. admin" value="admin">
+            <input type="text" id="usernameInput" placeholder="Enter username">
           </div>
         </div>
 
@@ -96,16 +91,8 @@
         <button type="submit" id="loginBtn" class="btn-jlms btn-jlms-primary btn-lg" style="width:100%; justify-content:center;">
           <i class="bi bi-box-arrow-in-right"></i> Sign In
         </button>
+        </form>
 
-        <div class="divider-jlms"></div>
-
-        <div style="background:var(--n-100); border-radius:var(--radius-md); padding:12px 14px; display:flex; gap:10px; align-items:flex-start;">
-          <i class="bi bi-info-circle" style="color:var(--navy-700); margin-top:1px;"></i>
-          <div style="font-size:11.5px; color:var(--n-600); line-height:1.5;">
-            Default test login: <strong>admin</strong> / <strong>Admin@123</strong> (from the optional reference data seed script). Access is monitored and logged for compliance.
-          </div>
-        </div>
-      </form>
 
       <div style="text-align:center; margin-top:28px; font-size:11.5px; color:var(--n-500);">
         © 2026 JLMS Financial Technologies. All rights reserved.
@@ -117,20 +104,11 @@
 </body>
 </html>
 
+<script src="../js/language.js"></script>
 <script src="js/api-client.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const branches = await Api.getBranches();
-    const branchSelect = document.getElementById('branchSelect');
-    if (branchSelect && branches && branches.length > 0) {
-      branchSelect.innerHTML =
-        `<option value="" disabled selected>-- Select Branch --</option>` +
-        branches.map(b => `<option value="${b.branchId}">${b.branchName} (${b.branchCode})</option>`).join('');
-    }
-  } catch (err) {
-    console.error('Failed to load branches:', err);
-  }
+  // Branch loading disabled as branch dropdown is removed
 });
 
 function togglePw() {
@@ -145,7 +123,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   clearApiError();
   const username = document.getElementById('usernameInput').value.trim();
   const password = document.getElementById('passwordInput').value;
-  const branchId = parseInt(document.getElementById('branchSelect').value, 10);
+  const branchId = null;
   const btn = document.getElementById('loginBtn');
 
   if (!username || !password) {
@@ -158,7 +136,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   try {
     const user = await Api.login(username, password, branchId);
     Session.set(user);
-    window.location.href = 'dashboard.html';
+    const isSuperAdmin = user && user.roleId === 1002;
+    window.location.href = isSuperAdmin ? 'superadmin-dashboard.html' : 'dashboard.html';
   } catch (err) {
     showApiError(err);
     btn.disabled = false;

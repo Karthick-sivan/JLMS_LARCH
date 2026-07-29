@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JLMS.Api.Data;
 using JLMS.Api.DTOs;
+using JLMS.Api.Models;
 
 namespace JLMS.Api.Controllers;
 
@@ -15,33 +16,62 @@ public class DashboardController : ControllerBase
     [HttpGet("summary")]
     public async Task<ActionResult<DashboardSummaryDto>> GetSummary()
     {
+        var currentUser = HttpContext.Items["CurrentUser"] as User;
+        var filterBranchId = currentUser?.GetFilterBranchId();
+
         var today = DateTime.UtcNow.Date;
         var monthStart = new DateTime(today.Year, today.Month, 1);
 
-        var activeLoans = await _db.Loans.CountAsync(l => l.Status == "Active");
-        var outstandingAmount = await _db.Loans
-            .Where(l => l.Status == "Active")
-            .SumAsync(l => (decimal?)l.OutstandingPrincipal) ?? 0;
+        // Active Loans
+        var activeLoansQuery = _db.Loans.Where(l => l.Status == "Active");
+        if (filterBranchId.HasValue)
+            activeLoansQuery = activeLoansQuery.Where(l => l.BranchId == filterBranchId.Value);
+        var activeLoans = await activeLoansQuery.CountAsync();
 
-        var todaysCollections = await _db.LoanTransactions
+        // Outstanding Amount
+        var outstandingQuery = _db.Loans.Where(l => l.Status == "Active");
+        if (filterBranchId.HasValue)
+            outstandingQuery = outstandingQuery.Where(l => l.BranchId == filterBranchId.Value);
+        var outstandingAmount = await outstandingQuery.SumAsync(l => (decimal?)l.OutstandingPrincipal) ?? 0;
+
+        // Today's Collections
+        var todaysCollectionsQuery = _db.LoanTransactions
             .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
-                        && t.TransactionDate.Date == today)
-            .SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
+                        && t.TransactionDate.Date == today);
+        if (filterBranchId.HasValue)
+            todaysCollectionsQuery = todaysCollectionsQuery.Where(t => _db.Loans.Any(l => l.LoanId == t.LoanId && l.BranchId == filterBranchId.Value));
+        var todaysCollections = await todaysCollectionsQuery.SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
 
-        var todaysDisbursement = await _db.LoanTransactions
-            .Where(t => t.TransactionType == "Disbursement" && t.TransactionDate.Date == today)
-            .SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
+        // Today's Disbursement
+        var todaysDisbursementQuery = _db.LoanTransactions
+            .Where(t => t.TransactionType == "Disbursement" && t.TransactionDate.Date == today);
+        if (filterBranchId.HasValue)
+            todaysDisbursementQuery = todaysDisbursementQuery.Where(t => _db.Loans.Any(l => l.LoanId == t.LoanId && l.BranchId == filterBranchId.Value));
+        var todaysDisbursement = await todaysDisbursementQuery.SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
 
-        var overdueLoans = await _db.Loans
-            .CountAsync(l => l.Status == "Active" && l.MaturityDate != null && l.MaturityDate < today);
+        // Overdue Loans
+        var overdueQuery = _db.Loans.Where(l => l.Status == "Active" && l.MaturityDate != null && l.MaturityDate < today);
+        if (filterBranchId.HasValue)
+            overdueQuery = overdueQuery.Where(l => l.BranchId == filterBranchId.Value);
+        var overdueLoans = await overdueQuery.CountAsync();
 
-        var auctionEligible = await _db.Auctions.CountAsync(a => (a.Status == "Eligible" || a.Status == "NoticeSent") && _db.Loans.Any(l => l.LoanId == a.LoanId));
+        // Auction Eligible
+        var auctionEligibleQuery = _db.Auctions.Where(a => (a.Status == "Eligible" || a.Status == "NoticeSent") && _db.Loans.Any(l => l.LoanId == a.LoanId));
+        if (filterBranchId.HasValue)
+            auctionEligibleQuery = auctionEligibleQuery.Where(a => _db.Loans.Any(l => l.LoanId == a.LoanId && l.BranchId == filterBranchId.Value));
+        var auctionEligible = await auctionEligibleQuery.CountAsync();
 
-        var renewalsThisMonth = await _db.LoanTransactions
-            .CountAsync(t => t.TransactionType == "Renewal" && t.TransactionDate >= monthStart);
+        // Renewals This Month
+        var renewalsQuery = _db.LoanTransactions.Where(t => t.TransactionType == "Renewal" && t.TransactionDate >= monthStart);
+        if (filterBranchId.HasValue)
+            renewalsQuery = renewalsQuery.Where(t => _db.Loans.Any(l => l.LoanId == t.LoanId && l.BranchId == filterBranchId.Value));
+        var renewalsThisMonth = await renewalsQuery.CountAsync();
 
-        var closuresThisMonth = await _db.Loans
-            .CountAsync(t => t.Status == "Closed" && t.ClosedAt >= monthStart);
+        // Closures This Month
+        var closuresQuery = _db.Loans.Where(t => t.Status == "Closed" && t.ClosedAt >= monthStart);
+        if (filterBranchId.HasValue)
+            closuresQuery = closuresQuery.Where(t => t.BranchId == filterBranchId.Value);
+        var closuresThisMonth = await closuresQuery.CountAsync();
 
         return Ok(new DashboardSummaryDto(
             activeLoans, outstandingAmount, todaysCollections, todaysDisbursement,
@@ -51,33 +81,25 @@ public class DashboardController : ControllerBase
     [HttpGet("collections-today")]
     public async Task<ActionResult> GetCollectionsToday()
     {
-        //var today = DateTime.UtcNow.Date;
-        //var items = await _db.LoanTransactions.AsNoTracking()
-        //    .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment")
-        //                && t.TransactionDate.Date == today)
-        //    .OrderByDescending(t => t.TransactionDate)
-        //    .Join(_db.Loans, t => t.LoanId, l => l.LoanId, (t, l) => new { t, l })
-        //    .Join(_db.Customers, x => x.l.CustomerId, c => c.CustomerId, (x, c) => new
-        //    {
-        //        x.l.LoanNumber,
-        //        c.CustomerName,
-        //        x.t.TotalAmount,
-        //        x.t.PaymentMode,
-        //        x.t.TransactionDate
-        //    })
-        //    .Take(20)
-        //    .ToListAsync();
-        //return Ok(items);
-
+        var currentUser = HttpContext.Items["CurrentUser"] as User;
+        var filterBranchId = currentUser?.GetFilterBranchId();
         var today = DateTime.Today;
 
-        var items = await _db.LoanTransactions
+        var itemsQuery = _db.LoanTransactions
             .AsNoTracking()
             .Where(x =>
                 (x.TransactionType == "InterestCollection" ||
-                 x.TransactionType == "LoanOpsPayment") &&
+                 x.TransactionType == "LoanOpsPayment" ||
+                 x.TransactionType == "Closure") &&
                 x.TransactionDate >= today &&
-                x.TransactionDate < today.AddDays(1))
+                x.TransactionDate < today.AddDays(1));
+
+        if (filterBranchId.HasValue)
+        {
+            itemsQuery = itemsQuery.Where(x => _db.Loans.Any(l => l.LoanId == x.LoanId && l.BranchId == filterBranchId.Value));
+        }
+
+        var items = await itemsQuery
             .Join(_db.Loans,
                 x => x.LoanId,
                 t => t.LoanId,
@@ -100,18 +122,25 @@ public class DashboardController : ControllerBase
         return Ok(items);
     }
 
-    // GET /api/dashboard/collection-trend?days=14
-    // Day-wise total collections (interest + principal + closures) for the last N days,
-    // zero-filled for days with no activity.
     [HttpGet("collection-trend")]
     public async Task<ActionResult> GetCollectionTrend([FromQuery] int days = 14)
     {
+        var currentUser = HttpContext.Items["CurrentUser"] as User;
+        var filterBranchId = currentUser?.GetFilterBranchId();
+
         var today = DateTime.UtcNow.Date;
         var startDate = today.AddDays(-(days - 1));
 
-        var raw = await _db.LoanTransactions.AsNoTracking()
+        var query = _db.LoanTransactions.AsNoTracking()
             .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
-                        && t.TransactionDate.Date >= startDate)
+                        && t.TransactionDate.Date >= startDate);
+
+        if (filterBranchId.HasValue)
+        {
+            query = query.Where(t => _db.Loans.Any(l => l.LoanId == t.LoanId && l.BranchId == filterBranchId.Value));
+        }
+
+        var raw = await query
             .GroupBy(t => t.TransactionDate.Date)
             .Select(g => new { Date = g.Key, Total = g.Sum(t => t.TotalAmount) })
             .ToListAsync();
@@ -130,10 +159,20 @@ public class DashboardController : ControllerBase
     [HttpGet("loans-due-today")]
     public async Task<ActionResult> GetLoansDueToday()
     {
+        var currentUser = HttpContext.Items["CurrentUser"] as User;
+        var filterBranchId = currentUser?.GetFilterBranchId();
+
         var today = DateTime.UtcNow.Date;
-        var loans = await _db.Loans.AsNoTracking()
+        var query = _db.Loans.AsNoTracking()
             .Include(l => l.Customer)
-            .Where(l => l.Status == "Active" && l.MaturityDate != null && l.MaturityDate <= today.AddDays(3))
+            .Where(l => l.Status == "Active" && l.MaturityDate != null && l.MaturityDate <= today.AddDays(3));
+
+        if (filterBranchId.HasValue)
+        {
+            query = query.Where(l => l.BranchId == filterBranchId.Value);
+        }
+
+        var loans = await query
             .OrderBy(l => l.MaturityDate)
             .Take(20)
             .Select(l => new
@@ -145,6 +184,84 @@ public class DashboardController : ControllerBase
                 IsOverdue = l.MaturityDate < today
             })
             .ToListAsync();
+
         return Ok(loans);
+    }
+
+    [HttpGet("superadmin-summary")]
+    public async Task<ActionResult> GetSuperAdminSummary()
+    {
+        var currentUser = HttpContext.Items["CurrentUser"] as User;
+        if (currentUser == null || !currentUser.IsSuperAdmin())
+        {
+            return Forbid();
+        }
+
+        var today = DateTime.UtcNow.Date;
+
+        var totalBranches = await _db.Branches.CountAsync();
+        var activeLoans = await _db.Loans.CountAsync(l => l.Status == "Active");
+        var outstandingAmount = await _db.Loans
+            .Where(l => l.Status == "Active")
+            .SumAsync(l => (decimal?)l.OutstandingPrincipal) ?? 0;
+
+        var todaysCollections = await _db.LoanTransactions
+            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
+                        && t.TransactionDate.Date == today)
+            .SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
+
+        var todaysDisbursement = await _db.LoanTransactions
+            .Where(t => t.TransactionType == "Disbursement" && t.TransactionDate.Date == today)
+            .SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
+
+        // Branch-wise stats
+        var branches = await _db.Branches.AsNoTracking().ToListAsync();
+        var activeLoansByBranch = await _db.Loans
+            .Where(l => l.Status == "Active")
+            .GroupBy(l => l.BranchId)
+            .Select(g => new { BranchId = g.Key, Count = g.Count(), Sum = g.Sum(l => (decimal?)l.OutstandingPrincipal) ?? 0 })
+            .ToDictionaryAsync(x => x.BranchId, x => x);
+
+        var collectionsByBranch = await _db.LoanTransactions
+            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
+                        && t.TransactionDate.Date == today
+                        && t.BranchId.HasValue)
+            .GroupBy(t => t.BranchId!.Value)
+            .Select(g => new { BranchId = g.Key, Sum = g.Sum(t => (decimal?)t.TotalAmount) ?? 0 })
+            .ToDictionaryAsync(x => x.BranchId, x => x.Sum);
+
+        var disbursementsByBranch = await _db.LoanTransactions
+            .Where(t => t.TransactionType == "Disbursement" && t.TransactionDate.Date == today && t.BranchId.HasValue)
+            .GroupBy(t => t.BranchId!.Value)
+            .Select(g => new { BranchId = g.Key, Sum = g.Sum(t => (decimal?)t.TotalAmount) ?? 0 })
+            .ToDictionaryAsync(x => x.BranchId, x => x.Sum);
+
+        var branchStats = branches.Select(b => {
+            activeLoansByBranch.TryGetValue(b.BranchId, out var loanMetric);
+            collectionsByBranch.TryGetValue(b.BranchId, out var collectionSum);
+            disbursementsByBranch.TryGetValue(b.BranchId, out var disbursementSum);
+
+            return new {
+                b.BranchId,
+                b.BranchCode,
+                b.BranchName,
+                b.City,
+                b.State,
+                b.IsActive,
+                ActiveLoans = loanMetric?.Count ?? 0,
+                OutstandingAmount = loanMetric?.Sum ?? 0,
+                TodaysCollections = collectionSum,
+                TodaysDisbursement = disbursementSum
+            };
+        }).ToList();
+
+        return Ok(new {
+            totalBranches,
+            activeLoans,
+            outstandingAmount,
+            todaysCollections,
+            todaysDisbursement,
+            branchStats
+        });
     }
 }

@@ -582,7 +582,7 @@ public class LoanReceiptPdfService
                                 .Where(s => !string.IsNullOrWhiteSpace(s))));
                         });
                         c.Item().Text(t => { t.Span("தொலைபேசி: ").SemiBold(); t.Span(customer.Mobile ?? "-"); });
-                        //c.Item().Text(t => { t.Span("கடன் திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
+                        //c.Item().Text(t => { t.Span("அடகு திட்டம்: ").SemiBold(); t.Span(loan.LoanScheme?.SchemeName ?? "-"); });
                         // NOTE: அடகு எண் / அசல் தொகை / தேதி are shown once, in the letterhead box above — not repeated here.
                     });
 

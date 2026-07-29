@@ -81,28 +81,49 @@ public class ClosureController : ControllerBase
         loan.UpdatedAt = DateTime.UtcNow;
         loan.ClosePhotoPath = closePhotoPath;
 
-        var seq = await _db.LoanTransactions.CountAsync() + 1;
-        var receiptNo = _calc.GenerateReceiptNumber(seq);
+        LoanTransaction txn = null;
+        Exception lastError = null;
+        string receiptNo = null;
 
-        var txn = new LoanTransaction
+        for (int attempt = 0; attempt < 5; attempt++)
         {
-            LoanId = loan.LoanId,
-            TransactionType = "Closure",
-            ReceiptNumber = receiptNo,
-            TransactionDate = DateTime.UtcNow,
-            PrincipalAmount = calc.OutstandingPrincipal,
-            InterestAmount = calc.OutstandingInterest,
-            PenaltyAmount = calc.Penalty,
-            TotalAmount = calc.TotalClosureAmount,
-            PaymentMode = request.PaymentMode,
-            ReferenceNo = request.ReferenceNo,
-            BalancePrincipalAfter = 0,
-            ProcessedBy = request.ProcessedByUserId,
-            BranchId = loan.BranchId,
-            CreatedAt = DateTime.UtcNow
-        };
-        _db.LoanTransactions.Add(txn);
-        await _db.SaveChangesAsync();
+            var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
+            receiptNo = _calc.GenerateReceiptNumber(seq);
+
+            txn = new LoanTransaction
+            {
+                LoanId = loan.LoanId,
+                TransactionType = "Closure",
+                ReceiptNumber = receiptNo,
+                TransactionDate = DateTime.UtcNow,
+                PrincipalAmount = calc.OutstandingPrincipal,
+                InterestAmount = calc.OutstandingInterest,
+                PenaltyAmount = calc.Penalty,
+                TotalAmount = calc.TotalClosureAmount,
+                PaymentMode = request.PaymentMode,
+                ReferenceNo = request.ReferenceNo,
+                BalancePrincipalAfter = 0,
+                ProcessedBy = request.ProcessedByUserId,
+                BranchId = loan.BranchId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.LoanTransactions.Add(txn);
+
+            try
+            {
+                await _db.SaveChangesAsync();
+                lastError = null;
+                break;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
+            {
+                _db.Entry(txn).State = EntityState.Detached;
+                lastError = ex;
+            }
+        }
+
+        if (lastError != null)
+            throw lastError;
 
         return Ok(new ReceiptDto(receiptNo, txn.TransactionDate, loan.LoanNumber, loan.Customer?.CustomerName ?? "",
             calc.OutstandingInterest, calc.Penalty, calc.TotalClosureAmount, request.PaymentMode, 0, null));
@@ -129,27 +150,48 @@ public class ClosureController : ControllerBase
         loan.TenureMonths = request.NewTenureMonths;
         loan.UpdatedAt = DateTime.UtcNow;
 
-        var seq = await _db.LoanTransactions.CountAsync() + 1;
-        var receiptNo = _calc.GenerateReceiptNumber(seq);
+        LoanTransaction txn = null;
+        Exception lastError = null;
+        string receiptNo = null;
 
-        var txn = new LoanTransaction
+        for (int attempt = 0; attempt < 5; attempt++)
         {
-            LoanId = loan.LoanId,
-            TransactionType = "Renewal",
-            ReceiptNumber = receiptNo,
-            TransactionDate = DateTime.UtcNow,
-            InterestAmount = calc.OutstandingInterest,
-            PenaltyAmount = calc.Penalty,
-            ChargesAmount = request.RenewalCharges,
-            TotalAmount = totalPayableNow,
-            BalancePrincipalAfter = loan.OutstandingPrincipal,
-            NextDueDate = newMaturity,
-            ProcessedBy = request.ProcessedByUserId,
-            BranchId = loan.BranchId,
-            CreatedAt = DateTime.UtcNow
-        };
-        _db.LoanTransactions.Add(txn);
-        await _db.SaveChangesAsync();
+            var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
+            receiptNo = _calc.GenerateReceiptNumber(seq);
+
+            txn = new LoanTransaction
+            {
+                LoanId = loan.LoanId,
+                TransactionType = "Renewal",
+                ReceiptNumber = receiptNo,
+                TransactionDate = DateTime.UtcNow,
+                InterestAmount = calc.OutstandingInterest,
+                PenaltyAmount = calc.Penalty,
+                ChargesAmount = request.RenewalCharges,
+                TotalAmount = totalPayableNow,
+                BalancePrincipalAfter = loan.OutstandingPrincipal,
+                NextDueDate = newMaturity,
+                ProcessedBy = request.ProcessedByUserId,
+                BranchId = loan.BranchId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.LoanTransactions.Add(txn);
+
+            try
+            {
+                await _db.SaveChangesAsync();
+                lastError = null;
+                break;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
+            {
+                _db.Entry(txn).State = EntityState.Detached;
+                lastError = ex;
+            }
+        }
+
+        if (lastError != null)
+            throw lastError;
 
         return Ok(new { receiptNo, loan.LoanId, loan.LoanNumber, NewMaturityDate = newMaturity, TotalPaid = totalPayableNow });
     }

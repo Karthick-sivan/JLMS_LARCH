@@ -1,4 +1,4 @@
-﻿/* =================================customer aster===========================
+/* =================================customer aster===========================
    JLMS API Client
    ============================================================
    Set API_BASE_URL to match where your ASP.NET Core API is
@@ -17,7 +17,9 @@ class ApiError extends Error {
   }
 }
 
-async function apiRequest(path, { method = "GET", body = null } = {}) {
+async function apiRequest(path, { method = "GET", body = null, timeoutMs = 15000 } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   let response;
   try {
     const headers = {};
@@ -31,13 +33,22 @@ async function apiRequest(path, { method = "GET", body = null } = {}) {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal
     });
   } catch (networkErr) {
+    if (networkErr.name === "AbortError") {
+      throw new ApiError(
+        `Request to ${API_BASE_URL}${path} timed out after ${timeoutMs / 1000}s. The API may be running but not responding.`,
+        0
+      );
+    }
     throw new ApiError(
       `Could not reach the API at ${API_BASE_URL}. Is the ASP.NET Core project running? (${networkErr.message})`,
       0
     );
+  } finally {
+    clearTimeout(timer);
   }
 
   let data = null;
@@ -57,6 +68,8 @@ const Api = {
   // ---- Auth ----
   login: (username, password, branchId) =>
     apiRequest("/auth/login", { method: "POST", body: { username, password, branchId } }),
+  changePassword: (currentPassword, newPassword) =>
+    apiRequest("/auth/change-password", { method: "POST", body: { currentPassword, newPassword } }),
 
   // ---- Customers ----
   searchCustomers: (params = {}) => {
@@ -114,12 +127,19 @@ const Api = {
     getUsers: () => apiRequest("/user-master"),
     getUserMasterBranches: () => apiRequest("/user-master/branches"),
     getUserMasterRoles: () => apiRequest("/user-master/roles"),
+    createRole: (dto) => apiRequest("/user-master/roles", { method: "POST", body: dto }),
     createUser: (dto) => apiRequest("/user-master", { method: "POST", body: dto }),
     updateUser: (id, dto) => apiRequest(`/user-master/${id}`, { method: "PUT", body: dto }),
     toggleUserStatus: (id) => apiRequest(`/user-master/${id}/toggle-status`, { method: "PATCH" }),
 
     // ---- Financial Year ----
-  getFinancialYears: (activeOnly = false) => apiRequest(`/financial-years?activeOnly=${activeOnly}`),
+  getFinancialYears: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.activeOnly) queryParams.append('activeOnly', params.activeOnly);
+    if (params.branchId) queryParams.append('branchId', params.branchId);
+    const queryString = queryParams.toString();
+    return apiRequest(`/financial-years${queryString ? '?' + queryString : ''}`);
+  },
   getFinancialYear: (id) => apiRequest(`/financial-years/${id}`),
   createFinancialYear: (dto) => apiRequest("/financial-years", { method: "POST", body: dto }),
   updateFinancialYear: (id, dto) => apiRequest(`/financial-years/${id}`, { method: "PUT", body: dto }),
@@ -330,9 +350,14 @@ getLoanOperationsLedger: (loanId, page = 1, pageSize = 10) =>
   apiRequest(`/loan-operations/${loanId}/ledger?page=${page}&pageSize=${pageSize}`),
 
 getLoanOperationsLedgerAll: (loanId) =>
-  apiRequest(`/loan-operations/${loanId}/ledger-all`)
+  apiRequest(`/loan-operations/${loanId}/ledger-all`),
 
-
+  // ---- SuperAdmin and Branch CRUD ----
+  getSuperAdminSummary: () => apiRequest("/dashboard/superadmin-summary"),
+  getBranchesAll: () => apiRequest("/branches"),
+  createBranch: (dto) => apiRequest("/branches", { method: "POST", body: dto }),
+  updateBranch: (id, dto) => apiRequest(`/branches/${id}`, { method: "PUT", body: dto }),
+  toggleBranchStatus: (id) => apiRequest(`/branches/${id}/toggle-status`, { method: "PATCH" })
 
 };
 

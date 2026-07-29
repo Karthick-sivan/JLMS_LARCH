@@ -342,36 +342,61 @@ public class LoanOperationsService
             // Rule 12: NEVER auto-close, even if both balances hit zero.
             // Status changes ONLY inside CloseLoanAsync via an explicit user action.
 
-            var sequence = await _db.LoanTransactions.CountAsync() + 1;
-            var receiptNumber = _calc.GenerateReceiptNumber(sequence);
+            LoanTransaction txn = null;
+            Exception lastError = null;
+            string receiptNumber = null;
 
-            var txn = new LoanTransaction
+            for (int attempt = 0; attempt < 5; attempt++)
             {
-                LoanId = loan.LoanId,
-                TransactionType = LoanOperationsCalculationHelper.PaymentTransactionType,
-                ReceiptNumber = receiptNumber,
-                //TransactionDate = paymentDate == DateTime.UtcNow.Date ? DateTime.UtcNow : paymentDate,
-                TransactionDate = paymentDate == IstClock.Today ? IstClock.Now : paymentDate,
-                PrincipalAmount = principalPaid,
-                InterestAmount = interestPaid,
-                PenaltyAmount = 0,
-                ChargesAmount = 0,
-                TotalAmount = amountReceived,
-                PaymentMode = request.PaymentMode,
-                ReferenceNo = request.ReferenceNo,
-                BalancePrincipalAfter = remainingPrincipal,
-                NextDueDate = null,
-                ProcessedBy = request.ProcessedByUserId,
-                BranchId = loan.BranchId,
-                Remarks = (remainingPrincipal == 0m && remainingInterest == 0m)
-                    ? "Balance fully cleared by this payment. Loan remains Active until closed via Loan Closure."
-                    : null,
-                //CreatedAt = DateTime.UtcNow
-                CreatedAt = IstClock.Now
-            };
+                var sequence = await _db.LoanTransactions.CountAsync() + 1 + attempt;
+                receiptNumber = _calc.GenerateReceiptNumber(sequence);
 
-            _db.LoanTransactions.Add(txn);
-            await _db.SaveChangesAsync();
+                txn = new LoanTransaction
+                {
+                    LoanId = loan.LoanId,
+                    TransactionType = LoanOperationsCalculationHelper.PaymentTransactionType,
+                    ReceiptNumber = receiptNumber,
+                    //TransactionDate = paymentDate == DateTime.UtcNow.Date ? DateTime.UtcNow : paymentDate,
+                    TransactionDate = paymentDate == IstClock.Today ? IstClock.Now : paymentDate,
+                    PrincipalAmount = principalPaid,
+                    InterestAmount = interestPaid,
+                    PenaltyAmount = 0,
+                    ChargesAmount = 0,
+                    TotalAmount = amountReceived,
+                    PaymentMode = request.PaymentMode,
+                    ReferenceNo = request.ReferenceNo,
+                    BalancePrincipalAfter = remainingPrincipal,
+                    NextDueDate = null,
+                    ProcessedBy = request.ProcessedByUserId,
+                    BranchId = loan.BranchId,
+                    Remarks = (remainingPrincipal == 0m && remainingInterest == 0m)
+                        ? "Balance fully cleared by this payment. Loan remains Active until closed via Loan Closure."
+                        : null,
+                    //CreatedAt = DateTime.UtcNow
+                    CreatedAt = IstClock.Now
+                };
+
+                _db.LoanTransactions.Add(txn);
+
+                try
+                {
+                    await _db.SaveChangesAsync();
+                    lastError = null;
+                    break;
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
+                {
+                    _db.Entry(txn).State = EntityState.Detached;
+                    lastError = ex;
+                }
+            }
+
+            if (lastError != null)
+            {
+                await dbTransaction.RollbackAsync();
+                throw lastError;
+            }
+
             await dbTransaction.CommitAsync();
 
             return new LoanOperationsPaymentResponseDto(
@@ -450,32 +475,57 @@ public class LoanOperationsService
             loan.UpdatedAt = IstClock.Now;
             loan.ClosePhotoPath = closePhotoPath;
 
-            var sequence = await _db.LoanTransactions.CountAsync() + 1;
-            var receiptNumber = _calc.GenerateReceiptNumber(sequence, "CLS");
+            LoanTransaction txn = null;
+            Exception lastError = null;
+            string receiptNumber = null;
 
-            var txn = new LoanTransaction
+            for (int attempt = 0; attempt < 5; attempt++)
             {
-                LoanId = loan.LoanId,
-                TransactionType = LoanOperationsCalculationHelper.ClosureTransactionType,
-                ReceiptNumber = receiptNumber,
-                //TransactionDate = DateTime.UtcNow,
-                TransactionDate = IstClock.Now,
-                PrincipalAmount = 0,
-                InterestAmount = 0,
-                PenaltyAmount = 0,
-                ChargesAmount = 0,
-                TotalAmount = 0,
-                PaymentMode = request.PaymentMode,
-                ReferenceNo = request.ReferenceNo,
-                BalancePrincipalAfter = 0,
-                ProcessedBy = request.ProcessedByUserId,
-                BranchId = loan.BranchId,
-                Remarks = "Loan closed by user - full settlement confirmed (balance was \u20b90.00 at time of closure).",
-                //CreatedAt = DateTime.UtcNow
-                CreatedAt = IstClock.Now
-            };
-            _db.LoanTransactions.Add(txn);
-            await _db.SaveChangesAsync();
+                var sequence = await _db.LoanTransactions.CountAsync() + 1 + attempt;
+                receiptNumber = _calc.GenerateReceiptNumber(sequence, "CLS");
+
+                txn = new LoanTransaction
+                {
+                    LoanId = loan.LoanId,
+                    TransactionType = LoanOperationsCalculationHelper.ClosureTransactionType,
+                    ReceiptNumber = receiptNumber,
+                    //TransactionDate = DateTime.UtcNow,
+                    TransactionDate = IstClock.Now,
+                    PrincipalAmount = 0,
+                    InterestAmount = 0,
+                    PenaltyAmount = 0,
+                    ChargesAmount = 0,
+                    TotalAmount = 0,
+                    PaymentMode = request.PaymentMode,
+                    ReferenceNo = request.ReferenceNo,
+                    BalancePrincipalAfter = 0,
+                    ProcessedBy = request.ProcessedByUserId,
+                    BranchId = loan.BranchId,
+                    Remarks = "Loan closed by user - full settlement confirmed (balance was \u20b90.00 at time of closure).",
+                    //CreatedAt = DateTime.UtcNow
+                    CreatedAt = IstClock.Now
+                };
+                _db.LoanTransactions.Add(txn);
+
+                try
+                {
+                    await _db.SaveChangesAsync();
+                    lastError = null;
+                    break;
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
+                {
+                    _db.Entry(txn).State = EntityState.Detached;
+                    lastError = ex;
+                }
+            }
+
+            if (lastError != null)
+            {
+                await dbTransaction.RollbackAsync();
+                throw lastError;
+            }
+
             await dbTransaction.CommitAsync();
 
             return new LoanOperationsClosureResponseDto(

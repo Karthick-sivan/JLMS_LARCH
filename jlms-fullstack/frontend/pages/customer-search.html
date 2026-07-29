@@ -137,7 +137,7 @@
         <div class="page-header">
           <div>
             <!--<div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><span class="current">Customer Search</span></div> -->
-            <div class="h1">Customer Search</div>
+            <div class="h1" data-i18n="customerSearch">Customer Search</div>
           </div>
 
         </div>
@@ -148,28 +148,28 @@
           <div class="panel-body">
             <div class="row g-3 align-items-end">
               <div class="col-md-2">
-                <label class="field-label">Customer Code</label>
-                <input type="text" class="form-control-jlms" id="searchCode" placeholder="CUS-000000">
+                <label class="field-label" data-i18n="customerCode">Customer Code</label>
+                <input type="text" class="form-control-jlms" id="searchCode" data-i18n-placeholder="cusPlaceholder" placeholder="CUS-000000">
               </div>
               <div class="col-md-3">
-                <label class="field-label">Customer Name</label>
-                <input type="text" class="form-control-jlms" id="searchName" placeholder="Search by name">
+                <label class="field-label" data-i18n="customerName">Customer Name</label>
+                <input type="text" class="form-control-jlms" id="searchName" data-i18n-placeholder="searchByName" placeholder="Search by name">
               </div>
               <div class="col-md-2">
-                <label class="field-label">Mobile Number</label>
-                <input type="text" class="form-control-jlms" id="searchMobile" placeholder="10-digit mobile">
+                <label class="field-label" data-i18n="mobile">Mobile Number</label>
+                <input type="text" class="form-control-jlms" id="searchMobile" data-i18n-placeholder="mobilePlaceholder" placeholder="10-digit mobile">
               </div>
               <div class="col-md-2">
-                <label class="field-label">Aadhaar Number</label>
-                <input type="text" class="form-control-jlms" id="searchAadhaar" placeholder="XXXX-XXXX-XXXX">
+                <label class="field-label" data-i18n="aadhaar">Aadhaar Number</label>
+                <input type="text" class="form-control-jlms" id="searchAadhaar" data-i18n-placeholder="aadhaarPlaceholder" placeholder="XXXX-XXXX-XXXX">
               </div>
 
               <div class="col-md-3 d-flex gap-2">
                 <button class="btn-jlms btn-jlms-primary" id="btnSearch" style="flex:1;"><i class="bi bi-search"></i>
-                  Search</button>
+                  <span data-i18n="search">Search</span></button>
 
                 <a href="customer-registration.html" class="btn-jlms btn-jlms-primary" style="flex:1;"><i
-                    class="bi bi-person-plus"></i> New Customer</a>
+                    class="bi bi-person-plus"></i> <span data-i18n="newCustomer">New Customer</span></a>
 
               </div>
 
@@ -180,7 +180,7 @@
         <div class="panel">
           <div class="grid-toolbar">
             <div class="grid-toolbar-left">
-              <span class="h4">Results</span>
+              <span class="h4" data-i18n="results">Results</span>
               <span class="badge-jlms badge-neutral" id="resultCount">0 customers</span>
             </div>
           </div>
@@ -188,12 +188,12 @@
             <table class="table-jlms">
               <thead>
                 <tr>
-                  <th class="text-center" style="width: 10%;">Actions</th>
-                  <th style="width: 20%;">Customer Code</th>
-                  <th style="width: 27%;">Customer Name</th>
+                  <th class="text-center" style="width: 10%;" data-i18n="actions">Actions</th>
+                  <th style="width: 20%;" data-i18n="customerCode">Customer Code</th>
+                  <th style="width: 27%;" data-i18n="customerName">Customer Name</th>
                   <th style="display: none;">Loan No.</th>
-                  <th style="width: 30%;">Aadhaar Number</th>
-                  <th style="width: 15%;">Mobile</th>
+                  <th style="width: 30%;" data-i18n="aadhaar">Aadhaar Number</th>
+                  <th style="width: 15%;" data-i18n="mobile">Mobile</th>
                 </tr>
               </thead>
               <tbody id="resultsBody">
@@ -205,7 +205,7 @@
           </div>
           <div class="pagination-bar">
             <div class="page-size-select">
-              <span>Rows per page</span>
+              <span data-i18n="rowsPerPage">Rows per page</span>
               <select id="pageSizeSelect">
                 <option value="10" selected>10</option>
                 <option value="20">20</option>
@@ -228,7 +228,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Customer Documents — <span id="docsModalCustomerName">-</span></h5>
+          <h5 class="modal-title" data-i18n="customerDocuments">Customer Documents</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -236,31 +236,31 @@
             <div class="col-md-4">
               <div class="doc-card">
                 <div class="doc-card-title">
-                  <span><i class="bi bi-person-badge"></i> Photo</span>
+                  <span><i class="bi bi-person-badge"></i> <span data-i18n="photo">Photo</span></span>
                   <button class="btn-icon-jlms" id="btnDownloadPhoto" title="Download" disabled><i
                       class="bi bi-download"></i></button>
                 </div>
-                <div class="doc-preview" id="previewPhoto"><span class="doc-loading">Loading...</span></div>
+                <div class="doc-preview" id="previewPhoto"><span class="doc-loading" data-i18n="loading">Loading...</span></div>
               </div>
             </div>
             <div class="col-md-4">
               <div class="doc-card">
                 <div class="doc-card-title">
-                  <span><i class="bi bi-file-earmark-text"></i> Aadhaar</span>
+                  <span><i class="bi bi-file-earmark-text"></i> <span data-i18n="aadhaarDoc">Aadhaar</span></span>
                   <button class="btn-icon-jlms" id="btnDownloadAadhaar" title="Download" disabled><i
                       class="bi bi-download"></i></button>
                 </div>
-                <div class="doc-preview" id="previewAadhaar"><span class="doc-loading">Loading...</span></div>
+                <div class="doc-preview" id="previewAadhaar"><span class="doc-loading" data-i18n="loading">Loading...</span></div>
               </div>
             </div>
             <div class="col-md-4">
               <div class="doc-card">
                 <div class="doc-card-title">
-                  <span><i class="bi bi-file-earmark-text"></i> PAN</span>
+                  <span><i class="bi bi-file-earmark-text"></i> <span data-i18n="panDoc">PAN</span></span>
                   <button class="btn-icon-jlms" id="btnDownloadPan" title="Download" disabled><i
                       class="bi bi-download"></i></button>
                 </div>
-                <div class="doc-preview" id="previewPan"><span class="doc-loading">Loading...</span></div>
+                <div class="doc-preview" id="previewPan"><span class="doc-loading" data-i18n="loading">Loading...</span></div>
               </div>
             </div>
           </div>
@@ -271,6 +271,7 @@
 
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>window.JLMS_ACTIVE = "customer-master";</script>
+  <script src="../js/language.js"></script>
   <script src="js/jlms-shell.js"></script>
   <script src="js/api-client.js"></script>
   <script>
@@ -282,9 +283,9 @@
     let activeDocObjectUrls = []; // track blob URLs to revoke on close
 
     function statusBadge(status) {
-      if (status === 'Active') return '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>';
-      if (status === 'Overdue') return '<span class="badge-jlms badge-warning"><span class="dot"></span>Has Overdue</span>';
-      return '<span class="badge-jlms badge-neutral"><span class="dot"></span>No Active Loan</span>';
+      if (status === 'Active') return `<span class="badge-jlms badge-success"><span class="dot"></span>${lang.active || 'Active'}</span>`;
+      if (status === 'Overdue') return `<span class="badge-jlms badge-warning"><span class="dot"></span>${lang.hasOverdue || 'Has Overdue'}</span>`;
+      return `<span class="badge-jlms badge-neutral"><span class="dot"></span>${lang.noActiveLoan || 'No Active Loan'}</span>`;
     }
 
     function initials(name) {
@@ -299,9 +300,11 @@
       clearApiError();
       currentPage = page;
       const body = document.getElementById('resultsBody');
-      body.innerHTML = '<tr><td colspan="9" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
+      body.innerHTML = `<tr><td colspan="9" class="text-center text-muted-jlms" style="padding:28px;">${lang.searching || 'Searching...'}</td></tr>`;
 
-      const params = { page: currentPage, pageSize: pageSize };
+      const sessionUser = Session.get();
+      const branchId = sessionUser ? sessionUser.branchId : 1;
+      const params = { page: currentPage, pageSize: pageSize, branchId: branchId };
       const name = document.getElementById('searchName').value.trim();
       const mobile = document.getElementById('searchMobile').value.trim();
       const aadhaar = document.getElementById('searchAadhaar').value.trim();
@@ -317,10 +320,10 @@
         const rows = pagedResult.items || [];
         const totalCount = pagedResult.totalCount ?? rows.length;
 
-        document.getElementById('resultCount').textContent = `${totalCount} customer${totalCount === 1 ? '' : 's'}`;
+        document.getElementById('resultCount').textContent = (lang.xCustomers || '{count} customer{plural}').replace('{count}', totalCount).replace('{plural}', totalCount === 1 ? '' : 's');
 
         if (rows.length === 0) {
-          body.innerHTML = '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">No customers found. Try different filters, or register a new customer.</td></tr>';
+          body.innerHTML = `<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">${lang.noCustomersFound || 'No customers found. Try different filters, or register a new customer.'}</td></tr>`;
           renderPagination(0, 0);
           return;
         }
@@ -329,10 +332,10 @@
   <tr>
     <td class="text-center">
         <div style="display:flex;align-items:center;justify-content:center;gap:2px;">
-          <button class="btn-icon-jlms" title="View documents" onclick="openDocsModal(${c.customerId}, '${c.customerName.replace(/'/g, "\\'")}')">
+          <button class="btn-icon-jlms" title="${lang.viewDocuments || 'View documents'}" onclick="openDocsModal(${c.customerId}, '${c.customerName.replace(/'/g, "\\'")}')">
             <i class="bi bi-eye"></i>
           </button>
-          <button class="btn-icon-jlms" title="Edit customer" onclick="editCustomer(${c.customerId})">
+          <button class="btn-icon-jlms" title="${lang.editCustomer || 'Edit customer'}" onclick="editCustomer(${c.customerId})">
             <i class="bi bi-pencil-square"></i>
           </button>
         </div>
@@ -348,7 +351,7 @@
         renderPagination(currentPage, totalPages);
       } catch (err) {
         showApiError(err);
-        body.innerHTML = '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">Could not load customers.</td></tr>';
+        body.innerHTML = `<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:28px;">${lang.couldNotLoadCustomers || 'Could not load customers.'}</td></tr>`;
         renderPagination(0, 0);
       }
     }
@@ -361,11 +364,11 @@
         controls.innerHTML = '';
         return;
       }
-      info.textContent = `Page ${page} of ${pages}`;
+      info.textContent = (lang.pageOf || 'Page {page} of {pages}').replace('{page}', page).replace('{pages}', pages);
 
       let html = '';
       html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
-    <button class="page-link" onclick="runSearch(${page - 1})">Prev</button></li>`;
+    <button class="page-link" onclick="runSearch(${page - 1})">${lang.previous || 'Prev'}</button></li>`;
 
       const windowSize = 5;
       let start = Math.max(1, page - Math.floor(windowSize / 2));
@@ -378,7 +381,7 @@
       }
 
       html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
-    <button class="page-link" onclick="runSearch(${page + 1})">Next</button></li>`;
+    <button class="page-link" onclick="runSearch(${page + 1})">${lang.next || 'Next'}</button></li>`;
 
       controls.innerHTML = html;
     }
@@ -386,7 +389,6 @@
     // ---------- Documents modal ----------
 
     async function openDocsModal(customerId, customerName) {
-      document.getElementById('docsModalCustomerName').textContent = customerName || '-';
       resetDocPreview('previewPhoto', 'btnDownloadPhoto');
       resetDocPreview('previewAadhaar', 'btnDownloadAadhaar');
       resetDocPreview('previewPan', 'btnDownloadPan');
@@ -401,7 +403,7 @@
       } catch (err) {
         showApiError(err);
         ['previewPhoto', 'previewAadhaar', 'previewPan'].forEach(id => {
-          document.getElementById(id).innerHTML = '<span class="doc-error">Could not load customer details.</span>';
+          document.getElementById(id).innerHTML = `<span class="doc-error">${lang.couldNotLoadCustomerDetails || 'Could not load customer details.'}</span>`;
         });
         return;
       }
@@ -412,7 +414,7 @@
     }
 
     function resetDocPreview(previewId, btnId) {
-      document.getElementById(previewId).innerHTML = '<span class="doc-loading">Loading...</span>';
+      document.getElementById(previewId).innerHTML = `<span class="doc-loading">${lang.loading || 'Loading...'}</span>`;
       const btn = document.getElementById(btnId);
       btn.disabled = true;
       btn.onclick = null;
@@ -423,7 +425,7 @@
       const btnEl = document.getElementById(btnId);
 
       if (!hasPath) {
-        previewEl.innerHTML = '<span class="doc-empty">Not uploaded</span>';
+        previewEl.innerHTML = `<span class="doc-empty">${lang.notUploaded || 'Not uploaded'}</span>`;
         return;
       }
 
@@ -432,7 +434,7 @@
         const url = `${API_BASE_URL}/customers/${customerId}/documents/${docType}`;
         const res = await fetch(url);
         if (res.status === 404) {
-          previewEl.innerHTML = '<span class="doc-empty">Not uploaded</span>';
+          previewEl.innerHTML = `<span class="doc-empty">${lang.notUploaded || 'Not uploaded'}</span>`;
           return;
         }
         if (!res.ok) throw new Error(`HTTP ${res.status} — the API returned an error for this document.`);
@@ -450,7 +452,7 @@
           // Aadhaar/PAN are frequently uploaded as scanned PDFs - render them inline.
           previewEl.innerHTML = `<iframe src="${objectUrl}" title="${docType} document"></iframe>`;
         } else {
-          previewEl.innerHTML = `<div class="doc-empty"><i class="bi bi-file-earmark" style="font-size:1.8rem;"></i><br>Preview not available for this file type.<br><a href="${objectUrl}" target="_blank" rel="noopener">Open in new tab</a></div>`;
+          previewEl.innerHTML = `<div class="doc-empty"><i class="bi bi-file-earmark" style="font-size:1.8rem;"></i><br>${lang.previewNotAvailable || 'Preview not available for this file type.'}<br><a href="${objectUrl}" target="_blank" rel="noopener">${lang.openInNewTab || 'Open in new tab'}</a></div>`;
         }
 
         const ext = type === 'application/pdf' ? '.pdf' : (type.startsWith('image/') ? '.' + type.split('/')[1] : '');
@@ -464,7 +466,7 @@
           a.remove();
         };
       } catch (err) {
-        previewEl.innerHTML = `<span class="doc-error">Could not load document.<br>${err.message}</span>`;
+        previewEl.innerHTML = `<span class="doc-error">${lang.couldNotLoadDocument || 'Could not load document.'}<br>${err.message}</span>`;
       }
     }
 
@@ -484,6 +486,13 @@
         document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(1); });
       });
       runSearch(1); // initial load shows all customers (empty list on a fresh DB)
+
+      // Register callback to re-render when language changes
+      if (typeof registerLanguageCallback === 'function') {
+        registerLanguageCallback(() => {
+          runSearch(currentPage);
+        });
+      }
     });
   </script>
 </body>

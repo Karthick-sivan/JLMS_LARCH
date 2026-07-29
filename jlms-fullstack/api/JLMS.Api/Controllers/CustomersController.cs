@@ -24,13 +24,17 @@ public class CustomersController : ControllerBase
     public async Task<ActionResult<PagedResultDto<CustomerListItemDto>>> Search(
         [FromQuery] string? search, [FromQuery] string? mobile,
         [FromQuery] string? aadhaar, [FromQuery] string? code,
+        [FromQuery] int branchId,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 20;
         if (pageSize > 200) pageSize = 200;
 
-        var query = _db.Customers.AsNoTracking().AsQueryable();
+        var query = _db.Customers.AsNoTracking().AsQueryable()
+             .Where(c => c.BranchId == branchId);
+
+
 
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(c => c.CustomerName.Contains(search));
@@ -69,7 +73,7 @@ public class CustomersController : ControllerBase
                 .ToListAsync();
             string? loanNumbersStr = loanNumbers.Count > 0 ? string.Join(", ", loanNumbers) : null;
 
-            result.Add(new CustomerListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.AadhaarNumber, c.Mobile,
+            result.Add(new CustomerListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.AadhaarNumber, c.Mobile,c.BranchId,
                 activeLoans, outstanding, status, loanNumbersStr));
         }
 
@@ -78,11 +82,12 @@ public class CustomersController : ControllerBase
 
     // GET /api/customers/active
     [HttpGet("active")]
-    public async Task<ActionResult<List<CustomerActiveListItemDto>>> GetActiveCustomers()
+    public async Task<ActionResult<List<CustomerActiveListItemDto>>> GetActiveCustomers([FromQuery] int branchId)
     {
         var customers = await _db.Customers.AsNoTracking()
+            .Where(c => c.BranchId == branchId)
             .OrderByDescending(c => c.CreatedAt)
-            .Select(c => new CustomerActiveListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Mobile))
+            .Select(c => new CustomerActiveListItemDto(c.CustomerId, c.CustomerCode, c.CustomerName, c.Mobile,c.BranchId))
             .ToListAsync();
 
         return Ok(customers);
@@ -208,7 +213,7 @@ public class CustomersController : ControllerBase
         string code;
         try
         {
-            code = await _numbering.GenerateNextCustomerCodeAsync();
+            code = await _numbering.GenerateNextCustomerCodeAsync(branchId);
         }
         catch (InvalidOperationException ex)
         {

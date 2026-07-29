@@ -214,17 +214,17 @@
           <div class="col-lg-3">
             <div class="panel">
               <div class="panel-head">
-                <div class="h4">Report Categories</div>
+                <div class="h4" data-i18n="reportCategories">Report Categories</div>
               </div>
               <div class="panel-body" style="padding:6px 0;">
-                <div class="report-cat-item active"><i class="bi bi-folder2-open"></i> Loan Report</div>
+                <div class="report-cat-item active"><i class="bi bi-folder2-open"></i> <span data-i18n="loanReport">Loan Report</span></div>
                 <div class="report-cat-item" onclick="location.href='loandetails-report.html'"><i
-                    class="bi bi-graph-down"></i> Loan & Item Reports </div>
+                    class="bi bi-graph-down"></i> <span data-i18n="loanItemReports">Loan & Item Reports</span> </div>
                 <!-- <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i class="bi bi-graph-down"></i> Outstanding Reports</div> -->
                 <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i
-                    class="bi bi-cash-coin"></i> Collection Reports</div>
+                    class="bi bi-cash-coin"></i> <span data-i18n="collectionReports">Collection Reports</span></div>
                 <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i
-                    class="bi bi-check2-circle"></i> Closed Loans Report</div>
+                    class="bi bi-check2-circle"></i> <span data-i18n="closedLoansReport">Closed Loans Report</span></div>
               </div>
             </div>
           </div>
@@ -235,39 +235,39 @@
             <!-- Filters -->
             <div class="panel mb-3">
               <div class="panel-head">
-                <div class="h4"> Loan Report — Filters</div>
+                <div class="h4" data-i18n="loanReportFilters"> Loan Report — Filters</div>
               </div>
               <div class="panel-body">
                 <div class="row g-3 align-items-end">
                   <div class="col-md-2">
-                    <label class="field-label" for="fFromDate">From Date</label>
+                    <label class="field-label" for="fFromDate" data-i18n="fromDate">From Date</label>
                     <input id="fFromDate" type="date" class="form-control-jlms">
                   </div>
                   <div class="col-md-2">
-                    <label class="field-label" for="fToDate">To Date</label>
+                    <label class="field-label" for="fToDate" data-i18n="toDate">To Date</label>
                     <input id="fToDate" type="date" class="form-control-jlms">
                   </div>
                   <div class="col-md-3" style="position:relative;">
-                    <label class="field-label" for="fLoanNo">Loan Number</label>
+                    <label class="field-label" for="fLoanNo" data-i18n="loanNumber">Loan Number</label>
                     <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="Loan Number"
-                      autocomplete="off">
+                      data-i18n-placeholder="loanNumber" autocomplete="off">
                     <div id="loanNoSuggestions" class="suggestion-list"></div>
                   </div>
                   <div class="col-md-3" style="position:relative;">
-                    <label class="field-label" for="fCustomerName">Customer Name</label>
+                    <label class="field-label" for="fCustomerName" data-i18n="customerName">Customer Name</label>
                     <input id="fCustomerName" type="text" class="form-control-jlms" placeholder="Name"
-                      autocomplete="off">
+                      data-i18n-placeholder="namePlaceholder" autocomplete="off">
                     <div id="customerSuggestions" class="suggestion-list"></div>
                   </div>
 
                   <div class="col-md-2">
-                    <label class="field-label" for="fStatus">Status</label>
+                    <label class="field-label" for="fStatus" data-i18n="status">Status</label>
                     <select id="fStatus" class="form-select-jlms">
-                      <option value="">All</option>
-                      <option value="Active">Active</option>
-                      <option value="Due">Due</option>
-                      <option value="Overdue">Overdue</option>
-                      <option value="Closed">Closed</option>
+                      <option value="" data-i18n="all">All</option>
+                      <option value="Active" data-i18n="active">Active</option>
+                      <option value="Due" data-i18n="due">Due</option>
+                      <option value="Overdue" data-i18n="overdue">Overdue</option>
+                      <option value="Closed" data-i18n="closedLoan">Closed</option>
                     </select>
                   </div>
                 </div>
@@ -282,7 +282,7 @@
                 <div class="row g-3 align-items-end mt-1">
                   <div class="col-12 d-flex justify-content-end">
                     <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary">
-                      <i class="bi bi-funnel"></i> Apply
+                      <i class="bi bi-funnel"></i> <span data-i18n="apply">Apply</span>
                     </button>
                   </div>
                 </div>
@@ -321,15 +321,15 @@
             </div> -->
             <div class="summary-cards" id="summaryCards" style="display:none;">
               <div class="summary-card">
-                <div class="sc-label">Total Qty(Ornaments)</div>
+                <div class="sc-label" data-i18n="totalQtyOrnaments">Total Qty(Ornaments)</div>
                 <div class="sc-value" id="scTotalQty">—</div>
               </div>
               <div class="summary-card accent-navy">
-                <div class="sc-label">Total Weight (g)</div>
+                <div class="sc-label" data-i18n="totalWeightGrams">Total Weight (g)</div>
                 <div class="sc-value" id="scTotalWeight">—</div>
               </div>
               <div class="summary-card accent-green">
-                <div class="sc-label">Total Loan Amount</div>
+                <div class="sc-label" data-i18n="totalLoanAmount">Total Loan Amount</div>
                 <div class="sc-value" id="scTotalLoanAmt">—</div>
               </div>
             </div>
@@ -337,42 +337,42 @@
             <div class="panel">
               <div class="grid-toolbar">
                 <div class="grid-toolbar-left">
-                  <span class="h4">Results</span>
+                  <span class="h4" data-i18n="results">Results</span>
                   <span class="badge-jlms badge-neutral" id="recordsBadge" style="display:none;"></span>
                 </div>
                 <div class="grid-toolbar-left">
                   <button class="btn-jlms btn-jlms-outline btn-sm" onclick="exportExcel()" id="btnExportExcel"
-                    style="display:none;"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                    style="display:none;"><i class="bi bi-file-earmark-excel"></i> <span data-i18n="exportExcel">Export Excel</span></button>
                   <button class="btn-jlms btn-jlms-outline btn-sm" onclick="printReport()" id="btnPrint"
-                    style="display:none;"><i class="bi bi-printer"></i> Print</button>
+                    style="display:none;"><i class="bi bi-printer"></i> <span data-i18n="print">Print</span></button>
                 </div>
               </div>
               <div class="panel-body no-pad table-jlms-wrap">
                 <table class="table-jlms" id="reportTable">
                   <thead>
                     <tr>
-                      <th>S.No</th>
-                      <th>Loan No</th>
-                      <th>Loan Date</th>
-                      <th>Customer</th>
-                      <th class="text-end">Loan Amt</th>
+                      <th data-i18n="serialNo">S.No</th>
+                      <th data-i18n="loanNo">Loan No</th>
+                      <th data-i18n="loanDate">Loan Date</th>
+                      <th data-i18n="customer">Customer</th>
+                      <th class="text-end" data-i18n="loanAmt">Loan Amt</th>
                       <!-- <th class="text-end">Int Amount</th> -->
-                      <th class="text-end">Bal Amt</th>
-                      <th>Status</th>
+                      <th class="text-end" data-i18n="balAmt">Bal Amt</th>
+                      <th data-i18n="status">Status</th>
                     </tr>
                   </thead>
                   <tbody id="tableBody">
                     <tr>
                       <td colspan="7">
                         <div class="state-panel"><i class="bi bi-arrow-repeat spin"></i>
-                          <p>Loading Loan Report…</p>
+                          <p data-i18n="loadingLoanReport">Loading Loan Report…</p>
                         </div>
                       </td>
                     </tr>
                   </tbody>
                   <tfoot id="tableFoot" style="display:none;">
                     <tr>
-                      <td colspan="4"><strong>Page Total</strong></td>
+                      <td colspan="4"><strong data-i18n="pageTotal">Page Total</strong></td>
                       <td class="text-end" id="footOverallInterest">—</td>
                       <!-- <td class="text-end" id="footOutInterest">—</td> -->
                       <td class="text-end" id="footTotalOutstanding">—</td>
@@ -392,12 +392,12 @@
       </div>
     </div>
   </div>
-
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
   <script>window.JLMS_ACTIVE = "active-loans-report";</script>
-  <script src="js/jlms-shell.js"></script>
+  <script src="../js/language.js"></script>
   <script src="js/api-client.js"></script>
+  <script src="js/jlms-shell.js"></script>
   <script>
     jlmsInitShell();
 
@@ -434,11 +434,17 @@
     //   else if (status === "Due") { cls = "badge-warning"; }
     //   return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
     // }
+    function t(key, fallback) { return (lang && lang[key]) || fallback; }
+
     function statusBadge(status, days) {
       let cls = "badge-success", label = status;
-      if (status === "Overdue") { cls = "badge-danger"; label = days > 0 ? `Overdue (${days}d)` : "Overdue"; }
-      else if (status === "Due") { cls = "badge-warning"; }
-      else if (status === "Closed") { cls = "badge-danger"; }
+      if (status === "Overdue") {
+        cls = "badge-danger";
+        label = days > 0 ? `${t("overdue", "Overdue")} (${days}d)` : t("overdue", "Overdue");
+      }
+      else if (status === "Due") { cls = "badge-warning"; label = t("due", "Due"); }
+      else if (status === "Closed") { cls = "badge-danger"; label = t("closedLoan", "Closed"); }
+      else if (status === "Active") { label = t("active", "Active"); }
       return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
     }
     function setExportBtnsVisible(v) {
@@ -448,13 +454,13 @@
     async function loadDropdowns() {
       try {
         const schemes = await Api.getLoanSchemes(true);
-        el("fScheme").innerHTML = `<option value="">All Schemes</option>` +
+        el("fScheme").innerHTML = `<option value="">${t("allSchemes", "All Schemes")}</option>` +
           schemes.map(s => `<option value="${s.loanSchemeId}">${s.schemeName}</option>`).join("");
       } catch { }
       try {
         const types = await Api.getJewelTypes(true);
-        el("fJewelType").innerHTML = `<option value="">All Types</option>` +
-          types.map(t => `<option value="${t.jewelTypeId}">${t.jewelTypeName}</option>`).join("");
+        el("fJewelType").innerHTML = `<option value="">${t("allTypes", "All Types")}</option>` +
+          types.map(jt => `<option value="${jt.jewelTypeId}">${jt.jewelTypeName}</option>`).join("");
       } catch { }
       try {
         const branches = await Api.getBranches();
@@ -465,7 +471,7 @@
           el("fBranch").innerHTML = `<option value="${userBranch.branchId}">${userBranch.branchName}</option>`;
           el("fBranch").disabled = true;
         } else {
-          el("fBranch").innerHTML = `<option value="">All Branches</option>` +
+          el("fBranch").innerHTML = `<option value="">${t("allBranches", "All Branches")}</option>` +
             branches.map(b => `<option value="${b.branchId}">${b.branchName}</option>`).join("");
         }
       } catch { /* branches endpoint not available — filter silently disabled */ }
@@ -474,7 +480,7 @@
     async function loadReport(filters) {
       clearApiError();
       const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
-      elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
+      elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>${t("loading", "Loading…")}</p></div></td></tr>`;
       elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
       elBadge.style.display = "none"; elSummary.style.display = "none";
       setExportBtnsVisible(false);
@@ -485,7 +491,7 @@
         renderGrid(data);
       } catch (err) {
         showApiError(err);
-        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
+        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>${t("failedToLoadReport", "Failed to load report. Check that the API is running.")}</p></div></td></tr>`;
       }
     }
 
@@ -565,12 +571,12 @@
       el("scTotalLoanAmt").textContent = fmt(totalLoanAmount);
       elSummary.style.display = "flex";
 
-      elBadge.textContent = `${totalCount.toLocaleString("en-IN")} records`;
+      elBadge.textContent = t("xRecords", "{count} records").replace("{count}", totalCount.toLocaleString("en-IN"));
       elBadge.style.display = "";
       setExportBtnsVisible(totalCount > 0);
 
       if (!items || items.length === 0) {
-        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-inbox"></i><p>No  loans found for the selected filters.</p></div></td></tr>`;
+        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-inbox"></i><p>${t("noLoansFoundFilters", "No loans found for the selected filters.")}</p></div></td></tr>`;
         elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
         return;
       }
@@ -604,7 +610,8 @@
     function renderPagination(totalCount, page, pageSize) {
       const totalPages = Math.ceil(totalCount / pageSize);
       const from = (page - 1) * pageSize + 1, to = Math.min(page * pageSize, totalCount);
-      elPaginInfo.textContent = `Showing ${from}–${to} of ${totalCount.toLocaleString("en-IN")}`;
+      elPaginInfo.textContent = t("showingXofY", "Showing {from}\u2013{to} of {total}")
+        .replace("{from}", from).replace("{to}", to).replace("{total}", totalCount.toLocaleString("en-IN"));
 
       let html = `<div class="page-btn${page === 1 ? " disabled" : ""}" onclick="goPage(${page - 1})"><i class="bi bi-chevron-left"></i></div>`;
       let sp = Math.max(1, page - 2), ep = Math.min(totalPages, sp + 4);
@@ -678,7 +685,19 @@
       toDate: el("fToDate").value || undefined
     };
     loadDropdowns();
-    loadReport(activeFilters);
+    // Wait for language to load before loading report
+    loadLanguage(currentLanguage).then(() => {
+      loadReport(activeFilters);
+    });
+
+    // Re-render already-loaded dynamic content (dropdowns, grid rows, pagination)
+    // when the user switches language, since data-i18n only updates static elements.
+    registerLanguageCallback(() => {
+      loadDropdowns();
+      if (lastResult) {
+        renderGrid(lastResult);
+      }
+    });
   </script>
 </body>
 

@@ -38,9 +38,18 @@ public static class ControllerExtensions
         }
     }
 
+    public static bool IsSuperAdmin(this User? user)
+    {
+        if (user == null) return false;
+        return user.Username.Equals("superadmin", StringComparison.OrdinalIgnoreCase) ||
+               user.RoleId == 1002 ||
+               (user.Role != null && user.Role.RoleName.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase));
+    }
+
     public static int? GetFilterBranchId(this User user)
     {
         if (user == null) return null;
+        if (user.IsSuperAdmin()) return null;
         // Filter always applies — branch scope is set by user's BranchId, not role.
         return user.BranchId;
     }
@@ -48,6 +57,7 @@ public static class ControllerExtensions
     public static bool CanAccessBranch(this User user, int branchId)
     {
         if (user == null) return false;
+        if (user.IsSuperAdmin()) return true;
         return user.BranchId == branchId;
     }
 }

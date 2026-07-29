@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>JLMS — Profile Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+<link rel="stylesheet" href="css/jlms-core.css">
+<style>
+  .profile-card {
+    background: #fff;
+    border: 1px solid var(--n-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    max-width: 520px;
+    padding: 36px 40px;
+  }
+  .profile-avatar-ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-600), var(--gold-700));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800;
+    color: var(--navy-900);
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(202,155,50,0.25);
+  }
+  .pw-strength-bar {
+    height: 4px; border-radius: 4px;
+    background: var(--n-200);
+    margin-top: 6px; overflow: hidden;
+    transition: all .3s;
+  }
+  .pw-strength-fill {
+    height: 100%; width: 0%;
+    border-radius: 4px;
+    transition: width .35s, background-color .35s;
+  }
+  .pw-strength-label {
+    font-size: 11px; margin-top: 4px;
+    font-weight: 600; color: var(--n-500);
+  }
+  .success-toast {
+    display: none;
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: var(--radius-md); padding: 12px 16px;
+    color: #166534; font-size: 13px; font-weight: 600;
+    align-items: center; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .success-toast.show { display: flex; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div id="jlmsSidebarMount"></div>
+  <div class="main-col">
+    <div id="jlmsTopbarMount"></div>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <div class="h1">Profile Settings</div>
+          <div class="text-muted-jlms" style="margin-top:3px;">Manage your account and change your password</div>
+        </div>
+      </div>
+
+      <div id="apiErrorBanner" class="api-error-banner"></div>
+
+      <div class="profile-card">
+
+        <!-- Avatar & user info -->
+        <div style="display:flex; align-items:center; gap:20px; margin-bottom:32px;">
+          <div class="profile-avatar-ring" id="profileInitials">SA</div>
+          <div>
+            <div style="font-size:18px; font-weight:700; color:var(--n-900);" id="profileName">SuperAdmin</div>
+            <div style="font-size:12px; color:var(--n-500); margin-top:2px;" id="profileRole">Super Admin</div>
+            <div style="font-size:12px; color:var(--n-400); margin-top:2px;" id="profileBranch"></div>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--n-200); margin-bottom:28px;">
+
+        <!-- Success toast -->
+        <div class="success-toast" id="successToast">
+          <i class="bi bi-check-circle-fill" style="font-size:16px;"></i>
+          Password changed successfully! Please remember your new password.
+        </div>
+
+        <!-- Change password form -->
+        <div style="font-size:15px; font-weight:700; color:var(--n-800); margin-bottom:20px;">
+          <i class="bi bi-shield-lock" style="color:var(--gold-600); margin-right:6px;"></i>
+          Change Password
+        </div>
+
+        <form id="changePasswordForm">
+          <div class="field-group">
+            <label class="field-label">Current Password <span class="req">*</span></label>
+            <div class="input-affix">
+              <span class="affix"><i class="bi bi-lock"></i></span>
+              <input type="password" id="currentPassword" placeholder="Enter current password">
+              <span class="affix suffix" style="cursor:pointer;" onclick="toggleField('currentPassword','iconCurrent')">
+                <i class="bi bi-eye" id="iconCurrent"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">New Password <span class="req">*</span></label>
+            <div class="input-affix">
+              <span class="affix"><i class="bi bi-key"></i></span>
+              <input type="password" id="newPassword" placeholder="Enter new password" oninput="checkStrength(this.value)">
+              <span class="affix suffix" style="cursor:pointer;" onclick="toggleField('newPassword','iconNew')">
+                <i class="bi bi-eye" id="iconNew"></i>
+              </span>
+            </div>
+            <div class="pw-strength-bar"><div class="pw-strength-fill" id="strengthFill"></div></div>
+            <div class="pw-strength-label" id="strengthLabel"></div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Confirm New Password <span class="req">*</span></label>
+            <div class="input-affix">
+              <span class="affix"><i class="bi bi-key-fill"></i></span>
+              <input type="password" id="confirmPassword" placeholder="Re-enter new password">
+              <span class="affix suffix" style="cursor:pointer;" onclick="toggleField('confirmPassword','iconConfirm')">
+                <i class="bi bi-eye" id="iconConfirm"></i>
+              </span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; margin-top:28px;">
+            <button type="submit" id="saveBtn" class="btn-jlms btn-jlms-primary" style="min-width:160px; justify-content:center;">
+              <i class="bi bi-floppy"></i> Save Password
+            </button>
+            <button type="button" class="btn-jlms btn-jlms-outline" onclick="resetForm()">
+              <i class="bi bi-x-circle"></i> Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div><!-- /page-content -->
+  </div>
+</div>
+
+<script src="js/api-client.js"></script>
+<script src="js/jlms-shell.js"></script>
+<script>
+window.JLMS_ACTIVE = "profile-settings";
+jlmsInitShell("Profile Settings", ["Profile Settings"]);
+
+// Populate user info from session
+document.addEventListener('DOMContentLoaded', () => {
+  const user = Session.get();
+  if (!user) return;
+  const initials = user.fullName ? user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'SA';
+  document.getElementById('profileInitials').textContent = initials;
+  document.getElementById('profileName').textContent = user.fullName || 'SuperAdmin';
+  document.getElementById('profileRole').textContent = user.roleName || 'Super Admin';
+  if (user.branchName) document.getElementById('profileBranch').textContent = user.branchName;
+});
+
+function toggleField(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon  = document.getElementById(iconId);
+  if (input.type === 'password') { input.type = 'text';     icon.className = 'bi bi-eye-slash'; }
+  else                           { input.type = 'password'; icon.className = 'bi bi-eye'; }
+}
+
+function checkStrength(val) {
+  const fill  = document.getElementById('strengthFill');
+  const label = document.getElementById('strengthLabel');
+  if (!val) { fill.style.width = '0%'; label.textContent = ''; return; }
+
+  let score = 0;
+  if (val.length >= 6)  score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const levels = [
+    { pct: '20%', color: '#ef4444', text: 'Very Weak' },
+    { pct: '40%', color: '#f97316', text: 'Weak' },
+    { pct: '60%', color: '#eab308', text: 'Fair' },
+    { pct: '80%', color: '#3b82f6', text: 'Good' },
+    { pct: '100%', color: '#22c55e', text: 'Strong' }
+  ];
+  const lvl = levels[Math.min(score, 4)];
+  fill.style.width = lvl.pct;
+  fill.style.backgroundColor = lvl.color;
+  label.textContent = lvl.text;
+  label.style.color = lvl.color;
+}
+
+function resetForm() {
+  document.getElementById('changePasswordForm').reset();
+  document.getElementById('strengthFill').style.width = '0%';
+  document.getElementById('strengthLabel').textContent = '';
+  clearApiError();
+  document.getElementById('successToast').classList.remove('show');
+}
+
+document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearApiError();
+  document.getElementById('successToast').classList.remove('show');
+
+  const current = document.getElementById('currentPassword').value;
+  const newPw   = document.getElementById('newPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+
+  if (!current || !newPw || !confirm) {
+    showApiError(new Error('Please fill in all password fields.'));
+    return;
+  }
+  if (newPw !== confirm) {
+    showApiError(new Error('New password and confirm password do not match.'));
+    return;
+  }
+  if (newPw.length < 4) {
+    showApiError(new Error('New password must be at least 4 characters.'));
+    return;
+  }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+
+  try {
+    await Api.changePassword(current, newPw);
+    document.getElementById('changePasswordForm').reset();
+    document.getElementById('strengthFill').style.width = '0%';
+    document.getElementById('strengthLabel').textContent = '';
+    document.getElementById('successToast').classList.add('show');
+  } catch (err) {
+    showApiError(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-floppy"></i> Save Password';
+  }
+});
+</script>
+</body>
+</html>

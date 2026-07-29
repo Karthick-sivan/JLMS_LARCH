@@ -36,6 +36,18 @@ public class AuthController : ControllerBase
         if (!string.Equals(hash, user.PasswordHash, StringComparison.OrdinalIgnoreCase))
             return Unauthorized("Invalid username or password.");
 
+        // Block login if the user's branch has been deactivated.
+        if (user.Branch != null && !user.Branch.IsActive)
+            return Unauthorized("Your branch is currently inactive. Please contact the administrator.");
+
+        if (user.RoleId != 4 && user.RoleId != 1002 && user.BranchId.HasValue)
+        {
+            var branchAdmin = await _db.Users.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.BranchId == user.BranchId.Value && u.RoleId == 4);
+
+            if (branchAdmin != null && !branchAdmin.IsActive)
+                return Unauthorized("Your branch inactive. Please contact Admin.");
+        }
         // Validate that the user belongs to the selected branch.
         // If a branch was supplied on the login form, the user's BranchId must match.
         if (request.BranchId.HasValue && request.BranchId.Value > 0 && user.BranchId != request.BranchId.Value)
@@ -46,7 +58,41 @@ public class AuthController : ControllerBase
 
         return Ok(new LoginResponse(
             user.UserId, user.FullName, user.Username,
-            user.Role?.RoleName ?? "", user.Branch?.BranchName ?? "", token, user.BranchId));
+            user.Role?.RoleName ?? "", user.Branch?.BranchName ?? "", token, user.BranchId, user.RoleId));
+    }
+
+    // POST /api/auth/change-password
+    [HttpPost("change-password")]
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        // Identify caller from the simple base64 token: userId:username:ticks
+        var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
+            return Unauthorized("Authentication required.");
+
+        var tokenPart = authHeader.Substring(7);
+        int callerId;
+        try
+        {
+            var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(tokenPart));
+            callerId = int.Parse(decoded.Split(':')[0]);
+        }
+        catch { return Unauthorized("Invalid token."); }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.UserId == callerId && u.IsActive);
+        if (user == null) return Unauthorized("User not found.");
+
+        // Verify current password
+        var currentHash = ComputeSha256(request.CurrentPassword);
+        if (!string.Equals(currentHash, user.PasswordHash, StringComparison.OrdinalIgnoreCase))
+            return BadRequest("Current password is incorrect.");
+
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 4)
+            return BadRequest("New password must be at least 4 characters.");
+
+        user.PasswordHash = ComputeSha256(request.NewPassword);
+        await _db.SaveChangesAsync();
+        return Ok(new { message = "Password changed successfully." });
     }
 
     private static string ComputeSha256(string input)

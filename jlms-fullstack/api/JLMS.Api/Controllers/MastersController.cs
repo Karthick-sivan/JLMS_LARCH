@@ -19,23 +19,27 @@ public class JewelTypesController : ControllerBase
         var query = _db.JewelTypes.AsNoTracking().AsQueryable();
         if (activeOnly) query = query.Where(j => j.IsActive);
         var items = await query.OrderBy(j => j.JewelTypeName).ToListAsync();
-        return Ok(items.Select(j => new JewelTypeDto(j.JewelTypeId, j.JewelTypeName, j.Category, j.DefaultPurity, j.WastagePercent, j.IsActive)));
+        return Ok(items.Select(j => new JewelTypeDto(j.JewelTypeId, j.JewelTypeName, j.Category, j.DefaultPurity, j.WastagePercent, j.IsActive, j.BranchId)));
     }
 
     [HttpPost]
     public async Task<ActionResult<JewelTypeDto>> Create([FromBody] JewelTypeCreateDto dto)
     {
+        var user = await this.GetCurrentUserAsync(_db);
+        var branchId = dto.BranchId ?? user?.BranchId;
+
         var entity = new JewelType
         {
             JewelTypeName = dto.JewelTypeName,
             Category = dto.Category,
             DefaultPurity = dto.DefaultPurity,
             WastagePercent = dto.WastagePercent,
-            IsActive = dto.IsActive
+            IsActive = dto.IsActive,
+            BranchId = branchId
         };
         _db.JewelTypes.Add(entity);
         await _db.SaveChangesAsync();
-        return Ok(new JewelTypeDto(entity.JewelTypeId, entity.JewelTypeName, entity.Category, entity.DefaultPurity, entity.WastagePercent, entity.IsActive));
+        return Ok(new JewelTypeDto(entity.JewelTypeId, entity.JewelTypeName, entity.Category, entity.DefaultPurity, entity.WastagePercent, entity.IsActive, entity.BranchId));
     }
 
     [HttpPut("{id:int}")]
@@ -43,11 +47,16 @@ public class JewelTypesController : ControllerBase
     {
         var entity = await _db.JewelTypes.FindAsync(id);
         if (entity == null) return NotFound();
+
+        var user = await this.GetCurrentUserAsync(_db);
+        var branchId = dto.BranchId ?? user?.BranchId ?? entity.BranchId;
+
         entity.JewelTypeName = dto.JewelTypeName;
         entity.Category = dto.Category;
         entity.DefaultPurity = dto.DefaultPurity;
         entity.WastagePercent = dto.WastagePercent;
         entity.IsActive = dto.IsActive;
+        entity.BranchId = branchId;
         await _db.SaveChangesAsync();
         return NoContent();
     }
@@ -60,7 +69,6 @@ public class GoldRatesController : ControllerBase
     private readonly JlmsDbContext _db;
     public GoldRatesController(JlmsDbContext db) => _db = db;
 
-    // GET /api/gold-rates/today
     [HttpGet("today")]
     public async Task<ActionResult<GoldRateDto>> GetToday()
     {
@@ -71,10 +79,9 @@ public class GoldRatesController : ControllerBase
             .FirstOrDefaultAsync();
 
         if (rate == null) return NotFound("No gold/silver rate has been set yet. Please add one via Gold/Silver Rate Master.");
-        return Ok(new GoldRateDto(rate.GoldRateId, rate.EffectiveDate, rate.Rate24K, rate.Rate22K, rate.Rate18K, rate.SilverRate));
+        return Ok(new GoldRateDto(rate.GoldRateId, rate.EffectiveDate, rate.Rate24K, rate.Rate22K, rate.Rate18K, rate.SilverRate, rate.BranchId));
     }
 
-    // GET /api/gold-rates/history?days=30
     [HttpGet("history")]
     public async Task<ActionResult<IEnumerable<GoldRateDto>>> GetHistory([FromQuery] int days = 30)
     {
@@ -83,15 +90,17 @@ public class GoldRatesController : ControllerBase
             .Where(r => r.EffectiveDate >= cutoff)
             .OrderByDescending(r => r.EffectiveDate)
             .ToListAsync();
-        return Ok(rates.Select(r => new GoldRateDto(r.GoldRateId, r.EffectiveDate, r.Rate24K, r.Rate22K, r.Rate18K, r.SilverRate)));
+        return Ok(rates.Select(r => new GoldRateDto(r.GoldRateId, r.EffectiveDate, r.Rate24K, r.Rate22K, r.Rate18K, r.SilverRate, r.BranchId)));
     }
 
-    // POST /api/gold-rates  (upserts today's rate)
     [HttpPost]
     public async Task<ActionResult<GoldRateDto>> SetToday([FromBody] GoldRateCreateDto dto)
     {
         var today = DateTime.UtcNow.Date;
-        var existing = await _db.GoldRates.FirstOrDefaultAsync(r => r.EffectiveDate == today);
+        var user = await this.GetCurrentUserAsync(_db);
+        var branchId = dto.BranchId ?? user?.BranchId;
+
+        var existing = await _db.GoldRates.FirstOrDefaultAsync(r => r.EffectiveDate == today && r.BranchId == branchId);
 
         if (existing != null)
         {
@@ -99,8 +108,9 @@ public class GoldRatesController : ControllerBase
             existing.Rate22K = dto.Rate22K;
             existing.Rate18K = dto.Rate18K;
             existing.SilverRate = dto.SilverRate;
+            existing.UpdatedBy = user?.UserId;
             await _db.SaveChangesAsync();
-            return Ok(new GoldRateDto(existing.GoldRateId, existing.EffectiveDate, existing.Rate24K, existing.Rate22K, existing.Rate18K, existing.SilverRate));
+            return Ok(new GoldRateDto(existing.GoldRateId, existing.EffectiveDate, existing.Rate24K, existing.Rate22K, existing.Rate18K, existing.SilverRate, existing.BranchId));
         }
 
         var entity = new GoldRate
@@ -110,11 +120,13 @@ public class GoldRatesController : ControllerBase
             Rate22K = dto.Rate22K,
             Rate18K = dto.Rate18K,
             SilverRate = dto.SilverRate,
+            UpdatedBy = user?.UserId,
+            BranchId = branchId,
             CreatedAt = DateTime.UtcNow
         };
         _db.GoldRates.Add(entity);
         await _db.SaveChangesAsync();
-        return Ok(new GoldRateDto(entity.GoldRateId, entity.EffectiveDate, entity.Rate24K, entity.Rate22K, entity.Rate18K, entity.SilverRate));
+        return Ok(new GoldRateDto(entity.GoldRateId, entity.EffectiveDate, entity.Rate24K, entity.Rate22K, entity.Rate18K, entity.SilverRate, entity.BranchId));
     }
 }
 
@@ -131,12 +143,15 @@ public class LoanSchemesController : ControllerBase
         var query = _db.LoanSchemes.AsNoTracking().AsQueryable();
         if (activeOnly) query = query.Where(s => s.IsActive);
         var items = await query.OrderBy(s => s.SchemeName).ToListAsync();
-        return Ok(items.Select(s => new LoanSchemeDto(s.LoanSchemeId, s.SchemeName, s.InterestRatePct, s.TenureMonths, s.MaxLtvPercent, s.ProcessingFee, s.PenaltyRatePerDay, s.IsActive)));
+        return Ok(items.Select(s => new LoanSchemeDto(s.LoanSchemeId, s.SchemeName, s.InterestRatePct, s.TenureMonths, s.MaxLtvPercent, s.ProcessingFee, s.PenaltyRatePerDay, s.IsActive, s.BranchId)));
     }
 
     [HttpPost]
     public async Task<ActionResult<LoanSchemeDto>> Create([FromBody] LoanSchemeCreateDto dto)
     {
+        var user = await this.GetCurrentUserAsync(_db);
+        var branchId = dto.BranchId ?? user?.BranchId;
+
         var entity = new LoanScheme
         {
             SchemeName = dto.SchemeName,
@@ -146,11 +161,12 @@ public class LoanSchemesController : ControllerBase
             ProcessingFee = dto.ProcessingFee,
             PenaltyRatePerDay = dto.PenaltyRatePerDay,
             IsActive = dto.IsActive,
+            BranchId = branchId,
             CreatedAt = DateTime.UtcNow
         };
         _db.LoanSchemes.Add(entity);
         await _db.SaveChangesAsync();
-        return Ok(new LoanSchemeDto(entity.LoanSchemeId, entity.SchemeName, entity.InterestRatePct, entity.TenureMonths, entity.MaxLtvPercent, entity.ProcessingFee, entity.PenaltyRatePerDay, entity.IsActive));
+        return Ok(new LoanSchemeDto(entity.LoanSchemeId, entity.SchemeName, entity.InterestRatePct, entity.TenureMonths, entity.MaxLtvPercent, entity.ProcessingFee, entity.PenaltyRatePerDay, entity.IsActive, entity.BranchId));
     }
 
     [HttpPut("{id:int}")]
@@ -158,6 +174,10 @@ public class LoanSchemesController : ControllerBase
     {
         var entity = await _db.LoanSchemes.FindAsync(id);
         if (entity == null) return NotFound();
+
+        var user = await this.GetCurrentUserAsync(_db);
+        var branchId = dto.BranchId ?? user?.BranchId ?? entity.BranchId;
+
         entity.SchemeName = dto.SchemeName;
         entity.InterestRatePct = dto.InterestRatePct;
         entity.TenureMonths = dto.TenureMonths;
@@ -165,6 +185,7 @@ public class LoanSchemesController : ControllerBase
         entity.ProcessingFee = dto.ProcessingFee;
         entity.PenaltyRatePerDay = dto.PenaltyRatePerDay;
         entity.IsActive = dto.IsActive;
+        entity.BranchId = branchId;
         await _db.SaveChangesAsync();
         return NoContent();
     }

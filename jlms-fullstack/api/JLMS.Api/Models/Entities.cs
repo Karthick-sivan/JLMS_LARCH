@@ -24,13 +24,13 @@ public class Role
 public class User
 {
     public int UserId { get; set; }
-    public string EmployeeCode { get; set; } = "";
+    public string? EmployeeCode { get; set; } = "";
     public string FullName { get; set; } = "";
     public string Username { get; set; } = "";
     public string PasswordHash { get; set; } = "";
     public int RoleId { get; set; }
     public Role? Role { get; set; }
-    public int BranchId { get; set; }
+    public int? BranchId { get; set; }
     public Branch? Branch { get; set; }
     public string? Mobile { get; set; }
     public string? Email { get; set; }
@@ -80,6 +80,7 @@ public class JewelType
     public string? DefaultPurity { get; set; }
     public decimal WastagePercent { get; set; }
     public bool IsActive { get; set; } = true;
+    public int? BranchId { get; set; }
 }
 
 public class GoldRate
@@ -91,6 +92,7 @@ public class GoldRate
     public decimal Rate18K { get; set; }
     public decimal SilverRate { get; set; }
     public int? UpdatedBy { get; set; }
+    public int? BranchId { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -104,6 +106,7 @@ public class LoanScheme
     public decimal ProcessingFee { get; set; }
     public decimal PenaltyRatePerDay { get; set; }
     public bool IsActive { get; set; } = true;
+    public int? BranchId { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -131,7 +134,7 @@ public class Loan
     public int? SubmittedBy { get; set; }
     public DateTime? SubmittedAt { get; set; }
 
-    // NEW — fixed at loan creation: Principal x InterestRatePct / 100.
+    // NEW ï¿½ fixed at loan creation: Principal x InterestRatePct / 100.
     // Never changes for the life of the loan. This is the customer's total
     // agreed scheme interest (Rule 4).
     public decimal OverallInterest { get; set; }
@@ -140,7 +143,7 @@ public class Loan
     public decimal OutstandingInterest { get; set; }
     public decimal PenaltyAccrued { get; set; }
 
-    // NEW — single web-captured photo covering ALL jewel items for this loan
+    // NEW ï¿½ single web-captured photo covering ALL jewel items for this loan
     // (Step 3 on New Loan screen now captures one combined photo instead of
     // one photo per jewel item). Relative path under wwwroot-style Uploads folder.
     public string? GroupPhotoPath { get; set; }
@@ -252,7 +255,7 @@ public class AuditLog
 
 
 // Master table that drives numbering series (Loan Number / Customer Code) per financial year.
-// One row per (Code, GoldLoanType) — e.g. Code="2026-2027", GoldLoanType="LoanNumber", Prefix="BR2627".
+// One row per (Code, GoldLoanType) ï¿½ e.g. Code="2026-2027", GoldLoanType="LoanNumber", Prefix="BR2627".
 public class FinancialYear
 {
     public int FinancialYearId { get; set; }
@@ -279,4 +282,8 @@ public class FinancialYear
 
     public DateTime CreatedDt { get; set; } = DateTime.UtcNow;
     public int CreatedBy { get; set; }
+
+    // Branch-specific financial year configuration
+    public int? BranchId { get; set; }
 }
+

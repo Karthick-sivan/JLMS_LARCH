@@ -1,4 +1,4 @@
-﻿namespace JLMS.Api.DTOs;
+namespace JLMS.Api.DTOs;
 
 using Microsoft.AspNetCore.Http;
 
@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Http;
 
 // ---------- Auth ----------
 public record LoginRequest(string Username, string Password, int? BranchId);
-public record LoginResponse(int UserId, string FullName, string Username, string RoleName, string BranchName, string Token, int BranchId);
+public record LoginResponse(int UserId, string FullName, string Username, string RoleName, string BranchName, string Token, int? BranchId, int RoleId);
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
 // ---------- Common ----------
 public record PagedResultDto<T>(List<T> Items, int TotalCount, int Page, int PageSize);
@@ -64,7 +65,7 @@ public record CustomerUpdateDto(
 );
 
 public record CustomerListItemDto(
-    int CustomerId, string CustomerCode, string CustomerName, string? AadhaarNumber, string Mobile,
+    int CustomerId, string CustomerCode, string CustomerName, string? AadhaarNumber, string Mobile,int?branchId,
     int ActiveLoans, decimal TotalOutstanding, string Status, string? LoanNumbers = null
 );
 
@@ -79,14 +80,14 @@ string? NomineeAadhaarNumber, string? NomineePhotoPath, string? NomineeAadhaarDo
 );
 
 // ---------- Jewel Types / Gold Rates / Schemes (Masters) ----------
-public record JewelTypeDto(int JewelTypeId, string JewelTypeName, string Category, string? DefaultPurity, decimal WastagePercent, bool IsActive);
-public record JewelTypeCreateDto(string JewelTypeName, string Category, string? DefaultPurity, decimal WastagePercent, bool IsActive);
+public record JewelTypeDto(int JewelTypeId, string JewelTypeName, string Category, string? DefaultPurity, decimal WastagePercent, bool IsActive, int? BranchId);
+public record JewelTypeCreateDto(string JewelTypeName, string Category, string? DefaultPurity, decimal WastagePercent, bool IsActive, int? BranchId = null);
 
-public record GoldRateDto(int GoldRateId, DateTime EffectiveDate, decimal Rate24K, decimal Rate22K, decimal Rate18K, decimal SilverRate);
-public record GoldRateCreateDto(decimal Rate24K, decimal Rate22K, decimal Rate18K, decimal SilverRate);
+public record GoldRateDto(int GoldRateId, DateTime EffectiveDate, decimal Rate24K, decimal Rate22K, decimal Rate18K, decimal SilverRate, int? BranchId);
+public record GoldRateCreateDto(decimal Rate24K, decimal Rate22K, decimal Rate18K, decimal SilverRate, int? BranchId = null);
 
-public record LoanSchemeDto(int LoanSchemeId, string SchemeName, decimal InterestRatePct, int TenureMonths, decimal MaxLtvPercent, decimal ProcessingFee, decimal PenaltyRatePerDay, bool IsActive);
-public record LoanSchemeCreateDto(string SchemeName, decimal InterestRatePct, int TenureMonths, decimal MaxLtvPercent, decimal ProcessingFee, decimal PenaltyRatePerDay, bool IsActive);
+public record LoanSchemeDto(int LoanSchemeId, string SchemeName, decimal InterestRatePct, int TenureMonths, decimal MaxLtvPercent, decimal ProcessingFee, decimal PenaltyRatePerDay, bool IsActive, int? BranchId);
+public record LoanSchemeCreateDto(string SchemeName, decimal InterestRatePct, int TenureMonths, decimal MaxLtvPercent, decimal ProcessingFee, decimal PenaltyRatePerDay, bool IsActive, int? BranchId = null);
 
 // ---------- Jewel Appraisal ----------
 public record JewelItemInputDto(int JewelTypeId, int Quantity, decimal GrossWeightGrams, decimal StoneWeightGrams, string? Purity, string? Model = null, string? Varient = null);
@@ -158,12 +159,13 @@ public record LoanDueRowDto(
 // ---------- User Master ----------
 public record UserMasterDto(
     int UserId,
-    string EmployeeCode,
+    string? EmployeeCode,
+    //string EmployeeCode,
     string FullName,
     string Username,
     int RoleId,
     string RoleName,
-    int BranchId,
+    int? BranchId,
     string BranchName,
     string? Mobile,
     string? Email,
@@ -172,27 +174,30 @@ public record UserMasterDto(
 );
 
 public record BranchOptionDto(int BranchId, string BranchName, string BranchCode);
+public record BranchDto(int BranchId, string BranchCode, string BranchName, string? City, string? State, bool IsActive, DateTime CreatedAt);
+public record BranchCreateDto(string BranchCode, string BranchName, string? City, string? State, bool IsActive);
 public record RoleOptionDto(int RoleId, string RoleName);
+public record RoleCreateDto(string RoleName, string? Description, bool IsActive);
 
 public record UserCreateDto(
-    string EmployeeCode,
+        string? EmployeeCode,
     string FullName,
     string Username,
     string Password,
     int RoleId,
-    int BranchId,
+    int? BranchId,
     string? Mobile,
     string? Email,
     bool IsActive
 );
 
 public record UserUpdateDto(
-    string EmployeeCode,
+        string? EmployeeCode,
     string FullName,
     string Username,
     string? Password,
     int RoleId,
-    int BranchId,
+    int? BranchId,
     string? Mobile,
     string? Email,
     bool IsActive
@@ -483,7 +488,7 @@ public record LoanOperationsPaymentDetailsDto(
 );
 
 // ---------- Customers: lightweight list for the "browse customers" picker ----------
-public record CustomerActiveListItemDto(int CustomerId, string CustomerCode, string CustomerName, string Mobile);
+public record CustomerActiveListItemDto(int CustomerId, string CustomerCode, string CustomerName, string Mobile,int? branchId);
 
 
 
@@ -665,7 +670,8 @@ public record FinancialYearDto(
     string? Suffix,
     string Status,
     DateTime CreatedDt,
-    int CreatedBy);
+    int CreatedBy,
+    int? BranchId);
 
 public record FinancialYearCreateDto(
     string Code,
@@ -675,7 +681,8 @@ public record FinancialYearCreateDto(
     int GoldLoanNoStartsFrom,
     string Prefix,
     string? Suffix,
-    int CreatedBy);
+    int CreatedBy,
+    int? BranchId);
 
 public record FinancialYearUpdateDto(
     string Code,
@@ -685,5 +692,6 @@ public record FinancialYearUpdateDto(
     int GoldLoanNoStartsFrom,
     string Prefix,
     string? Suffix,
-    string Status
+    string Status,
+    int? BranchId
     );

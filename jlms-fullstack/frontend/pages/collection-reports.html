@@ -362,10 +362,11 @@
         </div>
     </div>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
     <script>window.JLMS_ACTIVE = "collection-reports";</script>
-    <script src="js/jlms-shell.js"></script>
+    <script src="../js/language.js"></script>
     <script src="js/api-client.js"></script>
+    <script src="js/jlms-shell.js"></script>
     <script>
         jlmsInitShell();
 
@@ -679,7 +680,16 @@
             loanId: elLoanNo.value || undefined
         };
         loadCustomerDropdown();
-        loadReport(activeFilters);
+        // Wait for language to load before loading report
+        loadLanguage(currentLanguage).then(() => {
+            loadReport(activeFilters);
+        });
+
+        // Re-render dynamic content when language switches
+        registerLanguageCallback(() => {
+            loadCustomerDropdown();
+            if (lastResult) renderGrid(lastResult);
+        });
     </script>
 </body>
 
