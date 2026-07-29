@@ -78,9 +78,6 @@ public class CollectionsController : ControllerBase
         if (loan.Status != "Active") return BadRequest($"Loan is '{loan.Status}', cannot collect interest.");
         if (request.AmountReceived <= 0) return BadRequest("Amount received must be greater than zero.");
 
-        var seq = await _db.LoanTransactions.CountAsync() + 1;
-        var receiptNo = _calc.GenerateReceiptNumber(seq);
-
         // Apply received amount: penalty first, then interest (typical collection priority)
         var lastTxn = await _db.LoanTransactions.AsNoTracking()
           .Where(t => t.LoanId == loanId &&
@@ -144,25 +141,49 @@ public class CollectionsController : ControllerBase
         var nextDue = (loan.MaturityDate ?? DateTime.UtcNow).Date;
         if (!request.IsPartial) nextDue = DateTime.UtcNow.Date.AddMonths(1);
 
-        var txn = new LoanTransaction
+        LoanTransaction txn = null;
+        Exception lastError = null;
+        string receiptNo = null;
+
+        for (int attempt = 0; attempt < 5; attempt++)
         {
-            LoanId = loan.LoanId,
-            TransactionType = "InterestCollection",
-            ReceiptNumber = receiptNo,
-            TransactionDate = DateTime.UtcNow,
-            InterestAmount = interestCollected,
-            PenaltyAmount = penaltyCollected,
-            TotalAmount = penaltyCollected + interestCollected,
-            PaymentMode = request.PaymentMode,
-            ReferenceNo = request.ReferenceNo,
-            BalancePrincipalAfter = loan.OutstandingPrincipal,
-            NextDueDate = nextDue,
-            ProcessedBy = request.ProcessedByUserId,
-            BranchId = loan.BranchId,
-            CreatedAt = DateTime.UtcNow
-        };
-        _db.LoanTransactions.Add(txn);
-        await _db.SaveChangesAsync();
+            var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
+            receiptNo = _calc.GenerateReceiptNumber(seq);
+
+            txn = new LoanTransaction
+            {
+                LoanId = loan.LoanId,
+                TransactionType = "InterestCollection",
+                ReceiptNumber = receiptNo,
+                TransactionDate = DateTime.UtcNow,
+                InterestAmount = interestCollected,
+                PenaltyAmount = penaltyCollected,
+                TotalAmount = penaltyCollected + interestCollected,
+                PaymentMode = request.PaymentMode,
+                ReferenceNo = request.ReferenceNo,
+                BalancePrincipalAfter = loan.OutstandingPrincipal,
+                NextDueDate = nextDue,
+                ProcessedBy = request.ProcessedByUserId,
+                BranchId = loan.BranchId,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.LoanTransactions.Add(txn);
+
+            try
+            {
+                await _db.SaveChangesAsync();
+                lastError = null;
+                break;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
+            {
+                _db.Entry(txn).State = EntityState.Detached;
+                lastError = ex;
+            }
+        }
+
+        if (lastError != null)
+            throw lastError;
 
         return Ok(new ReceiptDto(receiptNo, txn.TransactionDate, loan.LoanNumber, loan.Customer?.CustomerName ?? "",
             interestCollected, penaltyCollected, txn.TotalAmount, request.PaymentMode, loan.OutstandingPrincipal, nextDue));
@@ -196,28 +217,48 @@ public async Task<ActionResult> CollectPrincipal(
     loan.OutstandingPrincipal -= request.PrincipalAmount;
     loan.UpdatedAt = DateTime.UtcNow;
 
-    var seq = await _db.LoanTransactions.CountAsync() + 1;
-    var receiptNo = _calc.GenerateReceiptNumber(seq);
+    LoanTransaction txn = null;
+    Exception lastError = null;
+    string receiptNo = null;
 
-    var txn = new LoanTransaction
+    for (int attempt = 0; attempt < 5; attempt++)
     {
-        LoanId = loan.LoanId,
-        TransactionType = "PrincipalCollection",
-        ReceiptNumber = receiptNo,
-        TransactionDate = DateTime.UtcNow,
-        PrincipalAmount = request.PrincipalAmount,
-        TotalAmount = request.PrincipalAmount,
-        PaymentMode = request.PaymentMode,
-        ReferenceNo = request.ReferenceNo,
-        BalancePrincipalAfter = loan.OutstandingPrincipal,
-        ProcessedBy = request.ProcessedByUserId,
-        BranchId = loan.BranchId,
-        CreatedAt = DateTime.UtcNow
-    };
+        var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
+        receiptNo = _calc.GenerateReceiptNumber(seq);
 
-    _db.LoanTransactions.Add(txn);
+        txn = new LoanTransaction
+        {
+            LoanId = loan.LoanId,
+            TransactionType = "PrincipalCollection",
+            ReceiptNumber = receiptNo,
+            TransactionDate = DateTime.UtcNow,
+            PrincipalAmount = request.PrincipalAmount,
+            TotalAmount = request.PrincipalAmount,
+            PaymentMode = request.PaymentMode,
+            ReferenceNo = request.ReferenceNo,
+            BalancePrincipalAfter = loan.OutstandingPrincipal,
+            ProcessedBy = request.ProcessedByUserId,
+            BranchId = loan.BranchId,
+            CreatedAt = DateTime.UtcNow
+        };
 
-    await _db.SaveChangesAsync();
+        _db.LoanTransactions.Add(txn);
+
+        try
+        {
+            await _db.SaveChangesAsync();
+            lastError = null;
+            break;
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
+        {
+            _db.Entry(txn).State = EntityState.Detached;
+            lastError = ex;
+        }
+    }
+
+    if (lastError != null)
+        throw lastError;
 
     return Ok(new
     {

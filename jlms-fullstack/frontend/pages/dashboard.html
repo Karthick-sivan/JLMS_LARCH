@@ -19,12 +19,12 @@
       <div class="page-header">
         <div>
           <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><span class="current">Dashboard</span></div> -->
-          <div class="h1">Welcome, <span id="greetUserName">User</span></div>
+          <div class="h1" data-i18n="welcome">Welcome</div>, <span id="greetUserName">User</span>
           <div class="text-muted-jlms" style="margin-top:3px;" id="greetSubline">Loading branch info...</div>
         </div>
         <div class="page-actions">
-          <button class="btn-jlms btn-jlms-outline" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
-          <a href="new-loan.html" class="btn-jlms btn-jlms-primary"><i class="bi bi-plus-lg"></i> New Loan</a>
+          <button class="btn-jlms btn-jlms-outline" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i> <span data-i18n="refresh">Refresh</span></button>
+          <a href="new-loan.html" class="btn-jlms btn-jlms-primary"><i class="bi bi-plus-lg"></i> <span data-i18n="newLoan">New Loan</span></a>
         </div>
       </div>
 
@@ -34,24 +34,24 @@
       <div class="row g-3 mb-3">
         <div class="col-xl-4 col-md-6">
           <div class="kpi-card">
-            <div class="kpi-top"><span class="kpi-label">Active Loans</span><div class="kpi-icon navy"><i class="bi bi-folder2-open"></i></div></div>
+            <div class="kpi-top"><span class="kpi-label" data-i18n="activeLoan">Active Loans</span><div class="kpi-icon navy"><i class="bi bi-folder2-open"></i></div></div>
             <div class="kpi-value" id="kpiActiveLoans">0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Ongoing Loans</span></div>
+            <div class="kpi-foot"><span class="text-muted-jlms" data-i18n="ongoingLoans">Ongoing Loans</span></div>
           </div>
         </div>
         <div class="col-xl-4 col-md-6">
           <div class="kpi-card gold">
-            <div class="kpi-top"><span class="kpi-label">Outstanding Amount</span><div class="kpi-icon gold"><i class="bi bi-cash-stack"></i></div></div>
+            <div class="kpi-top"><span class="kpi-label" data-i18n="outstandingAmount">Outstanding Amount</span><div class="kpi-icon gold"><i class="bi bi-cash-stack"></i></div></div>
             <div class="kpi-value" id="kpiOutstanding">₹0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Sum of active principal</span></div>
+            <div class="kpi-foot"><span class="text-muted-jlms" data-i18n="sumOfActivePrincipal">Sum of active principal</span></div>
           </div>
         </div>
        
         <div class="col-xl-4 col-md-6">
           <div class="kpi-card info">
-            <div class="kpi-top"><span class="kpi-label">Today's Disbursement</span><div class="kpi-icon info"><i class="bi bi-send-check"></i></div></div>
+            <div class="kpi-top"><span class="kpi-label" data-i18n="todaysDisbursement">Today's Disbursement</span><div class="kpi-icon info"><i class="bi bi-send-check"></i></div></div>
             <div class="kpi-value" id="kpiDisbursement">₹0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Loans disbursed today</span></div>
+            <div class="kpi-foot"><span class="text-muted-jlms" data-i18n="loansDisbursedToday">Loans disbursed today</span></div>
           </div>
         </div>
       </div>
@@ -60,16 +60,16 @@
       <div class="row g-3 mb-3">
          <div class="col-xl-4 col-md-6">
           <div class="kpi-card success">
-            <div class="kpi-top"><span class="kpi-label">Today's Collections</span><div class="kpi-icon success"><i class="bi bi-graph-up"></i></div></div>
+            <div class="kpi-top"><span class="kpi-label" data-i18n="todaysCollections">Today's Collections</span><div class="kpi-icon success"><i class="bi bi-graph-up"></i></div></div>
             <div class="kpi-value" id="kpiCollections">₹0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Interest + principal + closures</span></div>
+            <div class="kpi-foot"><span class="text-muted-jlms" data-i18n="interestPrincipalClosures">Interest + principal + closures</span></div>
           </div>
         </div>
         <div class="col-xl-4 col-md-6">
           <div class="kpi-card danger">
-            <div class="kpi-top"><span class="kpi-label">Overdue Loans</span><div class="kpi-icon danger"><i class="bi bi-exclamation-circle"></i></div></div>
+            <div class="kpi-top"><span class="kpi-label" data-i18n="overdueLoans">Overdue Loans</span><div class="kpi-icon danger"><i class="bi bi-exclamation-circle"></i></div></div>
             <div class="kpi-value" id="kpiOverdue">0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Past maturity date</span></div>
+            <div class="kpi-foot"><span class="text-muted-jlms" data-i18n="pastMaturityDate">Past maturity date</span></div>
           </div>
         </div>
         
@@ -82,7 +82,7 @@
         </div> -->
         <div class="col-xl-4 col-md-6">
           <div class="kpi-card success">
-            <div class="kpi-top"><span class="kpi-label">Closures This Month</span><div class="kpi-icon success"><i class="bi bi-check2-circle"></i></div></div>
+            <div class="kpi-top"><span class="kpi-label" data-i18n="closuresThisMonth">Closures This Month</span><div class="kpi-icon success"><i class="bi bi-check2-circle"></i></div></div>
             <div class="kpi-value" id="kpiClosures">0</div>
             <div class="kpi-foot"><span class="text-muted-jlms">Since start of month</span></div>
           </div>
@@ -108,20 +108,20 @@
 
       <!-- QUICK ACTIONS -->
       <div class="panel mb-4">
-        <div class="panel-head"><div class="h4">Quick Actions</div></div>
+        <div class="panel-head"><div class="h4" data-i18n="quickActions">Quick Actions</div></div>
         <div class="panel-body">
           <div class="row g-3">
             <div class="col-6 col-md-3">
-              <a href="new-loan.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-file-earmark-plus"></i></div><div class="qa-label">New Loan</div></div></a>
+              <a href="new-loan.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-file-earmark-plus"></i></div><div class="qa-label" data-i18n="newLoan">New Loan</div></div></a>
             </div>
             <div class="col-6 col-md-3">
-              <a href="loan-operations.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-percent"></i></div><div class="qa-label">Loan operations</div></div></a>
+              <a href="loan-operations.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-percent"></i></div><div class="qa-label" data-i18n="loanOperations">Loan operations</div></div></a>
             </div>
             <div class="col-6 col-md-3">
-              <a href="loan-scheme-master.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-journal-text"></i></div><div class="qa-label">Loan Scheme</div></div></a>
+              <a href="loan-scheme-master.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-journal-text"></i></div><div class="qa-label" data-i18n="loanScheme">Loan Scheme</div></div></a>
             </div>
             <div class="col-6 col-md-3">
-              <a href="customer-search.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-search"></i></div><div class="qa-label">Customer Search</div></div></a>
+              <a href="customer-search.html" style="text-decoration:none;"><div class="quick-action-card"><div class="qa-icon"><i class="bi bi-search"></i></div><div class="qa-label" data-i18n="customerSearch">Customer Search</div></div></a>
             </div>
           </div>
         </div>
@@ -131,10 +131,10 @@
       <div class="row g-3 mb-4">
         <div class="col-lg-6">
           <div class="panel h-100">
-            <div class="panel-head"><div class="h4">Today's Collections</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="todaysCollections">Today's Collections</div></div>
             <div class="panel-body no-pad table-jlms-wrap scroll-table">
               <table class="table-jlms">
-                <thead><tr><th>Loan No.</th><th>Customer</th><th class="text-end">Amount</th><th>Mode</th><th>Time</th></tr></thead>
+                <thead><tr><th data-i18n="loanNo">Loan No.</th><th data-i18n="customer">Customer</th><th class="text-end" data-i18n="amount">Amount</th><th data-i18n="mode">Mode</th><th data-i18n="time">Time</th></tr></thead>
                 <tbody id="collectionsTodayBody">
                   <tr><td colspan="5" class="text-center text-muted-jlms" style="padding:24px;">Loading...</td></tr>
                 </tbody>
@@ -144,10 +144,10 @@
         </div>
         <div class="col-lg-6">
           <div class="panel h-100">
-            <div class="panel-head"><div class="h4">Loans Due Today / Soon</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="loansDueTodaySoon">Loans Due Today / Soon</div></div>
             <div class="panel-body no-pad table-jlms-wrap scroll-table">
               <table class="table-jlms">
-                <thead><tr><th>Loan No.</th><th>Customer</th><th class="text-end">Outstanding</th><th>Due Date</th><th></th></tr></thead>
+                <thead><tr><th data-i18n="loanNo">Loan No.</th><th data-i18n="customer">Customer</th><th class="text-end" data-i18n="outstanding">Outstanding</th><th data-i18n="dueDate">Due Date</th><th></th></tr></thead>
                 <tbody id="loansDueTodayBody">
                   <tr><td colspan="5" class="text-center text-muted-jlms" style="padding:24px;">Loading...</td></tr>
                 </tbody>
@@ -163,8 +163,9 @@
 
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "dashboard";</script>
-<script src="js/jlms-shell.js"></script>
+<script src="../js/language.js"></script>
 <script src="js/api-client.js"></script>
+<script src="js/jlms-shell.js"></script>
 <script>
 jlmsInitShell();
 
@@ -179,6 +180,12 @@ function formatCurrencyExact(n) {
 document.addEventListener('DOMContentLoaded', async () => {
   const user = Session.requireLogin();
   if (!user) return;
+
+  const isSuperAdmin = user && user.roleId === 1002;
+  if (isSuperAdmin) {
+    window.location.href = 'superadmin-dashboard.html';
+    return;
+  }
 
   document.getElementById('greetUserName').textContent = user.fullName || user.username;
   document.getElementById('greetSubline').textContent =

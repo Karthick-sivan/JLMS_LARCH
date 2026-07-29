@@ -415,7 +415,7 @@
                 <div class="page-header">
                     <div>
                         <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Operations</span></div> -->
-                        <div class="h1">Loan Operations</div>
+                        <div class="h1" data-i18n="loanOperations">Loan Operations</div>
                     </div>
                     <!--<div class="page-actions">
                       <button class="btn-jlms btn-jlms-outline" id="btnRefresh"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
@@ -430,28 +430,28 @@
                     <div class="panel-body">
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <label class="field-label">Loan No</label>
+                                <label class="field-label" data-i18n="loanNo">Loan No</label>
                                 <input type="text" class="form-control-jlms" id="fLoanNo" placeholder="Loan Number">
                             </div>
                             <div class="col-md-3">
-                                <label class="field-label">Customer Name</label>
+                                <label class="field-label" data-i18n="customerName">Customer Name</label>
                                 <input type="text" class="form-control-jlms" id="fCustomerName"
                                     placeholder="Search by name">
                             </div>
                             <div class="col-md-3">
-                                <label class="field-label">Mobile</label>
+                                <label class="field-label" data-i18n="mobile">Mobile</label>
                                 <input type="text" class="form-control-jlms" id="fMobile" placeholder="10-digit mobile">
                             </div>
                             <div class="col-md-2 d-none">
-                                <label class="field-label">Aadhaar</label>
+                                <label class="field-label" data-i18n="aadhaar">Aadhaar</label>
                                 <input type="text" class="form-control-jlms" id="fAadhaar" placeholder="XXXX-XXXX-XXXX">
                             </div>
                             <div class="col-md-2 d-none">
-                                <label class="field-label">PAN</label>
+                                <label class="field-label" data-i18n="pan">PAN</label>
                                 <input type="text" class="form-control-jlms" id="fPan" placeholder="ABCDE1234F">
                             </div>
                             <div class="col-md-3">
-                                <label class="field-label">Loan Scheme</label>
+                                <label class="field-label" data-i18n="loanScheme">Loan Scheme</label>
                                 <select class="form-control-jlms" id="fScheme">
                                     <option value="">All Schemes</option>
                                     <!--Api.getLoanSchemes()-->
@@ -475,7 +475,7 @@
                 <div class="panel">
                     <div class="grid-toolbar">
                         <div class="grid-toolbar-left">
-                            <span class="h4">Active Loans</span>
+                            <span class="h4" data-i18n="activeLoan">Active Loans</span>
                             <span class="badge-jlms badge-neutral" id="resultCount">0 loans</span>
                         </div>
                     </div>
@@ -483,20 +483,20 @@
                         <table class="table-jlms">
                             <thead>
                                 <tr>
-                                    <th class="text-center">Actions</th>
-                                    <th style="width: 150px; min-width: 150px;">Loan No</th>
-                                    <th style="width: 100px; min-width: 100px;">Loan Date</th>
-                                    <th>Customer Name</th>
-                                    <th>Loan Scheme</th>
-                                    <th class="text-end">Principal Amount</th>
-                                    <th class="text-end d-none">Overall Interest</th>
-                                    <th class="text-end">Outstanding Principal</th>
-                                    <th class="text-end d-none">Outstanding Interest</th>
-                                    <th class="text-end">Total Outstanding</th>
-                                    <th class="text-end">Total Amount Paid</th>
-                                    <th style="display: none;">Loan Status</th>
+                                    <th class="text-center"  data-i18n="actions">Actions</th>
+                                    <th style="width: 150px; min-width: 150px;"  data-i18n="loanNo">Loan No</th>
+                                    <th style="width: 100px; min-width: 100px;" data-i18n="loanDate">Loan Date</th>
+                                    <th data-i18n="customerName">Customer Name</th>
+                                    <th data-i18n="loanScheme">Loan Scheme</th>
+                                    <th class="text-end" data-i18n="principalAmount">Principal Amount</th>
+                                    <th class="text-end d-none" data-i18n="overallInterest">Overall Interest</th>
+                                    <th class="text-end" data-i18n="outstandingPrincipal">Outstanding Principal</th>
+                                    <th class="text-end d-none" data-i18n="outstandingInterest">Outstanding Interest</th>
+                                    <th class="text-end" data-i18n="totalOutstanding">Total Outstanding</th>
+                                    <th class="text-end" data-i18n="totalAmountPaid">Total Amount Paid</th>
+                                    <th style="display: none;" data-i18n="loanStatus">Loan Status</th>
 
-                                    <th>Maturity Date</th>
+                                    <th data-i18n="maturityDate">Maturity Date</th>
                                 </tr>
                             </thead>
                             <tbody id="resultsBody">
@@ -549,59 +549,59 @@
                                     <div class="info-card-title">Customer &amp; Loan Details</div>
                                     <div class="info-grid">
                                         <div class="info-row">
-                                            <div class="info-label">Customer Name</div>
+                                            <div class="info-label" data-i18n="customerName">Customer Name</div>
                                             <div class="info-value" id="payCustomerName">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Loan No</div>
+                                            <div class="info-label" data-i18n="loanNo">Loan No</div>
                                             <div class="info-value" id="payLoanNo">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Loan Date</div>
+                                            <div class="info-label" data-i18n="loanDate">Loan Date</div>
                                             <div class="info-value" id="payLoanDate">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Aadhaar</div>
+                                            <div class="info-label" data-i18n="aadhaar">Aadhaar</div>
                                             <div class="info-value" id="payAadhaar">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">PAN</div>
+                                            <div class="info-label" data-i18n="pan">PAN</div>
                                             <div class="info-value" id="payPan">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Mobile</div>
+                                            <div class="info-label" data-i18n="mobile">Mobile</div>
                                             <div class="info-value" id="payMobile">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Loan Scheme</div>
+                                            <div class="info-label" data-i18n="loanScheme">Loan Scheme</div>
                                             <div class="info-value" id="payScheme">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Processing Fee</div>
+                                            <div class="info-label" data-i18n="processingFee">Processing Fee</div>
                                             <div class="info-value" id="payProcessingFee">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Principal</div>
+                                            <div class="info-label" data-i18n="principal">Principal</div>
                                             <div class="info-value" id="payPrincipal">-</div>
                                         </div>
                                         <div class="info-row d-none">
-                                            <div class="info-label">Overall Interest</div>
+                                            <div class="info-label" data-i18n="overallInterest">Overall Interest</div>
                                             <div class="info-value" id="payOverallInterest">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Outstanding Principal</div>
+                                            <div class="info-label" data-i18n="outstandingPrincipal">Outstanding Principal</div>
                                             <div class="info-value" id="payOutPrincipal">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Outstanding Interest</div>
+                                            <div class="info-label" data-i18n="outstandingInterest">Outstanding Interest</div>
                                             <div class="info-value" id="payOutInterest">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Total Outstanding</div>
+                                            <div class="info-label" data-i18n="totalOutstanding">Total Outstanding</div>
                                             <div class="info-value" id="payTotalOutstanding">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label">Maturity Date</div>
+                                            <div class="info-label" data-i18n="maturityDate">Maturity Date</div>
                                             <div class="info-value" id="payMaturityDate">-</div>
                                         </div>
                                     </div>
@@ -611,7 +611,7 @@
 
                                 <div class="receipt-section" id="paymentReceiptSection" style="display:none;">
                                     <div class="receipt-section-title">
-                                        <span class="h4">Receipt</span>
+                                        <span class="h4" data-i18n="receipt">Receipt</span>
                                         <span class="badge-jlms badge-success" id="paymentReceiptNoBadge"></span>
                                     </div>
                                     <div class="receipt-box" id="paymentReceiptBox"></div>
@@ -634,7 +634,7 @@
                                              is dynamic and can exceed OverallInterest, going negative here). -->
                                         <!-- <tr><td>Interest Paid So Far</td><td id="calcInterestPaid">-</td></tr> -->
                                         <tr>
-                                            <td>Outstanding Interest</td>
+                                            <td data-i18n="outstandingInterest">Outstanding Interest</td>
                                             <td id="calcOutstandingInterest">-</td>
                                         </tr>
                                         <!-- CHANGE (daily-interest fix): relabeled from "Daily Interest Reference"
@@ -647,7 +647,7 @@
                                              italic styling implying "just reference, ignore this") — these rows
                                              now show the figures actually charged this payment -->
                                         <tr>
-                                            <td>As Of Date</td>
+                                            <td data-i18n="asOfDate">As Of Date</td>
                                             <td id="calcCurrentDate">-</td>
                                         </tr>
                                         <!-- <tr>
@@ -655,27 +655,27 @@
                                             <td id="calcLastRefDate">-</td>
                                         </tr> -->
                                         <tr>
-                                            <td id="calcRefDateLabel">Reference Date (Last Payment)</td>
+                                            <td id="calcRefDateLabel" data-i18n="referenceDate">Reference Date (Last Payment)</td>
                                             <td id="calcLastRefDate">-</td>
                                         </tr>
                                         <tr>
-                                            <td>No. of Days</td>
+                                            <td data-i18n="noOfDays">No. of Days</td>
                                             <td id="calcDays">-</td>
                                         </tr>
                                         <tr>
-                                            <td>Daily Interest Rate</td>
+                                            <td data-i18n="dailyInterestRate">Daily Interest Rate</td>
                                             <td id="calcDailyRate">-</td>
                                         </tr>
                                         <tr>
-                                            <td>Daily Interest Amount</td>
+                                            <td data-i18n="dailyInterestAmount">Daily Interest Amount</td>
                                             <td id="calcDailyAmount">-</td>
                                         </tr>
                                         <tr>
-                                            <td>Accrued Interest (this period)</td>
+                                            <td data-i18n="accruedInterest">Accrued Interest (this period)</td>
                                             <td id="calcAccrued">-</td>
                                         </tr>
                                         <tr class="calc-total">
-                                            <td>Total Payable</td>
+                                            <td data-i18n="totalPayable">Total Payable</td>
                                             <td id="calcTotalPayable">-</td>
                                         </tr>
                                     </tbody>
@@ -693,7 +693,7 @@
                                          The input is still rendered (hidden) so onPaymentDateChanged / payDate
                                          references in JS continue to work without modification.
                                     <div class="col-md-4">
-                                        <label class="field-label">Payment Date</label>
+                                        <label class="field-label" data-i18n="paymentDate">Payment Date</label>
                                         <input type="date" class="form-control-jlms" id="payDate">
                                     </div>
                                     -->
@@ -701,7 +701,7 @@
                                     <!-- FIRST ROW -->
                                     <!-- Column 1: Payment Mode -->
                                     <div class="col-md-4">
-                                        <label class="field-label">Payment Mode</label>
+                                        <label class="field-label" data-i18n="paymentMode">Payment Mode</label>
                                         <select class="form-control-jlms" id="payMode">
                                             <option value="Cash">Cash</option>
                                             <option value="UPI">UPI</option>
@@ -717,7 +717,7 @@
                                          teller instead of an implicit split of one number. -->
                                     <!-- Column 2: Interest Amount -->
                                     <div class="col-md-4">
-                                        <label class="field-label">Interest Amount (₹)</label>
+                                        <label class="field-label" data-i18n="interestAmount">Interest Amount (₹)</label>
                                         <input type="number" class="form-control-jlms" id="payInterestAmount"
                                             placeholder="0.00" min="0" step="0.01">
                                     </div>
@@ -735,14 +735,14 @@
 
                                     <!-- Column 2: Principal Amount -->
                                     <div class="col-md-4">
-                                        <label class="field-label">Principal Amount (₹)</label>
+                                        <label class="field-label" data-i18n="principalAmount">Principal Amount (₹)</label>
                                         <input type="number" class="form-control-jlms" id="payPrincipalAmount"
                                             placeholder="0.00" min="0" step="0.01" disabled>
                                     </div>
 
                                     <!-- Column 3: Outstanding Principal Reference -->
                                     <div class="col-md-4">
-                                        <label class="field-label text-muted-jlms">Outstanding Principal</label>
+                                        <label class="field-label text-muted-jlms" data-i18n="outstandingPrincipal">Outstanding Principal</label>
                                         <div class="form-control-jlms bg-light fw-semibold text-secondary d-flex align-items-center"
                                             id="payOutPrincipalDisplay" style="height: 31px; opacity: 0.85;">₹0.00</div>
                                     </div>
@@ -759,23 +759,23 @@
                                 <div class="section-label"><i class="bi bi-diagram-3"></i> Allocation Preview</div>
                                 <div class="allocation-preview mb-2">
                                     <div class="alloc-box alloc-highlight">
-                                        <div class="alloc-label">Interest Paid</div>
+                                        <div class="alloc-label" data-i18n="interestPaid">Interest Paid</div>
                                         <div class="alloc-value" id="allocInterestPaid">₹0.00</div>
                                     </div>
                                     <div class="alloc-box alloc-highlight">
-                                        <div class="alloc-label">Principal Paid</div>
+                                        <div class="alloc-label" data-i18n="principalPaid">Principal Paid</div>
                                         <div class="alloc-value" id="allocPrincipalPaid">₹0.00</div>
                                     </div>
                                     <div class="alloc-box">
-                                        <div class="alloc-label">Remaining Interest</div>
+                                        <div class="alloc-label" data-i18n="remainingInterest">Remaining Interest</div>
                                         <div class="alloc-value" id="allocRemainingInterest">₹0.00</div>
                                     </div>
                                     <div class="alloc-box">
-                                        <div class="alloc-label">Remaining Principal</div>
+                                        <div class="alloc-label" data-i18n="remainingPrincipal">Remaining Principal</div>
                                         <div class="alloc-value" id="allocRemainingPrincipal">₹0.00</div>
                                     </div>
                                     <div class="alloc-box alloc-highlight-green" style="grid-column: span 2;">
-                                        <div class="alloc-label">Balance After Payment</div>
+                                        <div class="alloc-label" data-i18n="balanceAfterPayment">Balance After Payment</div>
                                         <div class="alloc-value" id="allocBalanceAfter">₹0.00</div>
                                     </div>
                                 </div>
@@ -802,7 +802,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Close Loan — <span id="closeLoanNoLabel">-</span></h5>
+                    <h5 class="modal-title" data-i18n="closeLoan">Close Loan — <span id="closeLoanNoLabel">-</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="closureModalBody">
@@ -811,25 +811,25 @@
 
                     <div id="closureContent" style="display:none;">
                         <div class="info-card mb-3">
-                            <div class="info-card-title">Customer Details</div>
+                            <div class="info-card-title" data-i18n="customerDetails">Customer Details</div>
                             <div class="row g-0">
 
                                 <!-- Column 1: Customer Name + Loan Scheme + Mobile -->
                                 <div class="col-md-4" style="padding-right:16px;">
                                     <div class="info-row mb-2">
-                                        <div class="info-label">Customer Name</div>
+                                        <div class="info-label" data-i18n="customerName">Customer Name</div>
                                         <div class="info-value" id="closeCustomerName">-</div>
                                     </div>
                                     <div class="info-row mb-2">
-                                        <div class="info-label">Loan Scheme</div>
+                                        <div class="info-label" data-i18n="loanScheme">Loan Scheme</div>
                                         <div class="info-value" id="closeScheme">-</div>
                                     </div>
                                     <div class="info-row mt-2">
-                                        <div class="info-label">Processing Fee</div>
+                                        <div class="info-label" data-i18n="processingFee">Processing Fee</div>
                                         <div class="info-value" id="closeProcessingFee">-</div>
                                     </div>
                                     <div class="info-row mt-2">
-                                        <div class="info-label">Mobile</div>
+                                        <div class="info-label" data-i18n="mobile">Mobile</div>
                                         <div class="info-value" id="closeMobile">-</div>
                                     </div>
                                 </div>
@@ -838,11 +838,11 @@
                                 <div class="col-md-4"
                                     style="padding-right:16px;border-left:1px solid #eef0f3;padding-left:16px;">
                                     <div class="info-row mb-2">
-                                        <div class="info-label">Loan No</div>
+                                        <div class="info-label" data-i18n="loanNo">Loan No</div>
                                         <div class="info-value" id="closeLoanNo">-</div>
                                     </div>
                                     <div class="info-row">
-                                        <div class="info-label">Total Amount Paid</div>
+                                        <div class="info-label" data-i18n="totalAmountPaid">Total Amount Paid</div>
                                         <div class="info-value" id="closeTotalPaid">-</div>
                                     </div>
                                 </div>
@@ -881,19 +881,19 @@
                         <table class="calc-table mb-2">
                             <tbody>
                                 <tr>
-                                    <td>Outstanding Principal</td>
+                                    <td data-i18n="outstandingPrincipal">Outstanding Principal</td>
                                     <td id="closeOutPrincipal">-</td>
                                 </tr>
                                 <tr>
-                                    <td>Outstanding Interest</td>
+                                    <td data-i18n="outstandingInterest">Outstanding Interest</td>
                                     <td id="closeOutInterest">-</td>
                                 </tr>
                                 <tr>
-                                    <td>Other Charges</td>
+                                    <td data-i18n="otherCharges">Other Charges</td>
                                     <td id="closeOtherCharges">-</td>
                                 </tr>
                                 <tr class="calc-total">
-                                    <td>Grand Total</td>
+                                    <td data-i18n="grandTotal">Grand Total</td>
                                     <td id="closeGrandTotal">-</td>
                                 </tr>
                             </tbody>
@@ -927,7 +927,7 @@
                         <!-- Receipt (shown after a successful closure) -->
                         <div class="receipt-section" id="closureReceiptSection" style="display:none;">
                             <div class="receipt-section-title">
-                                <span class="h4">Closure Receipt</span>
+                                <span class="h4" data-i18n="closureReceipt">Closure Receipt</span>
                                 <span class="badge-jlms badge-success" id="closureReceiptNoBadge"></span>
                             </div>
                             <div class="receipt-box" id="closureReceiptBox"></div>
@@ -962,37 +962,37 @@
                         <div class="info-card mb-3">
                             <div class="info-grid">
                                 <div class="info-row">
-                                    <div class="info-label">Customer</div>
+                                    <div class="info-label" data-i18n="customerName">Customer</div>
                                     <div class="info-value" id="ledgerCustomer">-</div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Scheme</div>
+                                    <div class="info-label" data-i18n="loanScheme">Scheme</div>
                                     <div class="info-value" id="ledgerScheme">-</div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Loan Date</div>
+                                    <div class="info-label" data-i18n="loanDate">Loan Date</div>
                                     <div class="info-value" id="ledgerLoanDate">-</div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Processing Fee</div>
+                                    <div class="info-label" data-i18n="processingFee">Processing Fee</div>
                                     <div class="info-value" id="ledgerProcessingFee">-</div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Maturity Date</div>
+                                    <div class="info-label" data-i18n="maturityDate">Maturity Date</div>
                                     <div class="info-value" id="ledgerMaturityDate">-</div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Principal</div>
+                                    <div class="info-label" data-i18n="principal">Principal</div>
                                     <div class="info-value" id="ledgerPrincipal">-</div>
                                 </div>
                                 <!-- CHANGE (daily-interest): Overall Interest removed — pre-loaded fixed
                                      interest is not used in daily-accrual model. Rate shown instead. -->
                                 <div class="info-row">
-                                    <div class="info-label">Rate</div>
+                                    <div class="info-label" data-i18n="rate">Rate</div>
                                     <div class="info-value" id="ledgerRate">-</div>
                                 </div>
                                 <div class="info-row">
-                                    <div class="info-label">Status</div>
+                                    <div class="info-label" data-i18n="status">Status</div>
                                     <div class="info-value" id="ledgerStatus">-</div>
                                 </div>
                             </div>
@@ -1002,17 +1002,17 @@
                             <table class="table-jlms">
                                 <thead>
                                     <tr>
-                                        <th style="width: 100px; min-width: 100px;">Date</th>
-                                        <th>Txn Type</th>
-                                        <th>Description</th>
-                                        <th class="text-end">Debit</th>
-                                        <th class="text-end">Credit</th>
-                                        <th class="text-end d-none">Principal Balance</th>
-                                        <th class="text-end d-none">Interest Balance</th>
-                                        <th class="text-end d-none">Running Balance</th>
-                                        <th style="display: none;">Receipt No</th>
-                                        <th style="display: none;">User</th>
-                                        <th class="text-center" style="width:48px;">Receipt</th>
+                                        <th style="width: 100px; min-width: 100px;" data-i18n="date">Date</th>
+                                        <th data-i18n="txnType">Txn Type</th>
+                                        <th data-i18n="description">Description</th>
+                                        <th class="text-end" data-i18n="debit">Debit</th>
+                                        <th class="text-end" data-i18n="credit">Credit</th>
+                                        <th class="text-end d-none" data-i18n="principalBalance">Principal Balance</th>
+                                        <th class="text-end d-none" data-i18n="interestBalance">Interest Balance</th>
+                                        <th class="text-end d-none" data-i18n="runningBalance">Running Balance</th>
+                                        <th style="display: none;" data-i18n="receiptNo">Receipt No</th>
+                                        <th style="display: none;" data-i18n="user">User</th>
+                                        <th class="text-center" style="width:48px;" data-i18n="receipt">Receipt</th>
                                     </tr>
                                 </thead>
                                 <tbody id="ledgerBody"></tbody>
@@ -1053,15 +1053,15 @@
 
                         <div class="ledger-footer-stats">
                             <div class="alloc-box alloc-highlight">
-                                <div class="alloc-label">Total Interest Collected</div>
+                                <div class="alloc-label" data-i18n="totalInterestCollected">Total Interest Collected</div>
                                 <div class="alloc-value" id="ledgerTotalInterest">₹0.00</div>
                             </div>
                             <div class="alloc-box alloc-highlight">
-                                <div class="alloc-label">Total Principal Collected</div>
+                                <div class="alloc-label" data-i18n="totalPrincipalCollected">Total Principal Collected</div>
                                 <div class="alloc-value" id="ledgerTotalPrincipal">₹0.00</div>
                             </div>
                             <div class="alloc-box">
-                                <div class="alloc-label">Current Outstanding</div>
+                                <div class="alloc-label" data-i18n="currentOutstanding">Current Outstanding</div>
                                 <div class="alloc-value" id="ledgerCurrentOutstanding">₹0.00</div>
                             </div>
                         </div>
@@ -1111,13 +1111,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-0">Loan Number :<strong id="confirmClosureLoanNo">-</strong>?</p>
-                    <p class="text-danger mb-0" style="font-size:0.85rem;">This action cannot be undone.</p>
+                    <p class="mb-0" data-i18n="loanNumber">Loan Number</p>
+                    <p class="text-danger mb-0" style="font-size:0.85rem;" data-i18n="actionCannotBeUndone">This action cannot be undone.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
                     <button type="button" class="btn-jlms btn-jlms-primary" id="btnConfirmClosureProceed">
-                        <i class="bi bi-lock-fill"></i> Confirm Close
+                        <i class="bi bi-lock-fill"></i> <span data-i18n="confirmClose">Confirm Close</span>
                     </button>
                 </div>
             </div>
@@ -1130,8 +1130,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>window.JLMS_ACTIVE = "loan-operations";</script>
-    <script src="js/jlms-shell.js"></script>
+    <script src="../js/language.js"></script>
     <script src="js/api-client.js"></script>
+    <script src="js/jlms-shell.js"></script>
     <script>
         jlmsInitShell();
 

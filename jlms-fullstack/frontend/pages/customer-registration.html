@@ -153,11 +153,10 @@
             <div class="breadcrumb-jlms">
               <!-- <a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Customer Master</span> -->
             </div>
-            <div class="h1" id="pageTitle">Customer Registration</div>
+            <div class="h1" id="pageTitle" data-i18n="customerRegistration">Customer Registration</div>
           </div>
           <div class="page-actions">
-            <a href="customer-search.html" class="btn-jlms btn-jlms-ghost"><i class="bi bi-list-ul"></i> View All /
-              Search</a>
+            <a href="customer-search.html" class="btn-jlms btn-jlms-ghost"><i class="bi bi-list-ul"></i> <span data-i18n="viewAllSearch">View All / Search</span></a>
           </div>
         </div>
 
@@ -165,9 +164,9 @@
         <div id="apiSuccessBanner" class="api-success-banner"></div>
 
         <div class="step-indicator">
-          <div class="step-pill active" id="stepPill1"><span class="num">1</span> Customer Details</div>
+          <div class="step-pill active" id="stepPill1"><span class="num">1</span> <span data-i18n="customerDetails">Customer Details</span></div>
           <div class="step-sep"></div>
-          <div class="step-pill" id="stepPill2"><span class="num">2</span> Nominee Details</div>
+          <div class="step-pill" id="stepPill2"><span class="num">2</span> <span data-i18n="nomineeDetails">Nominee Details</span></div>
         </div>
 
         <div class="row g-3">
@@ -179,26 +178,26 @@
               <div class="panel-body">
 
                 <fieldset class="section-fieldset">
-                  <legend>Customer Information</legend>
+                  <legend data-i18n="customerInformation">Customer Information</legend>
                   <div class="row g-3">
                     <!-- Row 1 -->
                     <div class="col-md-4">
-                      <label class="field-label">Customer Code</label>
+                      <label class="field-label" data-i18n="customerCode">Customer Code</label>
                       <input type="text" class="form-control-jlms" id="custCode" value="(auto-generated)" disabled>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">Customer Name<span class="req">*</span></label>
+                      <label class="field-label" data-i18n="customerName">Customer Name<span class="req">*</span></label>
                       <input type="text" class="form-control-jlms" id="custName" placeholder="As per ID proof">
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">Guardian Name<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="guardianName">Guardian Name<span class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="custGuardianName"
                         placeholder="Father / Spouse name">
                     </div>
 
                     <!-- Row 2 -->
                     <div class="col-md-4">
-                      <label class="field-label">Gender<span class="req">*</span></label>
+                      <label class="field-label" data-i18n="gender">Gender<span class="req">*</span></label>
                       <div class="radio-pill-group" id="genderPills">
                         <div class="radio-pill" data-value="Male">Male</div>
                         <div class="radio-pill" data-value="Female">Female</div>
@@ -206,38 +205,38 @@
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">Mobile Number<span class="req">*</span></label>
+                      <label class="field-label" data-i18n="mobile">Mobile Number<span class="req">*</span></label>
                       <div class="input-affix"><span class="affix">+91</span><input type="text" id="custMobile"
                           maxlength="10" inputmode="numeric" placeholder="10-digit mobile"></div>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">Alternate Mobile<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="alternateMobile">Alternate Mobile<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix">+91</span><input type="text" id="custAltMobile"
                           maxlength="10" inputmode="numeric" placeholder="Alternate contact"></div>
                     </div>
 
                     <!-- Row 3 -->
                     <div class="col-md-4">
-                      <label class="field-label">Date of Birth<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="dateOfBirth">Date of Birth<span class="opt">optional</span></label>
                       <input type="date" class="form-control-jlms" id="custDob">
                     </div>
                   </div>
                 </fieldset>
 
                 <fieldset class="section-fieldset">
-                  <legend>Address Information</legend>
+                  <legend data-i18n="addressInformation">Address Information</legend>
                   <div class="row g-3">
                     <div class="col-md-12">
-                      <label class="field-label">Address<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="address">Address<span class="opt">optional</span></label>
                       <textarea class="form-control-jlms" id="custAddress" rows="2"
                         placeholder="Door No, Street, Area"></textarea>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">City<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="city">City<span class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="custCity">
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">State<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="state">State<span class="opt">optional</span></label>
                       <select class="form-select-jlms" id="custState">
                         <option value="">Select state</option>
                         <option>Tamil Nadu</option>
@@ -248,22 +247,22 @@
                       </select>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">Pincode<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="pincode">Pincode<span class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="custPincode">
                     </div>
                   </div>
                 </fieldset>
 
                 <fieldset class="section-fieldset">
-                  <legend>KYC Information</legend>
+                  <legend data-i18n="kycInformation">KYC Information</legend>
                   <div class="row g-3">
                     <div class="col-md-6">
-                      <label class="field-label">Aadhaar Number<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="aadhaar">Aadhaar Number<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix"><i class="bi bi-credit-card"></i></span><input
                           type="text" id="custAadhaar" placeholder="12-digit Aadhaar"></div>
                     </div>
                     <div class="col-md-6">
-                      <label class="field-label">PAN Number<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="pan">PAN Number<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix"><i
                             class="bi bi-credit-card-2-front"></i></span><input type="text" id="custPan"
                           placeholder="ABCDE1234F" style="text-transform:uppercase;"></div>
@@ -273,10 +272,10 @@
                 </fieldset>
 
                 <fieldset class="section-fieldset">
-                  <legend>Document Upload</legend>
+                  <legend data-i18n="documentUpload">Document Upload</legend>
                   <div class="row g-3">
                     <div class="col-md-4">
-                      <label class="field-label">Customer Photo</label>
+                      <label class="field-label" data-i18n="customerPhoto">Customer Photo</label>
 
                       <div class="doc-thumb" id="photoPreview">
                         <i class="bi bi-person-circle"></i>
@@ -286,12 +285,12 @@
 
                         <button type="button" class="btn btn-outline-primary" id="photoUploadBox">
                           <i class="bi bi-upload"></i>
-                          Upload Photo
+                          <span data-i18n="uploadPhoto">Upload Photo</span>
                         </button>
 
                         <button type="button" class="btn btn-outline-success" id="capturePhotoBtn">
                           <i class="bi bi-camera"></i>
-                          Capture Photo
+                          <span data-i18n="capturePhoto">Capture Photo</span>
                         </button>
 
                       </div>
@@ -304,7 +303,7 @@
                       <input type="file" id="customerPhoto" accept=".jpg,.jpeg,.png" hidden>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">Aadhaar Copy</label>
+                      <label class="field-label" data-i18n="aadhaarCopy">Aadhaar Copy</label>
 
                       <div class="doc-thumb" id="aadhaarPreview">
                         <i class="bi bi-file-earmark-text"></i>
@@ -324,7 +323,7 @@
                       <input type="file" id="aadhaarFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">PAN Copy</label>
+                      <label class="field-label" data-i18n="panCopy">PAN Copy</label>
 
                       <div class="doc-thumb" id="panPreview">
                         <i class="bi bi-file-earmark-text"></i>
@@ -348,8 +347,8 @@
 
               </div>
               <div class="panel-foot">
-                <button class="btn-jlms btn-jlms-ghost" id="btnClear"><i class="bi bi-x-lg"></i> Clear</button>
-                <button class="btn-jlms btn-jlms-primary" id="btnNext">Next: Nominee Details <i
+                <button class="btn-jlms btn-jlms-ghost" id="btnClear"><i class="bi bi-x-lg"></i> <span data-i18n="clear">Clear</span></button>
+                <button class="btn-jlms btn-jlms-primary" id="btnNext"><span data-i18n="next">Next</span>: <span data-i18n="nomineeDetails">Nominee Details</span> <i
                     class="bi bi-arrow-right"></i></button>
               </div>
             </div>
@@ -359,28 +358,28 @@
               <div class="panel-body">
 
                 <fieldset class="section-fieldset">
-                  <legend>Nominee Details <span class="opt">optional — skip and save if not applicable</span></legend>
+                  <legend data-i18n="nomineeDetails">Nominee Details <span class="opt">optional — skip and save if not applicable</span></legend>
                   <div class="row g-3">
                     <div class="col-md-6">
-                      <label class="field-label">Nominee Name<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeName">Nominee Name<span class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="nomineeName" placeholder="Full name of nominee">
                     </div>
                     <div class="col-md-6">
-                      <label class="field-label">Nominee Mobile<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeMobile">Nominee Mobile<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix">+91</span><input type="text" id="nomineeMobile"
                           maxlength="10" inputmode="numeric" placeholder="10-digit mobile"></div>
                     </div>
                     <div class="col-md-12">
-                      <label class="field-label">Nominee Address<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeAddress">Nominee Address<span class="opt">optional</span></label>
                       <textarea class="form-control-jlms" id="nomineeAddress" rows="2"
                         placeholder="Door No, Street, Area"></textarea>
                     </div>
                     <div class="col-md-6">
-                      <label class="field-label">Nominee City<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeCity">Nominee City<span class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="nomineeCity">
                     </div>
                     <div class="col-md-6">
-                      <label class="field-label">Nominee Aadhaar Number<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeAadhaar">Nominee Aadhaar Number<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix"><i class="bi bi-credit-card"></i></span><input
                           type="text" id="nomineeAadhaar" placeholder="12-digit Aadhaar"></div>
                     </div>
@@ -388,10 +387,10 @@
                 </fieldset>
 
                 <fieldset class="section-fieldset">
-                  <legend>Nominee Document Upload <span class="opt">optional</span></legend>
+                  <legend data-i18n="nomineeDocumentUpload">Nominee Document Upload <span class="opt">optional</span></legend>
                   <div class="row g-3">
                     <div class="col-md-4">
-                      <label class="field-label">Nominee Photo</label>
+                      <label class="field-label" data-i18n="nomineePhoto">Nominee Photo</label>
                       <div class="doc-thumb" id="nomineePhotoPreview">
                         <i class="bi bi-person-circle"></i>
                       </div>
@@ -408,7 +407,7 @@
                       <input type="file" id="nomineePhoto" accept=".jpg,.jpeg,.png" hidden>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label">Nominee Aadhaar Copy</label>
+                      <label class="field-label" data-i18n="nomineeAadhaarCopy">Nominee Aadhaar Copy</label>
                       <div class="doc-thumb" id="nomineeAadhaarPreview">
                         <i class="bi bi-file-earmark-text"></i>
                       </div>
@@ -429,9 +428,9 @@
 
               </div>
               <div class="panel-foot">
-                <button class="btn-jlms btn-jlms-ghost" id="btnBack"><i class="bi bi-arrow-left"></i> Back</button>
+                <button class="btn-jlms btn-jlms-ghost" id="btnBack"><i class="bi bi-arrow-left"></i> <span data-i18n="back">Back</span></button>
                 <button class="btn-jlms btn-jlms-primary" id="btnSaveCustomer"><i class="bi bi-save"></i> <span
-                    id="btnSaveLabel">Save Customer</span></button>
+                    id="btnSaveLabel" data-i18n="saveCustomer">Save Customer</span></button>
               </div>
             </div>
 
@@ -443,8 +442,9 @@
 
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>window.JLMS_ACTIVE = "customer-registration";</script>
-  <script src="js/jlms-shell.js"></script>
+  <script src="../js/language.js"></script>
   <script src="js/api-client.js"></script>
+  <script src="js/jlms-shell.js"></script>
   <script>
 
     let editModeDocState = { photo: false, aadhaar: false, pan: false, nomineePhoto: false, nomineeAadhaar: false };

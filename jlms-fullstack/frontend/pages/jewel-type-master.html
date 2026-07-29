@@ -19,7 +19,7 @@
 <div id="apiSuccessBanner" class="api-success-banner"></div>
         <div>
           <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">Jewel Type Master</span></div> -->
-          <div class="h1">Jewel Type Master</div>
+          <div class="h1" data-i18n="jewelTypeMaster">Jewel Type Master</div>
         </div>
       </div>
 
@@ -27,16 +27,16 @@
         <div class="col-lg-4">
           <div class="panel">
             <div class="panel-head">
-    <div class="h4" id="formTitle">
+    <div class="h4" id="formTitle" data-i18n="addJewelType">
         Add Jewel Type
     </div>
 </div>
             <div class="panel-body">
-              <div class="field-group"><label class="field-label">Jewel Type Name<span class="req">*</span></label><input
+              <div class="field-group"><label class="field-label" data-i18n="jewelTypeName">Jewel Type Name<span class="req">*</span></label><input
     id="txtJewelTypeName"
     class="form-control-jlms"
     placeholder="e.g. Gold Necklace"></div>
-              <div class="field-group"><label class="field-label">Category<span class="req">*</span></label><select
+              <div class="field-group"><label class="field-label" data-i18n="category">Category<span class="req">*</span></label><select
     id="ddlCategory"
     class="form-select-jlms">
 
@@ -45,7 +45,7 @@
     <option value="Bar">Bar</option>
 
 </select></div>
-              <div class="field-group"><label class="field-label">Default Purity</label><select
+              <div class="field-group"><label class="field-label" data-i18n="defaultPurity">Default Purity</label><select
     id="ddlPurity"
     class="form-select-jlms">
 
@@ -55,7 +55,7 @@
 
 </select></div>
               <div class="field-group">
-    <label class="field-label">Standard Wastage %</label>
+    <label class="field-label" data-i18n="standardWastage">Standard Wastage %</label>
     <div class="input-affix">
         <input
             id="txtWastage"
@@ -74,15 +74,15 @@
         id="chkActive"
         checked>
 
-    <label for="chkActive">Active</label>
+    <label for="chkActive" data-i18n="active">Active</label>
 </div>
               <div class="d-flex gap-2">
                 <button
 id="btnClear"
-class="btn-jlms btn-jlms-ghost" style="flex:1; justify-content:center;">Clear</button>
+class="btn-jlms btn-jlms-ghost" style="flex:1; justify-content:center;" data-i18n="clear">Clear</button>
                 <button
 id="btnSave"
-class="btn-jlms btn-jlms-primary" style="flex:1; justify-content:center;"><i class="bi bi-save"></i> Save</button>
+class="btn-jlms btn-jlms-primary" style="flex:1; justify-content:center;"><i class="bi bi-save"></i> <span data-i18n="save">Save</span></button>
               </div>
             </div>
           </div>
@@ -90,12 +90,12 @@ class="btn-jlms btn-jlms-primary" style="flex:1; justify-content:center;"><i cla
         <div class="col-lg-8">
           <div class="panel">
             <div class="grid-toolbar">
-              <span class="h4">Jewel Types</span>
-              <div class="grid-search"><i class="bi bi-search"></i><input placeholder="Search jewel type"></div>
+              <span class="h4" data-i18n="jewelTypes">Jewel Types</span>
+              <div class="grid-search"><i class="bi bi-search"></i><input data-i18n-placeholder="searchJewelType" placeholder="Search jewel type"></div>
             </div>
             <div class="panel-body no-pad table-jlms-wrap">
               <table class="table-jlms">
-                <thead><tr><th>Jewel Type</th><th>Category</th><th>Default Purity</th><th class="text-end">Wastage %</th><th class="text-center">Status</th><th class="text-center">Action</th></tr></thead>
+                <thead id="jewelTypeThead"><tr><th data-i18n="jewelType">Jewel Type</th><th data-i18n="category">Category</th><th data-i18n="defaultPurity">Default Purity</th><th class="text-end" data-i18n="wastagePercent">Wastage %</th><th class="text-center" data-i18n="status">Status</th><th class="text-center" data-i18n="action">Action</th></tr></thead>
                 <tbody id="tblJewelTypes">
 </tbody>
               </table>
@@ -108,8 +108,9 @@ class="btn-jlms btn-jlms-primary" style="flex:1; justify-content:center;"><i cla
 </div>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "jewel-type-master";</script>
-<script src="js/jlms-shell.js"></script>
+<script src="../js/language.js"></script>
 <script src="js/api-client.js"></script>
+<script src="js/jlms-shell.js"></script>
 <script>
 jlmsInitShell();
 
@@ -160,6 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
             jewelTypeList = await Api.getJewelTypes(false);
 
             renderTable(jewelTypeList);
+            applyTranslationsToTableHeaders();
 
         }
         catch (err) {
@@ -322,7 +324,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         editingId = id;
 
-        document.getElementById("formTitle").textContent = "Edit Jewel Type";
+        const formTitle = document.getElementById("formTitle");
+        formTitle.textContent = lang["editJewelType"] || "Edit Jewel Type";
+        formTitle.setAttribute("data-i18n", "editJewelType");
 
         txtJewelTypeName.value = item.jewelTypeName;
 
@@ -352,7 +356,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         editingId = 0;
 
-        document.getElementById("formTitle").textContent = "Add Jewel Type";
+        const formTitle = document.getElementById("formTitle");
+        formTitle.textContent = lang["addJewelType"] || "Add Jewel Type";
+        formTitle.setAttribute("data-i18n", "addJewelType");
 
         txtJewelTypeName.value = "";
 
@@ -367,6 +373,36 @@ document.addEventListener("DOMContentLoaded", () => {
         btnSave.innerHTML =
             '<i class="bi bi-save"></i> Save';
 
+    }
+
+    function applyTranslationsToTableHeaders() {
+        const headerElements = document.querySelectorAll('#jewelTypeThead th[data-i18n]');
+        headerElements.forEach(th => {
+            const key = th.getAttribute('data-i18n');
+            if (lang[key]) {
+                th.textContent = lang[key];
+            }
+        });
+
+        // Re-apply when language changes
+        registerLanguageCallback(() => {
+            const updatedHeaders = document.querySelectorAll('#jewelTypeThead th[data-i18n]');
+            updatedHeaders.forEach(th => {
+                const key = th.getAttribute('data-i18n');
+                if (lang[key]) {
+                    th.textContent = lang[key];
+                }
+            });
+
+            // Update form title based on editing state
+            const formTitle = document.getElementById("formTitle");
+            if (formTitle) {
+                const key = formTitle.getAttribute('data-i18n');
+                if (key && lang[key]) {
+                    formTitle.textContent = lang[key];
+                }
+            }
+        });
     }
 
 });

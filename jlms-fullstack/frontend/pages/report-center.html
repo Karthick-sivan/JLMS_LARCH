@@ -31,17 +31,12 @@
       <div class="row g-3">
         <div class="col-lg-3">
           <div class="panel">
-            <div class="panel-head"><div class="h4">Report Categories</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="reportCategories">Report Categories</div></div>
             <div class="panel-body" style="padding:6px 0;">
-                <!--<div class="report-cat-item"><i class="bi bi-person-vcard"></i> Customer Reports <span class="count">4</span></div>-->
-                <!-- <div class="report-cat-item active" onclick="location.href='activeloan-report.html'"><i class="bi bi-folder2-open"></i> Active Loans Report </div> -->
-                <!-- <div class="report-cat-item" onclick="location.href='outstanding-reports.html'"><i class="bi bi-graph-down"></i> Outstanding Reports </div> -->
-                <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i class="bi bi-graph-down"></i> Collection Reports </div>
-                <!--<div class="report-cat-item"><i class="bi bi-cash-coin"></i> Collection Reports </div>-->
-                <!-- <div class="report-cat-item"><i class="bi bi-arrow-repeat"></i> Renewal Report <span class="count">2</span></div> -->
-    <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i class="bi bi-check2-circle"></i> Closed Report </div>
-    <!-- <div class="report-cat-item"><i class="bi bi-hammer"></i> Auction Reports <span class="count">3</span></div>
-    <div class="report-cat-item"><i class="bi bi-clipboard-data"></i> Audit Reports <span class="count">6</span></div> -->
+                <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i class="bi bi-folder2-open"></i> <span data-i18n="loanReport">Loan Report</span></div>
+                <div class="report-cat-item" onclick="location.href='loandetails-report.html'"><i class="bi bi-graph-down"></i> <span data-i18n="loanItemReports">Loan &amp; Item Reports</span></div>
+                <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i class="bi bi-cash-coin"></i> <span data-i18n="collectionReports">Collection Reports</span></div>
+                <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i class="bi bi-check2-circle"></i> <span data-i18n="closedLoansReport">Closed Loans Report</span></div>
             </div>
           </div>
         </div>
@@ -93,6 +88,7 @@
 </div>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "report-center";</script>
+<script src="../js/language.js"></script>
 <script src="js/api-client.js"></script>
 <script src="js/jlms-shell.js"></script>
 <script>jlmsInitShell();</script>

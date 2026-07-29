@@ -35,6 +35,21 @@ public class UserMasterController : ControllerBase
         if (filterBranchId.HasValue)
             query = query.Where(u => u.BranchId == filterBranchId.Value);
 
+        // Role-based visibility rules for the User Master grid:
+        //  - SuperAdmin (1002) only manages Administrator (4) accounts here.
+        //  - Administrator (4) manages everyone except SuperAdmin and other Administrators.
+        bool isSuperAdmin = currentUser?.RoleId == 1002;
+        bool isAdministrator = currentUser?.RoleId == 4;
+
+        if (isSuperAdmin)
+        {
+            query = query.Where(u => u.RoleId == 4);
+        }
+        else if (isAdministrator)
+        {
+            query = query.Where(u => u.RoleId != 1002 && u.RoleId != 4);
+        }
+
         var users = await query
             .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
@@ -83,6 +98,30 @@ public class UserMasterController : ControllerBase
         return Ok(roles);
     }
 
+    // POST /api/user-master/roles
+    [HttpPost("roles")]
+    public async Task<ActionResult<RoleOptionDto>> CreateRole([FromBody] RoleCreateDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.RoleName))
+            return BadRequest("Role Name is required.");
+
+        var nameUpper = dto.RoleName.Trim().ToUpperInvariant();
+        if (await _db.Roles.AnyAsync(r => r.RoleName.ToUpper() == nameUpper))
+            return BadRequest($"Role '{dto.RoleName}' is already registered.");
+
+        var role = new Role
+        {
+            RoleName = dto.RoleName.Trim(),
+            Description = dto.Description?.Trim(),
+            IsActive = dto.IsActive
+        };
+
+        _db.Roles.Add(role);
+        await _db.SaveChangesAsync();
+
+        return Ok(new RoleOptionDto(role.RoleId, role.RoleName));
+    }
+
     // POST /api/user-master
     [HttpPost]
     public async Task<ActionResult<UserMasterDto>> Create([FromBody] UserCreateDto dto)
@@ -93,8 +132,13 @@ public class UserMasterController : ControllerBase
         // Use the logged-in user's branch when set; otherwise fall back to the DTO value
         var effectiveBranchId = filterBranchId ?? dto.BranchId;
 
-        if (string.IsNullOrWhiteSpace(dto.EmployeeCode))
+        bool isSuperAdminCreatingAdministrator = currentUser?.RoleId == 1002 && dto.RoleId == 4;
+
+        // Employee Code is only mandatory for the normal User Master flow.
+        // SuperAdmin -> Administrator creation does not require it.
+        if (!isSuperAdminCreatingAdministrator && string.IsNullOrWhiteSpace(dto.EmployeeCode))
             return BadRequest("Employee Code is required.");
+
         if (string.IsNullOrWhiteSpace(dto.FullName))
             return BadRequest("Full Name is required.");
         if (string.IsNullOrWhiteSpace(dto.Username))
@@ -103,11 +147,13 @@ public class UserMasterController : ControllerBase
             return BadRequest("Password is required.");
         if (dto.RoleId <= 0)
             return BadRequest("Valid Role is required.");
-        if (effectiveBranchId <= 0)
+        bool isTargetSuperAdmin = dto.RoleId == 1002;
+        if (!isTargetSuperAdmin && (!effectiveBranchId.HasValue || effectiveBranchId.Value <= 0))
             return BadRequest("Valid Branch is required.");
 
-        // Check uniqueness
-        if (await _db.Users.AnyAsync(u => u.EmployeeCode == dto.EmployeeCode))
+        // Check uniqueness — only enforce when an Employee Code was actually supplied
+        if (!string.IsNullOrWhiteSpace(dto.EmployeeCode) &&
+            await _db.Users.AnyAsync(u => u.EmployeeCode == dto.EmployeeCode))
             return BadRequest($"Employee Code '{dto.EmployeeCode}' is already registered.");
         if (await _db.Users.AnyAsync(u => u.Username == dto.Username))
             return BadRequest($"Username '{dto.Username}' is already taken.");
@@ -126,12 +172,17 @@ public class UserMasterController : ControllerBase
         var role = await _db.Roles.FindAsync(dto.RoleId);
         if (role == null) return BadRequest("Selected Role does not exist.");
 
-        var branch = await _db.Branches.FindAsync(effectiveBranchId);
-        if (branch == null) return BadRequest("Selected Branch does not exist.");
+        string branchName = "No Branch";
+        if (!isTargetSuperAdmin)
+        {
+            var branch = await _db.Branches.FindAsync(effectiveBranchId);
+            if (branch == null) return BadRequest("Selected Branch does not exist.");
+            branchName = branch.BranchName;
+        }
 
         var user = new User
         {
-            EmployeeCode = dto.EmployeeCode.Trim(),
+            EmployeeCode = string.IsNullOrWhiteSpace(dto.EmployeeCode) ? null : dto.EmployeeCode.Trim(),
             FullName = dto.FullName.Trim(),
             Username = dto.Username.Trim().ToLowerInvariant(),
             PasswordHash = ComputeSha256(dto.Password),
@@ -154,7 +205,7 @@ public class UserMasterController : ControllerBase
             user.RoleId,
             role.RoleName,
             user.BranchId,
-            branch.BranchName,
+            branchName,
             user.Mobile,
             user.Email,
             user.IsActive,
@@ -177,8 +228,9 @@ public class UserMasterController : ControllerBase
         // Prevent editing users from other branches
         if (filterBranchId.HasValue && user.BranchId != filterBranchId.Value)
             return Forbid();
+        bool isSuperAdminEditingAdministrator = currentUser?.RoleId == 1002 && dto.RoleId == 4;
 
-        if (string.IsNullOrWhiteSpace(dto.EmployeeCode))
+        if (!isSuperAdminEditingAdministrator && string.IsNullOrWhiteSpace(dto.EmployeeCode))
             return BadRequest("Employee Code is required.");
         if (string.IsNullOrWhiteSpace(dto.FullName))
             return BadRequest("Full Name is required.");
@@ -186,11 +238,13 @@ public class UserMasterController : ControllerBase
             return BadRequest("Username is required.");
         if (dto.RoleId <= 0)
             return BadRequest("Valid Role is required.");
-        if (effectiveBranchId <= 0)
+        bool isTargetSuperAdmin = dto.RoleId == 1002;
+        if (!isTargetSuperAdmin && (!effectiveBranchId.HasValue || effectiveBranchId.Value <= 0))
             return BadRequest("Valid Branch is required.");
 
         // Check uniqueness
-        if (await _db.Users.AnyAsync(u => u.EmployeeCode == dto.EmployeeCode && u.UserId != id))
+        if (!string.IsNullOrWhiteSpace(dto.EmployeeCode) &&
+       await _db.Users.AnyAsync(u => u.EmployeeCode == dto.EmployeeCode && u.UserId != id))
             return BadRequest($"Employee Code '{dto.EmployeeCode}' is already in use by another user.");
         if (await _db.Users.AnyAsync(u => u.Username == dto.Username && u.UserId != id))
             return BadRequest($"Username '{dto.Username}' is already taken by another user.");
@@ -209,10 +263,14 @@ public class UserMasterController : ControllerBase
         var role = await _db.Roles.FindAsync(dto.RoleId);
         if (role == null) return BadRequest("Selected Role does not exist.");
 
-        var branch = await _db.Branches.FindAsync(dto.BranchId);
-        if (branch == null) return BadRequest("Selected Branch does not exist.");
+        if (!isTargetSuperAdmin)
+        {
+            var branch = await _db.Branches.FindAsync(effectiveBranchId);
+            if (branch == null) return BadRequest("Selected Branch does not exist.");
+        }
 
-        user.EmployeeCode = dto.EmployeeCode.Trim();
+        //user.EmployeeCode = dto.EmployeeCode.Trim();
+        user.EmployeeCode = string.IsNullOrWhiteSpace(dto.EmployeeCode) ? null : dto.EmployeeCode.Trim();
         user.FullName = dto.FullName.Trim();
         user.Username = dto.Username.Trim().ToLowerInvariant();
         user.RoleId = dto.RoleId;

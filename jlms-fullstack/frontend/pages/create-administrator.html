@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>JLMS — User Master</title>
+    <title>JLMS — Create Administrator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
@@ -20,13 +20,12 @@
                     <div id="apiErrorBanner" class="api-error-banner" style="display:none; width: 100%;"></div>
                     <div id="apiSuccessBanner" class="api-success-banner" style="display:none; width: 100%;"></div>
                     <div>
-                        <!-- <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Masters</a><span class="sep">/</span><span class="current">User Master</span></div> -->
-                        <div class="h1">User Master</div>
+                        <div class="h1">Create Administrator / System Users</div>
                     </div>
                     <div class="page-actions">
                         <button class="btn-jlms btn-jlms-primary" id="btnNewUser"
-                            onclick="window.location.href='user-form.html'"><i class="bi bi-person-plus"></i> New
-                            User</button>
+                            onclick="window.location.href='user-form.html?mode=admin'"><i class="bi bi-person-plus"></i>
+                            New User / Admin</button>
                     </div>
                 </div>
 
@@ -38,7 +37,7 @@
                         </div>
                         <div class="grid-toolbar-left">
                             <select class="form-select-jlms" id="ddlRoleFilter" style="width:160px;">
-                                <option value="" data-i18n="allRoles">All Roles</option>
+                                <option value="">All Roles</option>
                             </select>
                             <div class="grid-search"><i class="bi bi-search"></i><input id="txtSearchUser"
                                     placeholder="Search user"></div>
@@ -46,7 +45,15 @@
                     </div>
                     <div class="panel-body no-pad table-jlms-wrap">
                         <table class="table-jlms">
-                            <thead id="userTableHeader">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Branch</th>
+                                    <th>Mobile</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
                             </thead>
                             <tbody id="tblUsers">
                                 <tr>
@@ -68,24 +75,23 @@
 
 
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script>window.JLMS_ACTIVE = "user-master";</script>
+    <script>window.JLMS_ACTIVE = "create-administrator";</script>
     <script src="../js/language.js"></script>
-    <script src="js/jlms-shell.js"></script>
     <script src="js/api-client.js"></script>
     <script>
-        const loggedInUser = Session.requireLogin();
-        const isSuperAdmin = loggedInUser && loggedInUser.roleId === 1002;
-        const isAdmin = loggedInUser && loggedInUser.roleName &&
-            loggedInUser.roleName.toLowerCase() === 'administrator';
-        if (!isAdmin && !isSuperAdmin) {
+        // Redirect if not superadmin BEFORE initializing shell
+        const checkUser = Session.requireLogin();
+        const isSA = checkUser && (checkUser.username === 'superadmin' || checkUser.roleName === 'SuperAdmin' || checkUser.roleId === 1002);
+        if (!isSA) {
             window.location.href = 'dashboard.html';
         }
-
-        jlmsInitShell();
+    </script>
+    <script src="js/jlms-shell.js"></script>
+    <script>
+        jlmsInitShell("Create Administrator", []);
 
         let allUsers = [];
         let filteredUsers = [];
-        let rolesList = [];
         let currentPage = 1;
         const pageSize = 10;
 
@@ -96,11 +102,10 @@
             const txtUserCount = document.getElementById('txtUserCount');
             const txtShowingText = document.getElementById('txtShowingText');
             const paginationWrap = document.getElementById('paginationWrap');
-            const userTableHeader = document.getElementById('userTableHeader');
             const apiSuccessBanner = document.getElementById('apiSuccessBanner');
             const apiErrorBanner = document.getElementById('apiErrorBanner');
 
-            // Show success banner if returning from user-form
+            // Show success message when returning from user-form
             const formSuccess = sessionStorage.getItem('jlms_form_success');
             if (formSuccess) {
                 sessionStorage.removeItem('jlms_form_success');
@@ -115,28 +120,15 @@
             async function initPage() {
                 try {
                     apiErrorBanner.style.display = 'none';
-                    rolesList = await Api.getUserMasterRoles();
-
-                    // Role filter options must match what the grid can actually show:
-                    //  - SuperAdmin's grid only contains Administrator (4) users
-                    //  - Administrator's grid contains everyone except SuperAdmin (1002) and Administrator (4)
-                    const rolesToShow = isSuperAdmin
-                        ? rolesList.filter(r => r.roleId === 4)
-                        : rolesList.filter(r => r.roleId !== 1002 && r.roleId !== 4);
-
-                    ddlRoleFilter.innerHTML = '<option value="" data-i18n="allRoles">All Roles</option>' +
-                        rolesToShow.map(r => `<option value="${r.roleId}">${r.roleName}</option>`).join('');
-
-                    // Apply translations to role names
-                    applyTranslationsToRoleDropdown();
+                    const rolesList = await Api.getUserMasterRoles();
+                    ddlRoleFilter.innerHTML = '<option value="">All Roles</option>' +
+                        rolesList.map(r => `<option value="${r.roleId}">${r.roleName}</option>`).join('');
                     await loadUsers();
                 } catch (err) {showApiError(err);}
             }
 
             async function loadUsers() {
                 try {
-                    // The API already scopes results by role for the logged-in user
-                    // (SuperAdmin -> Administrators only; Administrator -> everyone else).
                     allUsers = await Api.getUsers();
                     filterAndRender();
                 } catch (err) {showApiError(err);}
@@ -173,31 +165,6 @@
 
             function renderTable() {
                 tblUsers.innerHTML = '';
-                if (isSuperAdmin) {
-                    userTableHeader.innerHTML = `
-        <tr>
-            <th data-i18n="name">Name</th>
-            <th data-i18n="username">Username</th>
-            <th data-i18n="branch">Branch</th>
-            <th data-i18n="mobile">Mobile</th>
-            <th class="text-center" data-i18n="status">Status</th>
-            <th class="text-center" data-i18n="actions">Actions</th>
-        </tr>`;
-                } else {
-                    userTableHeader.innerHTML = `
-        <tr>
-            <th data-i18n="employeeId">Employee ID</th>
-            <th data-i18n="name">Name</th>
-            <th data-i18n="username">Username</th>
-            <th data-i18n="role">Role</th>
-            <th data-i18n="mobile">Mobile</th>
-            <th class="text-center" data-i18n="status">Status</th>
-            <th class="text-center" data-i18n="actions">Actions</th>
-        </tr>`;
-                }
-
-                // Apply translations to table headers after they are set
-                applyTranslationsToTableHeaders();
                 if (filteredUsers.length === 0) {
                     tblUsers.innerHTML = `<tr><td colspan="7" class="text-center text-muted-jlms" style="padding:24px;">No users found.</td></tr>`;
                     txtShowingText.textContent = 'Showing 0\u20130 of 0';
@@ -217,41 +184,28 @@
                         : '<span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span>';
                     const roleClass = getRoleBadgeClass(u.roleName);
                     const tr = document.createElement('tr');
+                    tr.innerHTML = `
+    <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <div class="avatar-sm">${initials(u.fullName)}</div>
+            ${u.fullName}
+        </div>
+    </td>
+    <td>${u.username}</td>
+    <td>${u.branchName || '\u2014'}</td>
+    <td>${u.mobile || '\u2014'}</td>
+    <td class="text-center">${statusBadge}</td>
+    <td class="text-center">
+        <i class="bi bi-pencil edit-btn"
+           data-id="${u.userId}"
+           style="margin-right:10px;color:var(--n-500);cursor:pointer;"
+           title="Edit"></i>
 
-                    if (isSuperAdmin) {
-                        tr.innerHTML = `
-        <td>
-            <div style="display:flex;align-items:center;gap:8px;">
-                <div class="avatar-sm">${initials(u.fullName)}</div>
-                ${u.fullName}
-            </div>
-        </td>
-        <td>${u.username}</td>
-        <td>${u.branchName || '\u2014'}</td>
-        <td>${u.mobile || '\u2014'}</td>
-        <td class="text-center">${statusBadge}</td>
-        <td class="text-center">
-            <i class="bi bi-pencil edit-btn" data-id="${u.userId}" style="margin-right:10px;color:var(--n-500);cursor:pointer;" title="Edit User"></i>
-            <i class="bi ${u.isActive ? 'bi-shield-lock' : 'bi-shield-fill-check'} toggle-btn" data-id="${u.userId}" style="color:var(--n-500);cursor:pointer;" title="${u.isActive ? 'Deactivate' : 'Activate'}"></i>
-        </td>`;
-                    } else {
-                        tr.innerHTML = `
-        <td class="cell-strong">${u.employeeCode}</td>
-        <td>
-            <div style="display:flex;align-items:center;gap:8px;">
-                <div class="avatar-sm">${initials(u.fullName)}</div>
-                ${u.fullName}
-            </div>
-        </td>
-        <td>${u.username}</td>
-        <td><span class="badge-jlms ${roleClass}"><span class="dot"></span>${u.roleName}</span></td>
-        <td>${u.mobile || '\u2014'}</td>
-        <td class="text-center">${statusBadge}</td>
-        <td class="text-center">
-            <i class="bi bi-pencil edit-btn" data-id="${u.userId}" style="margin-right:10px;color:var(--n-500);cursor:pointer;" title="Edit User"></i>
-            <i class="bi ${u.isActive ? 'bi-shield-lock' : 'bi-shield-fill-check'} toggle-btn" data-id="${u.userId}" style="color:var(--n-500);cursor:pointer;" title="${u.isActive ? 'Deactivate' : 'Activate'}"></i>
-        </td>`;
-                    }
+        <i class="bi ${u.isActive ? 'bi-shield-lock' : 'bi-shield-fill-check'} toggle-btn"
+           data-id="${u.userId}"
+           style="color:var(--n-500);cursor:pointer;"
+           title="${u.isActive ? 'Deactivate' : 'Activate'}"></i>
+    </td>`;
                     tblUsers.appendChild(tr);
                 });
 
@@ -260,7 +214,7 @@
                         const u = allUsers.find(x => x.userId === Number(btn.dataset.id));
                         if (u) {
                             sessionStorage.setItem('jlms_edit_user', JSON.stringify(u));
-                            window.location.href = `user-form.html?userId=${u.userId}`;
+                            window.location.href = `user-form.html?userId=${u.userId}&mode=admin`;
                         }
                     });
                 });
@@ -268,46 +222,6 @@
                     btn.addEventListener('click', () => toggleStatus(Number(btn.dataset.id)));
                 });
                 renderPagination(totalPages);
-            }
-
-            function applyTranslationsToRoleDropdown() {
-                const roleOptions = ddlRoleFilter.querySelectorAll('option');
-                roleOptions.forEach(option => {
-                    if (option.value && lang[option.textContent]) {
-                        option.textContent = lang[option.textContent];
-                    }
-                });
-
-                // Re-apply when language changes
-                registerLanguageCallback(() => {
-                    const updatedOptions = ddlRoleFilter.querySelectorAll('option');
-                    updatedOptions.forEach(option => {
-                        if (option.value && lang[option.textContent]) {
-                            option.textContent = lang[option.textContent];
-                        }
-                    });
-                });
-            }
-
-            function applyTranslationsToTableHeaders() {
-                const headerElements = userTableHeader.querySelectorAll('th[data-i18n]');
-                headerElements.forEach(th => {
-                    const key = th.getAttribute('data-i18n');
-                    if (lang[key]) {
-                        th.textContent = lang[key];
-                    }
-                });
-
-                // Re-apply when language changes
-                registerLanguageCallback(() => {
-                    const updatedHeaders = userTableHeader.querySelectorAll('th[data-i18n]');
-                    updatedHeaders.forEach(th => {
-                        const key = th.getAttribute('data-i18n');
-                        if (lang[key]) {
-                            th.textContent = lang[key];
-                        }
-                    });
-                });
             }
 
             function renderPagination(totalPages) {
@@ -332,27 +246,25 @@
                 paginationWrap.appendChild(nextBtn);
             }
 
-            async function toggleStatus(userId) {
+            async function toggleStatus(id) {
                 apiErrorBanner.style.display = 'none';
                 try {
-                    const res = await Api.toggleUserStatus(userId);
-                    const u = allUsers.find(x => x.userId === userId);
-                    if (u) {u.isActive = res.isActive; filterAndRender();}
-                    showSuccess(`User status updated.`);
+                    const result = await Api.toggleUserStatus(id);
+                    const u = allUsers.find(x => x.userId === id);
+                    if (u) {u.isActive = result.isActive; filterAndRender();}
+                    showSuccess(`User has been ${result.isActive ? 'activated' : 'deactivated'}.`);
                 } catch (err) {showApiError(err);}
             }
 
             function showSuccess(msg) {
                 apiSuccessBanner.textContent = msg;
                 apiSuccessBanner.style.display = 'block';
-                apiErrorBanner.style.display = 'none';
-                window.scrollTo({top: 0, behavior: 'smooth'});
-                setTimeout(() => {apiSuccessBanner.style.display = 'none';}, 5000);
+                setTimeout(() => {apiSuccessBanner.style.display = 'none';}, 4000);
             }
+
             function showApiError(err) {
                 apiErrorBanner.textContent = err.message || 'An error occurred.';
                 apiErrorBanner.style.display = 'block';
-                apiSuccessBanner.style.display = 'none';
                 window.scrollTo({top: 0, behavior: 'smooth'});
             }
         });

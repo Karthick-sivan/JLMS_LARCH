@@ -413,7 +413,7 @@ public class LoansController : ControllerBase
         string loanNumber;
         try
         {
-            loanNumber = await _numbering.GenerateNextLoanNumberAsync();
+            loanNumber = await _numbering.GenerateNextLoanNumberAsync(branchId);
         }
         catch (InvalidOperationException ex)
         {

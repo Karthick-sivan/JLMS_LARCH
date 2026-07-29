@@ -15,26 +15,32 @@ public class FinancialYearNumberingService
 
     public FinancialYearNumberingService(JlmsDbContext db) => _db = db;
 
-    // Active row for a given series type, covering "today" (UTC date).
-    public async Task<FinancialYear?> GetActiveAsync(string goldLoanType, DateTime? asOf = null)
+    // Active row for a given series type, covering "today" (UTC date), optionally filtered by branch.
+    public async Task<FinancialYear?> GetActiveAsync(string goldLoanType, DateTime? asOf = null, int? branchId = null)
     {
         var date = (asOf ?? DateTime.UtcNow).Date;
-        return await _db.FinancialYears.AsNoTracking()
+        var query = _db.FinancialYears.AsNoTracking()
             .Where(f => f.GoldLoanType == goldLoanType
                      && f.Status == "A"
                      && f.FromDt.Date <= date
-                     && f.ToDt.Date >= date)
+                     && f.ToDt.Date >= date);
+        
+        if (branchId.HasValue)
+            query = query.Where(f => f.BranchId == branchId.Value);
+        
+        return await query
             .OrderByDescending(f => f.FromDt)
             .FirstOrDefaultAsync();
     }
 
-    public async Task<string> GenerateNextLoanNumberAsync(DateTime? asOf = null)
+    public async Task<string> GenerateNextLoanNumberAsync(int? branchId = null, DateTime? asOf = null)
     {
-        var fy = await GetActiveAsync(TypeLoanNumber, asOf);
+        var fy = await GetActiveAsync(TypeLoanNumber, asOf, branchId);
         if (fy == null)
             throw new InvalidOperationException(
-                $"No active Financial Year configured for '{TypeLoanNumber}' covering {(asOf ?? DateTime.UtcNow).Date:d}. " +
-                "Add one on the Financial Year screen.");
+                $"No active Financial Year configured for '{TypeLoanNumber}' covering {(asOf ?? DateTime.UtcNow).Date:d}" +
+                (branchId.HasValue ? $" for branch {branchId.Value}" : "") +
+                ". Add one on the Financial Year screen.");
 
         var seq = fy.GoldLoanNoStartsFrom;
         string candidate;
@@ -48,13 +54,14 @@ public class FinancialYearNumberingService
         return candidate;
     }
 
-    public async Task<string> GenerateNextCustomerCodeAsync(DateTime? asOf = null)
+    public async Task<string> GenerateNextCustomerCodeAsync(int? branchId = null, DateTime? asOf = null)
     {
-        var fy = await GetActiveAsync(TypeCustomerCode, asOf);
+        var fy = await GetActiveAsync(TypeCustomerCode, asOf, branchId);
         if (fy == null)
             throw new InvalidOperationException(
-                $"No active Financial Year configured for '{TypeCustomerCode}' covering {(asOf ?? DateTime.UtcNow).Date:d}. " +
-                "Add one on the Financial Year screen.");
+                $"No active Financial Year configured for '{TypeCustomerCode}' covering {(asOf ?? DateTime.UtcNow).Date:d}" +
+                (branchId.HasValue ? $" for branch {branchId.Value}" : "") +
+                ". Add one on the Financial Year screen.");
 
         var seq = fy.GoldLoanNoStartsFrom;
         string candidate;

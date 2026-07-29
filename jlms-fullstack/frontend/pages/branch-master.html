@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JLMS — Branch Master</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/jlms-core.css">
+</head>
+<body>
+    <div class="app-shell">
+        <div id="jlmsSidebarMount"></div>
+        <div class="main-col">
+            <div id="jlmsTopbarMount"></div>
+            <div class="page-content">
+                <div class="page-header" style="flex-wrap: wrap; gap: 16px;">
+                    <div id="apiErrorBanner" class="api-error-banner" style="display:none; width: 100%;"></div>
+                    <div id="apiSuccessBanner" class="api-success-banner" style="display:none; width: 100%;"></div>
+                    <div>
+                        <div class="h1" data-i18n="branchMaster">Branch Master</div>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn-jlms btn-jlms-primary" id="btnNewBranch"><i class="bi bi-building-add"></i> New Branch</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="grid-toolbar">
+                        <div class="grid-toolbar-left">
+                            <span class="h4" data-i18n="systemBranches">System Branches</span>
+                            <span class="badge-jlms badge-neutral" id="txtBranchCount">0 branches</span>
+                        </div>
+                        <div class="grid-toolbar-left">
+                            <div class="grid-search"><i class="bi bi-search"></i><input id="txtSearchBranch" placeholder="Search branch code, name, city..."></div>
+                        </div>
+                    </div>
+                    <div class="panel-body no-pad table-jlms-wrap">
+                        <table class="table-jlms">
+                            <thead>
+                                <tr>
+                                    <th>Branch Code</th>
+                                    <th>Branch Name</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tblBranches">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted-jlms" style="padding: 24px;">Loading branches...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="grid-footer">
+                        <span id="txtShowingText">Showing 0–0 of 0</span>
+                        <div class="pagination-jlms" id="paginationWrap"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Modal -->
+    <div class="modal-jlms-backdrop" id="branchModal" style="display:none;">
+        <div class="modal-jlms" style="width: 500px; max-width: 95%;">
+            <div class="modal-jlms-head">
+                <div class="h4" id="modalTitle" data-i18n="newBranch">New Branch</div>
+                <i class="bi bi-x-lg" style="cursor:pointer; color:var(--n-500);" id="btnBranchModalClose"></i>
+            </div>
+            <div class="modal-jlms-body" style="text-align: left; padding: 20px;">
+                <div id="modalErrorBanner" class="api-error-banner" style="display:none; margin-bottom: 16px;"></div>
+                <form id="branchForm" onsubmit="return false;">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="branchCode">Branch Code <span class="req">*</span></label>
+                                <input id="txtBranchCode" class="form-control-jlms" placeholder="Enter Branch Code">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="branchName">Branch Name <span class="req">*</span></label>
+                                <input id="txtBranchName" class="form-control-jlms" placeholder="Enter Branch Name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="city">City</label>
+                                <input id="txtCity" class="form-control-jlms" placeholder="Enter City">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="state">State</label>
+                                <input id="txtState" class="form-control-jlms" placeholder="Enter State">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check-jlms">
+                                <input type="checkbox" id="chkBranchActive" checked>
+                                <label for="chkBranchActive">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-jlms-foot">
+                <button class="btn-jlms btn-jlms-ghost" id="btnBranchModalCancel">Cancel</button>
+                <button class="btn-jlms btn-jlms-primary" id="btnSaveBranch"><i class="bi bi-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.JLMS_ACTIVE = "branch-master";
+    </script>
+    <script src="../js/language.js"></script>
+    <script src="js/api-client.js"></script>
+    <script>
+        // Redirect if not superadmin BEFORE initializing shell
+        const checkUser = Session.requireLogin();
+        const isSA = checkUser && (checkUser.username === 'superadmin' || checkUser.roleName === 'SuperAdmin' || checkUser.roleId === 1002);
+        if (!isSA) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+    <script src="js/jlms-shell.js"></script>
+    <script>
+        jlmsInitShell("Branch Master", []);
+
+        let allBranches = [];
+        let filteredBranches = [];
+        let editingBranchId = 0;
+        let currentPage = 1;
+        const pageSize = 10;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            // DOM Controls
+            const btnNewBranch = document.getElementById("btnNewBranch");
+            const branchModal = document.getElementById("branchModal");
+            const btnBranchModalClose = document.getElementById("btnBranchModalClose");
+            const btnBranchModalCancel = document.getElementById("btnBranchModalCancel");
+            const btnSaveBranch = document.getElementById("btnSaveBranch");
+
+            const txtBranchCode = document.getElementById("txtBranchCode");
+            const txtBranchName = document.getElementById("txtBranchName");
+            const txtCity = document.getElementById("txtCity");
+            const txtState = document.getElementById("txtState");
+            const chkBranchActive = document.getElementById("chkBranchActive");
+
+            const txtSearchBranch = document.getElementById("txtSearchBranch");
+            const tblBranches = document.getElementById("tblBranches");
+            const txtBranchCount = document.getElementById("txtBranchCount");
+            const txtShowingText = document.getElementById("txtShowingText");
+            const paginationWrap = document.getElementById("paginationWrap");
+
+            const apiSuccessBanner = document.getElementById("apiSuccessBanner");
+            const apiErrorBanner = document.getElementById("apiErrorBanner");
+            const modalErrorBanner = document.getElementById("modalErrorBanner");
+
+            // Event Listeners
+            btnNewBranch.addEventListener("click", openNewModal);
+            btnBranchModalClose.addEventListener("click", closeBranchModal);
+            btnBranchModalCancel.addEventListener("click", closeBranchModal);
+            btnSaveBranch.addEventListener("click", saveBranch);
+
+            txtSearchBranch.addEventListener("input", () => {
+                currentPage = 1;
+                filterAndRender();
+            });
+
+            // Initial Loading
+            await loadBranches();
+
+            async function loadBranches() {
+                try {
+                    clearApiError();
+                    allBranches = await Api.getBranchesAll();
+                    filterAndRender();
+                } catch (err) {
+                    showApiError(err);
+                }
+            }
+
+            function filterAndRender() {
+                const searchQuery = txtSearchBranch.value.trim().toLowerCase();
+
+                filteredBranches = allBranches.filter(b => {
+                    const matchesSearch = !searchQuery ||
+                        b.branchCode.toLowerCase().includes(searchQuery) ||
+                        b.branchName.toLowerCase().includes(searchQuery) ||
+                        (b.city && b.city.toLowerCase().includes(searchQuery)) ||
+                        (b.state && b.state.toLowerCase().includes(searchQuery));
+                    return matchesSearch;
+                });
+
+                txtBranchCount.textContent = `${filteredBranches.length} branch${filteredBranches.length === 1 ? '' : 'es'}`;
+                renderTable();
+            }
+
+            function renderTable() {
+                tblBranches.innerHTML = "";
+
+                if (filteredBranches.length === 0) {
+                    tblBranches.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted-jlms" style="padding: 24px;">No branches found.</td>
+                        </tr>
+                    `;
+                    txtShowingText.textContent = "Showing 0–0 of 0";
+                    paginationWrap.innerHTML = "";
+                    return;
+                }
+
+                const totalItems = filteredBranches.length;
+                const totalPages = Math.ceil(totalItems / pageSize);
+                if (currentPage > totalPages) currentPage = totalPages || 1;
+
+                const startIndex = (currentPage - 1) * pageSize;
+                const endIndex = Math.min(startIndex + pageSize, totalItems);
+                const pageItems = filteredBranches.slice(startIndex, endIndex);
+
+                txtShowingText.textContent = `Showing ${startIndex + 1}–${endIndex} of ${totalItems}`;
+
+                pageItems.forEach(b => {
+                    const statusBadge = b.isActive
+                        ? '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>'
+                        : '<span class="badge-jlms badge-neutral"><span class="dot"></span>Inactive</span>';
+
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td class="cell-strong">${b.branchCode}</td>
+                        <td>${b.branchName}</td>
+                        <td>${b.city || '—'}</td>
+                        <td>${b.state || '—'}</td>
+                        <td class="text-center">${statusBadge}</td>
+                        <td class="text-center">
+                            <i class="bi bi-pencil edit-btn" data-id="${b.branchId}" style="margin-right:10px;color:var(--n-500);cursor:pointer;" title="Edit Branch"></i>
+                            <i class="bi ${b.isActive ? 'bi-shield-lock' : 'bi-shield-fill-check'} toggle-btn" data-id="${b.branchId}" style="color:var(--n-500);cursor:pointer;" title="${b.isActive ? 'Deactivate Branch' : 'Activate Branch'}"></i>
+                        </td>
+                    `;
+                    tblBranches.appendChild(tr);
+                });
+
+                // Attach listeners
+                tblBranches.querySelectorAll(".edit-btn").forEach(btn => {
+                    btn.addEventListener("click", () => editBranch(Number(btn.dataset.id)));
+                });
+                tblBranches.querySelectorAll(".toggle-btn").forEach(btn => {
+                    btn.addEventListener("click", () => toggleStatus(Number(btn.dataset.id)));
+                });
+
+                renderPagination(totalPages);
+            }
+
+            function renderPagination(totalPages) {
+                paginationWrap.innerHTML = "";
+                if (totalPages <= 1) return;
+
+                const prevBtn = document.createElement("div");
+                prevBtn.className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
+                prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
+                if (currentPage > 1) {
+                    prevBtn.addEventListener("click", () => { currentPage--; renderTable(); });
+                }
+                paginationWrap.appendChild(prevBtn);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageBtn = document.createElement("div");
+                    pageBtn.className = `page-btn ${currentPage === i ? 'active' : ''}`;
+                    pageBtn.textContent = i;
+                    pageBtn.addEventListener("click", () => { currentPage = i; renderTable(); });
+                    paginationWrap.appendChild(pageBtn);
+                }
+
+                const nextBtn = document.createElement("div");
+                nextBtn.className = `page-btn ${currentPage === totalPages ? 'disabled' : ''}`;
+                nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                if (currentPage < totalPages) {
+                    nextBtn.addEventListener("click", () => { currentPage++; renderTable(); });
+                }
+                paginationWrap.appendChild(nextBtn);
+            }
+
+            function openNewModal() {
+                editingBranchId = 0;
+                document.getElementById("branchForm").reset();
+                document.getElementById("modalTitle").textContent = "New Branch";
+                txtBranchCode.disabled = false;
+                hideModalError();
+                branchModal.style.display = "flex";
+            }
+
+            function editBranch(branchId) {
+                const b = allBranches.find(x => x.branchId === branchId);
+                if (!b) return;
+
+                editingBranchId = branchId;
+                document.getElementById("modalTitle").textContent = "Edit Branch";
+
+                txtBranchCode.value = b.branchCode;
+                txtBranchCode.disabled = true; // Typically Code should not be edited
+                txtBranchName.value = b.branchName;
+                txtCity.value = b.city || "";
+                txtState.value = b.state || "";
+                chkBranchActive.checked = b.isActive;
+
+                hideModalError();
+                branchModal.style.display = "flex";
+            }
+
+            function closeBranchModal() {
+                branchModal.style.display = "none";
+            }
+
+            async function saveBranch() {
+                hideModalError();
+
+                const branchCode = txtBranchCode.value.trim();
+                const branchName = txtBranchName.value.trim();
+                const city = txtCity.value.trim();
+                const state = txtState.value.trim();
+                const isActive = chkBranchActive.checked;
+
+                if (!branchCode) return showModalError("Branch Code is required.");
+                if (!branchName) return showModalError("Branch Name is required.");
+
+                const dto = {
+                    branchCode,
+                    branchName,
+                    city: city || null,
+                    state: state || null,
+                    isActive
+                };
+
+                btnSaveBranch.disabled = true;
+                try {
+                    if (editingBranchId === 0) {
+                        await Api.createBranch(dto);
+                        showSuccess("Branch created successfully.");
+                    } else {
+                        await Api.updateBranch(editingBranchId, dto);
+                        showSuccess("Branch updated successfully.");
+                    }
+                    closeBranchModal();
+                    await loadBranches();
+                } catch (err) {
+                    showModalError(err.message || "Failed to save branch.");
+                } finally {
+                    btnSaveBranch.disabled = false;
+                }
+            }
+
+            async function toggleStatus(branchId) {
+                clearApiError();
+                try {
+                    const res = await Api.toggleBranchStatus(branchId);
+                    const b = allBranches.find(x => x.branchId === branchId);
+                    if (b) {
+                        b.isActive = res.isActive;
+                        showSuccess(`Branch '${b.branchName}' status updated successfully.`);
+                        filterAndRender();
+                    }
+                } catch (err) {
+                    showApiError(err);
+                }
+            }
+
+            function showSuccess(msg) {
+                apiSuccessBanner.textContent = msg;
+                apiSuccessBanner.style.display = "block";
+                apiErrorBanner.style.display = "none";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+
+                setTimeout(() => {
+                    apiSuccessBanner.style.display = "none";
+                }, 5000);
+            }
+
+            function showApiError(err) {
+                apiErrorBanner.textContent = err.message || "An error occurred.";
+                apiErrorBanner.style.display = "block";
+                apiSuccessBanner.style.display = "none";
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+
+            function clearApiError() {
+                apiErrorBanner.style.display = "none";
+                apiSuccessBanner.style.display = "none";
+            }
+
+            function showModalError(msg) {
+                modalErrorBanner.textContent = msg;
+                modalErrorBanner.style.display = "block";
+            }
+
+            function hideModalError() {
+                modalErrorBanner.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>

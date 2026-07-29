@@ -298,9 +298,10 @@
 
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script>window.JLMS_ACTIVE = "closed-loans-report";</script>
-  <script src="js/jlms-shell.js"></script>
+  <script>window.JLMS_ACTIVE = "closureloan-report";</script>
+  <script src="../js/language.js"></script>
   <script src="js/api-client.js"></script>
+  <script src="js/jlms-shell.js"></script>
   <script>
     jlmsInitShell();
 
@@ -526,7 +527,15 @@
       closureFromDate: el("fFromDate").value || undefined,
       closureToDate: el("fToDate").value || undefined
     };
-    loadReport(activeFilters);
+    // Wait for language to load before loading report
+    loadLanguage(currentLanguage).then(() => {
+      loadReport(activeFilters);
+    });
+
+    // Re-render dynamic content when language switches
+    registerLanguageCallback(() => {
+      if (lastResult) renderGrid(lastResult);
+    });
   </script>
 </body>
 

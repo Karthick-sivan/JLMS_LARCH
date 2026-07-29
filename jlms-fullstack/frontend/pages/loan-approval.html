@@ -17,7 +17,7 @@
       <div class="page-header">
         <div>
           <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Loan Approval</span></div>
-          <div class="h1">Loan Approval Queue</div>
+          <div class="h1" data-i18n="loanApprovalQueue">Loan Approval Queue</div>
         </div>
       </div>
 
@@ -27,7 +27,7 @@
       <div class="row g-3">
         <div class="col-lg-4">
           <div class="panel">
-            <div class="panel-head"><div class="h4">Pending Approvals</div><span class="badge-jlms badge-warning" id="pendingCount"><span class="dot"></span>0 Pending</span></div>
+            <div class="panel-head"><div class="h4" data-i18n="pendingApprovals">Pending Approvals</div><span class="badge-jlms badge-warning" id="pendingCount"><span class="dot"></span>0 Pending</span></div>
             <div class="panel-body" style="padding:8px 0;" id="pendingList">
               <div class="text-muted-jlms" style="padding:16px; font-size:12.5px; text-align:center;">Loading...</div>
             </div>
@@ -37,7 +37,7 @@
         <div class="col-lg-8" id="decisionPanel" style="display:none;">
           <div class="panel mb-3">
             <div class="panel-head">
-              <div class="h4">Loan <span id="loanNumberLabel"></span> <span class="badge-jlms badge-info" style="margin-left:8px;"><span class="dot"></span>Pending Review</span></div>
+              <div class="h4" data-i18n="loan">Loan <span id="loanNumberLabel"></span> <span class="badge-jlms badge-info" style="margin-left:8px;"><span class="dot"></span>Pending Review</span></div>
             </div>
             <div class="panel-body">
               <div class="row g-3 mb-2">
@@ -52,7 +52,7 @@
           </div>
 
           <div class="panel mb-3">
-            <div class="panel-head"><div class="h4">Jewel Summary</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="jewelSummary">Jewel Summary</div></div>
             <div class="panel-body no-pad table-jlms-wrap">
               <table class="table-jlms">
                 <thead><tr><th>Jewel Type</th><th class="text-center">Qty</th><th class="text-end">Net Wt (g)</th><th>Purity</th><th class="text-end">Market Value</th></tr></thead>
@@ -62,10 +62,10 @@
           </div>
 
           <div class="panel">
-            <div class="panel-head"><div class="h4">Approval Decision</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="approvalDecision">Approval Decision</div></div>
             <div class="panel-body">
               <div class="field-group">
-                <label class="field-label">Remarks<span class="opt">required for rejection</span></label>
+                <label class="field-label" data-i18n="remarks">Remarks<span class="opt">required for rejection</span></label>
                 <textarea class="form-control-jlms" id="decisionRemarks" rows="3" placeholder="Add notes for this decision (visible in audit log)"></textarea>
               </div>
               <div class="d-flex justify-content-end gap-2">
@@ -81,6 +81,7 @@
 </div>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "loan-approval";</script>
+<script src="../js/language.js"></script>
 <script src="js/jlms-shell.js"></script>
 <script src="js/api-client.js"></script>
 <script>

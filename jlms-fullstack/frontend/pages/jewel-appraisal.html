@@ -24,7 +24,7 @@
       <div class="page-header">
         <div>
           <div class="breadcrumb-jlms"><a href="dashboard.html">Home</a><span class="sep">/</span><a href="#">Transactions</a><span class="sep">/</span><span class="current">Jewel Appraisal</span></div>
-          <div class="h1">Jewel Appraisal</div>
+          <div class="h1" data-i18n="jewelAppraisal">Jewel Appraisal</div>
           <div class="api-error-banner" style="display:block; background:var(--info-100); border-color:var(--info-600); color:var(--info-700); margin-top:10px;">
             This screen is a static demo. Live jewel appraisal (with real gold rates and calculation) is now part of the <a href="new-loan.html">New Loan</a> screen, Step 2.
           </div>
@@ -37,10 +37,10 @@
       <div class="panel mb-3">
         <div class="panel-body">
           <div class="row g-3">
-            <div class="col-md-3"><label class="field-label">Customer</label><input class="form-control-jlms" value="Murugan Subramaniam" disabled></div>
-            <div class="col-md-3"><label class="field-label">Customer Code</label><input class="form-control-jlms" value="CUS-008421" disabled></div>
-            <div class="col-md-3"><label class="field-label">Appraisal Date</label><input class="form-control-jlms" value="20/06/2026" disabled></div>
-            <div class="col-md-3"><label class="field-label">Appraised By</label><input class="form-control-jlms" value="Suresh M. (Loan Officer)" disabled></div>
+            <div class="col-md-3"><label class="field-label" data-i18n="customer">Customer</label><input class="form-control-jlms" value="Murugan Subramaniam" disabled></div>
+            <div class="col-md-3"><label class="field-label" data-i18n="customerCode">Customer Code</label><input class="form-control-jlms" value="CUS-008421" disabled></div>
+            <div class="col-md-3"><label class="field-label" data-i18n="appraisalDate">Appraisal Date</label><input class="form-control-jlms" value="20/06/2026" disabled></div>
+            <div class="col-md-3"><label class="field-label" data-i18n="appraisedBy">Appraised By</label><input class="form-control-jlms" value="Suresh M. (Loan Officer)" disabled></div>
           </div>
         </div>
       </div>
@@ -49,7 +49,7 @@
         <div class="col-lg-9">
           <div class="panel mb-3">
             <div class="panel-head">
-              <div class="h4">Jewel Items</div>
+              <div class="h4" data-i18n="jewelItems">Jewel Items</div>
               <button class="btn-jlms btn-jlms-outline btn-sm"><i class="bi bi-plus-lg"></i> Add Item</button>
             </div>
             <div class="panel-body no-pad table-jlms-wrap appraisal-table">
@@ -110,7 +110,7 @@
           </div>
 
           <div class="panel">
-            <div class="panel-head"><div class="h4">Jewel Photos</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="jewelPhotos">Jewel Photos</div></div>
             <div class="panel-body">
               <div style="display:flex; gap:12px; flex-wrap:wrap;">
                 <div class="photo-tile"><i class="bi bi-image"></i></div>
@@ -124,7 +124,7 @@
 
         <div class="col-lg-3">
           <div class="panel">
-            <div class="panel-head"><div class="h4">Valuation Summary</div></div>
+            <div class="panel-head"><div class="h4" data-i18n="valuationSummary">Valuation Summary</div></div>
             <div class="panel-body">
               <div class="summary-panel">
                 <div class="summary-row"><span class="label">Total Gross Weight</span><span class="value">67.500 g</span></div>
@@ -148,6 +148,7 @@
 </div>
 <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>window.JLMS_ACTIVE = "jewel-appraisal";</script>
+<script src="../js/language.js"></script>
 <script src="js/api-client.js"></script>
 <script src="js/jlms-shell.js"></script>
 <script>jlmsInitShell();</script>

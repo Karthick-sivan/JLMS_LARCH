@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JLMS — User Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/jlms-core.css">
+    <style>
+        .form-page-card {
+            background: var(--surface, #fff);
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: 12px;
+            padding: 28px 32px;
+            width: 100%;
+        }
+
+        .page-form-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border, #e2e8f0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="jlmsSidebarMount"></div>
+        <div class="main-col">
+            <div id="jlmsTopbarMount"></div>
+            <div class="page-content">
+                <!-- Page Header -->
+                <div class="page-header" style="flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+                    <div id="apiErrorBanner" class="api-error-banner" style="display:none; width: 100%;"></div>
+                    <div id="apiSuccessBanner" class="api-success-banner" style="display:none; width: 100%;"></div>
+                    <div>
+                        <div class="h1" id="pageTitle" data-i18n="newUser">New User</div>
+                        <div style="color: var(--n-400); font-size: 13px; margin-top: 4px;" id="pageSubtitle" data-i18n="fillDetails">Fill in the details below to create a new user account.</div>
+                    </div>
+                    <!-- <div class="page-actions">
+                    <a class="btn-jlms btn-jlms-primary" id="btnBack" href="#">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </div> -->
+                </div>
+
+                <!-- Form Card -->
+                <div class="form-page-card">
+                    <form id="userForm" onsubmit="return false;">
+
+                        <!-- Row 1: Employee Code / Full Name / Username -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4" id="employeeCodeWrap">
+                                <div class="field-group">
+                                    <label class="field-label" data-i18n="employeeId">Employee Code <span class="req"
+                                            id="lblEmployeeCodeReq">*</span></label>
+                                    <input id="txtEmployeeCode" class="form-control-jlms" placeholder="e.g. EMP-1042">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="field-group">
+                                    <label class="field-label" data-i18n="fullName">Full Name <span class="req">*</span></label>
+                                    <input id="txtFullName" class="form-control-jlms" placeholder="e.g. Ravi Kumar">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="field-group">
+                                    <label class="field-label" data-i18n="username">Username <span class="req">*</span></label>
+                                    <input id="txtUsername" class="form-control-jlms" placeholder="e.g. ravik">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Password / Role / Branch -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="field-group">
+                                    <label class="field-label" data-i18n="password">Password <span class="req"
+                                            id="lblPasswordReq">*</span></label>
+                                    <div style="position:relative;">
+                                        <input id="txtPassword" type="password" class="form-control-jlms"
+                                            placeholder="Password" style="padding-right:40px;">
+                                        <i class="bi bi-eye-slash" id="togglePasswordIcon"
+                                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--n-400);"></i>
+                                    </div>
+                                    <small class="text-muted-jlms" id="txtPasswordHelp"
+                                        style="display:none;font-size:11px;margin-top:4px;">
+                                        Leave blank to keep current password
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Role field — toggled between select+add and fixed badge -->
+                            <div class="col-md-4" id="roleSelectWrap">
+                                <div class="field-group">
+                                    <label class="field-label" data-i18n="role">Role <span class="req">*</span></label>
+                                    <div style="display:flex; gap: 8px;">
+                                        <select id="ddlRole" class="form-select-jlms" style="flex:1;">
+                                            <!-- populated dynamically -->
+                                        </select>
+                                        <button type="button" class="btn-jlms btn-jlms-outline" id="btnAddNewRole"
+                                            style="padding:0 12px;height:38px;" title="Add New Role">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fixed Admin role (shown in admin mode) -->
+                            <div class="col-md-4" id="roleFixedWrap" style="display:none;">
+                                <div class="field-group">
+                                    <label class="field-label">Role</label>
+                                    <input class="form-control-jlms" value="Administrator" disabled>
+                                    <input type="hidden" id="hdnAdminRoleId">
+                                </div>
+                            </div>
+
+                            <!-- Branch -->
+                            <div class="col-md-4">
+                                <div class="field-group">
+                                    <label class="field-label" data-i18n="branch">Branch <span class="req"
+                                            id="lblBranchReq">*</span></label>
+                                    <div style="display:flex; gap: 8px;">
+                                        <select id="ddlBranch" class="form-select-jlms" style="flex:1;">
+                                            <!-- populated dynamically -->
+                                        </select>
+                                        <!-- + branch button only visible in admin mode -->
+                                        <button type="button" class="btn-jlms btn-jlms-outline" id="btnAddNewBranch"
+                                            style="padding:0 12px;height:38px;display:none;" title="Add New Branch">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Mobile -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="field-group">
+                                    <label class="field-label" data-i18n="mobile">Mobile</label>
+                                    <input id="txtMobile" class="form-control-jlms" placeholder="e.g. 9876511111"
+                                        type="tel" maxlength="10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Email -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="field-group">
+                                    <label class="field-label" data-i18n="email">Email</label>
+                                    <input id="txtEmail" type="email" class="form-control-jlms"
+                                        placeholder="e.g. user@example.com">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="form-check-jlms">
+                            <input type="checkbox" id="chkUserActive" checked>
+                            <label for="chkUserActive" data-i18n="active">Active</label>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="page-form-actions">
+                            <button type="button" class="btn-jlms btn-jlms-primary" id="btnSaveUser">
+                                <i class="bi bi-save"></i> <span id="btnSaveLabel" data-i18n="saveUser">Save User</span>
+                            </button>
+                            <button type="button" class="btn-jlms btn-jlms-ghost" id="btnCancel">
+                                <span data-i18n="cancel"></span>Cancel</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+     Role Popup Modal
+     ======================================================== -->
+    <div class="modal-jlms-backdrop" id="roleModal" style="display:none; z-index:1060;">
+        <div class="modal-jlms" style="width:460px;max-width:95%;margin-top:10%;">
+            <div class="modal-jlms-head">
+                <div class="h4">New Role (Quick Add)</div>
+                <i class="bi bi-x-lg" style="cursor:pointer;color:var(--n-500);" id="btnRoleModalClose"></i>
+            </div>
+            <div class="modal-jlms-body" style="text-align:left;padding:20px;">
+                <div id="roleModalErrorBanner" class="api-error-banner" style="display:none;margin-bottom:16px;"></div>
+                <form id="roleForm" onsubmit="return false;">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="roleName">Role Name <span class="req">*</span></label>
+                                <input id="txtRoleName" class="form-control-jlms" placeholder="e.g. Audit Inspector">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="description">Description</label>
+                                <input id="txtRoleDescription" class="form-control-jlms"
+                                    placeholder="e.g. Performs branch financial auditing">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check-jlms">
+                                <input type="checkbox" id="chkRoleActive" checked>
+                                <label for="chkRoleActive" data-i18n="active">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-jlms-foot">
+                <button class="btn-jlms btn-jlms-ghost" id="btnRoleModalCancel" data-i18n="cancel">Cancel</button>
+                <button class="btn-jlms btn-jlms-primary" id="btnSaveRole"><i class="bi bi-save"></i> Save Role</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+     Branch Popup Modal
+     ======================================================== -->
+    <div class="modal-jlms-backdrop" id="branchModal" style="display:none; z-index:1060;">
+        <div class="modal-jlms" style="width:460px;max-width:95%;margin-top:8%;">
+            <div class="modal-jlms-head">
+                <div class="h4">New Branch (Quick Add)</div>
+                <i class="bi bi-x-lg" style="cursor:pointer;color:var(--n-500);" id="btnBranchModalClose"></i>
+            </div>
+            <div class="modal-jlms-body" style="text-align:left;padding:20px;">
+                <div id="branchModalErrorBanner" class="api-error-banner" style="display:none;margin-bottom:16px;">
+                </div>
+                <form id="branchForm" onsubmit="return false;">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="branchCode">Branch Code <span class="req">*</span></label>
+                                <input id="txtBranchCode" class="form-control-jlms" placeholder="e.g. BR-002">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="branchName">Branch Name <span class="req">*</span></label>
+                                <input id="txtBranchName" class="form-control-jlms"
+                                    placeholder="e.g. Madurai Anna Nagar">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="city">City</label>
+                                <input id="txtCity" class="form-control-jlms" placeholder="e.g. Madurai">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="field-group">
+                                <label class="field-label" data-i18n="state">State</label>
+                                <input id="txtState" class="form-control-jlms" placeholder="e.g. Tamil Nadu">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check-jlms">
+                                <input type="checkbox" id="chkBranchActive" checked>
+                                <label for="chkBranchActive" data-i18n="active">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-jlms-foot">
+                <button class="btn-jlms btn-jlms-ghost" id="btnBranchModalCancel" data-i18n="cancel">Cancel</button>
+                <button class="btn-jlms btn-jlms-primary" id="btnSaveBranch" data-i18n="saveBranch"><i class="bi bi-save"></i> Save
+                    Branch</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>window.JLMS_ACTIVE = "user-master";</script>
+    <script src="../js/language.js"></script>
+    <script src="js/api-client.js"></script>
+    <script>
+        // ── Auth Guard ──────────────────────────────────────────────────
+        const loggedInUser = Session.requireLogin();
+        const isSuperAdmin = loggedInUser && loggedInUser.roleId === 1002;
+        const isAdminRole = loggedInUser && loggedInUser.roleName &&
+            loggedInUser.roleName.toLowerCase() === 'administrator';
+
+        // Parse query params
+        const params = new URLSearchParams(window.location.search);
+        const isAdminMode = params.get('mode') === 'admin';   // superadmin creating Administrator
+        const editUserId = parseInt(params.get('userId') || '0', 10);
+
+        // Access control
+        if (!isSuperAdmin && !isAdminRole) {
+            window.location.href = 'dashboard.html';
+        }
+        // Admin-mode page is only for superadmin
+        if (isAdminMode && !isSuperAdmin) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+    <script src="js/jlms-shell.js"></script>
+    <script>
+        jlmsInitShell();
+
+        let branchesList = [];
+        let rolesList = [];
+
+        // Back-navigation target
+        const returnPage = isAdminMode ? 'create-administrator.html' : 'user-master.html';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            // ── DOM refs ──────────────────────────────────────────────
+            const pageTitle = document.getElementById('pageTitle');
+            const pageSubtitle = document.getElementById('pageSubtitle');
+            const btnBack = document.getElementById('btnBack'); // may be null if the Back button markup is commented out
+            const btnSaveUser = document.getElementById('btnSaveUser');
+            const btnSaveLabel = document.getElementById('btnSaveLabel');
+            const btnCancel = document.getElementById('btnCancel');
+
+            const txtEmployeeCode = document.getElementById('txtEmployeeCode');
+            const txtFullName = document.getElementById('txtFullName');
+            const txtUsername = document.getElementById('txtUsername');
+            const txtPassword = document.getElementById('txtPassword');
+            const lblPasswordReq = document.getElementById('lblPasswordReq');
+            const txtPasswordHelp = document.getElementById('txtPasswordHelp');
+            const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+
+            const ddlRole = document.getElementById('ddlRole');
+            const hdnAdminRoleId = document.getElementById('hdnAdminRoleId');
+            const roleSelectWrap = document.getElementById('roleSelectWrap');
+            const roleFixedWrap = document.getElementById('roleFixedWrap');
+            const btnAddNewRole = document.getElementById('btnAddNewRole');
+
+            const ddlBranch = document.getElementById('ddlBranch');
+            const btnAddNewBranch = document.getElementById('btnAddNewBranch');
+
+            const txtMobile = document.getElementById('txtMobile');
+            const txtEmail = document.getElementById('txtEmail');
+            const chkUserActive = document.getElementById('chkUserActive');
+
+            const apiErrorBanner = document.getElementById('apiErrorBanner');
+            const apiSuccessBanner = document.getElementById('apiSuccessBanner');
+
+            // Role popup refs
+            const roleModal = document.getElementById('roleModal');
+            const btnRoleModalClose = document.getElementById('btnRoleModalClose');
+            const btnRoleModalCancel = document.getElementById('btnRoleModalCancel');
+            const btnSaveRole = document.getElementById('btnSaveRole');
+            const txtRoleName = document.getElementById('txtRoleName');
+            const txtRoleDescription = document.getElementById('txtRoleDescription');
+            const chkRoleActive = document.getElementById('chkRoleActive');
+            const roleModalErrorBanner = document.getElementById('roleModalErrorBanner');
+
+            // Branch popup refs
+            const branchModal = document.getElementById('branchModal');
+            const btnBranchModalClose = document.getElementById('btnBranchModalClose');
+            const btnBranchModalCancel = document.getElementById('btnBranchModalCancel');
+            const btnSaveBranch = document.getElementById('btnSaveBranch');
+            const txtBranchCode = document.getElementById('txtBranchCode');
+            const txtBranchName = document.getElementById('txtBranchName');
+            const txtCity = document.getElementById('txtCity');
+            const txtState = document.getElementById('txtState');
+            const chkBranchActive = document.getElementById('chkBranchActive');
+            const branchModalErrorBanner = document.getElementById('branchModalErrorBanner');
+
+            // ── Setup page labels based on mode ───────────────────────
+            if (isAdminMode) {
+                document.title = 'JLMS — Administrator Form';
+                btnSaveLabel.textContent = 'Save Administrator';
+                btnAddNewBranch.style.display = '';
+                roleSelectWrap.style.display = 'none';
+                roleFixedWrap.style.display = '';
+
+                // Employee Code is not needed when SuperAdmin creates an Administrator
+                document.getElementById('employeeCodeWrap').style.display = 'none';
+            } else {
+                btnAddNewRole.style.display = '';
+                btnAddNewBranch.style.display = 'none';
+            }
+
+            if (editUserId > 0) {
+                pageTitle.textContent = isAdminMode ? 'Edit Administrator' : 'Edit User';
+                pageSubtitle.textContent = 'Update the details below and save.';
+                btnSaveLabel.textContent = isAdminMode ? 'Update Administrator' : 'Update User';
+                lblPasswordReq.style.display = 'none';
+                txtPasswordHelp.style.display = 'block';
+            }
+
+            // Back / Cancel navigation
+            // Guard against btnBack not existing in the DOM (e.g. its markup is commented out) —
+            // without this guard, setting .href on null throws and silently aborts every line
+            // after it, including the Cancel/Save listeners and the initial data load below.
+            if (btnBack) btnBack.href = returnPage;
+            btnCancel.addEventListener('click', () => {window.location.href = returnPage;});
+
+            // Password toggle
+            togglePasswordIcon.addEventListener('click', () => {
+                const hidden = txtPassword.type === 'password';
+                txtPassword.type = hidden ? 'text' : 'password';
+                togglePasswordIcon.classList.toggle('bi-eye-slash', !hidden);
+                togglePasswordIcon.classList.toggle('bi-eye', hidden);
+            });
+
+            // Mobile validation
+            txtMobile.addEventListener('input', () => {
+                const digits = txtMobile.value.replace(/\D/g, '');
+                if (txtMobile.value !== digits) txtMobile.value = digits;
+                if (digits.length > 0 && digits.length < 10) {
+                    txtMobile.style.borderColor = '#e53e3e';
+                    txtMobile.style.boxShadow = '0 0 0 3px rgba(229,62,62,0.25)';
+                } else {
+                    txtMobile.style.borderColor = '';
+                    txtMobile.style.boxShadow = '';
+                }
+            });
+
+            // Role change — disable branch if super admin role
+            ddlRole.addEventListener('change', () => {
+                if (Number(ddlRole.value) === 1002) {
+                    ddlBranch.value = '';
+                    ddlBranch.disabled = true;
+                } else {
+                    ddlBranch.disabled = false;
+                }
+            });
+
+            // ── Role Modal ────────────────────────────────────────────
+            const closeRoleModal = () => {roleModal.style.display = 'none';};
+            btnAddNewRole.addEventListener('click', () => {
+                roleModalErrorBanner.style.display = 'none';
+                document.getElementById('roleForm').reset();
+                chkRoleActive.checked = true;
+                roleModal.style.display = 'flex';
+            });
+            btnRoleModalClose.addEventListener('click', closeRoleModal);
+            btnRoleModalCancel.addEventListener('click', closeRoleModal);
+            btnSaveRole.addEventListener('click', saveRole);
+
+            // ── Branch Modal ──────────────────────────────────────────
+            const closeBranchModal = () => {branchModal.style.display = 'none';};
+            btnAddNewBranch.addEventListener('click', () => {
+                branchModalErrorBanner.style.display = 'none';
+                document.getElementById('branchForm').reset();
+                chkBranchActive.checked = true;
+                branchModal.style.display = 'flex';
+            });
+            btnBranchModalClose.addEventListener('click', closeBranchModal);
+            btnBranchModalCancel.addEventListener('click', closeBranchModal);
+            btnSaveBranch.addEventListener('click', saveBranch);
+
+            // ── Save button ───────────────────────────────────────────
+            btnSaveUser.addEventListener('click', saveUser);
+
+            // ── Initial data load ─────────────────────────────────────
+            await initPage();
+
+            // ─────────────────────────────────────────────────────────
+            async function initPage() {
+                try {
+                    clearErrors();
+
+                    branchesList = await Api.getUserMasterBranches();
+                    rolesList = await Api.getUserMasterRoles();
+
+                    // Populate role dropdown (normal mode — excludes SuperAdmin & Administrator)
+                    if (!isAdminMode) {
+                        const rolesToShow = rolesList.filter(r => r.roleId !== 1002 && r.roleId !== 4);
+                        ddlRole.innerHTML = rolesToShow.map(r =>
+                            `<option value="${r.roleId}">${r.roleName}</option>`
+                        ).join('');
+
+                        // Apply translations to role names
+                        applyTranslationsToRoleDropdown();
+                    } else {
+                        // Admin mode: find Administrator role id and store in hidden field
+                        const adminRole = rolesList.find(r => r.roleName.toLowerCase() === 'administrator');
+                        hdnAdminRoleId.value = adminRole ? adminRole.roleId : 4;
+                    }
+
+                    // Populate branch dropdown
+                    populateBranchDropdown();
+
+                    // Apply translations to dropdowns
+                    applyTranslationsToDropdowns();
+                    applyTranslationsToBranchDropdown();
+
+                    // If not super-admin in normal mode, lock branch to current user's branch
+                    if (!isAdminMode && !isSuperAdmin && loggedInUser.branchId) {
+                        ddlBranch.value = loggedInUser.branchId;
+                        ddlBranch.disabled = true;
+                    }
+
+                    // If editing, load the user data
+                    if (editUserId > 0) {
+                        await loadUserForEdit();
+                    }
+
+                } catch (err) {
+                    showApiError(err);
+                }
+            }
+
+            function populateBranchDropdown() {
+                ddlBranch.innerHTML =
+                    '<option value="" data-i18n="selectBranch">-- Select Branch --</option>' +
+                    branchesList.map(b => `<option value="${b.branchId}">${b.branchName}</option>`).join('');
+            }
+
+            function applyTranslationsToDropdowns() {
+                // Apply translations to dropdown options that have data-i18n attribute
+                const dropdownOptions = document.querySelectorAll('option[data-i18n]');
+                dropdownOptions.forEach(option => {
+                    const key = option.getAttribute('data-i18n');
+                    if (lang[key]) {
+                        option.textContent = lang[key];
+                    }
+                });
+            }
+
+            function applyTranslationsToRoleDropdown() {
+                const roleOptions = ddlRole.querySelectorAll('option');
+                roleOptions.forEach(option => {
+                    if (option.value && lang[option.textContent]) {
+                        option.textContent = lang[option.textContent];
+                    }
+                });
+
+                // Re-apply when language changes
+                registerLanguageCallback(() => {
+                    const updatedOptions = ddlRole.querySelectorAll('option');
+                    updatedOptions.forEach(option => {
+                        if (option.value && lang[option.textContent]) {
+                            option.textContent = lang[option.textContent];
+                        }
+                    });
+                });
+            }
+
+            function applyTranslationsToBranchDropdown() {
+                const branchOptions = ddlBranch.querySelectorAll('option');
+                branchOptions.forEach(option => {
+                    if (option.value && lang[option.textContent]) {
+                        option.textContent = lang[option.textContent];
+                    }
+                });
+
+                // Re-apply when language changes
+                registerLanguageCallback(() => {
+                    const updatedOptions = ddlBranch.querySelectorAll('option');
+                    updatedOptions.forEach(option => {
+                        if (option.value && lang[option.textContent]) {
+                            option.textContent = lang[option.textContent];
+                        }
+                    });
+                });
+            }
+
+            async function loadUserForEdit() {
+                try {
+                    // Try to get user from sessionStorage (set by list page on edit click)
+                    let user = null;
+                    const cached = sessionStorage.getItem('jlms_edit_user');
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        if (parsed && parsed.userId === editUserId) {
+                            user = parsed;
+                            sessionStorage.removeItem('jlms_edit_user');
+                        }
+                    }
+
+                    // Fallback: load from API list
+                    if (!user) {
+                        const users = await Api.getUsers();
+                        user = users.find(u => u.userId === editUserId);
+                    }
+
+                    if (!user) {
+                        showApiError(new Error('User not found.'));
+                        return;
+                    }
+
+                    // Populate form
+                    txtEmployeeCode.value = user.employeeCode || '';
+                    txtEmployeeCode.disabled = true;
+                    txtFullName.value = user.fullName || '';
+                    txtUsername.value = user.username || '';
+                    txtUsername.disabled = true;
+                    txtPassword.value = '';
+                    txtMobile.value = user.mobile || '';
+                    txtEmail.value = user.email || '';
+                    chkUserActive.checked = user.isActive;
+
+                    if (!isAdminMode) {
+                        ddlRole.value = user.roleId;
+                        if (Number(user.roleId) === 1002) {
+                            ddlBranch.value = '';
+                            ddlBranch.disabled = true;
+                        }
+                    }
+                    ddlBranch.value = user.branchId || '';
+                    if (!isSuperAdmin && !isAdminMode) ddlBranch.disabled = true;
+
+                } catch (err) {
+                    showApiError(err);
+                }
+            }
+
+            // ── Save Role ─────────────────────────────────────────────
+            async function saveRole() {
+                try {
+                    roleModalErrorBanner.style.display = 'none';
+                    const roleName = txtRoleName.value.trim();
+                    const description = txtRoleDescription.value.trim();
+                    const isActive = chkRoleActive.checked;
+
+                    if (!roleName) {
+                        roleModalErrorBanner.textContent = 'Role Name is required.';
+                        roleModalErrorBanner.style.display = 'block';
+                        return;
+                    }
+
+                    const dto = {roleName, description, isActive};
+                    const newRole = await Api.createRole(dto);
+
+                    // Reload roles, select new one
+                    rolesList = await Api.getUserMasterRoles();
+                    const rolesToShow = rolesList.filter(r => r.roleId !== 1002 && r.roleId !== 4);
+                    ddlRole.innerHTML = rolesToShow.map(r =>
+                        `<option value="${r.roleId}">${r.roleName}</option>`
+                    ).join('');
+                    ddlRole.value = newRole.roleId;
+
+                    closeRoleModal();
+                    showSuccess('New Role added and selected!');
+                } catch (err) {
+                    roleModalErrorBanner.textContent = err.message || 'Failed to save role.';
+                    roleModalErrorBanner.style.display = 'block';
+                }
+            }
+
+            // ── Save Branch ───────────────────────────────────────────
+            async function saveBranch() {
+                try {
+                    branchModalErrorBanner.style.display = 'none';
+                    const branchCode = txtBranchCode.value.trim();
+                    const branchName = txtBranchName.value.trim();
+                    const city = txtCity.value.trim();
+                    const state = txtState.value.trim();
+                    const isActive = chkBranchActive.checked;
+
+                    if (!branchCode || !branchName) {
+                        branchModalErrorBanner.textContent = 'Branch Code and Branch Name are required.';
+                        branchModalErrorBanner.style.display = 'block';
+                        return;
+                    }
+
+                    const dto = {branchCode, branchName, city, state, isActive};
+                    const newBranch = await Api.createBranch(dto);
+
+                    branchesList = await Api.getUserMasterBranches();
+                    populateBranchDropdown();
+                    ddlBranch.value = newBranch.branchId;
+
+                    closeBranchModal();
+                    showSuccess('New Branch added and selected!');
+                } catch (err) {
+                    branchModalErrorBanner.textContent = err.message || 'Failed to save branch.';
+                    branchModalErrorBanner.style.display = 'block';
+                }
+            }
+
+            // ── Save User ─────────────────────────────────────────────
+            async function saveUser() {
+                clearErrors();
+
+                const employeeCode = txtEmployeeCode.value.trim();
+                const fullName = txtFullName.value.trim();
+                const username = txtUsername.value.trim();
+                const password = txtPassword.value;
+                const mobile = txtMobile.value.trim();
+                const email = txtEmail.value.trim();
+                const isActive = chkUserActive.checked;
+
+                // Determine roleId
+                let roleId;
+                if (isAdminMode) {
+                    roleId = parseInt(hdnAdminRoleId.value, 10) || 4;
+                } else {
+                    roleId = Number(ddlRole.value);
+                }
+
+                const branchIdVal = ddlBranch.value;
+                const branchId = (roleId === 1002 || !branchIdVal) ? null : Number(branchIdVal);
+
+                // Validations
+                if (!isAdminMode && !employeeCode) return showFormError('Employee Code is required.')
+                if (!fullName) return showFormError('Full Name is required.');
+                if (!username) return showFormError('Username is required.');
+                if (editUserId === 0 && !password) return showFormError('Password is required for new users.');
+                if (!roleId) return showFormError('Role is required.');
+                if (roleId !== 1002 && !branchId) return showFormError('Branch is required.');
+                if (mobile && mobile.length !== 10) return showFormError('Mobile number must be exactly 10 digits.');
+                if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showFormError('Please enter a valid email address.');
+
+                const dto = {
+                    employeeCode: isAdminMode ? null : employeeCode,
+                    fullName,
+                    username,
+                    password: (editUserId === 0 || password) ? password : undefined,
+                    roleId,
+                    branchId,
+                    mobile: mobile || null,
+                    email: email || null,
+                    isActive
+                };
+                if (editUserId > 0 && !password) delete dto.password;
+
+                btnSaveUser.disabled = true;
+                try {
+                    if (editUserId === 0) {
+                        await Api.createUser(dto);
+                    } else {
+                        await Api.updateUser(editUserId, dto);
+                    }
+                    // Redirect back with success flag
+                    sessionStorage.setItem('jlms_form_success',
+                        editUserId === 0 ? 'User created successfully!' : 'User updated successfully!');
+                    window.location.href = returnPage;
+                } catch (err) {
+                    showFormError(err.message || 'Failed to save user.');
+                } finally {
+                    btnSaveUser.disabled = false;
+                }
+            }
+
+            // ── Helpers ───────────────────────────────────────────────
+            function showFormError(msg) {
+                showApiError(new Error(msg));
+            }
+
+            function showApiError(err) {
+                apiErrorBanner.textContent = err.message || 'An error occurred.';
+                apiErrorBanner.style.display = 'block';
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            }
+
+            function showSuccess(msg) {
+                apiSuccessBanner.textContent = msg;
+                apiSuccessBanner.style.display = 'block';
+                setTimeout(() => {apiSuccessBanner.style.display = 'none';}, 4000);
+            }
+
+            function clearErrors() {
+                apiErrorBanner.style.display = 'none';
+                apiSuccessBanner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

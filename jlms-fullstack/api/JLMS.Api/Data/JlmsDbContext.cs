@@ -62,7 +62,7 @@ public class JlmsDbContext : DbContext
         modelBuilder.Entity<AuditLog>().ToTable("AuditLogs");
         //modelBuilder.Entity<FinancialYear>().ToTable("FinancialYear");
         modelBuilder.Entity<FinancialYear>().ToTable("FinancialYear");
-        modelBuilder.Entity<FinancialYear>().Property(f => f.FinancialYearId).HasColumnName("Id");
+        modelBuilder.Entity<FinancialYear>().Property(f => f.FinancialYearId).HasColumnName("Id").ValueGeneratedOnAdd();
         modelBuilder.Entity<FinancialYear>().Property(f => f.GoldLoanNoStartsFrom).HasColumnName("GoldLoanNoStarts");
         // Decimal precision (avoid EF Core warnings / silent truncation)
         modelBuilder.Entity<JewelType>().Property(p => p.WastagePercent).HasColumnType("decimal(5,2)");
@@ -151,5 +151,8 @@ public class JlmsDbContext : DbContext
         modelBuilder.Entity<Loan>().HasQueryFilter(l => CurrentBranchId == null || l.BranchId == CurrentBranchId);
         modelBuilder.Entity<Customer>().HasQueryFilter(c => CurrentBranchId == null || c.BranchId == CurrentBranchId);
         modelBuilder.Entity<LoanTransaction>().HasQueryFilter(t => CurrentBranchId == null || t.BranchId == CurrentBranchId);
+        modelBuilder.Entity<JewelType>().HasQueryFilter(j => CurrentBranchId == null || j.BranchId == CurrentBranchId || j.BranchId == null);
+        modelBuilder.Entity<LoanScheme>().HasQueryFilter(s => CurrentBranchId == null || s.BranchId == CurrentBranchId || s.BranchId == null);
+        modelBuilder.Entity<GoldRate>().HasQueryFilter(g => CurrentBranchId == null || g.BranchId == CurrentBranchId || g.BranchId == null);
     }
 }
