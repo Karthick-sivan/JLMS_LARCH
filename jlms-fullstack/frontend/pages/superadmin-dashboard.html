@@ -7,10 +7,16 @@
 <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
 <link rel="stylesheet" href="css/jlms-core.css">
-<script src="vendor/chartjs/chart.umd.js"></script>
 <style>
   .kpi-card.indigo { border-left: 4px solid #4f46e5; }
   .kpi-card.indigo .kpi-icon { background: #e0e7ff; color: #4f46e5; }
+  .w1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy-700);
+    line-height: 1.3;
+    margin: 0;
+}
 </style>
 </head>
 <body>
@@ -22,8 +28,8 @@
     <div class="page-content">
       <div class="page-header">
         <div>
-          <div class="h1">SuperAdmin Consolidation</div>
-          <div class="text-muted-jlms" style="margin-top:3px;" id="greetSubline">Aggregated metrics across all active branches</div>
+          <div class="w1">Welcome, SuperAdmin</div>
+          <div class="text-muted-jlms" style="margin-top:3px;" id="greetSubline">Manage branches, administrators, and bank accounts</div>
         </div>
         <div class="page-actions">
           <button class="btn-jlms btn-jlms-outline" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
@@ -36,25 +42,25 @@
       <div class="row g-3 mb-4">
         <div class="col-xl-2-5 col-md-4">
           <div class="kpi-card indigo">
-            <div class="kpi-top"><span class="kpi-label">Active Branches</span><div class="kpi-icon"><i class="bi bi-building"></i></div></div>
+            <div class="kpi-top"><span class="kpi-label">Total Branches</span><div class="kpi-icon"><i class="bi bi-building"></i></div></div>
             <div class="kpi-value" id="kpiBranches">0</div>
             <div class="kpi-foot"><span class="text-muted-jlms">Registered locations</span></div>
           </div>
         </div>
         <div class="col-xl-2-5 col-md-4">
-          <div class="kpi-card">
-            <div class="kpi-top"><span class="kpi-label">Total Active Loans</span><div class="kpi-icon navy"><i class="bi bi-folder2-open"></i></div></div>
-            <div class="kpi-value" id="kpiActiveLoans">0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Ongoing across network</span></div>
+          <div class="kpi-card success">
+            <div class="kpi-top"><span class="kpi-label">Total Admins</span><div class="kpi-icon success"><i class="bi bi-people"></i></div></div>
+            <div class="kpi-value" id="kpiAdmins">0</div>
+            <div class="kpi-foot"><span class="text-muted-jlms">Active administrators</span></div>
           </div>
         </div>
-        <div class="col-xl-2-5 col-md-4">
+        <!-- <div class="col-xl-2-5 col-md-4">
           <div class="kpi-card gold">
-            <div class="kpi-top"><span class="kpi-label">Outstanding Portfolio</span><div class="kpi-icon gold"><i class="bi bi-cash-stack"></i></div></div>
-            <div class="kpi-value" id="kpiOutstanding">₹0</div>
-            <div class="kpi-foot"><span class="text-muted-jlms">Total active principal</span></div>
+            <div class="kpi-top"><span class="kpi-label">Total Banks</span><div class="kpi-icon gold"><i class="bi bi-bank"></i></div></div>
+            <div class="kpi-value" id="kpiBanks">0</div>
+            <div class="kpi-foot"><span class="text-muted-jlms">Registered banks</span></div>
           </div>
-        </div>
+        </div> -->
         <!-- <div class="col-xl-2-5 col-md-6">
           <div class="kpi-card success">
             <div class="kpi-top"><span class="kpi-label">Today's Collections</span><div class="kpi-icon success"><i class="bi bi-graph-up"></i></div></div>
@@ -71,30 +77,11 @@
         </div> -->
       </div>
 
-      <!-- CHARTS ROW -->
-      <div class="row g-3 mb-4">
-        <div class="col-lg-7">
-          <div class="panel h-100">
-            <div class="panel-head">
-              <div class="h4"><i class="bi bi-graph-up-arrow" style="color:var(--navy-700);"></i> Network Collection Trend — Last 14 Days</div>
-            </div>
-            <div class="panel-body" style="height: 280px;"><canvas id="collectionTrendChart"></canvas></div>
-          </div>
-        </div>
-        <div class="col-lg-5">
-          <div class="panel h-100">
-            <div class="panel-head">
-              <div class="h4"><i class="bi bi-pie-chart" style="color:var(--navy-700);"></i> Loan Count by Branch</div>
-            </div>
-            <div class="panel-body" style="height: 280px;"><canvas id="branchDistributionChart"></canvas></div>
-          </div>
-        </div>
-      </div>
 
       <!-- BRANCH GRID -->
       <div class="panel mb-4">
         <div class="panel-head">
-          <div class="h4">Branch Performance Dashboard</div>
+          <div class="h4">Branch Management</div>
         </div>
         <div class="panel-body no-pad table-jlms-wrap">
           <table class="table-jlms">
@@ -103,15 +90,11 @@
                 <th>Branch Code</th>
                 <th>Branch Name</th>
                 <th>Location</th>
-                <th class="text-center">Active Loans</th>
-                <th class="text-end">Outstanding Principal</th>
-                <!-- <th class="text-end">Today's Collections</th>
-                <th class="text-end">Today's Disbursements</th> -->
                 <th class="text-center">Status</th>
               </tr>
             </thead>
             <tbody id="tblBranchStats">
-              <tr><td colspan="8" class="text-center text-muted-jlms" style="padding:24px;">Loading branch consolidated statistics...</td></tr>
+              <tr><td colspan="4" class="text-center text-muted-jlms" style="padding:24px;">Loading branch information...</td></tr>
             </tbody>
           </table>
         </div>
@@ -125,7 +108,7 @@
 <script>
   window.JLMS_ACTIVE = "dashboard";
 </script>
-<script src="../js/language.js"></script>
+<script src="js/language.js"></script>
 <script src="js/api-client.js"></script>
 <script>
   // Redirect if not superadmin BEFORE initializing shell
@@ -149,24 +132,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Set KPI cards
     document.getElementById('kpiBranches').textContent = summary.totalBranches.toLocaleString('en-IN');
-    document.getElementById('kpiActiveLoans').textContent = summary.activeLoans.toLocaleString('en-IN');
-    document.getElementById('kpiOutstanding').textContent = formatCurrency(summary.outstandingAmount);
-    // document.getElementById('kpiCollections').textContent = formatCurrency(summary.todaysCollections);
-    // document.getElementById('kpiDisbursements').textContent = formatCurrency(summary.todaysDisbursement);
+    document.getElementById('kpiAdmins').textContent = summary.totalAdmins.toLocaleString('en-IN');
+    // document.getElementById('kpiBanks').textContent = summary.totalBanks.toLocaleString('en-IN');
 
     // Set branch list table
     const tableBody = document.getElementById('tblBranchStats');
     if (!summary.branchStats || summary.branchStats.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:24px;">No branch information available.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted-jlms" style="padding:24px;">No branch information available.</td></tr>';
     } else {
       tableBody.innerHTML = summary.branchStats.map(b => `
         <tr>
           <td class="cell-strong">${b.branchCode}</td>
           <td>${b.branchName}</td>
           <td>${b.city || '—'}, ${b.state || '—'}</td>
-          <td class="text-center cell-strong">${b.activeLoans.toLocaleString('en-IN')}</td>
-          <td class="text-end cell-strong">${formatCurrency(b.outstandingAmount)}</td>
-  
           <td class="text-center">
             ${b.isActive 
               ? '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>' 
@@ -176,86 +154,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       `).join('');
     }
 
-    // Render Charts
-    renderCollectionTrendChart();
-    renderBranchDistributionChart(summary.branchStats);
 
   } catch (err) {
     showApiError(err);
   }
 });
 
-async function renderCollectionTrendChart() {
-  try {
-    const trend = await Api.getCollectionTrend(14);
-    const labels = trend.map(p => new Date(p.collectionDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }));
-    const values = trend.map(p => p.totalCollected);
-
-    const ctx = document.getElementById('collectionTrendChart');
-    new Chart(ctx, {
-      type: 'line',
-      data: { 
-        labels, 
-        datasets: [{ 
-          label: 'Total Collections (₹)', 
-          data: values, 
-          borderColor: '#4f46e5', 
-          backgroundColor: 'rgba(79, 70, 229, 0.06)', 
-          fill: true, 
-          tension: 0.35 
-        }] 
-      },
-      options: {
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { 
-          y: { grid: { color: '#EDEFF2' } }, 
-          x: { grid: { display: false } } 
-        }
-      }
-    });
-  } catch (err) {
-    console.error('Failed to render trend chart:', err);
-  }
-}
-
-function renderBranchDistributionChart(branchStats) {
-  try {
-    const activeBranches = branchStats.filter(b => b.activeLoans > 0);
-    const labels = activeBranches.map(b => b.branchName);
-    const values = activeBranches.map(b => b.activeLoans);
-
-    const ctx = document.getElementById('branchDistributionChart');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{
-          data: values,
-          backgroundColor: [
-            '#4f46e5',
-            '#10b981',
-            '#f59e0b',
-            '#ef4444',
-            '#06b6d4',
-            '#8b5cf6'
-          ]
-        }]
-      },
-      options: {
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: { boxWidth: 12, font: { size: 11 } }
-          }
-        }
-      }
-    });
-  } catch (err) {
-    console.error('Failed to render branch distribution chart:', err);
-  }
-}
 </script>
 </body>
 </html>

@@ -197,70 +197,26 @@ public class DashboardController : ControllerBase
             return Forbid();
         }
 
-        var today = DateTime.UtcNow.Date;
-
         var totalBranches = await _db.Branches.CountAsync();
-        var activeLoans = await _db.Loans.CountAsync(l => l.Status == "Active");
-        var outstandingAmount = await _db.Loans
-            .Where(l => l.Status == "Active")
-            .SumAsync(l => (decimal?)l.OutstandingPrincipal) ?? 0;
+        var totalAdmins = await _db.Users.CountAsync(u => u.IsActive && u.RoleId==4);
+        var totalBanks = 0; // No bank entity in current system
 
-        var todaysCollections = await _db.LoanTransactions
-            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
-                        && t.TransactionDate.Date == today)
-            .SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
-
-        var todaysDisbursement = await _db.LoanTransactions
-            .Where(t => t.TransactionType == "Disbursement" && t.TransactionDate.Date == today)
-            .SumAsync(t => (decimal?)t.TotalAmount) ?? 0;
-
-        // Branch-wise stats
+        // Branch list for management
         var branches = await _db.Branches.AsNoTracking().ToListAsync();
-        var activeLoansByBranch = await _db.Loans
-            .Where(l => l.Status == "Active")
-            .GroupBy(l => l.BranchId)
-            .Select(g => new { BranchId = g.Key, Count = g.Count(), Sum = g.Sum(l => (decimal?)l.OutstandingPrincipal) ?? 0 })
-            .ToDictionaryAsync(x => x.BranchId, x => x);
 
-        var collectionsByBranch = await _db.LoanTransactions
-            .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
-                        && t.TransactionDate.Date == today
-                        && t.BranchId.HasValue)
-            .GroupBy(t => t.BranchId!.Value)
-            .Select(g => new { BranchId = g.Key, Sum = g.Sum(t => (decimal?)t.TotalAmount) ?? 0 })
-            .ToDictionaryAsync(x => x.BranchId, x => x.Sum);
-
-        var disbursementsByBranch = await _db.LoanTransactions
-            .Where(t => t.TransactionType == "Disbursement" && t.TransactionDate.Date == today && t.BranchId.HasValue)
-            .GroupBy(t => t.BranchId!.Value)
-            .Select(g => new { BranchId = g.Key, Sum = g.Sum(t => (decimal?)t.TotalAmount) ?? 0 })
-            .ToDictionaryAsync(x => x.BranchId, x => x.Sum);
-
-        var branchStats = branches.Select(b => {
-            activeLoansByBranch.TryGetValue(b.BranchId, out var loanMetric);
-            collectionsByBranch.TryGetValue(b.BranchId, out var collectionSum);
-            disbursementsByBranch.TryGetValue(b.BranchId, out var disbursementSum);
-
-            return new {
-                b.BranchId,
-                b.BranchCode,
-                b.BranchName,
-                b.City,
-                b.State,
-                b.IsActive,
-                ActiveLoans = loanMetric?.Count ?? 0,
-                OutstandingAmount = loanMetric?.Sum ?? 0,
-                TodaysCollections = collectionSum,
-                TodaysDisbursement = disbursementSum
-            };
+        var branchStats = branches.Select(b => new {
+            b.BranchId,
+            b.BranchCode,
+            b.BranchName,
+            b.City,
+            b.State,
+            b.IsActive
         }).ToList();
 
         return Ok(new {
             totalBranches,
-            activeLoans,
-            outstandingAmount,
-            todaysCollections,
-            todaysDisbursement,
+            totalAdmins,
+            totalBanks,
             branchStats
         });
     }

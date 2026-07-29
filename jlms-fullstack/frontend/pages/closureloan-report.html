@@ -159,17 +159,17 @@
           <div class="col-lg-3">
             <div class="panel">
               <div class="panel-head">
-                <div class="h4">Report Categories</div>
+                <div class="h4" data-i18n="reportCategories">Report Categories</div>
               </div>
               <div class="panel-body" style="padding:6px 0;">
                 <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i
-                    class="bi bi-cash-coin"></i> Loan Report</div>
+                    class="bi bi-folder2-open"></i> <span data-i18n="loanReport">Loan Report</span></div>
                 <div class="report-cat-item" onclick="location.href='loandetails-report.html'"><i
-                    class="bi bi-graph-down"></i> Loan & Item Reports </div>
+                    class="bi bi-graph-down"></i> <span data-i18n="loanItemReports">Loan & Item Reports</span></div>
                 <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i
-                    class="bi bi-cash-coin"></i> Collection Reports</div>
+                    class="bi bi-cash-coin"></i> <span data-i18n="collectionReports">Collection Reports</span></div>
 
-                <div class="report-cat-item active"><i class="bi bi-check2-circle"></i> Closed Loans Report</div>
+                <div class="report-cat-item active"><i class="bi bi-check2-circle"></i> <span data-i18n="closedLoansReport">Closed Loans Report</span></div>
               </div>
             </div>
           </div>
@@ -180,28 +180,28 @@
             <!-- Filters -->
             <div class="panel mb-3">
               <div class="panel-head">
-                <div class="h4">Closed Loans — Filters</div>
+                <div class="h4" data-i18n="closedLoansReport">Closed Loans — Filters</div>
               </div>
               <div class="panel-body">
                 <div class="row g-3 align-items-end">
                   <div class="col-md-4" style="position:relative;">
-                    <label class="field-label" for="fLoanNo">Loan Number</label>
+                    <label class="field-label" for="fLoanNo" data-i18n="loanNumber">Loan Number</label>
                     <input id="fLoanNo" type="text" class="form-control-jlms" placeholder="Loan Number"
-                      autocomplete="off">
+                      data-i18n-placeholder="loanNumber" autocomplete="off">
                     <div id="loanNoSuggestions" class="suggestion-list"></div>
                   </div>
                   <div class="col-md-3">
-                    <label class="field-label" for="fFromDate">Closure Date From</label>
+                    <label class="field-label" for="fFromDate" data-i18n="closureDateFrom">Closure Date From</label>
                     <input id="fFromDate" type="date" class="form-control-jlms">
                   </div>
                   <div class="col-md-3">
-                    <label class="field-label" for="fToDate">Closure Date To</label>
+                    <label class="field-label" for="fToDate" data-i18n="closureDateTo">Closure Date To</label>
                     <input id="fToDate" type="date" class="form-control-jlms">
                   </div>
                   <div class="col-md-2">
                     <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary"
                       style="width:100%;justify-content:center;">
-                      <i class="bi bi-funnel"></i> Apply
+                      <i class="bi bi-funnel"></i> <span data-i18n="apply">Apply</span>
                     </button>
                   </div>
                 </div>
@@ -214,23 +214,23 @@
             <!-- Summary cards -->
             <div class="summary-cards" id="summaryCards" style="display:none;">
               <div class="summary-card">
-                <div class="sc-label">Total Closed Loans</div>
+                <div class="sc-label" data-i18n="totalClosedLoans">Total Closed Loans</div>
                 <div class="sc-value" id="scTotalLoans">—</div>
               </div>
               <div class="summary-card accent-navy">
-                <div class="sc-label">Total Principal Disbursed</div>
+                <div class="sc-label" data-i18n="totalPrincipalDisbursed">Total Principal Disbursed</div>
                 <div class="sc-value" id="scPrincipalDisbursed">—</div>
               </div>
               <div class="summary-card accent-navy">
-                <div class="sc-label">Total Principal Collected</div>
+                <div class="sc-label" data-i18n="totalPrincipalCollected">Total Principal Collected</div>
                 <div class="sc-value" id="scPrincipalCollected">—</div>
               </div>
               <div class="summary-card accent-navy">
-                <div class="sc-label">Total Interest Collected</div>
+                <div class="sc-label" data-i18n="totalInterestCollected">Total Interest Collected</div>
                 <div class="sc-value" id="scInterestCollected">—</div>
               </div>
               <div class="summary-card accent-green">
-                <div class="sc-label">Grand Total Collected</div>
+                <div class="sc-label" data-i18n="grandTotalCollected">Grand Total Collected</div>
                 <div class="sc-value" id="scGrandCollected">—</div>
               </div>
             </div>
@@ -239,44 +239,44 @@
             <div class="panel">
               <div class="grid-toolbar">
                 <div class="grid-toolbar-left">
-                  <span class="h4">Results</span>
+                  <span class="h4" data-i18n="results">Results</span>
                   <span class="badge-jlms badge-neutral" id="recordsBadge" style="display:none;"></span>
                 </div>
                 <div class="grid-toolbar-left">
                   <button class="btn-jlms btn-jlms-outline btn-sm" onclick="exportExcel()" id="btnExportExcel"
-                    style="display:none;"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                    style="display:none;"><i class="bi bi-file-earmark-excel"></i> <span data-i18n="exportExcel">Export Excel</span></button>
                   <button class="btn-jlms btn-jlms-outline btn-sm" onclick="printReport()" id="btnPrint"
-                    style="display:none;"><i class="bi bi-printer"></i> Print</button>
+                    style="display:none;"><i class="bi bi-printer"></i> <span data-i18n="print">Print</span></button>
                 </div>
               </div>
               <div class="panel-body no-pad table-jlms-wrap">
                 <table class="table-jlms" id="reportTable">
                   <thead>
                     <tr>
-                      <th>S.No</th>
-                      <th>Loan No</th>
-                      <th>Loan Date</th>
+                      <th data-i18n="serialNo">S.No</th>
+                      <th data-i18n="loanNo">Loan No</th>
+                      <th data-i18n="loanDate">Loan Date</th>
                       <!-- NOTE: "Book No" has no source field in the current API/DTO.
                          Using Loan No as a stand-in until a real Book No field is wired up. -->
                       <!-- <th>Book No</th> -->
-                      <th>Customer</th>
-                      <th class="text-end">Loan Amount</th>
-                      <th class="text-end">Interest Amount</th>
-                      <th>Closure Date</th>
+                      <th data-i18n="customer">Customer</th>
+                      <th class="text-end" data-i18n="loanAmount">Loan Amount</th>
+                      <th class="text-end" data-i18n="interestAmount">Interest Amount</th>
+                      <th data-i18n="closureDate">Closure Date</th>
                     </tr>
                   </thead>
                   <tbody id="tableBody">
                     <tr>
                       <td colspan="7">
                         <div class="state-panel"><i class="bi bi-arrow-repeat spin"></i>
-                          <p>Loading closed loans…</p>
+                          <p data-i18n="loadingClosedLoans">Loading closed loans…</p>
                         </div>
                       </td>
                     </tr>
                   </tbody>
                   <tfoot id="tableFoot" style="display:none;">
                     <tr>
-                      <td colspan="4"><strong>Page Total</strong></td>
+                      <td colspan="4"><strong data-i18n="pageTotal">Page Total</strong></td>
                       <td class="text-end" id="footPrincipal">—</td>
                       <td class="text-end" id="footInterestCollected">—</td>
                       <td></td>
@@ -299,7 +299,7 @@
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script>window.JLMS_ACTIVE = "closureloan-report";</script>
-  <script src="../js/language.js"></script>
+  <script src="js/language.js"></script>
   <script src="js/api-client.js"></script>
   <script src="js/jlms-shell.js"></script>
   <script>
@@ -330,6 +330,7 @@
       if (!dt) return "—";
       return new Date(dt).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
     }
+    function t(key, fallback) { return (lang && lang[key]) || fallback; }
     function setExportBtnsVisible(v) {
       ["btnExportExcel", "btnPrint"].forEach(id => document.getElementById(id).style.display = v ? "" : "none");
     }
@@ -337,7 +338,7 @@
     async function loadReport(filters) {
       clearApiError();
       const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
-      elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
+      elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>${t("loading", "Loading…")}</p></div></td></tr>`;
       elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
       elBadge.style.display = "none"; elSummary.style.display = "none";
       setExportBtnsVisible(false);
@@ -348,7 +349,7 @@
         renderGrid(data);
       } catch (err) {
         showApiError(err);
-        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
+        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;"></i><p>${t("failedToLoadReport", "Failed to load report. Check that the API is running.")}</p></div></td></tr>`;
       }
     }
 
@@ -374,12 +375,12 @@
       el("scGrandCollected").textContent = fmt(grandTotalCollected);
       elSummary.style.display = "flex";
 
-      elBadge.textContent = `${totalCount.toLocaleString("en-IN")} records`;
+      elBadge.textContent = t("xRecords", "{count} records").replace("{count}", totalCount.toLocaleString("en-IN"));
       elBadge.style.display = "";
       setExportBtnsVisible(totalCount > 0);
 
       if (!items || items.length === 0) {
-        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-inbox"></i><p>No closed loans found for the selected filters.</p></div></td></tr>`;
+        elTBody.innerHTML = `<tr><td colspan="7"><div class="state-panel"><i class="bi bi-inbox"></i><p>${t("noLoansFoundFilters", "No loans found for the selected filters.")}</p></div></td></tr>`;
         elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
         return;
       }
@@ -454,7 +455,8 @@
     function renderPagination(totalCount, page, pageSize) {
       const totalPages = Math.ceil(totalCount / pageSize);
       const from = (page - 1) * pageSize + 1, to = Math.min(page * pageSize, totalCount);
-      elPaginInfo.textContent = `Showing ${from}–${to} of ${totalCount.toLocaleString("en-IN")}`;
+      elPaginInfo.textContent = t("showingXofY", "Showing {from}\u2013{to} of {total}")
+        .replace("{from}", from).replace("{to}", to).replace("{total}", totalCount.toLocaleString("en-IN"));
 
       let html = `<div class="page-btn${page === 1 ? " disabled" : ""}" onclick="goPage(${page - 1})"><i class="bi bi-chevron-left"></i></div>`;
       let sp = Math.max(1, page - 2), ep = Math.min(totalPages, sp + 4);

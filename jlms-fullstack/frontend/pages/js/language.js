@@ -11,7 +11,7 @@ async function loadLanguage(language = currentLanguage) {
     localStorage.setItem("jlmsLanguage", language);
 
     try {
-        const response = await fetch("../lang/" + language + ".json");
+        const response = await fetch("../pages/lang/" + language + ".json");
         if (!response.ok) {
             console.error("Failed to load language file:", response.status);
             return;
