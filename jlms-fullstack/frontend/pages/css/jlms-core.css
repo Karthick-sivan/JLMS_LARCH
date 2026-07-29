@@ -441,7 +441,8 @@ body.sidebar-collapsed .main-col { margin-left: var(--sidebar-w-collapsed); }
   color: var(--n-700);
   margin-bottom: 5px;
 }
-.field-label .req { color: var(--danger-600); margin-left: 2px; }
+.field-label span.req { color: var(--danger-600) !important; margin-left: 2px; }
+.req { color: var(--danger-600) !important; }
 .field-label .opt { color: var(--n-400); font-weight: 400; margin-left: 4px; font-size: 10.5px; }
 
 .form-control-jlms, .form-select-jlms {

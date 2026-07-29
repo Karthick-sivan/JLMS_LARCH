@@ -199,7 +199,7 @@
                     <div class="col-lg-3">
                         <div class="panel">
                             <div class="panel-head">
-                                <div class="h4">Report Categories</div>
+                                <div class="h4" data-i18n="reportCategories">Report Categories</div>
                             </div>
                             <div class="panel-body" style="padding:6px 0;">
                                 <!--<div class="report-cat-item" onclick="location.href='report-center.html'"><i class="bi bi-person-vcard"></i> Customer Reports <span class="count">4</span></div>-->
@@ -207,13 +207,13 @@
                                 <!--<div class="report-cat-item active"><i class="bi bi-graph-down"></i> Outstanding Reports </div>
                                 <div class="report-cat-item"><i class="bi bi-cash-coin"></i> Collection Reports </div>-->
                                 <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i
-                                        class="bi bi-folder2-open"></i> Loan Report </div>
+                                        class="bi bi-folder2-open"></i> <span data-i18n="loanReport">Loan Report</span></div>
                                 <div class="report-cat-item" onclick="location.href='loandetails-report.html'"><i
-                                        class="bi bi-graph-down"></i> Loan & Item Reports </div>
-                                <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> Collection Reports
+                                        class="bi bi-graph-down"></i> <span data-i18n="loanItemReports">Loan & Item Reports</span></div>
+                                <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> <span data-i18n="collectionReports">Collection Reports</span>
                                 </div>
                                 <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i
-                                        class="bi bi-check2-circle"></i> Closed Loans Report</div>
+                                        class="bi bi-check2-circle"></i> <span data-i18n="closedLoansReport">Closed Loans Report</span></div>
                                 <!--<div class="report-cat-item"><i class="bi bi-arrow-repeat"></i> Renewal Report <span class="count">2</span></div>
                                 <div class="report-cat-item"><i class="bi bi-check2-circle"></i> Closure Report <span class="count">2</span></div>
                                 <div class="report-cat-item"><i class="bi bi-hammer"></i> Auction Reports <span class="count">3</span></div>
@@ -228,26 +228,26 @@
                         <!-- Filters -->
                         <div class="panel mb-3">
                             <div class="panel-head">
-                                <div class="h4">Collection Reports — Filters</div>
+                                <div class="h4" data-i18n="collectionReports">Collection Reports — Filters</div>
                             </div>
                             <div class="panel-body">
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-2">
-                                        <label class="field-label" for="filterFromDate">From Date</label>
+                                        <label class="field-label" for="filterFromDate" data-i18n="fromDate">From Date</label>
                                         <input id="filterFromDate" type="date" class="form-control-jlms">
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="field-label" for="filterToDate">To Date</label>
+                                        <label class="field-label" for="filterToDate" data-i18n="toDate">To Date</label>
                                         <input id="filterToDate" type="date" class="form-control-jlms">
                                     </div>
                                     <div class="col-md-3">
-                                        <label class="field-label" for="filterCustomer">Customer</label>
+                                        <label class="field-label" for="filterCustomer" data-i18n="customer">Customer</label>
                                         <select id="filterCustomer" class="form-select-jlms" disabled>
                                             <option value="">Loading customers…</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3">
-                                        <label class="field-label" for="filterLoanNo">Loan No.</label>
+                                        <label class="field-label" for="filterLoanNo" data-i18n="loanNo">Loan No.</label>
                                         <select id="filterLoanNo" class="form-select-jlms" disabled>
                                             <option value="">All Loans</option>
                                         </select>
@@ -255,7 +255,7 @@
                                     <div class="col-md-2">
                                         <button id="btnApplyFilters" class="btn-jlms btn-jlms-primary"
                                             style="width:100%;justify-content:center;">
-                                            <i class="bi bi-funnel"></i> Apply Filters
+                                            <i class="bi bi-funnel"></i> <span data-i18n="apply">Apply Filters</span>
                                         </button>
                                     </div>
                                 </div>
@@ -268,19 +268,19 @@
                         <!-- Summary cards -->
                         <div class="summary-cards" id="summaryCards" style="display:none;">
                             <div class="summary-card">
-                                <div class="sc-label">Total Records</div>
+                                <div class="sc-label" data-i18n="totalRecords">Total Records</div>
                                 <div class="sc-value" id="scTotalRecords">—</div>
                             </div>
                             <div class="summary-card accent-navy">
-                                <div class="sc-label">Principal Collected</div>
+                                <div class="sc-label" data-i18n="principalCollected">Principal Collected</div>
                                 <div class="sc-value" id="scPrincipal">—</div>
                             </div>
                             <div class="summary-card accent-orange">
-                                <div class="sc-label">Interest Collected</div>
+                                <div class="sc-label" data-i18n="interestCollected">Interest Collected</div>
                                 <div class="sc-value" id="scInterest">—</div>
                             </div>
                             <div class="summary-card accent-red">
-                                <div class="sc-label">Total Collected</div>
+                                <div class="sc-label" data-i18n="totalCollected">Total Collected</div>
                                 <div class="sc-value" id="scGrandTotal">—</div>
                             </div>
                         </div>
@@ -289,7 +289,7 @@
                         <div class="panel">
                             <div class="grid-toolbar">
                                 <div class="grid-toolbar-left">
-                                    <span class="h4">Results</span>
+                                    <span class="h4" data-i18n="results">Results</span>
                                     <span class="badge-jlms badge-neutral" id="recordsBadge"
                                         style="display:none;"></span>
                                 </div>
@@ -299,31 +299,31 @@
                                             class="bi bi-file-earmark-pdf"></i> Export PDF</button> -->
                                     <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportExcel"
                                         onclick="exportExcel()" style="display:none;"><i
-                                            class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                                            class="bi bi-file-earmark-excel"></i> <span data-i18n="exportExcel">Export Excel</span></button>
                                     <button class="btn-jlms btn-jlms-outline btn-sm" id="btnPrint"
                                         onclick="printReport()" style="display:none;"><i class="bi bi-printer"></i>
-                                        Print</button>
+                                        <span data-i18n="print">Print</span></button>
                                 </div>
                             </div>
                             <div class="panel-body no-pad table-jlms-wrap">
                                 <div class="amt-legend">
-                                <span class="legend-item"><span class="legend-dot principal"></span>Principal</span>
-                                <span class="legend-item"><span class="legend-dot interest"></span>Interest</span>
-                                <span class="legend-item"><span class="legend-dot fmi"></span>1st Month Interest</span>
+                                <span class="legend-item"><span class="legend-dot principal"></span><span data-i18n="principal">Principal</span></span>
+                                <span class="legend-item"><span class="legend-dot interest"></span><span data-i18n="interest">Interest</span></span>
+                                <span class="legend-item"><span class="legend-dot fmi"></span><span data-i18n="firstMonthInterest">1st Month Interest</span></span>
                             </div>
                                 <table class="table-jlms" id="CollectionTable">
                                     <thead>
                                         <tr>
-                                            <th>Txn Date</th>
-                                            <th>Loan No.</th>
-                                            <th>Loan Date</th>
-                                            <th>Customer</th>
-                                            <th>Scheme</th>
-                                            <th class="text-end">Loan Amt</th>
-                                            <th class="text-end">Principal Amt</th>
-                                            <th class="text-end">Interest Amt</th>
-                                            <th class="text-end">Paid Amount</th>
-                                            <th class="text-end">Bal Amt</th>
+                                            <th data-i18n="txnDate">Txn Date</th>
+                                            <th data-i18n="loanNo">Loan No.</th>
+                                            <th data-i18n="loanDate">Loan Date</th>
+                                            <th data-i18n="customer">Customer</th>
+                                            <th data-i18n="scheme">Scheme</th>
+                                            <th class="text-end" data-i18n="loanAmt">Loan Amt</th>
+                                            <th class="text-end" data-i18n="principalAmt">Principal Amt</th>
+                                            <th class="text-end" data-i18n="interestAmt">Interest Amt</th>
+                                            <th class="text-end" data-i18n="paidAmount">Paid Amount</th>
+                                            <th class="text-end" data-i18n="balAmt">Bal Amt</th>
 
                                         </tr>
                                     </thead>
@@ -332,14 +332,14 @@
                                             <td colspan="9">
                                                 <div class="state-panel">
                                                     <i class="bi bi-arrow-repeat spin"></i>
-                                                    <p>Loading collection report…</p>
+                                                    <p data-i18n="loadingCollectionReport">Loading collection report…</p>
                                                 </div>
                                             </td>
                                         </tr>
                                     </tbody>
                                     <tfoot id="collectionTableFoot" style="display:none;">
                                         <tr>
-                                            <td colspan="5"><strong>Page Total</strong></td>
+                                            <td colspan="5"><strong data-i18n="pageTotal">Page Total</strong></td>
                                             <!-- Txn Date, Loan No, Loan Date, Customer, Scheme -->
                                             <td class="text-end" id="footLoanAmt">—</td> <!-- Loan Amt -->
                                             <td class="text-end" id="footPrincipal">—</td> <!-- Principal Amt -->
@@ -364,7 +364,7 @@
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
     <script>window.JLMS_ACTIVE = "collection-reports";</script>
-    <script src="../js/language.js"></script>
+    <script src="js/language.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/jlms-shell.js"></script>
     <script>
@@ -440,10 +440,13 @@
             const cls = row.transactionType === "Disbursement" ? "fmi" : "interest";
             return `<span class="amt-badge ${cls}">${fmt(row.interestAmount)}</span>`;
         }
+        function t(key, fallback) { return (lang && lang[key]) || fallback; }
+
         function statusBadge(status, daysOverdue) {
             let cls = "badge-success", label = status;
-            if (status === "Overdue") { cls = "badge-danger"; label = daysOverdue > 0 ? `Overdue (${daysOverdue}d)` : "Overdue"; }
-            else if (status === "Due") { cls = "badge-warning"; }
+            if (status === "Overdue") { cls = "badge-danger"; label = daysOverdue > 0 ? `${t("overdue", "Overdue")} (${daysOverdue}d)` : t("overdue", "Overdue"); }
+            else if (status === "Due") { cls = "badge-warning"; label = t("due", "Due"); }
+            else if (status === "Active") { label = t("active", "Active"); }
             return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
         }
 
@@ -502,7 +505,7 @@
             clearApiError();
             const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
 
-            elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>Loading…</p></div></td></tr>`;
+            elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-arrow-repeat spin"></i><p>${t("loading", "Loading…")}</p></div></td></tr>`;
             elTFoot.style.display = "none";
             elPaginFoot.style.display = "none";
             elBadge.style.display = "none";
@@ -515,7 +518,7 @@
                 renderGrid(data);
             } catch (err) {
                 showApiError(err);
-                elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;display:block;margin-bottom:12px;"></i><p>Failed to load report. Check that the API is running.</p></div></td></tr>`;
+                elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:2.8rem;display:block;margin-bottom:12px;"></i><p>${t("failedToLoadReport", "Failed to load report. Check that the API is running.")}</p></div></td></tr>`;
             }
         }
 
@@ -542,12 +545,12 @@
             document.getElementById("scGrandTotal").textContent = fmt(grandTotalCollected);
             elSummary.style.display = "flex";
 
-            elBadge.textContent = `${totalCount.toLocaleString("en-IN")} records`;
+            elBadge.textContent = t("xRecords", "{count} records").replace("{count}", totalCount.toLocaleString("en-IN"));
             elBadge.style.display = "";
             setExportBtnsVisible(totalCount > 0);
 
             if (!items || items.length === 0) {
-                elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-inbox"></i><p>No collections found for the selected filters.</p></div></td></tr>`;
+                elTBody.innerHTML = `<tr><td colspan="10"><div class="state-panel"><i class="bi bi-inbox"></i><p>${t("noLoansFoundFilters", "No loans found for the selected filters.")}</p></div></td></tr>`;
                 elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
                 return;
             }
@@ -592,7 +595,8 @@
             const totalPages = Math.ceil(totalCount / pageSize);
             const from = (page - 1) * pageSize + 1;
             const to = Math.min(page * pageSize, totalCount);
-            elPaginInfo.textContent = `Showing ${from}–${to} of ${totalCount.toLocaleString("en-IN")}`;
+            elPaginInfo.textContent = t("showingXofY", "Showing {from}\u2013{to} of {total}")
+                .replace("{from}", from).replace("{to}", to).replace("{total}", totalCount.toLocaleString("en-IN"));
 
             let html = `<div class="page-btn${page === 1 ? " disabled" : ""}" onclick="goPage(${page - 1})"><i class="bi bi-chevron-left"></i></div>`;
             let sp = Math.max(1, page - 2), ep = Math.min(totalPages, sp + 4);
