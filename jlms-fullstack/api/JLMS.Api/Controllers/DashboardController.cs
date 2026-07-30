@@ -198,25 +198,55 @@ public class DashboardController : ControllerBase
         }
 
         var totalBranches = await _db.Branches.CountAsync();
-        var totalAdmins = await _db.Users.CountAsync(u => u.IsActive && u.RoleId==4);
-        var totalBanks = 0; // No bank entity in current system
+        var activeBranches = await _db.Branches.CountAsync(b => b.IsActive);
+        var inactiveBranches = totalBranches - activeBranches;
+        var totalBranchAdmins = await _db.Users.CountAsync(u => u.IsActive && u.RoleId == 4);
+        var totalSystemUsers = await _db.Users.CountAsync(u => u.IsActive);
+        var totalCustomers = await _db.Customers.CountAsync();
+        var totalLoans = await _db.Loans.CountAsync();
 
-        // Branch list for management
+        var today = DateTime.UtcNow.Date;
+
+        // Branch list for management with performance metrics
         var branches = await _db.Branches.AsNoTracking().ToListAsync();
 
-        var branchStats = branches.Select(b => new {
-            b.BranchId,
-            b.BranchCode,
-            b.BranchName,
-            b.City,
-            b.State,
-            b.IsActive
+        var branchStats = branches.Select(b => {
+            // Active loans for this branch
+            var activeLoans = _db.Loans.Count(l => l.BranchId == b.BranchId && l.Status == "Active");
+            
+            // Outstanding amount for this branch
+            var outstandingAmount = _db.Loans
+                .Where(l => l.BranchId == b.BranchId && l.Status == "Active")
+                .Sum(l => (decimal?)l.OutstandingPrincipal) ?? 0;
+            
+            // Today's collections for this branch
+            var todaysCollections = _db.LoanTransactions
+                .Where(t => (t.TransactionType == "InterestCollection" || t.TransactionType == "LoanOpsPayment" || t.TransactionType == "Closure")
+                            && t.TransactionDate.Date == today
+                            && _db.Loans.Any(l => l.LoanId == t.LoanId && l.BranchId == b.BranchId))
+                .Sum(t => (decimal?)t.TotalAmount) ?? 0;
+
+            return new {
+                b.BranchId,
+                b.BranchCode,
+                b.BranchName,
+                b.City,
+                b.State,
+                b.IsActive,
+                ActiveLoans = activeLoans,
+                OutstandingAmount = outstandingAmount,
+                TodaysCollections = todaysCollections
+            };
         }).ToList();
 
         return Ok(new {
             totalBranches,
-            totalAdmins,
-            totalBanks,
+            activeBranches,
+            inactiveBranches,
+            totalBranchAdmins,
+            totalSystemUsers,
+            totalCustomers,
+            totalLoans,
             branchStats
         });
     }
