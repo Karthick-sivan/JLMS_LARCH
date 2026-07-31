@@ -431,7 +431,7 @@
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="field-label" data-i18n="loanNo">Loan No</label>
-                                <input type="text" class="form-control-jlms" id="fLoanNo" placeholder="Loan Number">
+                                <input type="text" class="form-control-jlms" id="fLoanNo" data-i18n-placeholder="loanNumberPlaceholder">
                             </div>
                             <div class="col-md-3">
                                 <label class="field-label" data-i18n="customerName">Customer Name</label>
@@ -453,7 +453,7 @@
                             <div class="col-md-3">
                                 <label class="field-label" data-i18n="loanScheme">Loan Scheme</label>
                                 <select class="form-control-jlms" id="fScheme">
-                                    <option value="">All Schemes</option>
+                                    <option value="" data-i18n="allSchemes">All Schemes</option>
                                     <!--Api.getLoanSchemes()-->
                                 </select>
                             </div>
@@ -463,9 +463,9 @@
 
                             <div class="col-md-12 d-flex gap-2 justify-content-md-end">
                                 <button class="btn-jlms btn-jlms-outline" id="btnReset"><i class="bi bi-x-circle"></i>
-                                    Reset</button>
+                                    <span data-i18n="reset">Reset</span></button>
                                 <button class="btn-jlms btn-jlms-primary" id="btnSearch"><i class="bi bi-search"></i>
-                                    Search</button>
+                                    <span data-i18n="search">Search</span></button>
                             </div>
                         </div>
                     </div>
@@ -476,7 +476,7 @@
                     <div class="grid-toolbar">
                         <div class="grid-toolbar-left">
                             <span class="h4" data-i18n="activeLoan">Active Loans</span>
-                            <span class="badge-jlms badge-neutral" id="resultCount">0 loans</span>
+                            <span class="badge-jlms badge-neutral" id="resultCount" data-i18n="loans">0 loans</span>
                         </div>
                     </div>
                     <div class="panel-body no-pad table-jlms-wrap">
@@ -509,7 +509,7 @@
                     </div>
                     <div class="pagination-bar">
                         <div class="page-size-select">
-                            <span>Rows per page</span>
+                            <span data-i18n="rowsPerPage">Rows per page</span>
                             <select id="pageSizeSelect">
                                 <option value="10" selected>10</option>
                                 <option value="20">20</option>
@@ -517,7 +517,7 @@
                                 <option value="100">100</option>
                             </select>
                         </div>
-                        <div class="page-info" id="pageInfo">Page 1</div>
+                        <div class="page-info" id="pageInfo" data-i18n="page">Page 1</div>
                         <nav>
                             <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
                         </nav>
@@ -532,11 +532,11 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Collect Payment — <span id="payLoanNoLabel">-</span></h5>
+                    <h5 class="modal-title" data-i18n="collectPayment">Collect Payment — <span id="payLoanNoLabel">-</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="paymentModalBody">
-                    <div class="text-center text-muted-jlms" style="padding:30px;" id="paymentLoadingState">Loading loan
+                    <div class="text-center text-muted-jlms" style="padding:30px;" id="paymentLoadingState" data-i18n="loadingLoanDetails">Loading loan
                         details...</div>
 
                     <div id="paymentContent" style="display:none;">
@@ -546,7 +546,7 @@
                             <div class="col-lg-5 border-end d-flex flex-column">
 
                                 <div class="info-card mb-3">
-                                    <div class="info-card-title">Customer &amp; Loan Details</div>
+                                    <div class="info-card-title" data-i18n="customerLoanDetails">Customer &amp; Loan Details</div>
                                     <div class="info-grid">
                                         <div class="info-row">
                                             <div class="info-label" data-i18n="customerName">Customer Name</div>
@@ -621,7 +621,7 @@
 
                             <div class="col-lg-7">
                                 <!-- Interest calculation -->
-                                <div class="section-label mt-0"><i class="bi bi-calculator"></i> Interest Calculation
+                                <div class="section-label mt-0"><i class="bi bi-calculator"></i> <span data-i18n="interestCalculation">Interest Calculation</span>
                                 </div>
                                 <table class="calc-table mb-3">
                                     <tbody>
@@ -641,7 +641,7 @@
                                              / "Info Only — Not Charged" — this block now IS the charged calculation,
                                              badge removed (was already hidden via d-none but text was still wrong) -->
                                         <tr>
-                                            <td colspan="2" class="calc-section-divider">Daily Interest Calculation</td>
+                                            <td colspan="2" class="calc-section-divider" data-i18n="dailyInterestCalculation">Daily Interest Calculation</td>
                                         </tr>
                                         <!-- CHANGE (daily-interest fix): removed class="calc-info" (was muted/
                                              italic styling implying "just reference, ignore this") — these rows
@@ -681,13 +681,13 @@
                                     </tbody>
                                 </table>
                                 <!-- ★ NEW: prepaid first-month note (hidden after first payment) -->
-                                <div class="field-hint" id="firstMonthPrepaidNote" style="display:none;">
+                                <div class="field-hint" id="firstMonthPrepaidNote" style="display:none;" data-i18n="firstMonthPrepaidNote">
                                     <i class="bi bi-info-circle"></i> First month's interest was collected upfront at
                                     disbursement.
                                     Daily accrual begins from <span id="firstAccrualStartDate">-</span>.
                                 </div>
                                 <!-- Payment entry -->
-                                <div class="section-label"><i class="bi bi-cash-coin"></i> Payment Entry</div>
+                                <div class="section-label"><i class="bi bi-cash-coin"></i> <span data-i18n="paymentEntry">Payment Entry</span></div>
                                 <div class="row g-3 mb-1 align-items-end">
                                     <!-- CHANGE: Payment Date hidden — date is always today (server-authoritative).
                                          The input is still rendered (hidden) so onPaymentDateChanged / payDate
@@ -849,7 +849,7 @@
 
                                 <!-- Column 3: Photo preview + Capture button -->
                                 <div class="col-md-4" style="border-left:1px solid #eef0f3;padding-left:16px;">
-                                    <div class="info-label mb-1"><i class="bi bi-camera"></i> Customer Photo <span
+                                    <div class="info-label mb-1" data-i18n="customerPhotoRequired"><i class="bi bi-camera"></i> Customer Photo <span
                                             style="color:#c0392b;font-size:0.7rem;">(required)</span></div>
                                     <div id="closurePhotoPreview"
                                         style="border:1.5px dashed #d7dce3;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:26px;overflow:hidden;margin-bottom:6px;">
@@ -857,18 +857,18 @@
                                     </div>
                                     <button type="button" class="btn btn-outline-success btn-sm w-100"
                                         id="btnCaptureClosurePhoto">
-                                        <i class="bi bi-camera"></i> Capture Photo
+                                        <i class="bi bi-camera"></i> <span data-i18n="capturePhoto">Capture Photo</span>
                                     </button>
                                     <div class="validation-msg" id="closureCameraErrorMsg"
                                         style="font-size: 0.8rem; margin-top: 6px;"></div>
                                     <input type="file" id="closurePhotoFile" accept=".jpg,.jpeg,.png" hidden>
                                     <button type="button" class="btn btn-outline-primary btn-sm w-100 mt-1 d-none"
                                         id="btnUploadClosurePhoto">
-                                        <i class="bi bi-upload"></i> Upload Photo
+                                        <i class="bi bi-upload"></i> <span data-i18n="uploadPhoto">Upload Photo</span>
                                     </button>
 
                                     <div class="validation-msg" id="closurePhotoMsg"
-                                        style="font-size: 0.9rem; margin-top: 8px; text-align: center;">A customer photo
+                                        style="font-size: 0.9rem; margin-top: 8px; text-align: center;" data-i18n="customerPhotoRequiredMsg">A customer photo
                                         is required to close the loan.</div>
                                 </div>
 
@@ -921,7 +921,7 @@
                         <div class="validation-msg" id="closurePhotoMsg">A customer photo is required to close the loan.</div> -->
 
 
-                        <div class="validation-msg" id="closeValidationMsg" style="font-size: 0.95rem">The Grand Total
+                        <div class="validation-msg" id="closeValidationMsg" style="font-size: 0.95rem" data-i18n="grandTotalZeroMessage">The Grand Total
                             must be ₹0.00 to close this loan. Please collect pending payments first.</div>
 
                         <!-- Receipt (shown after a successful closure) -->
@@ -938,9 +938,9 @@
                     <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal"
                         id="btnClosureCancel">Cancel</button>
                     <button type="button" class="btn-jlms btn-jlms-ghost" id="btnPrintClosureReceipt" disabled><i
-                            class="bi bi-printer"></i> Print Receipt</button>
+                            class="bi bi-printer"></i> <span data-i18n="printReceipt">Print Receipt</span></button>
                     <button type="button" class="btn-jlms btn-jlms-primary" id="btnCloseLoan" disabled><i
-                            class="bi bi-lock-fill"></i> Close Loan</button>
+                            class="bi bi-lock-fill"></i> <span data-i18n="closeLoan">Close Loan</span></button>
                 </div>
             </div>
         </div>
@@ -2580,6 +2580,11 @@
 
             runSearch(1);
         });
+
+        // Expose modal functions to global scope for onclick handlers
+        window.openPaymentModal = openPaymentModal;
+        window.openClosureModal = openClosureModal;
+        window.openLedgerModal = openLedgerModal;
     </script>
 </body>
 
