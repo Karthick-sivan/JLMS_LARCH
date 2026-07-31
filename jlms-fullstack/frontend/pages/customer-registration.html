@@ -235,7 +235,7 @@
                       <label class="field-label" data-i18n="city">City<span class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="custCity">
                     </div>
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                       <label class="field-label" data-i18n="state">State<span class="opt">optional</span></label>
                       <select class="form-select-jlms" id="custState">
                         <option value="">Select state</option>
@@ -245,7 +245,7 @@
                         <option>Andhra Pradesh</option>
                         <option>Telangana</option>
                       </select>
-                    </div>
+                    </div> -->
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="pincode">Pincode<span class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="custPincode">
@@ -501,7 +501,7 @@
         // ---- Address ----
         document.getElementById('custAddress').value = c.address || '';
         document.getElementById('custCity').value = c.city || '';
-        document.getElementById('custState').value = c.state || '';
+        // document.getElementById('custState').value = c.state || '';
         document.getElementById('custPincode').value = c.pincode || '';
 
         // ---- KYC (read-only in edit mode — already locked above) ----
@@ -879,7 +879,7 @@
         return true;
       }
 
-      function goToStep(step) {
+      function goToStep(step, scroll = true) {
         const custPanel = document.getElementById('stepCustomerPanel');
         const nomineePanel = document.getElementById('stepNomineePanel');
         const pill1 = document.getElementById('stepPill1');
@@ -896,7 +896,9 @@
           pill1.classList.remove('active'); pill1.classList.add('done');
           pill2.classList.add('active');
         }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (scroll) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }
 
       document.getElementById('btnNext').addEventListener('click', () => {
@@ -911,7 +913,7 @@
       document.getElementById('btnClear').addEventListener('click', () => {
         document.querySelectorAll('#custName, #custGuardianName, #custMobile, #custAltMobile, #custDob, #custAddress, #custCity, #custPincode, #custAadhaar, #custPan, #nomineeName, #nomineeMobile, #nomineeAddress, #nomineeCity, #nomineeAadhaar')
           .forEach(el => el.value = '');
-        document.getElementById('custState').value = '';
+        // document.getElementById('custState').value = '';
         capturedPhoto = null;
 
         document.getElementById("customerPhoto").value = "";
@@ -960,7 +962,7 @@
 
         // Nominee details are optional, so we only re-check the customer step's required fields.
         if (!validateCustomerStep()) {
-          goToStep(1);
+          goToStep(1, false);
           return;
         }
 
@@ -977,7 +979,7 @@
         formData.append("AlternateMobile", document.getElementById("custAltMobile").value);
         formData.append("Address", document.getElementById("custAddress").value);
         formData.append("City", document.getElementById("custCity").value);
-        formData.append("State", document.getElementById("custState").value);
+        // formData.append("State", document.getElementById("custState").value);
         formData.append("Pincode", document.getElementById("custPincode").value);
         formData.append("AadhaarNumber", document.getElementById("custAadhaar").value);
         formData.append("PanNumber", document.getElementById("custPan").value.toUpperCase());
@@ -1038,7 +1040,7 @@
               alternateMobile: document.getElementById('custAltMobile').value.trim(),
               address: document.getElementById('custAddress').value.trim(),
               city: document.getElementById('custCity').value.trim(),
-              state: document.getElementById('custState').value,
+              // state: document.getElementById('custState').value,
               pincode: document.getElementById('custPincode').value.trim(),
               // Aadhaar & PAN are read-only; send existing values so the PUT doesn't blank them
               aadhaarNumber: document.getElementById('custAadhaar').value.trim(),

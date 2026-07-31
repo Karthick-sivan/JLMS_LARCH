@@ -30,9 +30,9 @@
               <div class="row g-3 align-items-end">
                 <div class="col-md-9">
                   <label class="field-label" data-i18n="loanNumber">Loan Number<span class="req">*</span></label>
-                  <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input id="loanNumberInput" placeholder="e.g. JL-20260001"></div>
+                  <div class="input-affix"><span class="affix"><i class="bi bi-search"></i></span><input id="loanNumberInput" data-i18n-placeholder="loanNumberPlaceholder"></div>
                 </div>
-                <div class="col-md-3"><button class="btn-jlms btn-jlms-outline" id="btnFind" style="width:100%; justify-content:center;">Find</button></div>
+                <div class="col-md-3"><button class="btn-jlms btn-jlms-outline" id="btnFind" style="width:100%; justify-content:center;"><span data-i18n="search">Find</span></button></div>
               </div>
             </div>
           </div>
@@ -41,9 +41,9 @@
             <div class="panel-head"><div class="h4" data-i18n="loanDetails">Loan Details</div></div>
             <div class="panel-body">
               <div class="row g-3">
-                <div class="col-md-4"><div class="text-caption">Customer</div><div class="cell-strong" id="detCustomer"></div></div>
-                <div class="col-md-4"><div class="text-caption">Loan Date</div><div class="cell-strong" id="detLoanDate"></div></div>
-                <div class="col-md-4"><div class="text-caption">Pledged Jewels</div><div class="cell-strong" id="detJewels"></div></div>
+                <div class="col-md-4"><div class="text-caption" data-i18n="customer">Customer</div><div class="cell-strong" id="detCustomer"></div></div>
+                <div class="col-md-4"><div class="text-caption" data-i18n="loanDate">Loan Date</div><div class="cell-strong" id="detLoanDate"></div></div>
+                <div class="col-md-4"><div class="text-caption" data-i18n="jewelItems">Jewel Items</div><div class="cell-strong" id="detJewels"></div></div>
               </div>
             </div>
           </div>
@@ -62,19 +62,19 @@
                 </div>
               </div>
               <div class="summary-panel">
-                <div class="summary-row"><span class="label">Outstanding Principal</span><span class="value" id="sumPrincipal">₹0</span></div>
-                <div class="summary-row"><span class="label">Outstanding Interest</span><span class="value" id="sumInterest">₹0</span></div>
-                <div class="summary-row"><span class="label">Penalty</span><span class="value danger" id="sumPenalty">₹0</span></div>
-                <div class="summary-row total"><span class="label">Total Closure Amount</span><span class="value" id="sumTotal">₹0</span></div>
+                <div class="summary-row"><span class="label" data-i18n="outstandingPrincipal">Outstanding Principal</span><span class="value" id="sumPrincipal">₹0</span></div>
+                <div class="summary-row"><span class="label" data-i18n="outstandingInterest">Outstanding Interest</span><span class="value" id="sumInterest">₹0</span></div>
+                <div class="summary-row"><span class="label" data-i18n="penalty">Penalty</span><span class="value danger" id="sumPenalty">₹0</span></div>
+                <div class="summary-row total"><span class="label" data-i18n="totalClosureAmount">Total Closure Amount</span><span class="value" id="sumTotal">₹0</span></div>
               </div>
               <div id="partialPaymentWarning" style="display:none; margin-top:12px; padding:10px 14px;
                   background:var(--bg-warning); border:1px solid var(--border-warning);
-                  border-radius:var(--radius); font-size:1rem; color:rgb(150, 3, 3);">
+                  border-radius:var(--radius); font-size:1rem; color:rgb(150, 3, 3);" data-i18n="outstandingBalanceWarning">
                 <i class="bi bi-exclamation-triangle-fill"></i>
                 Outstanding balance remains. Complete the full payment before closing this loan.
               </div>
               <div class="d-flex justify-content-end gap-2 mt-3">
-                <button class="btn-jlms btn-jlms-primary btn-lg" id="btnClose"><i class="bi bi-x-circle"></i> Close Loan</button>
+                <button class="btn-jlms btn-jlms-primary btn-lg" id="btnClose"><i class="bi bi-x-circle"></i> <span data-i18n="closeLoan">Close Loan</span></button>
               </div>
             </div>
           </div>
@@ -92,12 +92,12 @@
     </div>
     <div class="modal-jlms-body">
       <div class="success-icon-circle"><i class="bi bi-check-lg"></i></div>
-      <div class="h3">Loan Closed Successfully</div>
+      <div class="h3" data-i18n="loanClosedSuccessfully">Loan Closed Successfully</div>
       <div class="text-muted-jlms" style="margin-top:6px;" id="closureModalText"></div>
       <div style="background:var(--n-100); border-radius:var(--radius-md); padding:12px; margin-top:16px; text-align:left;" id="closureModalDetails"></div>
     </div>
     <div class="modal-jlms-foot">
-      <a href="jewel-release.html" class="btn-jlms btn-jlms-primary" id="proceedToReleaseLink"><i class="bi bi-unlock"></i> Proceed to Jewel Release</a>
+      <a href="jewel-release.html" class="btn-jlms btn-jlms-primary" id="proceedToReleaseLink"><i class="bi bi-unlock"></i> <span data-i18n="proceedToJewelRelease">Proceed to Jewel Release</span></a>
     </div>
   </div>
 </div>
