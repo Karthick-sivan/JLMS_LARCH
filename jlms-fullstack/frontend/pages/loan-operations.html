@@ -431,7 +431,8 @@
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="field-label" data-i18n="loanNo">Loan No</label>
-                                <input type="text" class="form-control-jlms" id="fLoanNo" data-i18n-placeholder="loanNumberPlaceholder">
+                                <input type="text" class="form-control-jlms" id="fLoanNo"
+                                    data-i18n-placeholder="loanNumberPlaceholder">
                             </div>
                             <div class="col-md-3">
                                 <label class="field-label" data-i18n="customerName">Customer Name</label>
@@ -483,15 +484,16 @@
                         <table class="table-jlms">
                             <thead>
                                 <tr>
-                                    <th class="text-center"  data-i18n="actions">Actions</th>
-                                    <th style="width: 150px; min-width: 150px;"  data-i18n="loanNo">Loan No</th>
+                                    <th class="text-center" data-i18n="actions">Actions</th>
+                                    <th style="width: 150px; min-width: 150px;" data-i18n="loanNo">Loan No</th>
                                     <th style="width: 100px; min-width: 100px;" data-i18n="loanDate">Loan Date</th>
                                     <th data-i18n="customerName">Customer Name</th>
                                     <th data-i18n="loanScheme">Loan Scheme</th>
                                     <th class="text-end" data-i18n="principalAmount">Principal Amount</th>
                                     <th class="text-end d-none" data-i18n="overallInterest">Overall Interest</th>
                                     <th class="text-end" data-i18n="outstandingPrincipal">Outstanding Principal</th>
-                                    <th class="text-end d-none" data-i18n="outstandingInterest">Outstanding Interest</th>
+                                    <th class="text-end d-none" data-i18n="outstandingInterest">Outstanding Interest
+                                    </th>
                                     <th class="text-end" data-i18n="totalOutstanding">Total Outstanding</th>
                                     <th class="text-end" data-i18n="totalAmountPaid">Total Amount Paid</th>
                                     <th style="display: none;" data-i18n="loanStatus">Loan Status</th>
@@ -532,11 +534,14 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" data-i18n="collectPayment">Collect Payment — <span id="payLoanNoLabel">-</span></h5>
+                    <!-- <h5 class="modal-title" data-i18n="collectPayment">Collect Payment — <span id="payLoanNoLabel">-</span></h5> -->
+                    <h5 class="modal-title"><span data-i18n="collectPayment">Collect Payment</span> — <span
+                            id="payLoanNoLabel">-</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="paymentModalBody">
-                    <div class="text-center text-muted-jlms" style="padding:30px;" id="paymentLoadingState" data-i18n="loadingLoanDetails">Loading loan
+                    <div class="text-center text-muted-jlms" style="padding:30px;" id="paymentLoadingState"
+                        data-i18n="loadingLoanDetails">Loading loan
                         details...</div>
 
                     <div id="paymentContent" style="display:none;">
@@ -546,7 +551,8 @@
                             <div class="col-lg-5 border-end d-flex flex-column">
 
                                 <div class="info-card mb-3">
-                                    <div class="info-card-title" data-i18n="customerLoanDetails">Customer &amp; Loan Details</div>
+                                    <div class="info-card-title" data-i18n="customerLoanDetails">Customer &amp; Loan
+                                        Details</div>
                                     <div class="info-grid">
                                         <div class="info-row">
                                             <div class="info-label" data-i18n="customerName">Customer Name</div>
@@ -589,11 +595,13 @@
                                             <div class="info-value" id="payOverallInterest">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label" data-i18n="outstandingPrincipal">Outstanding Principal</div>
+                                            <div class="info-label" data-i18n="outstandingPrincipal">Outstanding
+                                                Principal</div>
                                             <div class="info-value" id="payOutPrincipal">-</div>
                                         </div>
                                         <div class="info-row">
-                                            <div class="info-label" data-i18n="outstandingInterest">Outstanding Interest</div>
+                                            <div class="info-label" data-i18n="outstandingInterest">Outstanding Interest
+                                            </div>
                                             <div class="info-value" id="payOutInterest">-</div>
                                         </div>
                                         <div class="info-row">
@@ -621,7 +629,8 @@
 
                             <div class="col-lg-7">
                                 <!-- Interest calculation -->
-                                <div class="section-label mt-0"><i class="bi bi-calculator"></i> <span data-i18n="interestCalculation">Interest Calculation</span>
+                                <div class="section-label mt-0"><i class="bi bi-calculator"></i> <span
+                                        data-i18n="interestCalculation">Interest Calculation</span>
                                 </div>
                                 <table class="calc-table mb-3">
                                     <tbody>
@@ -641,7 +650,8 @@
                                              / "Info Only — Not Charged" — this block now IS the charged calculation,
                                              badge removed (was already hidden via d-none but text was still wrong) -->
                                         <tr>
-                                            <td colspan="2" class="calc-section-divider" data-i18n="dailyInterestCalculation">Daily Interest Calculation</td>
+                                            <td colspan="2" class="calc-section-divider"
+                                                data-i18n="dailyInterestCalculation">Daily Interest Calculation</td>
                                         </tr>
                                         <!-- CHANGE (daily-interest fix): removed class="calc-info" (was muted/
                                              italic styling implying "just reference, ignore this") — these rows
@@ -655,7 +665,8 @@
                                             <td id="calcLastRefDate">-</td>
                                         </tr> -->
                                         <tr>
-                                            <td id="calcRefDateLabel" data-i18n="referenceDate">Reference Date (Last Payment)</td>
+                                            <td id="calcRefDateLabel" data-i18n="referenceDate">Reference Date (Last
+                                                Payment)</td>
                                             <td id="calcLastRefDate">-</td>
                                         </tr>
                                         <tr>
@@ -681,13 +692,15 @@
                                     </tbody>
                                 </table>
                                 <!-- ★ NEW: prepaid first-month note (hidden after first payment) -->
-                                <div class="field-hint" id="firstMonthPrepaidNote" style="display:none;" data-i18n="firstMonthPrepaidNote">
-                                    <i class="bi bi-info-circle"></i> First month's interest was collected upfront at
-                                    disbursement.
-                                    Daily accrual begins from <span id="firstAccrualStartDate">-</span>.
+                                <div class="field-hint" id="firstMonthPrepaidNote" style="display:none;">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span data-i18n="firstMonthPrepaidText">First month's interest was collected upfront
+                                        at disbursement. Daily accrual begins from</span>
+                                    <span id="firstAccrualStartDate">-</span>.
                                 </div>
                                 <!-- Payment entry -->
-                                <div class="section-label"><i class="bi bi-cash-coin"></i> <span data-i18n="paymentEntry">Payment Entry</span></div>
+                                <div class="section-label"><i class="bi bi-cash-coin"></i> <span
+                                        data-i18n="paymentEntry">Payment Entry</span></div>
                                 <div class="row g-3 mb-1 align-items-end">
                                     <!-- CHANGE: Payment Date hidden — date is always today (server-authoritative).
                                          The input is still rendered (hidden) so onPaymentDateChanged / payDate
@@ -717,14 +730,16 @@
                                          teller instead of an implicit split of one number. -->
                                     <!-- Column 2: Interest Amount -->
                                     <div class="col-md-4">
-                                        <label class="field-label" data-i18n="interestAmount">Interest Amount (₹)</label>
+                                        <label class="field-label" data-i18n="interestAmount">Interest Amount
+                                            (₹)</label>
                                         <input type="number" class="form-control-jlms" id="payInterestAmount"
                                             placeholder="0.00" min="0" step="0.01">
                                     </div>
 
                                     <!-- Column 3: Outstanding Interest Reference -->
                                     <div class="col-md-4">
-                                        <label class="field-label text-muted-jlms">Outstanding Interest</label>
+                                        <label class="field-label text-muted-jlms"
+                                            data-i18n="outstandingInterestRef">Outstanding Interest</label>
                                         <div class="form-control-jlms bg-light fw-semibold text-secondary d-flex align-items-center"
                                             id="payOutInterestDisplay" style="height: 31px; opacity: 0.85;">₹0.00</div>
                                     </div>
@@ -735,14 +750,16 @@
 
                                     <!-- Column 2: Principal Amount -->
                                     <div class="col-md-4">
-                                        <label class="field-label" data-i18n="principalAmount">Principal Amount (₹)</label>
+                                        <label class="field-label" data-i18n="principalAmount">Principal Amount
+                                            (₹)</label>
                                         <input type="number" class="form-control-jlms" id="payPrincipalAmount"
                                             placeholder="0.00" min="0" step="0.01" disabled>
                                     </div>
 
                                     <!-- Column 3: Outstanding Principal Reference -->
                                     <div class="col-md-4">
-                                        <label class="field-label text-muted-jlms" data-i18n="outstandingPrincipal">Outstanding Principal</label>
+                                        <label class="field-label text-muted-jlms"
+                                            data-i18n="outstandingPrincipal">Outstanding Principal</label>
                                         <div class="form-control-jlms bg-light fw-semibold text-secondary d-flex align-items-center"
                                             id="payOutPrincipalDisplay" style="height: 31px; opacity: 0.85;">₹0.00</div>
                                     </div>
@@ -756,7 +773,8 @@
                                 </div>
 
                                 <!-- Allocation preview -->
-                                <div class="section-label"><i class="bi bi-diagram-3"></i> Allocation Preview</div>
+                                <div class="section-label"><i class="bi bi-diagram-3"></i> <span
+                                        data-i18n="allocationPreview"></span>Allocation Preview</div>
                                 <div class="allocation-preview mb-2">
                                     <div class="alloc-box alloc-highlight">
                                         <div class="alloc-label" data-i18n="interestPaid">Interest Paid</div>
@@ -771,11 +789,13 @@
                                         <div class="alloc-value" id="allocRemainingInterest">₹0.00</div>
                                     </div>
                                     <div class="alloc-box">
-                                        <div class="alloc-label" data-i18n="remainingPrincipal">Remaining Principal</div>
+                                        <div class="alloc-label" data-i18n="remainingPrincipal">Remaining Principal
+                                        </div>
                                         <div class="alloc-value" id="allocRemainingPrincipal">₹0.00</div>
                                     </div>
                                     <div class="alloc-box alloc-highlight-green" style="grid-column: span 2;">
-                                        <div class="alloc-label" data-i18n="balanceAfterPayment">Balance After Payment</div>
+                                        <div class="alloc-label" data-i18n="balanceAfterPayment">Balance After Payment
+                                        </div>
                                         <div class="alloc-value" id="allocBalanceAfter">₹0.00</div>
                                     </div>
                                 </div>
@@ -787,7 +807,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal"
-                        id="btnPaymentCancel">Cancel</button>
+                        id="btnPaymentCancel"><span data-i18n="cancelBtn"></span>Cancel</button>
                     <button type="button" class="btn-jlms btn-jlms-ghost" id="btnPrintPaymentReceipt" disabled><i
                             class="bi bi-printer"></i> Print Receipt</button>
                     <button type="button" class="btn-jlms btn-jlms-primary" id="btnSavePayment" disabled><i
@@ -849,7 +869,8 @@
 
                                 <!-- Column 3: Photo preview + Capture button -->
                                 <div class="col-md-4" style="border-left:1px solid #eef0f3;padding-left:16px;">
-                                    <div class="info-label mb-1" data-i18n="customerPhotoRequired"><i class="bi bi-camera"></i> Customer Photo <span
+                                    <div class="info-label mb-1" data-i18n="customerPhotoRequired"><i
+                                            class="bi bi-camera"></i> Customer Photo <span
                                             style="color:#c0392b;font-size:0.7rem;">(required)</span></div>
                                     <div id="closurePhotoPreview"
                                         style="border:1.5px dashed #d7dce3;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:26px;overflow:hidden;margin-bottom:6px;">
@@ -868,7 +889,8 @@
                                     </button>
 
                                     <div class="validation-msg" id="closurePhotoMsg"
-                                        style="font-size: 0.9rem; margin-top: 8px; text-align: center;" data-i18n="customerPhotoRequiredMsg">A customer photo
+                                        style="font-size: 0.9rem; margin-top: 8px; text-align: center;"
+                                        data-i18n="customerPhotoRequiredMsg">A customer photo
                                         is required to close the loan.</div>
                                 </div>
 
@@ -921,7 +943,8 @@
                         <div class="validation-msg" id="closurePhotoMsg">A customer photo is required to close the loan.</div> -->
 
 
-                        <div class="validation-msg" id="closeValidationMsg" style="font-size: 0.95rem" data-i18n="grandTotalZeroMessage">The Grand Total
+                        <div class="validation-msg" id="closeValidationMsg" style="font-size: 0.95rem"
+                            data-i18n="grandTotalZeroMessage">The Grand Total
                             must be ₹0.00 to close this loan. Please collect pending payments first.</div>
 
                         <!-- Receipt (shown after a successful closure) -->
@@ -1053,11 +1076,13 @@
 
                         <div class="ledger-footer-stats">
                             <div class="alloc-box alloc-highlight">
-                                <div class="alloc-label" data-i18n="totalInterestCollected">Total Interest Collected</div>
+                                <div class="alloc-label" data-i18n="totalInterestCollected">Total Interest Collected
+                                </div>
                                 <div class="alloc-value" id="ledgerTotalInterest">₹0.00</div>
                             </div>
                             <div class="alloc-box alloc-highlight">
-                                <div class="alloc-label" data-i18n="totalPrincipalCollected">Total Principal Collected</div>
+                                <div class="alloc-label" data-i18n="totalPrincipalCollected">Total Principal Collected
+                                </div>
                                 <div class="alloc-value" id="ledgerTotalPrincipal">₹0.00</div>
                             </div>
                             <div class="alloc-box">
@@ -1112,10 +1137,12 @@
                 </div>
                 <div class="modal-body">
                     <p class="mb-0" data-i18n="loanNumber">Loan Number</p>
-                    <p class="text-danger mb-0" style="font-size:0.85rem;" data-i18n="actionCannotBeUndone">This action cannot be undone.</p>
+                    <p class="text-danger mb-0" style="font-size:0.85rem;" data-i18n="actionCannotBeUndone">This action
+                        cannot be undone.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                    <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal"
+                        data-i18n="cancel">Cancel</button>
                     <button type="button" class="btn-jlms btn-jlms-primary" id="btnConfirmClosureProceed">
                         <i class="bi bi-lock-fill"></i> <span data-i18n="confirmClose">Confirm Close</span>
                     </button>
@@ -1417,9 +1444,12 @@
             document.getElementById('payTotalOutstanding').textContent = inr(calc.maxPayable);
 
             const refLabel = document.getElementById('calcRefDateLabel');
+            // refLabel.textContent = calc.hasPriorPayment
+            //     ? 'Reference Date (Last Payment)'
+            //     : 'Reference Date (Accrual Start)';
             refLabel.textContent = calc.hasPriorPayment
-                ? 'Reference Date (Last Payment)'
-                : 'Reference Date (Accrual Start)';
+                ? (lang.referenceDate || 'Reference Date (Last Payment)')
+                : (lang.referenceDateAccrual || 'Reference Date (Accrual Start)');
             // ---- CHANGE (daily-interest fix): this is now the authoritative charged
             // calculation, not an info-only reference — it's what Outstanding
             // Interest / Max Payable above are built from. ----
@@ -1517,12 +1547,13 @@
             principalField.disabled = !unlocked;
             if (!unlocked) {
                 principalField.value = '';
-                hint.textContent = `Clear the full outstanding interest (${inr(outstandingInterest)}) to unlock principal payment.`;
+                hint.textContent = (lang.clearInterestToUnlock || 'Clear the full outstanding interest ({0}) to unlock principal payment.')
+                    .replace('{0}', inr(outstandingInterest));
                 hint.classList.add('field-hint-locked');
             } else {
                 hint.textContent = outstandingInterest <= 0
-                    ? 'No interest outstanding — principal payment is open.'
-                    : 'Outstanding interest fully covered — principal payment unlocked.';
+                    ? (lang.noInterestPrincipalOpen || 'No interest outstanding — principal payment is open.')
+                    : (lang.interestClearedUnlocked || 'Outstanding interest fully covered — principal payment unlocked.');
                 hint.classList.remove('field-hint-locked');
             }
         }
