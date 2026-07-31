@@ -2580,6 +2580,11 @@
 
             runSearch(1);
         });
+
+        // Expose modal functions to global scope for onclick handlers
+        window.openPaymentModal = openPaymentModal;
+        window.openClosureModal = openClosureModal;
+        window.openLedgerModal = openLedgerModal;
     </script>
 </body>
 
