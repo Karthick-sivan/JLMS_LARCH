@@ -822,7 +822,9 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" data-i18n="closeLoan">Close Loan — <span id="closeLoanNoLabel">-</span></h5>
+                    <!-- <h5 class="modal-title" data-i18n="closeLoan">Close Loan — <span id="closeLoanNoLabel">-</span></h5> -->
+                    <h5 class="modal-title"><span data-i18n="closeLoan">Close Loan</span> — <span
+                            id="closeLoanNoLabel">-</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="closureModalBody">
@@ -869,9 +871,10 @@
 
                                 <!-- Column 3: Photo preview + Capture button -->
                                 <div class="col-md-4" style="border-left:1px solid #eef0f3;padding-left:16px;">
-                                    <div class="info-label mb-1" data-i18n="customerPhotoRequired"><i
-                                            class="bi bi-camera"></i> Customer Photo <span
-                                            style="color:#c0392b;font-size:0.7rem;">(required)</span></div>
+                                    <div class="info-label mb-1"><i class="bi bi-camera"></i> <span
+                                            data-i18n="customerPhotoRequired">Customer Photo</span> <span
+                                            style="color:#c0392b;font-size:0.7rem;"
+                                            data-i18n="customerPhotoRequiredTag">(required)</span></div>
                                     <div id="closurePhotoPreview"
                                         style="border:1.5px dashed #d7dce3;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#9aa3b2;font-size:26px;overflow:hidden;margin-bottom:6px;">
                                         <i class="bi bi-person-circle"></i>
@@ -959,7 +962,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-jlms btn-jlms-outline" data-bs-dismiss="modal"
-                        id="btnClosureCancel">Cancel</button>
+                        id="btnClosureCancel"><span data-i18n="cancel">Cancel</span></button>
                     <button type="button" class="btn-jlms btn-jlms-ghost" id="btnPrintClosureReceipt" disabled><i
                             class="bi bi-printer"></i> <span data-i18n="printReceipt">Print Receipt</span></button>
                     <button type="button" class="btn-jlms btn-jlms-primary" id="btnCloseLoan" disabled><i
@@ -974,7 +977,9 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Loan Ledger — <span id="ledgerLoanNoLabel">-</span></h5>
+                    <!-- <h5 class="modal-title">Loan Ledger — <span id="ledgerLoanNoLabel">-</span></h5> -->
+                    <h5 class="modal-title"><span data-i18n="loanLedger">Loan Ledger</span> — <span
+                            id="ledgerLoanNoLabel">-</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="ledgerModalBody">
@@ -1061,7 +1066,7 @@
                         </div>
                         <div class="pagination-bar">
                             <div class="page-size-select">
-                                <span>Rows per page</span>
+                                <span data-i18n="rowsPerPage">Rows per page</span>
                                 <select id="ledgerPageSizeSelect">
                                     <option value="5" selected>5</option>
                                     <option value="10">10</option>
@@ -1100,7 +1105,9 @@
                     <button type="button" class="btn-jlms btn-jlms-outline" id="btnExportLedgerPdf" disabled>
                         <i class="bi bi-file-earmark-pdf"></i> Export PDF
                     </button>
-                    <button type="button" class="btn-jlms btn-jlms-primary" data-bs-dismiss="modal">Close</button>
+                    <!-- <button type="button" class="btn-jlms btn-jlms-primary" data-bs-dismiss="modal">Close</button> -->
+                    <button type="button" class="btn-jlms btn-jlms-primary" data-bs-dismiss="modal"
+                        data-i18n="close">Close</button>
                 </div>
             </div>
         </div>
@@ -1132,11 +1139,14 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Loan Closure</h5>
+                    <!-- <h5 class="modal-title">Loan Closure</h5> -->
+                    <h5 class="modal-title" data-i18n="loanClosure">Loan Closure</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-0" data-i18n="loanNumber">Loan Number</p>
+                    <!-- <p class="mb-0" data-i18n="loanNumber">Loan Number</p> -->
+                    <p class="mb-0" data-i18n="loanNumberLabel">Loan Number: <span id="confirmClosureLoanNo">-</span>
+                    </p>
                     <p class="text-danger mb-0" style="font-size:0.85rem;" data-i18n="actionCannotBeUndone">This action
                         cannot be undone.</p>
                 </div>
@@ -1207,11 +1217,10 @@
         }
 
         function statusBadge(status) {
-            if (status === 'Active') return '<span class="badge-jlms badge-success"><span class="dot"></span>Active</span>';
-            if (status === 'Overdue') return '<span class="badge-jlms badge-warning"><span class="dot"></span>Overdue</span>';
-            return '<span class="badge-jlms badge-neutral"><span class="dot"></span>Closed</span>';
+            if (status === 'Active') return `<span class="badge-jlms badge-success"><span class="dot"></span>${lang.active || 'Active'}</span>`;
+            if (status === 'Overdue') return `<span class="badge-jlms badge-warning"><span class="dot"></span>${lang.overdue || 'Overdue'}</span>`;
+            return `<span class="badge-jlms badge-neutral"><span class="dot"></span>${lang.closedLoan || 'Closed'}</span>`;
         }
-
         function clearApiError() {
             const el = document.getElementById('apiErrorBanner');
             if (el) { el.style.display = 'none'; el.textContent = ''; }
@@ -1846,7 +1855,8 @@
             document.getElementById('btnCloseLoan').style.display = '';
             document.getElementById('btnPrintClosureReceipt').disabled = true;
             document.getElementById('closureReceiptSection').style.display = 'none';
-            document.getElementById('btnClosureCancel').textContent = 'Cancel';
+            // document.getElementById('btnClosureCancel').textContent = 'Cancel';
+            document.getElementById('btnClosureCancel').textContent = lang.cancel || 'Cancel';
             lastClosureReceipt = null;
             activeClosureLoan = null;
 
@@ -1900,7 +1910,7 @@
 
             try {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    errEl.textContent = 'Camera is not supported in this browser.';
+                    errEl.textContent = lang.cameraNotSupported || 'Camera is not supported in this browser.';
                     errEl.classList.add('show');
                     return;
                 }
@@ -1909,8 +1919,8 @@
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('closureCameraModal')).show();
             } catch (err) {
                 errEl.textContent = err && err.name === 'NotAllowedError'
-                    ? 'Camera access was denied. Please allow camera permission and try again.'
-                    : 'Unable to access camera.';
+                    ? (lang.cameraAccessDenied || 'Camera access was denied. Please allow camera permission and try again.')
+                    : (lang.cameraUnableAccess || 'Unable to access camera.');
                 errEl.classList.add('show');
             }
         })
@@ -1925,7 +1935,8 @@
             canvas.toBlob(blob => {
                 if (!blob) {
                     const errEl = document.getElementById('closureCameraErrorMsg');
-                    errEl.textContent = 'Unable to capture photo. Please try again.';
+                    // errEl.textContent = 'Unable to capture photo. Please try again.';
+                    errEl.textContent = lang.photoCaptureUnable || 'Unable to capture photo. Please try again.';
                     errEl.classList.add('show');
                     return;
                 }
@@ -1983,7 +1994,9 @@
 
             const btn = document.getElementById('btnCloseLoan');
             btn.disabled = true;
-            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Closing...';
+            // btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Closing...';
+            btn.innerHTML = `<i class="bi bi-hourglass-split"></i> ${lang.closing || 'Closing...'}`;
+
 
             const formData = new FormData();
             formData.append('PaymentMode', 'Cash');
@@ -1996,7 +2009,8 @@
                     showApiSuccess(`Loan ${loanNo} has been closed successfully.`);
 
                     btn.style.display = 'none';
-                    document.getElementById('btnClosureCancel').textContent = 'Done';
+                    // document.getElementById('btnClosureCancel').textContent = 'Done';
+                    document.getElementById('btnClosureCancel').textContent = lang.done || 'Done';
                     document.getElementById('btnPrintClosureReceipt').disabled = false;
 
                     document.getElementById('closureReceiptNoBadge').innerHTML = '<span class="dot"></span>' + response.receiptNumber;
@@ -2028,7 +2042,8 @@
                 })
                 .catch(err => {
                     showApiError(err);
-                    btn.innerHTML = '<i class="bi bi-lock-fill"></i> Close Loan';
+                    // btn.innerHTML = '<i class="bi bi-lock-fill"></i> Close Loan';
+                    btn.innerHTML = `<i class="bi bi-lock-fill"></i> ${lang.closeLoanBtn || 'Close Loan'}`;
                     btn.disabled = false;
                 });
         });
@@ -2164,6 +2179,14 @@
             runSearch(currentPage);
         });
 
+        if (typeof registerLanguageCallback === 'function') {
+            registerLanguageCallback(() => {
+                if (activeClosureLoan) {
+                    document.getElementById('btnClosureCancel').textContent =
+                        document.getElementById('btnPrintClosureReceipt').disabled ? (lang.cancel || 'Cancel') : (lang.done || 'Done');
+                }
+            });
+        }
         /* ============================= Ledger modal ============================= */
 
         let activeLedgerLoanId = null;
@@ -2319,11 +2342,12 @@
                 controls.innerHTML = '';
                 return;
             }
-            info.textContent = `Page ${page} of ${pages}`;
+            info.textContent = (lang.pageOf || 'Page {page} of {pages}')
+                .replace('{page}', page).replace('{pages}', pages);
 
             let html = '';
             html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
-                        <button class="page-link" onclick="loadLedgerPage(${page - 1})">Prev</button></li>`;
+                <button class="page-link" onclick="loadLedgerPage(${page - 1})">${lang.previous || 'Prev'}</button></li>`;
 
             const windowSize = 5;
             let start = Math.max(1, page - Math.floor(windowSize / 2));
@@ -2335,8 +2359,11 @@
                           <button class="page-link" onclick="loadLedgerPage(${p})">${p}</button></li>`;
             }
 
+            // html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
+            //             <button class="page-link" onclick="loadLedgerPage(${page + 1})">Next</button></li>`;
+
             html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
-                        <button class="page-link" onclick="loadLedgerPage(${page + 1})">Next</button></li>`;
+                <button class="page-link" onclick="loadLedgerPage(${page + 1})">${lang.next || 'Next'}</button></li>`;
 
             controls.innerHTML = html;
         }

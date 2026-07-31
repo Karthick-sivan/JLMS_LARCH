@@ -208,10 +208,7 @@ public class LoanOperationsService
         // of ANY type, including old-system InterestCollection/PrincipalCollection).
         //var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
         //var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
-
-        var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
-        var lastReferenceDate = (lastAnyPaymentDate ?? GetFirstAccrualReferenceDate(loan)).Date;
-
+        var (lastReferenceDate, hasPriorPayment) = await GetAccrualStartAsync(loan);
         var (noOfDays, dailyRate, dailyAmount, accruedInterest) = _calc.CalculateAccruedInterestInfoOnly(
             loan.OutstandingPrincipal, loan.InterestRatePct, lastReferenceDate, asOfDate);
 
@@ -226,7 +223,7 @@ public class LoanOperationsService
         var outstandingInterest = Round2(genuineCarryForward + accruedInterest);
         var interestPaidToDate = Round2(loan.OverallInterest - outstandingInterest);
         var maxPayable = Round2(outstandingInterest + loan.OutstandingPrincipal);
-        var hasPriorPayment = lastAnyPaymentDate.HasValue;
+        //var hasPriorPayment = lastAnyPaymentDate.HasValue;
 
         return new LoanOperationsInterestCalculationDto(
             loan.OverallInterest, interestPaidToDate, outstandingInterest,
@@ -314,8 +311,7 @@ public class LoanOperationsService
             //var maxPayable = Round2(interestDue + loan.OutstandingPrincipal);
             //var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
             //var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
-            var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
-            var lastReferenceDate = (lastAnyPaymentDate ?? GetFirstAccrualReferenceDate(loan)).Date;
+            var (lastReferenceDate, _) = await GetAccrualStartAsync(loan);
             var (noOfDays, dailyRate, dailyAmount, accruedInterest) = _calc.CalculateAccruedInterestInfoOnly(
                 loan.OutstandingPrincipal, loan.InterestRatePct, lastReferenceDate, paymentDate);
 
@@ -749,9 +745,7 @@ public class LoanOperationsService
         //var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
         //var lastReferenceDate = (lastAnyPaymentDate ?? loan.LoanDate ?? IstClock.Today).Date;
 
-        var lastAnyPaymentDate = await GetLastCollectionDateAsync(loan.LoanId);
-        var lastReferenceDate = (lastAnyPaymentDate ?? GetFirstAccrualReferenceDate(loan)).Date;
-
+        var (lastReferenceDate, _) = await GetAccrualStartAsync(loan);
         var (_, _, _, accruedInterest) = _calc.CalculateAccruedInterestInfoOnly(
             loan.OutstandingPrincipal, loan.InterestRatePct, lastReferenceDate, asOfDate);
 
@@ -829,4 +823,48 @@ public class LoanOperationsService
 
     private static DateTime GetFirstAccrualReferenceDate(Loan loan)
     => (loan.LoanDate?.AddMonths(1) ?? IstClock.Today).Date;
+
+
+
+    //private async Task<(DateTime referenceDate, bool hasPriorPayment)> GetAccrualStartAsync(Loan loan)
+    //{
+    //    var lastCollection = await _db.LoanTransactions.AsNoTracking()
+    //        .Where(t => t.LoanId == loan.LoanId && CollectionTransactionTypes.Contains(t.TransactionType))
+    //        .OrderByDescending(t => t.TransactionDate)
+    //        .FirstOrDefaultAsync();
+
+    //    if (lastCollection == null)
+    //        return (GetFirstAccrualReferenceDate(loan), false);
+
+    //    var isLegacyPrepaidFirstMonth =
+    //        lastCollection.TransactionType == "InterestCollection" &&
+    //        loan.LoanDate.HasValue &&
+    //        lastCollection.TransactionDate.Date == loan.LoanDate.Value.Date;
+
+    //    if (isLegacyPrepaidFirstMonth)
+    //        return (GetFirstAccrualReferenceDate(loan), false);
+
+    //    return (lastCollection.TransactionDate.Date, true);
+    //}
+
+    private async Task<(DateTime referenceDate, bool hasPriorPayment)> GetAccrualStartAsync(Loan loan)
+    {
+        var firstAccrualDate = GetFirstAccrualReferenceDate(loan); // LoanDate + 1 month
+
+        var lastInterestPayment = await _db.LoanTransactions.AsNoTracking()
+            .Where(t => t.LoanId == loan.LoanId
+                     && CollectionTransactionTypes.Contains(t.TransactionType)
+                     && t.InterestAmount > 0)
+            .OrderByDescending(t => t.TransactionDate)
+            .FirstOrDefaultAsync();
+
+        // No interest ever paid, OR the last interest payment happened
+        // before the first-month floor — either way, accrual starts at the floor.
+        if (lastInterestPayment == null || lastInterestPayment.TransactionDate.Date <= firstAccrualDate)
+            return (firstAccrualDate, false);
+
+        // A genuine interest payment landed after the first month — accrue
+        // from that date forward as normal.
+        return (lastInterestPayment.TransactionDate.Date, true);
+    }
 }
