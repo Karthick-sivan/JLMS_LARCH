@@ -879,7 +879,7 @@
         return true;
       }
 
-      function goToStep(step, scroll = true) {
+      function goToStep(step) {
         const custPanel = document.getElementById('stepCustomerPanel');
         const nomineePanel = document.getElementById('stepNomineePanel');
         const pill1 = document.getElementById('stepPill1');
@@ -896,9 +896,7 @@
           pill1.classList.remove('active'); pill1.classList.add('done');
           pill2.classList.add('active');
         }
-        if (scroll) {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
       document.getElementById('btnNext').addEventListener('click', () => {
@@ -962,7 +960,7 @@
 
         // Nominee details are optional, so we only re-check the customer step's required fields.
         if (!validateCustomerStep()) {
-          goToStep(1, false);
+          goToStep(1);
           return;
         }
 

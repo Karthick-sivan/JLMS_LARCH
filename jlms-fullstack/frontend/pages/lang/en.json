@@ -45,7 +45,7 @@
   "principalAmount": "Principal Amount",
   "interest": "Interest",
   "interestRate": "Interest Rate",
-  "interestAmount": "Interest Amount (₹)",
+  "interestAmount": "Interest Amount",
   "penalty": "Penalty",
   "totalAmount": "Total Amount",
   "balanceAmount": "Balance Amount",
@@ -385,26 +385,5 @@
   "dontValidateExceed": "Don't validate — allow requested amount to exceed eligible amount",
   "requestedLoanAmount": "Requested Loan Amount",
   "addJewelCalculateFirst": "Add jewel items & calculate valuation first",
-  "firstMonthInterest": "First Month Interest",
-
-  "closeLoan": "Close Loan",
-  "customerPhotoRequired": "Customer Photo (required)",
-  "customerPhotoRequiredMsg": "A customer photo is required to close the loan.",
-  "grandTotalZeroMessage": "The Grand Total must be ₹0.00 to close this loan. Please collect pending payments first.",
-  "loanNumberPlaceholder": "Loan Number",
-  "allSchemes": "All Schemes",
-  "loadingLoanDetails": "Loading loan details...",
-  "collectPayment": "Collect Payment —",
-  "customerLoanDetails": "Customer & Loan Details",
-  "interestCalculation": "Interest Calculation",
-  "dailyInterestCalculation": "Daily Interest Calculation",
-  "paymentEntry": "Payment Entry",
-  "firstMonthPrepaidNote": "First month's interest was collected upfront at disbursement. Daily accrual begins from",
-  "page": "Page",
-  "loans": "loans",
-
-  "totalClosureAmount": "Total Closure Amount",
-  "outstandingBalanceWarning": "Outstanding balance remains. Complete the full payment before closing this loan.",
-  "loanClosedSuccessfully": "Loan Closed Successfully",
-  "proceedToJewelRelease": "Proceed to Jewel Release"
+  "firstMonthInterest": "First Month Interest"
 }
