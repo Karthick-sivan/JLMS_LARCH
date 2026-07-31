@@ -442,7 +442,7 @@
           <div class="col-lg-9">
 
             <fieldset class="section-fieldset" style="background:#fff; padding-top:18px;">
-              <legend>Step 1 — Select Customer</legend>
+              <legend data-i18n="step1SelectCustomer">Step 1 — Select Customer</legend>
               <div class="row g-3">
                 <div class="col-md-8">
                   <label class="field-label" data-i18n="searchCustomer">Search customer by name, mobile, or code<span class="req">*</span></label>
@@ -514,7 +514,7 @@
             </fieldset>
 
             <fieldset class="section-fieldset" style="background:#fff;">
-              <legend>Step 2 — Jewel Items &amp; Appraisal</legend>
+              <legend data-i18n="step2JewelItemsAppraisal">Step 2 — Jewel Items &amp; Appraisal</legend>
               <div class="table-jlms-wrap appraisal-table">
                 <table class="table-jlms">
                   <thead id="jewelItemsThead">
@@ -545,7 +545,7 @@
             </fieldset>
 
             <fieldset class="section-fieldset" style="background:#fff;">
-              <legend>Step 3 — Loan Terms</legend>
+              <legend data-i18n="step3LoanTerms">Step 3 — Loan Terms</legend>
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="field-label" data-i18n="loanScheme">Loan Scheme<span class="req">*</span></label>
@@ -564,7 +564,7 @@
             </fieldset>
 
             <fieldset class="section-fieldset" style="background:#fff;">
-              <legend  data-i18n="Jewel Items Photos">Step 4 — Jewel Items Photo (Web Capture)</legend>
+              <legend data-i18n="step4JewelItemsPhoto">Step 4 — Jewel Items Photo (Web Capture)</legend>
               <div class="text-caption mb-2">Capture a single photo covering all the jewel items listed above using your
                 webcam. This one photo is attached to the loan and uploads right after it is created.</div>
               <div class="row g-3">
@@ -600,24 +600,24 @@
               </div>
               <div class="panel-body">
                 <div class="summary-panel">
-                  <div class="summary-row"  data-i18n="loanScheme"><span class="label">Loan Scheme</span><span class="value"
+                  <div class="summary-row"><span class="label" data-i18n="loanScheme">Loan Scheme</span><span class="value"
                       id="sumScheme">—</span></div>
-                  <div class="summary-row" data-i18n="totalWeight"><span class="label">Total Weight</span><span class="value"
+                  <div class="summary-row"><span class="label" data-i18n="totalWeight">Total Weight</span><span class="value"
                       id="sumTotalWeight">0.000 g</span></div>
-                  <div class="summary-row" data-i18n="goldRate"><span class="label">Gold Rate (per gram)</span><span class="value"
+                  <div class="summary-row"><span class="label" data-i18n="goldRate">Gold Rate (per gram)</span><span class="value"
                       id="sumGoldRate">—</span></div>
-                  <div class="summary-row" data-i18n="totalMarketValue"><span class="label">Total Market Value</span><span class="value"
+                  <div class="summary-row"><span class="label" data-i18n="totalMarketValue">Total Market Value</span><span class="value"
                       id="sumMarketValue">₹0</span></div>
-                  <div class="summary-row" ><span class="label">Scheme Max LTV(Loan Limit %)</span><span class="value"
+                  <div class="summary-row"><span class="label" data-i18n="schemeMaxLtv">Scheme Max LTV(Loan Limit %)</span><span class="value"
                       id="sumLtv">—</span></div>
-                  <div class="summary-row" ><span class="label">Processing Fee Amount</span><span class="value"
+                  <div class="summary-row"><span class="label" data-i18n="processingFeeAmount">Processing Fee Amount</span><span class="value"
                       id="sumProcessingFee">₹0</span></div>
-                  <div class="summary-row total"><span class="label">Eligible Amount</span><span class="value"
+                  <div class="summary-row total"><span class="label" data-i18n="eligibleAmount">Eligible Amount</span><span class="value"
                       id="sumEligible">₹0</span></div>
                 </div>
                 <div class="form-check mt-2">
                   <input class="form-check-input" type="checkbox" id="chkAllowExceed">
-                  <label class="form-check-label" for="chkAllowExceed" style="font-size:11.5px; line-height:1.4;">
+                  <label class="form-check-label" for="chkAllowExceed" style="font-size:11.5px; line-height:1.4;" data-i18n="dontValidateExceed">
                     Don't validate — allow requested amount to exceed eligible amount
                   </label>
                 </div>
@@ -630,7 +630,7 @@
                 <div class="panel-body" style="padding: 14px 16px;">
                   <div class="d-flex justify-content-between align-items-center mb-1">
                     <label class="field-label mb-0"
-                      style="font-weight: 700; color: var(--navy-800); font-size: 11.5px;">Requested Loan Amount <span
+                      style="font-weight: 700; color: var(--navy-800); font-size: 11.5px;" data-i18n="requestedLoanAmount">Requested Loan Amount <span
                         class="req">*</span></label>
                     <span id="requestedAmountPercent" class="badge-percent">0% of Max</span>
                   </div>
@@ -656,13 +656,13 @@
 
                   <!-- Limit Warning/Status -->
                   <div id="limitStatusText" class="limit-status-info mt-2 text-center text-muted-jlms">
-                    <i class="bi bi-info-circle"></i> Add jewel items &amp; calculate valuation first
+                    <i class="bi bi-info-circle"></i> <span data-i18n="addJewelCalculateFirst">Add jewel items &amp; calculate valuation first</span>
                   </div>
                 </div>
               </div>
               <div id="firstMonthInterestWrap" style="display:none; border:1px solid var(--n-200); border-left:4px solid var(--navy-500); border-radius:6px; background:var(--navy-50); padding:10px 14px;">
                 <div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#5b6474; margin-bottom:4px;">
-                  <i class="bi bi-calendar-month" style="margin-right:4px;"></i>First Month Interest
+                  <i class="bi bi-calendar-month" style="margin-right:4px;"></i><span data-i18n="firstMonthInterest">First Month Interest</span>
                 </div>
                 <div style="font-size:20px; font-weight:700; color:var(--navy-900);">
                   ₹<span id="firstMonthInterestValue">0</span>

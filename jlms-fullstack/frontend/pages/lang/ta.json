@@ -268,7 +268,6 @@
   "searchJewelType": "நகை வகை தேடு",
   "defaultPurity": "இயல்புநிலை தூய்மை",
   "maxLtvPercent": "திட்ட அதிகபட்ச LTV",
-  "processingFeeAmount": "செயலாக்கக் கட்டண தொகை",
   "standardWastage": "நிலையான வீண்பொருள் %",
   "jewelTypes": "நகை வகைகள்",
   "allFinancialYears": "அனைத்து நிதி ஆண்டுகள்",
@@ -384,7 +383,6 @@
   "interestCollected": "வட்டி தொகை வசூல்",
   "totalCollected": "மொத்த வசூல்",
   "loadingCollectionReport": "வசூல் அறிக்கை ஏற்றப்படுகிறது…",
-  "firstMonthInterest": "முதல் மாத வட்டி",
   "totalClosedLoans": "மொத்த முடிக்கப்பட்ட அடகுகள்",
   "totalPrincipalDisbursed": "மொத்த முதல் தொகை வழங்கப்பட்டது",
   "totalPrincipalCollected": "மொத்த முதல் தொகை வசூல்",
@@ -396,5 +394,18 @@
   "failedToLoadReport": "அறிக்கையை ஏற்ற முடியவில்லை. API இயங்குகிறதா என சரிபார்க்கவும்.",
   "noLoansFoundFilters": "தேர்ந்தெடுத்த வடிகட்டிகளுக்கு அடகுகள் எதுவும் கிடைக்கவில்லை.",
   "showingXofY": "{from}–{to} / {total}",
-  "xRecords": "{count} பதிவுகள்"
+  "xRecords": "{count} பதிவுகள்",
+
+  "step1SelectCustomer": "படி 1 — வாடிக்கையாளரைத் தேர்ந்தெடு",
+  "step2JewelItemsAppraisal": "படி 2 — நகை பொருட்கள் மற்றும் மதிப்பீடு",
+  "step3LoanTerms": "படி 3 — அடகு விதிமுறைகள்",
+  "step4JewelItemsPhoto": "படி 4 — நகை பொருட்களின் புகைப்படம் (வெப் கேமரா)",
+  "totalWeight": "மொத்த எடை",
+  "goldRate": "தங்க விகிதம் (ஒரு கிராம்)",
+  "totalMarketValue": "மொத்த சந்தை மதிப்பு",
+  "schemeMaxLtv": "திட்ட அதிகபட்ச LTV(அடகு வரம்பு %)",
+  "eligibleAmount": "தகுதி பெற்ற தொகை",
+  "dontValidateExceed": "சரிபார்க்க வேண்டாம் — தகுதி தொகையை விட அதிகமாக கோரப்பட்ட தொகையை அனுமதி",
+  "requestedLoanAmount": "கோரப்பட்ட அடகு தொகை",
+  "addJewelCalculateFirst": "முதலில் நகை பொருட்களைச் சேர்த்து மதிப்பீடு கணக்கிடுங்கள்"
 }
