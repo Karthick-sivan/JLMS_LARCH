@@ -404,6 +404,7 @@
   "goldRate": "தங்க விகிதம் (ஒரு கிராம்)",
   "totalMarketValue": "மொத்த சந்தை மதிப்பு",
   "schemeMaxLtv": "திட்ட அதிகபட்ச LTV(அடகு வரம்பு %)",
+  "processingFeeAmount": "செயலாக்கக் கட்டணம்",
   "eligibleAmount": "தகுதி பெற்ற தொகை",
   "dontValidateExceed": "சரிபார்க்க வேண்டாம் — தகுதி தொகையை விட அதிகமாக கோரப்பட்ட தொகையை அனுமதி",
   "requestedLoanAmount": "கோரப்பட்ட அடகு தொகை",
@@ -438,5 +439,25 @@
 "amountExceedsPayable": "தொகை மொத்த செலுத்த வேண்டிய தொகையை விட அதிகமாக உள்ளது. சரியான தொகையை உள்ளிடவும்.",
 "cancelBtn": "ரத்து",
 "printReceipt": "ரசீது அச்சிடு",
-"savePayment": "கட்டணம் சேமி"
+"savePayment": "கட்டணம் சேமி",
+
+"otherCharges": "பிற கட்டணங்கள்",
+"grandTotal": "மொத்தத் தொகை",
+"grandTotalZeroMessage": "இந்த அடகை முடிக்க மொத்தத் தொகை ₹0.00 ஆக இருக்க வேண்டும்.",
+"customerPhotoRequired": "வாடிக்கையாளர் புகைப்படம்",
+"customerPhotoRequiredTag": "(கட்டாயம்)",
+"customerPhotoRequiredMsg": "வாடிக்கையாளர் புகைப்படம் தேவை.",
+"cameraNotSupported": "கேமரா ஆதரிக்கப்படவில்லை.",
+"cameraAccessDenied": "கேமரா அணுகல் மறுக்கப்பட்டது.",
+"cameraUnableAccess": "கேமராவை அணுக முடியவில்லை.",
+"photoCaptureUnable": "புகைப்படம் எடுக்க முடியவில்லை.",
+"loanNumberLabel": "அடகு எண்",
+"actionCannotBeUndone": "இந்த செயலை மீட்டெடுக்க முடியாது.",
+"confirmClose": "முடிப்பதை உறுதிசெய்",
+"done": "முடிந்தது",
+"closing": "மூடப்படுகிறது...",
+"closeLoanBtn": "அடகு முடி",
+
+
+"loanLedger": "அடகு பேரேடு"
 }
