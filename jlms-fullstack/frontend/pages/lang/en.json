@@ -370,5 +370,20 @@
   "masters": "Masters",
   "reports": "Reports",
   "reportCenter": "Report Center",
-  "createAdministrator": "Create Administrator"
+  "createAdministrator": "Create Administrator",
+
+  "step1SelectCustomer": "Step 1 — Select Customer",
+  "step2JewelItemsAppraisal": "Step 2 — Jewel Items & Appraisal",
+  "step3LoanTerms": "Step 3 — Loan Terms",
+  "step4JewelItemsPhoto": "Step 4 — Jewel Items Photo (Web Capture)",
+  "totalWeight": "Total Weight",
+  "goldRate": "Gold Rate (per gram)",
+  "totalMarketValue": "Total Market Value",
+  "schemeMaxLtv": "Scheme Max LTV(Loan Limit %)",
+  "processingFeeAmount": "Processing Fee Amount",
+  "eligibleAmount": "Eligible Amount",
+  "dontValidateExceed": "Don't validate — allow requested amount to exceed eligible amount",
+  "requestedLoanAmount": "Requested Loan Amount",
+  "addJewelCalculateFirst": "Add jewel items & calculate valuation first",
+  "firstMonthInterest": "First Month Interest"
 }
