@@ -40,6 +40,7 @@ function jlmsBuildSidebar() {
   const user = Session.get();
   const isSuperAdmin = user && user.roleId === 1002;
   const isAdmin = user && stringEqualsIgnoreCase(user.roleName, "Administrator");
+    const isRestrictedBranch = user && Number(user.branchId) === 1; 
 
   let html = `
     <aside class="jlms-sidebar" id="jlmsSidebar">
@@ -72,6 +73,8 @@ function jlmsBuildSidebar() {
       let itemsHtml = "";
       group.items.forEach(item => {
         if (item.id === "user-master" && !isAdmin) return;
+          if (item.id === "user-master" && isRestrictedBranch) return;      
+        if (item.id === "financial-year" && isRestrictedBranch) return; 
         if (item.id === "branch-master") return;
 
         hasItems = true;

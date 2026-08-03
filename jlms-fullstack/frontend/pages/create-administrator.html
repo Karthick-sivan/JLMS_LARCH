@@ -36,9 +36,9 @@
                             <span class="badge-jlms badge-neutral" id="txtUserCount">0 users</span>
                         </div>
                         <div class="grid-toolbar-left">
-                            <select class="form-select-jlms" id="ddlRoleFilter" style="width:160px;">
+                            <!-- <select class="form-select-jlms" id="ddlRoleFilter" style="width:160px;">
                                 <option value="">All Roles</option>
-                            </select>
+                            </select> -->
                             <div class="grid-search"><i class="bi bi-search"></i><input id="txtSearchUser"
                                     placeholder="Search user"></div>
                         </div>
@@ -96,7 +96,7 @@
         const pageSize = 10;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const ddlRoleFilter = document.getElementById('ddlRoleFilter');
+            // const ddlRoleFilter = document.getElementById('ddlRoleFilter');
             const txtSearchUser = document.getElementById('txtSearchUser');
             const tblUsers = document.getElementById('tblUsers');
             const txtUserCount = document.getElementById('txtUserCount');
@@ -112,39 +112,42 @@
                 showSuccess(formSuccess);
             }
 
-            ddlRoleFilter.addEventListener('change', () => {currentPage = 1; filterAndRender();});
-            txtSearchUser.addEventListener('input', () => {currentPage = 1; filterAndRender();});
+            // ddlRoleFilter.addEventListener('change', () => {currentPage = 1; filterAndRender();});
+            txtSearchUser.addEventListener('input', () => { currentPage = 1; filterAndRender(); });
 
             await initPage();
 
+            // async function initPage() {
+            //     try {
+            //         apiErrorBanner.style.display = 'none';
+            //         const rolesList = await Api.getUserMasterRoles();
+            //         ddlRoleFilter.innerHTML = '<option value="">All Roles</option>' +
+            //             rolesList.map(r => `<option value="${r.roleId}">${r.roleName}</option>`).join('');
+            //         await loadUsers();
+            //     } catch (err) {showApiError(err);}
+            // }
             async function initPage() {
                 try {
                     apiErrorBanner.style.display = 'none';
-                    const rolesList = await Api.getUserMasterRoles();
-                    ddlRoleFilter.innerHTML = '<option value="">All Roles</option>' +
-                        rolesList.map(r => `<option value="${r.roleId}">${r.roleName}</option>`).join('');
                     await loadUsers();
-                } catch (err) {showApiError(err);}
+                } catch (err) { showApiError(err); }
             }
-
             async function loadUsers() {
                 try {
                     allUsers = await Api.getUsers();
                     filterAndRender();
-                } catch (err) {showApiError(err);}
+                } catch (err) { showApiError(err); }
             }
 
             function filterAndRender() {
-                const sel = ddlRoleFilter.value;
                 const query = txtSearchUser.value.trim().toLowerCase();
                 filteredUsers = allUsers.filter(u => {
-                    const okRole = !sel || u.roleId == sel;
                     const okSearch = !query ||
                         u.employeeCode.toLowerCase().includes(query) ||
                         u.fullName.toLowerCase().includes(query) ||
                         u.username.toLowerCase().includes(query) ||
                         (u.mobile && u.mobile.toLowerCase().includes(query));
-                    return okRole && okSearch;
+                    return okSearch;
                 });
                 txtUserCount.textContent = `${filteredUsers.length} user${filteredUsers.length === 1 ? '' : 's'}`;
                 renderTable();
@@ -230,19 +233,19 @@
                 const prevBtn = document.createElement('div');
                 prevBtn.className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
                 prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
-                if (currentPage > 1) prevBtn.addEventListener('click', () => {currentPage--; renderTable();});
+                if (currentPage > 1) prevBtn.addEventListener('click', () => { currentPage--; renderTable(); });
                 paginationWrap.appendChild(prevBtn);
                 for (let i = 1; i <= totalPages; i++) {
                     const pb = document.createElement('div');
                     pb.className = `page-btn ${currentPage === i ? 'active' : ''}`;
                     pb.textContent = i;
-                    pb.addEventListener('click', () => {currentPage = i; renderTable();});
+                    pb.addEventListener('click', () => { currentPage = i; renderTable(); });
                     paginationWrap.appendChild(pb);
                 }
                 const nextBtn = document.createElement('div');
                 nextBtn.className = `page-btn ${currentPage === totalPages ? 'disabled' : ''}`;
                 nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
-                if (currentPage < totalPages) nextBtn.addEventListener('click', () => {currentPage++; renderTable();});
+                if (currentPage < totalPages) nextBtn.addEventListener('click', () => { currentPage++; renderTable(); });
                 paginationWrap.appendChild(nextBtn);
             }
 
@@ -251,21 +254,21 @@
                 try {
                     const result = await Api.toggleUserStatus(id);
                     const u = allUsers.find(x => x.userId === id);
-                    if (u) {u.isActive = result.isActive; filterAndRender();}
+                    if (u) { u.isActive = result.isActive; filterAndRender(); }
                     showSuccess(`User has been ${result.isActive ? 'activated' : 'deactivated'}.`);
-                } catch (err) {showApiError(err);}
+                } catch (err) { showApiError(err); }
             }
 
             function showSuccess(msg) {
                 apiSuccessBanner.textContent = msg;
                 apiSuccessBanner.style.display = 'block';
-                setTimeout(() => {apiSuccessBanner.style.display = 'none';}, 4000);
+                setTimeout(() => { apiSuccessBanner.style.display = 'none'; }, 4000);
             }
 
             function showApiError(err) {
                 apiErrorBanner.textContent = err.message || 'An error occurred.';
                 apiErrorBanner.style.display = 'block';
-                window.scrollTo({top: 0, behavior: 'smooth'});
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
     </script>
