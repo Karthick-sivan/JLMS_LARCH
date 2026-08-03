@@ -156,7 +156,8 @@
             <div class="h1" id="pageTitle" data-i18n="customerRegistration">Customer Registration</div>
           </div>
           <div class="page-actions">
-            <a href="customer-search.html" class="btn-jlms btn-jlms-ghost"><i class="bi bi-list-ul"></i> <span data-i18n="viewAllSearch">View All / Search</span></a>
+            <a href="customer-search.html" class="btn-jlms btn-jlms-ghost"><i class="bi bi-list-ul"></i> <span
+                data-i18n="viewAllSearch">View All / Search</span></a>
           </div>
         </div>
 
@@ -164,9 +165,11 @@
         <div id="apiSuccessBanner" class="api-success-banner"></div>
 
         <div class="step-indicator">
-          <div class="step-pill active" id="stepPill1"><span class="num">1</span> <span data-i18n="customerDetails">Customer Details</span></div>
+          <div class="step-pill active" id="stepPill1"><span class="num">1</span> <span
+              data-i18n="customerDetails">Customer Details</span></div>
           <div class="step-sep"></div>
-          <div class="step-pill" id="stepPill2"><span class="num">2</span> <span data-i18n="nomineeDetails">Nominee Details</span></div>
+          <div class="step-pill" id="stepPill2"><span class="num">2</span> <span data-i18n="nomineeDetails">Nominee
+              Details</span></div>
         </div>
 
         <div class="row g-3">
@@ -186,18 +189,29 @@
                       <input type="text" class="form-control-jlms" id="custCode" value="(auto-generated)" disabled>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label" data-i18n="customerName">Customer Name<span class="req">*</span></label>
-                      <input type="text" class="form-control-jlms" id="custName"  data-i18n-placeholder="asperIdProof"placeholder="As per ID proof">
+                      <!-- <label class="field-label" data-i18n="customerName">Customer Name<span
+                          class="req">*</span></label> -->
+                      <label class="field-label">
+                        <span data-i18n="customerName">Customer Name</span><span class="req">*</span>
+                      </label>
+                      <input type="text" class="form-control-jlms" id="custName" data-i18n-placeholder="asperIdProof"
+                        placeholder="As per ID proof">
                     </div>
+
                     <div class="col-md-4">
-                      <label class="field-label" data-i18n="guardianName">Guardian Name<span class="opt">optional</span></label>
-                      <input type="text" class="form-control-jlms" id="custGuardianName"  data-i18n-placeholder="guardianName"placeholder="Gurdian Name">
-                       
+                      <!-- <label class="field-label" data-i18n="guardianName">Guardian Name<span
+                          class="opt">optional</span></label> -->
+                      <label class="field-label">
+                        <span data-i18n="guardianName">Guardian Name</span><span class="opt">optional</span>
+                      </label>
+                      <input type="text" class="form-control-jlms" id="custGuardianName"
+                        data-i18n-placeholder="guardianName" placeholder="Gurdian Name">
+
                     </div>
 
                     <!-- Row 2 -->
                     <div class="col-md-4">
-                      <label class="field-label" data-i18n="gender">Gender<span class="req">*</span></label>
+                      <label class="field-label"><span>data-i18n="gender">Gender</span><span class="req">*</span></label>
                       <div class="radio-pill-group" id="genderPills">
                         <div class="radio-pill" data-value="Male">Male</div>
                         <div class="radio-pill" data-value="Female">Female</div>
@@ -205,19 +219,23 @@
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label" data-i18n="mobile">Mobile Number<span class="req">*</span></label>
+                      <label class="field-label"><span data-i18n="mobile">Mobile Number</span><span class="req">*</span></label>
                       <div class="input-affix"><span class="affix">+91</span><input type="text" id="custMobile"
-                          maxlength="10" inputmode="numeric"  data-i18n-placeholder="mobilePlaceholder" placeholder="10-digit mobile"></div>
+                          maxlength="10" inputmode="numeric" data-i18n-placeholder="mobilePlaceholder"
+                          placeholder="10-digit mobile"></div>
                     </div>
                     <div class="col-md-4">
-                      <label class="field-label" data-i18n="alternateMobile">Alternate Mobile<span class="opt">optional</span></label>
+                      <label class="field-label"><span data-i18n="alternateMobile">Alternate Mobile</span><span
+                          class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix">+91</span><input type="text" id="custAltMobile"
-                          maxlength="10" inputmode="numeric"  data-i18n-placeholder="alternateMobilePlaceholder" placeholder="Alternate contact"></div>
+                          maxlength="10" inputmode="numeric" data-i18n-placeholder="alternateMobilePlaceholder"
+                          placeholder="Alternate contact"></div>
                     </div>
 
                     <!-- Row 3 -->
                     <div class="col-md-4">
-                      <label class="field-label" data-i18n="dateOfBirth">Date of Birth<span class="opt">optional</span></label>
+                      <label class="field-label"><span data-i18n="dateOfBirth">Date of Birth</span><span
+                          class="opt">optional</span></label>
                       <input type="date" class="form-control-jlms" id="custDob">
                     </div>
                   </div>
@@ -228,8 +246,8 @@
                   <div class="row g-3">
                     <div class="col-md-12">
                       <label class="field-label" data-i18n="address">Address<span class="opt">optional</span></label>
-                      <textarea class="form-control-jlms" id="custAddress" rows="2"  data-i18n-placeholder="doorNoStreetArea"
-                        placeholder="Door No, Street, Area"></textarea>
+                      <textarea class="form-control-jlms" id="custAddress" rows="2"
+                        data-i18n-placeholder="doorNoStreetArea" placeholder="Door No, Street, Area"></textarea>
                     </div>
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="city">City<span class="opt">optional</span></label>
@@ -248,7 +266,8 @@
                     </div> -->
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="pincode">Pincode<span class="opt">optional</span></label>
-                      <input type="text" class="form-control-jlms"  id="custPincode"  data-i18n-placeholder="pincodePlaceholder" placeholder="Pincode">
+                      <input type="text" class="form-control-jlms" id="custPincode"
+                        data-i18n-placeholder="pincodePlaceholder" placeholder="Pincode">
                     </div>
                   </div>
                 </fieldset>
@@ -257,15 +276,18 @@
                   <legend data-i18n="kycInformation">KYC Information</legend>
                   <div class="row g-3">
                     <div class="col-md-6">
-                      <label class="field-label" data-i18n="aadhaar">Aadhaar Number<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="aadhaar">Aadhaar Number<span
+                          class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix"><i class="bi bi-credit-card"></i></span><input
-                          type="text" id="custAadhaar"  data-i18n-placeholder="aadhaarPlaceholder" placeholder="12-digit Aadhaar"></div>
+                          type="text" id="custAadhaar" data-i18n-placeholder="aadhaarPlaceholder"
+                          placeholder="12-digit Aadhaar"></div>
                     </div>
                     <div class="col-md-6">
                       <label class="field-label" data-i18n="pan">PAN Number<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix"><i
                             class="bi bi-credit-card-2-front"></i></span><input type="text" id="custPan"
-                         data-i18n-placeholder="panPlaceholder" placeholder="ABCDE1234F" style="text-transform:uppercase;"></div>
+                          data-i18n-placeholder="panPlaceholder" placeholder="ABCDE1234F"
+                          style="text-transform:uppercase;"></div>
                     </div>
                     <!-- EDIT MODE NOTE: Aadhaar & PAN are read-only in edit mode (set via JS) -->
                   </div>
@@ -347,9 +369,10 @@
 
               </div>
               <div class="panel-foot">
-                <button class="btn-jlms btn-jlms-ghost" id="btnClear"><i class="bi bi-x-lg"></i> <span data-i18n="clear">Clear</span></button>
-                <button class="btn-jlms btn-jlms-primary" id="btnNext"><span data-i18n="next">Next</span>: <span data-i18n="nomineeDetails">Nominee Details</span> <i
-                    class="bi bi-arrow-right"></i></button>
+                <button class="btn-jlms btn-jlms-ghost" id="btnClear"><i class="bi bi-x-lg"></i> <span
+                    data-i18n="clear">Clear</span></button>
+                <button class="btn-jlms btn-jlms-primary" id="btnNext"><span data-i18n="next">Next</span>: <span
+                    data-i18n="nomineeDetails">Nominee Details</span> <i class="bi bi-arrow-right"></i></button>
               </div>
             </div>
 
@@ -358,28 +381,34 @@
               <div class="panel-body">
 
                 <fieldset class="section-fieldset">
-                  <legend data-i18n="nomineeDetails">Nominee Details <span class="opt">optional — skip and save if not applicable</span></legend>
+                  <legend data-i18n="nomineeDetails">Nominee Details <span class="opt">optional — skip and save if not
+                      applicable</span></legend>
                   <div class="row g-3">
                     <div class="col-md-6">
-                      <label class="field-label" data-i18n="nomineeName">Nominee Name<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeName">Nominee Name<span
+                          class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="nomineeName" placeholder="Full name of nominee">
                     </div>
                     <div class="col-md-6">
-                      <label class="field-label" data-i18n="nomineeMobile">Nominee Mobile<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeMobile">Nominee Mobile<span
+                          class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix">+91</span><input type="text" id="nomineeMobile"
                           maxlength="10" inputmode="numeric" placeholder="10-digit mobile"></div>
                     </div>
                     <div class="col-md-12">
-                      <label class="field-label" data-i18n="nomineeAddress">Nominee Address<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeAddress">Nominee Address<span
+                          class="opt">optional</span></label>
                       <textarea class="form-control-jlms" id="nomineeAddress" rows="2"
                         placeholder="Door No, Street, Area"></textarea>
                     </div>
                     <div class="col-md-6">
-                      <label class="field-label" data-i18n="nomineeCity">Nominee City<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeCity">Nominee City<span
+                          class="opt">optional</span></label>
                       <input type="text" class="form-control-jlms" id="nomineeCity">
                     </div>
                     <div class="col-md-6">
-                      <label class="field-label" data-i18n="nomineeAadhaar">Nominee Aadhaar Number<span class="opt">optional</span></label>
+                      <label class="field-label" data-i18n="nomineeAadhaar">Nominee Aadhaar Number<span
+                          class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix"><i class="bi bi-credit-card"></i></span><input
                           type="text" id="nomineeAadhaar" placeholder="12-digit Aadhaar"></div>
                     </div>
@@ -387,7 +416,8 @@
                 </fieldset>
 
                 <fieldset class="section-fieldset">
-                  <legend data-i18n="nomineeDocumentUpload">Nominee Document Upload <span class="opt">optional</span></legend>
+                  <legend data-i18n="nomineeDocumentUpload">Nominee Document Upload <span class="opt">optional</span>
+                  </legend>
                   <div class="row g-3">
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="nomineePhoto">Nominee Photo</label>
@@ -428,7 +458,8 @@
 
               </div>
               <div class="panel-foot">
-                <button class="btn-jlms btn-jlms-ghost" id="btnBack"><i class="bi bi-arrow-left"></i> <span data-i18n="back">Back</span></button>
+                <button class="btn-jlms btn-jlms-ghost" id="btnBack"><i class="bi bi-arrow-left"></i> <span
+                    data-i18n="back">Back</span></button>
                 <button class="btn-jlms btn-jlms-primary" id="btnSaveCustomer"><i class="bi bi-save"></i> <span
                     id="btnSaveLabel" data-i18n="saveCustomer">Save Customer</span></button>
               </div>
