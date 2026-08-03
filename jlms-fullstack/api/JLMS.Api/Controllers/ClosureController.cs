@@ -85,10 +85,27 @@ public class ClosureController : ControllerBase
         Exception lastError = null;
         string receiptNo = null;
 
+        // Generate unique receipt number by checking existing ones for this branch
+        // Include BranchId in receipt number to ensure global uniqueness
+        var lastReceiptNo = await _db.LoanTransactions
+            .AsNoTracking()
+            .Where(t => t.ReceiptNumber != null && t.ReceiptNumber.StartsWith($"RC-{loan.BranchId}-"))
+            .OrderByDescending(t => t.ReceiptNumber)
+            .Select(t => t.ReceiptNumber)
+            .FirstOrDefaultAsync();
+
+        int seq = 1;
+        if (lastReceiptNo != null)
+        {
+            var lastSeqStr = lastReceiptNo.Replace($"RC-{loan.BranchId}-", "");
+            if (int.TryParse(lastSeqStr, out int lastSeq))
+                seq = lastSeq + 1;
+        }
+
         for (int attempt = 0; attempt < 5; attempt++)
         {
-            var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
-            receiptNo = _calc.GenerateReceiptNumber(seq);
+            receiptNo = $"RC-{loan.BranchId}-{seq:D5}";
+            seq++;
 
             txn = new LoanTransaction
             {
@@ -154,10 +171,27 @@ public class ClosureController : ControllerBase
         Exception lastError = null;
         string receiptNo = null;
 
+        // Generate unique receipt number by checking existing ones for this branch
+        // Include BranchId in receipt number to ensure global uniqueness
+        var lastReceiptNo = await _db.LoanTransactions
+            .AsNoTracking()
+            .Where(t => t.ReceiptNumber != null && t.ReceiptNumber.StartsWith($"RC-{loan.BranchId}-"))
+            .OrderByDescending(t => t.ReceiptNumber)
+            .Select(t => t.ReceiptNumber)
+            .FirstOrDefaultAsync();
+
+        int seq = 1;
+        if (lastReceiptNo != null)
+        {
+            var lastSeqStr = lastReceiptNo.Replace($"RC-{loan.BranchId}-", "");
+            if (int.TryParse(lastSeqStr, out int lastSeq))
+                seq = lastSeq + 1;
+        }
+
         for (int attempt = 0; attempt < 5; attempt++)
         {
-            var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
-            receiptNo = _calc.GenerateReceiptNumber(seq);
+            receiptNo = $"RC-{loan.BranchId}-{seq:D5}";
+            seq++;
 
             txn = new LoanTransaction
             {

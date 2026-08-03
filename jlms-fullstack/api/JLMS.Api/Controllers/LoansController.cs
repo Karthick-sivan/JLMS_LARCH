@@ -168,6 +168,29 @@ public class LoansController : ControllerBase
     {
         const string HardcodedPaymentMode = "Cash";
 
+        // First, fetch the loan to get BranchId for receipt number generation (outside transaction)
+        var loanForBranch = await _db.Loans.AsNoTracking()
+            .FirstOrDefaultAsync(l => l.LoanId == id);
+        if (loanForBranch == null)
+            return NotFound($"Loan {id} not found.");
+
+        // Generate receipt number before transaction to avoid isolation issues
+        // Include BranchId in receipt number to ensure global uniqueness
+        var lastReceiptNo = await _db.LoanTransactions
+            .AsNoTracking()
+            .Where(t => t.ReceiptNumber != null && t.ReceiptNumber.StartsWith($"RC-{loanForBranch.BranchId}-"))
+            .OrderByDescending(t => t.ReceiptNumber)
+            .Select(t => t.ReceiptNumber)
+            .FirstOrDefaultAsync();
+
+        int seq = 1;
+        if (lastReceiptNo != null)
+        {
+            var lastSeqStr = lastReceiptNo.Replace($"RC-{loanForBranch.BranchId}-", "");
+            if (int.TryParse(lastSeqStr, out int lastSeq))
+                seq = lastSeq + 1;
+        }
+
         await using var tx = await _db.Database.BeginTransactionAsync();
         try
         {
@@ -179,7 +202,7 @@ public class LoansController : ControllerBase
             if (claimed == 0)
             {
                 var existing = await _db.Loans.AsNoTracking().FirstOrDefaultAsync(l => l.LoanId == id);
-                await tx.RollbackAsync();
+                //await tx.RollbackAsync();
 
                 if (existing == null)
                     return NotFound($"Loan {id} not found.");
@@ -198,13 +221,14 @@ public class LoansController : ControllerBase
 
             if (loan == null)
             {
-                await tx.RollbackAsync();
+                //await tx.RollbackAsync();
                 return NotFound($"Loan {id} not found.");
             }
 
             var errors = ValidateLoanForSubmission(loan);
             if (errors.Count > 0)
             {
+
                 await tx.RollbackAsync();
                 return BadRequest(new { Errors = errors });
             }
@@ -233,10 +257,26 @@ public class LoansController : ControllerBase
             LoanTransaction txn = null;
             Exception lastError = null;
 
-            for (int attempt = 0; attempt < 5; attempt++)
+            string receiptNo = null;
+            for (int attempt = 0; attempt < 10; attempt++)
             {
-                var seq = await _db.LoanTransactions.CountAsync() + 1 + attempt;
-                var receiptNo = _calc.GenerateReceiptNumber(seq);
+                // Re-query the last receipt number on each attempt to get the latest committed value
+                var currentLastReceiptNo = await _db.LoanTransactions
+                    .AsNoTracking()
+                    .Where(t => t.ReceiptNumber != null && t.ReceiptNumber.StartsWith($"RC-{loan.BranchId}-"))
+                    .OrderByDescending(t => t.ReceiptNumber)
+                    .Select(t => t.ReceiptNumber)
+                    .FirstOrDefaultAsync();
+
+                int currentSeq = 1;
+                if (currentLastReceiptNo != null)
+                {
+                    var lastSeqStr = currentLastReceiptNo.Replace($"RC-{loan.BranchId}-", "");
+                    if (int.TryParse(lastSeqStr, out int lastSeq))
+                        currentSeq = lastSeq + 1;
+                }
+
+                receiptNo = $"RC-{loan.BranchId}-{currentSeq:D5}";
 
                 var firstMonthInterest = Math.Round(loan.LoanAmount * loan.InterestRatePct / 100m / loan.TenureMonths, 2, MidpointRounding.AwayFromZero);
 
@@ -273,14 +313,13 @@ public class LoansController : ControllerBase
                 {
                     _db.Entry(txn).State = EntityState.Detached;
                     lastError = ex;
+                    // Small delay to allow other transaction to complete
+                    await Task.Delay(50);
                 }
             }
 
             if (lastError != null)
-            {
-                await tx.RollbackAsync();
                 throw lastError;
-            }
 
             _db.AuditLogs.Add(new AuditLog
             {
@@ -295,9 +334,18 @@ public class LoansController : ControllerBase
             await tx.CommitAsync();
             return Ok(await BuildSubmitResponse(loan.LoanId));
         }
+        //catch
+        //{
+        //    await tx.RollbackAsync();
+        //    throw;
+        //}
         catch
         {
-            await tx.RollbackAsync();
+            if (_db.Database.CurrentTransaction != null)
+            {
+                await tx.RollbackAsync();
+            }
+
             throw;
         }
     }
@@ -649,30 +697,85 @@ public class LoansController : ControllerBase
         loan.DisbursedAt = DateTime.UtcNow;
         loan.UpdatedAt = DateTime.UtcNow;
 
-        var seq = await _db.LoanTransactions.CountAsync() + 1;
-        var receiptNo = _calc.GenerateReceiptNumber(seq);
-        
-        var firstMonthInt = Math.Round(loan.LoanAmount * loan.InterestRatePct / 100m / loan.TenureMonths, 2, MidpointRounding.AwayFromZero);
+        // Generate unique receipt number by checking existing ones for this branch
+        // Include BranchId in receipt number to ensure global uniqueness
+        var lastReceiptNo = await _db.LoanTransactions
+            .AsNoTracking()
+            .Where(t => t.ReceiptNumber != null && t.ReceiptNumber.StartsWith($"RC-{loan.BranchId}-"))
+            .OrderByDescending(t => t.ReceiptNumber)
+            .Select(t => t.ReceiptNumber)
+            .FirstOrDefaultAsync();
 
-        var txn = new LoanTransaction
+        int seq = 1;
+        if (lastReceiptNo != null)
         {
-            LoanId = loan.LoanId,
-            TransactionType = "Disbursement",
-            ReceiptNumber = receiptNo,
-            TransactionDate = DateTime.UtcNow,
-            PrincipalAmount = loan.LoanAmount,
-            ChargesAmount = loan.ProcessingFee,
-            TotalAmount = netDisbursement,
-            PaymentMode = request.PaymentMode,
-            ReferenceNo = request.ReferenceNo,
-            BalancePrincipalAfter = loan.OutstandingPrincipal,
-            ProcessedBy = request.ProcessedByUserId,
-            BranchId = loan.BranchId,
-            CreatedAt = DateTime.UtcNow,
-            FirstMonthInt = firstMonthInt
-        };
-        _db.LoanTransactions.Add(txn);
-        await _db.SaveChangesAsync();
+            var lastSeqStr = lastReceiptNo.Replace($"RC-{loan.BranchId}-", "");
+            if (int.TryParse(lastSeqStr, out int lastSeq))
+                seq = lastSeq + 1;
+        }
+
+        string receiptNo = null;
+        Exception lastError = null;
+        LoanTransaction txn = null;
+
+        for (int attempt = 0; attempt < 10; attempt++)
+        {
+            // Re-query the last receipt number on each attempt to get the latest committed value
+            var currentLastReceiptNo = await _db.LoanTransactions
+                .AsNoTracking()
+                .Where(t => t.ReceiptNumber != null && t.ReceiptNumber.StartsWith($"RC-{loan.BranchId}-"))
+                .OrderByDescending(t => t.ReceiptNumber)
+                .Select(t => t.ReceiptNumber)
+                .FirstOrDefaultAsync();
+
+            int currentSeq = 1;
+            if (currentLastReceiptNo != null)
+            {
+                var lastSeqStr = currentLastReceiptNo.Replace($"RC-{loan.BranchId}-", "");
+                if (int.TryParse(lastSeqStr, out int lastSeq))
+                    currentSeq = lastSeq + 1;
+            }
+
+            receiptNo = $"RC-{loan.BranchId}-{currentSeq:D5}";
+
+            var firstMonthInt = Math.Round(loan.LoanAmount * loan.InterestRatePct / 100m / loan.TenureMonths, 2, MidpointRounding.AwayFromZero);
+
+            txn = new LoanTransaction
+            {
+                LoanId = loan.LoanId,
+                TransactionType = "Disbursement",
+                ReceiptNumber = receiptNo,
+                TransactionDate = DateTime.UtcNow,
+                PrincipalAmount = loan.LoanAmount,
+                ChargesAmount = loan.ProcessingFee,
+                TotalAmount = netDisbursement,
+                PaymentMode = request.PaymentMode,
+                ReferenceNo = request.ReferenceNo,
+                BalancePrincipalAfter = loan.OutstandingPrincipal,
+                ProcessedBy = request.ProcessedByUserId,
+                BranchId = loan.BranchId,
+                CreatedAt = DateTime.UtcNow,
+                FirstMonthInt = firstMonthInt
+            };
+            _db.LoanTransactions.Add(txn);
+
+            try
+            {
+                await _db.SaveChangesAsync();
+                lastError = null;
+                break;
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2627)
+            {
+                _db.Entry(txn).State = EntityState.Detached;
+                lastError = ex;
+                // Small delay to allow other transaction to complete
+                await Task.Delay(50);
+            }
+        }
+
+        if (lastError != null)
+            throw lastError;
 
         return Ok(new ReceiptDto(receiptNo, txn.TransactionDate, loan.LoanNumber, loan.Customer?.CustomerName ?? "",
             0, 0, netDisbursement, request.PaymentMode, loan.OutstandingPrincipal, maturity));

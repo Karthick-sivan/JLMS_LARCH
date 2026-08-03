@@ -1,4 +1,4 @@
-using JLMS.Api.Data;
+ï»¿using JLMS.Api.Data;
 using JLMS.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +11,7 @@ public class FinancialYearNumberingService
     public const string TypeLoanNumber = "LoanNumber";
     public const string TypeCustomerCode = "CustomerCode";
 
-    // Branch 2 gets its own LOAN NUMBER scheme only — CustomerCode for branch 2
+    // Branch 2 gets its own LOAN NUMBER scheme only â€” CustomerCode for branch 2
     // still goes through the normal FinancialYear-driven path below, untouched.
     private const int Branch2Id = 2;
     private const int Branch2BlockSize = 10000;
@@ -64,7 +64,7 @@ public class FinancialYearNumberingService
         return candidate;
     }
 
-    // ---------------- CUSTOMER CODE (unchanged — same for every branch, including branch 2) ----------------
+    // ---------------- CUSTOMER CODE (unchanged â€” same for every branch, including branch 2) ----------------
     public async Task<string> GenerateNextCustomerCodeAsync(int? branchId = null, DateTime? asOf = null)
     {
         var fy = await GetActiveAsync(TypeCustomerCode, asOf, branchId);
