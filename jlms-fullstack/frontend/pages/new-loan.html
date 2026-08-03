@@ -448,7 +448,7 @@
                   <label class="field-label" data-i18n="searchCustomer">Search customer by name, mobile, or code<span class="req">*</span></label>
                   <div class="d-flex gap-2">
                     <input type="text" class="form-control-jlms" id="customerSearchInput"
-                      placeholder="Start typing to search..." style="flex:1;">
+                     data-i18n-placeholder="Starttyping to Search"  placeholder="Start typing to search..." style="flex:1;">
                     <button class="btn-jlms btn-jlms-outline" type="button" id="btnBrowseCustomers"
                       title="Browse all active customers" data-i18n="browseCustomers">
                       <i class="bi bi-eye"></i>
@@ -558,7 +558,7 @@
                 </div>
                 <div class="col-md-12">
                   <label class="field-label" data-i18n="remarks">Remarks <span class="opt">optional</span></label>
-                  <textarea class="form-control-jlms" id="loanRemarks" rows="2" placeholder="Internal notes"></textarea>
+                  <textarea class="form-control-jlms" id="loanRemarks" rows="2"  data-i18n-placeholder="remarksPlaceholder" placeholder="Internal notes"></textarea>
                 </div>
               </div>
             </fieldset>
@@ -689,7 +689,7 @@
         </div>
         <div class="modal-body">
           <input type="text" class="form-control-jlms mb-2" id="customerListFilter"
-            placeholder="Filter by code or name...">
+             data-i18n-placeholder="FilterbyCideorName"placeholder="Filter by code or name...">
           <div class="table-jlms-wrap" style="max-height:360px; overflow-y:auto;">
             <table class="table-jlms">
               <!--<thead><tr><th>Customer Code</th><th>Customer Name</th></tr></thead>-->
@@ -768,8 +768,8 @@
       <td class="text-muted-jlms">${rowId}</td>
       <td><select class="jewelTypeSelect">${options}</select></td>
       <td><input type="number" class="qtyInput" value="1" min="1" style="text-align:center;"></td>
-      <td><input type="text" class="modelInput" placeholder="Enter Model"></td>
-      <td><input type="text" class="varientInput" placeholder="Enter Variant"></td>
+      <td><input type="text" class="modelInput"  data-i18n-placeholder="modelplaceholder" placeholder="Enter Model"></td>
+      <td><input type="text" class="varientInput" data-i18n-placeholder="variantplaceholder" placeholder="Enter Variant"></td>
       <td><input type="number" step="0.001" class="grossInput" value="0.000"></td>
       <input type="hidden" class="stoneInput" value="0.000">
       <input type="hidden" class="purityInput" value="22K">

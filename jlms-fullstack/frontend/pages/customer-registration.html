@@ -187,12 +187,12 @@
                     </div>
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="customerName">Customer Name<span class="req">*</span></label>
-                      <input type="text" class="form-control-jlms" id="custName" placeholder="As per ID proof">
+                      <input type="text" class="form-control-jlms" id="custName"  data-i18n-placeholder="asperIdProof"placeholder="As per ID proof">
                     </div>
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="guardianName">Guardian Name<span class="opt">optional</span></label>
-                      <input type="text" class="form-control-jlms" id="custGuardianName"
-                        placeholder="Father / Spouse name">
+                      <input type="text" class="form-control-jlms" id="custGuardianName"  data-i18n-placeholder="guardianName"placeholder="Gurdian Name">
+                       
                     </div>
 
                     <!-- Row 2 -->
@@ -207,12 +207,12 @@
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="mobile">Mobile Number<span class="req">*</span></label>
                       <div class="input-affix"><span class="affix">+91</span><input type="text" id="custMobile"
-                          maxlength="10" inputmode="numeric" placeholder="10-digit mobile"></div>
+                          maxlength="10" inputmode="numeric"  data-i18n-placeholder="mobilePlaceholder" placeholder="10-digit mobile"></div>
                     </div>
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="alternateMobile">Alternate Mobile<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix">+91</span><input type="text" id="custAltMobile"
-                          maxlength="10" inputmode="numeric" placeholder="Alternate contact"></div>
+                          maxlength="10" inputmode="numeric"  data-i18n-placeholder="alternateMobilePlaceholder" placeholder="Alternate contact"></div>
                     </div>
 
                     <!-- Row 3 -->
@@ -228,7 +228,7 @@
                   <div class="row g-3">
                     <div class="col-md-12">
                       <label class="field-label" data-i18n="address">Address<span class="opt">optional</span></label>
-                      <textarea class="form-control-jlms" id="custAddress" rows="2"
+                      <textarea class="form-control-jlms" id="custAddress" rows="2"  data-i18n-placeholder="doorNoStreetArea"
                         placeholder="Door No, Street, Area"></textarea>
                     </div>
                     <div class="col-md-4">
@@ -248,7 +248,7 @@
                     </div> -->
                     <div class="col-md-4">
                       <label class="field-label" data-i18n="pincode">Pincode<span class="opt">optional</span></label>
-                      <input type="text" class="form-control-jlms" id="custPincode">
+                      <input type="text" class="form-control-jlms"  id="custPincode"  data-i18n-placeholder="pincodePlaceholder" placeholder="Pincode">
                     </div>
                   </div>
                 </fieldset>
@@ -259,13 +259,13 @@
                     <div class="col-md-6">
                       <label class="field-label" data-i18n="aadhaar">Aadhaar Number<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix"><i class="bi bi-credit-card"></i></span><input
-                          type="text" id="custAadhaar" placeholder="12-digit Aadhaar"></div>
+                          type="text" id="custAadhaar"  data-i18n-placeholder="aadhaarPlaceholder" placeholder="12-digit Aadhaar"></div>
                     </div>
                     <div class="col-md-6">
                       <label class="field-label" data-i18n="pan">PAN Number<span class="opt">optional</span></label>
                       <div class="input-affix"><span class="affix"><i
                             class="bi bi-credit-card-2-front"></i></span><input type="text" id="custPan"
-                          placeholder="ABCDE1234F" style="text-transform:uppercase;"></div>
+                         data-i18n-placeholder="panPlaceholder" placeholder="ABCDE1234F" style="text-transform:uppercase;"></div>
                     </div>
                     <!-- EDIT MODE NOTE: Aadhaar & PAN are read-only in edit mode (set via JS) -->
                   </div>

@@ -441,15 +441,18 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="field-label" data-i18n="mobile">Mobile</label>
-                                <input type="text" class="form-control-jlms" id="fMobile" placeholder="10-digit mobile" data-i18n-placeholder="mobilePlaceholder">
+                                <input type="text" class="form-control-jlms" id="fMobile" placeholder="10-digit mobile"
+                                    data-i18n-placeholder="mobilePlaceholder">
                             </div>
                             <div class="col-md-2 d-none">
                                 <label class="field-label" data-i18n="aadhaar">Aadhaar</label>
-                                <input type="text" class="form-control-jlms" id="fAadhaar" placeholder="XXXX-XXXX-XXXX" data-i18n-placeholder="aadhaarPlaceholder">
+                                <input type="text" class="form-control-jlms" id="fAadhaar" placeholder="XXXX-XXXX-XXXX"
+                                    data-i18n-placeholder="aadhaarPlaceholder">
                             </div>
                             <div class="col-md-2 d-none">
                                 <label class="field-label" data-i18n="pan">PAN</label>
-                                <input type="text" class="form-control-jlms" id="fPan" placeholder="ABCDE1234F" data-i18n-placeholder="panPlaceholder">
+                                <input type="text" class="form-control-jlms" id="fPan" placeholder="ABCDE1234F"
+                                    data-i18n-placeholder="panPlaceholder">
                             </div>
                             <div class="col-md-3">
                                 <label class="field-label" data-i18n="loanScheme">Loan Scheme</label>
@@ -1343,9 +1346,14 @@
             }
             info.textContent = `Page ${page} of ${pages}`;
 
+            // let html = '';
+            // html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
+            //             <button class="page-link" onclick="runSearch(${page - 1})">Prev</button></li>`;
+
             let html = '';
             html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
-                        <button class="page-link" onclick="runSearch(${page - 1})">Prev</button></li>`;
+    <button class="page-link" onclick="runSearch(${page - 1})">${lang.previous || 'Prev'}</button></li>`;
+
 
             const windowSize = 5;
             let start = Math.max(1, page - Math.floor(windowSize / 2));
@@ -1357,8 +1365,10 @@
                           <button class="page-link" onclick="runSearch(${p})">${p}</button></li>`;
             }
 
+            // html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
+            //             <button class="page-link" onclick="runSearch(${page + 1})">Next</button></li>`;
             html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
-                        <button class="page-link" onclick="runSearch(${page + 1})">Next</button></li>`;
+    <button class="page-link" onclick="runSearch(${page + 1})">${lang.next || 'Next'}</button></li>`;
 
             controls.innerHTML = html;
         }
