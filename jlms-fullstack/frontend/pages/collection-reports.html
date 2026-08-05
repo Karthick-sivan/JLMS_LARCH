@@ -459,7 +459,9 @@
         // ── Customer Dropdown ──────────────────────────────────────────
         async function loadCustomerDropdown() {
             try {
-                const data = await Api.searchCustomers({ pageSize: 200 });
+                const user = Session.get();  
+                const data = await Api.searchCustomers({ pageSize: 200,    
+                      branchId: user?.branchId });
                 const customers = data.items || [];
                 elCustomer.innerHTML = `<option value="">All Customers</option>`;
                 customers.forEach(c => {
@@ -468,7 +470,9 @@
                     opt.textContent = `${c.customerName} (${c.customerCode})`;
                     elCustomer.appendChild(opt);
                 });
-            } catch { /* silent – default "All Customers" option stays */ }
+           } catch (err) {
+        console.error("Failed to load customers:", err); // ← was empty before
+    }
             elCustomer.disabled = false;
         }
         async function loadLoanDropdown(customerId) {
