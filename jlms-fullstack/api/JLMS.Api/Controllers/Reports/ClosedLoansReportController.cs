@@ -149,7 +149,8 @@ public class ClosedLoansReportController : ControllerBase
                 BranchName: branchNames.TryGetValue(l.BranchId, out var bn) ? bn : "",
                 ClosureReceiptNo: closureTx?.ReceiptNumber,
                 Status: l.Status,
-                Remarks: l.Remarks
+                Remarks: l.Remarks,
+                BookNo: l.BookNo
             );
         }).ToList();
 

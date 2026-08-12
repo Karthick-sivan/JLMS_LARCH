@@ -93,7 +93,8 @@ public class OutstandingReportsController : ControllerBase
                 //PenaltyAccrued:      l.PenaltyAccrued,
                 TotalOutstanding:    l.OutstandingPrincipal + l.OutstandingInterest,
                 DaysOverdue:         daysOverdue,
-                Status:              derivedStatus
+                Status:              derivedStatus,
+                BookNo:              l.BookNo
             );
         }).ToList();
 

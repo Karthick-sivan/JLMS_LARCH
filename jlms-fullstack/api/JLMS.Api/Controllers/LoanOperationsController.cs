@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using JLMS.Api.Data;
+﻿using JLMS.Api.Data;
 using JLMS.Api.DTOs;
+using JLMS.Api.Models;
 using JLMS.Api.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace JLMS.Api.Controllers;
 
@@ -171,12 +172,29 @@ public class LoanOperationsController : ControllerBase
     // POST /api/loan-operations/payment-receipt-pdf
     // Body: PaymentReceiptPdfDto (matches fields of LoanOperationsPaymentResponseDto)
     [HttpPost("payment-receipt-pdf")]
-    public IActionResult DownloadPaymentReceiptPdf([FromBody] PaymentReceiptPdfDto dto)
+    public async Task<IActionResult> DownloadPaymentReceiptPdf([FromBody] PaymentReceiptPdfDto dto)
     {
+        // Fetch current user's branch details (override the loan's branch with user's branch)
+        var currentUser = HttpContext.Items["CurrentUser"] as Models.User;
+        var userBranchId = currentUser?.BranchId ?? dto.BranchId;
+        var branch = await _db.Branches.FindAsync(userBranchId);
+
+        // Look up the loan so we can pull the authoritative BookNo server-side
+        var loan = await _db.Loans.FirstOrDefaultAsync(l => l.LoanNumber == dto.LoanNo);
+
+        // Override branch details with user's branch (and BookNo from DB)
+        dto = dto with
+        {
+            BranchId = userBranchId,
+            BranchName = branch?.BranchName,
+            City = branch?.City,
+            State = branch?.State,
+            BookNo = loan?.BookNo ?? dto.BookNo
+        };
+
         var bytes = _pdfService.GeneratePaymentReceipt(dto);
         return File(bytes, "application/pdf", $"Receipt-{dto.ReceiptNumber}.pdf");
     }
-
     // POST /api/loan-operations/closure-receipt-pdf
     // Body: ClosureReceiptPdfDto (matches fields of LoanOperationsClosureResponseDto)
     //[HttpPost("closure-receipt-pdf")]
@@ -206,6 +224,14 @@ public class LoanOperationsController : ControllerBase
             .OrderByDescending(t => t.TransactionDate)
             .FirstOrDefaultAsync();
 
+        // Fetch current user's branch details (not the loan's branch)
+        var currentUser = HttpContext.Items["CurrentUser"] as Models.User;
+        var userBranchId = currentUser?.BranchId ?? loan.BranchId;
+        var branch = await _db.Branches.FindAsync(userBranchId);
+        string? branchName = branch?.BranchName;
+        string? city = branch?.City;
+        string? state = branch?.State;
+
         var dto = new ClosureReceiptPdfDto(
             ReceiptNumber: closureTxn?.ReceiptNumber ?? loan.LoanNumber,
             LoanNo: loan.LoanNumber,
@@ -217,10 +243,15 @@ public class LoanOperationsController : ControllerBase
             OutstandingInterest: 0,
             OtherCharges: closureTxn?.ChargesAmount ?? 0,
             GrandTotal: closureTxn?.TotalAmount ?? 0,
-            GuardianName: loan.Customer.GuardianName
+            GuardianName: loan.Customer.GuardianName,
+            BranchId: userBranchId,
+            BranchName: branchName,
+            City: city,
+            State: state,
+            BookNo: loan.BookNo
         );
 
-        var bytes = _pdfService.GenerateClosureReceiptWithDetails(loan, dto);
+        var bytes = _pdfService.GenerateClosureReceiptWithDetails(loan, dto, branchName, city, state);
         return File(bytes, "application/pdf", $"Closure-Receipt-{dto.ReceiptNumber}-{loan.LoanNumber}.pdf");
     }
 
@@ -272,6 +303,14 @@ public async Task<IActionResult> DownloadTransactionReceiptPdf(int transactionId
 
     if (txn == null) return NotFound();
 
+    // Fetch current user's branch details (not the loan's branch)
+    var currentUser = HttpContext.Items["CurrentUser"] as Models.User;
+    var userBranchId = currentUser?.BranchId ?? txn.Loan.BranchId;
+    var branch = await _db.Branches.FindAsync(userBranchId);
+    string? branchName = branch?.BranchName;
+    string? city = branch?.City;
+    string? state = branch?.State;
+
     PaymentReceiptPdfDto dto;
 
     if (txn.TransactionType == "Disbursement")
@@ -297,7 +336,12 @@ public async Task<IActionResult> DownloadTransactionReceiptPdf(int transactionId
             RemainingInterest: 0,
             //RemainingPrincipal: txn.BalancePrincipalAfter,
             RemainingPrincipal: txn.BalancePrincipalAfter ?? 0,
-            GuardianName: txn.Loan.Customer.GuardianName
+            GuardianName: txn.Loan.Customer.GuardianName,
+            BranchId: userBranchId,
+            BranchName: branchName,
+            City: city,
+            State: state,
+            BookNo: txn.Loan.BookNo
         );
     }
     else
@@ -319,7 +363,12 @@ public async Task<IActionResult> DownloadTransactionReceiptPdf(int transactionId
             RemainingInterest: 0, // see note below
             //RemainingPrincipal: txn.BalancePrincipalAfter,
             RemainingPrincipal: txn.BalancePrincipalAfter ?? 0,
-            GuardianName: txn.Loan.Customer.GuardianName
+            GuardianName: txn.Loan.Customer.GuardianName,
+            BranchId: userBranchId,
+            BranchName: branchName,
+            City: city,
+            State: state,
+            BookNo: txn.Loan.BookNo
         );
     }
 

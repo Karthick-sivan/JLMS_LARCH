@@ -3,9 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>JLMS — Collection Reports</title>
+    <title>JLMS — Loan Payment Report</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="View and filter collection loan balances across all active loans in JLMS.">
+    <meta name="description" content="View loan payment report with daily payment tracking.">
     <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/jlms-core.css">
@@ -112,68 +112,6 @@
             margin: 0;
         }
 
-        /* Transaction-type badges shown next to Loan No. */
-        /* Amount pills — wrap the Principal/Interest/1st-Mo-Int value itself */
-        .amt-badge {
-            display: inline-block;
-            font-weight: 700;
-            font-size: 13px;
-            padding: 3px 10px;
-            border-radius: 999px;
-        }
-
-        .amt-badge.principal {
-            background: #dbeafe;
-            color: #2b9730;
-        }
-
-        .amt-badge.interest {
-            background: #fef3c7;
-            color: #b45309;
-        }
-
-        .amt-badge.fmi {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-        /* Legend row above the results grid */
-        .amt-legend {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            padding: 10px 16px;
-            font-size: 12px;
-            color: #6b7280;
-            border-bottom: 1px solid #eef0f3;
-            flex-wrap: wrap;
-        }
-
-        .amt-legend .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .amt-legend .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .amt-legend .legend-dot.principal {
-            background: #2b9730;
-        }
-
-        .amt-legend .legend-dot.interest {
-            background: #b45309;
-        }
-
-        .amt-legend .legend-dot.fmi {
-            background: #6d28d9;
-        }
-
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -184,6 +122,23 @@
             display: inline-block;
             animation: spin .8s linear infinite;
         }
+
+        .day-column {
+            min-width: 45px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .day-column .day-header {
+            font-weight: 600;
+            color: #6b7280;
+            padding: 8px 4px;
+        }
+
+        .day-column .day-value {
+            padding: 8px 4px;
+            font-size: 12px;
+        }
     </style>
 </head>
 
@@ -193,17 +148,6 @@
         <div class="main-col">
             <div id="jlmsTopbarMount"></div>
             <div class="page-content">
-                <!-- 
-                <div class="page-header">
-                    <div>
-                        <div class="breadcrumb-jlms">
-                            <a href="dashboard.html">Home</a><span class="sep">/</span>
-                            <a href="report-center.html">Report Center</a><span class="sep">/</span>
-                            <span class="current">Collection Reports</span>
-                        </div>
-                    </div>
-                </div> -->
-
                 <div class="row g-3">
                     <!-- Left: categories -->
                     <div class="col-lg-3">
@@ -212,30 +156,25 @@
                                 <div class="h4" data-i18n="reportCategories">Report Categories</div>
                             </div>
                             <div class="panel-body" style="padding:6px 0;">
-                                <!--<div class="report-cat-item" onclick="location.href='report-center.html'"><i class="bi bi-person-vcard"></i> Customer Reports <span class="count">4</span></div>-->
-                                <!--<div class="report-cat-item" onclick="location.href='report-center.html'"><i class="bi bi-folder2-open"></i> Active Loan Report <span class="count">1</span></div>-->
-                                <!--<div class="report-cat-item active"><i class="bi bi-graph-down"></i> Outstanding Reports </div>
-                                <div class="report-cat-item"><i class="bi bi-cash-coin"></i> Collection Reports </div>-->
                                 <div class="report-cat-item" onclick="location.href='activeloan-report.html'"><i
                                         class="bi bi-folder2-open"></i> <span data-i18n="loanReport">Loan Report</span>
                                 </div>
                                 <div class="report-cat-item" onclick="location.href='loandetails-report.html'"><i
                                         class="bi bi-graph-down"></i> <span data-i18n="loanItemReports">Loan & Item
                                         Reports</span></div>
-                                <div class="report-cat-item active"><i class="bi bi-cash-coin"></i> <span
-                                        data-i18n="collectionReports">Collection Reports</span>
+                                <div class="report-cat-item" onclick="location.href='collection-reports.html'"><i
+                                        class="bi bi-cash-coin"></i> <span data-i18n="collectionReports">Collection
+                                        Reports</span>
                                 </div>
+
                                 <div class="report-cat-item" onclick="location.href='closureloan-report.html'"><i
                                         class="bi bi-check2-circle"></i> <span data-i18n="closedLoansReport">Closed
                                         Loans Report</span></div>
-                                <div class="report-cat-item" onclick="location.href='loan-payment-report.html'"><i
-                                        class="bi bi-cash-coin"></i> <span data-i18n="loanPaymentReport">Loan Payment
-                                        Report</span></div>
-                                <!--<div class="report-cat-item"><i class="bi bi-arrow-repeat"></i> Renewal Report <span class="count">2</span></div>
-                                <div class="report-cat-item"><i class="bi bi-check2-circle"></i> Closure Report <span class="count">2</span></div>
-                                <div class="report-cat-item"><i class="bi bi-hammer"></i> Auction Reports <span class="count">3</span></div>
-                                <div class="report-cat-item"><i class="bi bi-clipboard-data"></i> Audit Reports <span class="count">6</span></div>-->
+                                <div class="report-cat-item active"><i class="bi bi-calendar-check"></i> <span
+                                        data-i18n="loanPaymentReport">Loan Payment Report</span>
+                                </div>
                             </div>
+                            
                         </div>
                     </div>
 
@@ -245,18 +184,19 @@
                         <!-- Filters -->
                         <div class="panel mb-3">
                             <div class="panel-head">
-                                <div class="h4" data-i18n="collectionReports">Collection Reports — Filters</div>
+                                <div class="h4" data-i18n="loanPaymentReport">Loan Payment Report — Filters</div>
                             </div>
                             <div class="panel-body">
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-2">
-                                        <label class="field-label" for="filterFromDate" data-i18n="fromDate">From
-                                            Date</label>
-                                        <input id="filterFromDate" type="date" class="form-control-jlms">
+                                        <label class="field-label" for="filterYear" data-i18n="year">Year</label>
+                                        <select id="filterYear" class="form-select-jlms">
+                                        </select>
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="field-label" for="filterToDate" data-i18n="toDate">To Date</label>
-                                        <input id="filterToDate" type="date" class="form-control-jlms">
+                                        <label class="field-label" for="filterMonth" data-i18n="month">TXN Date</label>
+                                        <select id="filterMonth" class="form-select-jlms">
+                                        </select>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="field-label" for="filterCustomer"
@@ -292,6 +232,10 @@
                                 <div class="sc-value" id="scTotalRecords">—</div>
                             </div>
                             <div class="summary-card accent-navy">
+                                <div class="sc-label" data-i18n="totalLoanAmount">Total Loan Amount</div>
+                                <div class="sc-value" id="scLoanAmount">—</div>
+                            </div>
+                            <div class="summary-card accent-navy">
                                 <div class="sc-label" data-i18n="principalCollected">Principal Collected</div>
                                 <div class="sc-value" id="scPrincipal">—</div>
                             </div>
@@ -299,9 +243,13 @@
                                 <div class="sc-label" data-i18n="interestCollected">Interest Collected</div>
                                 <div class="sc-value" id="scInterest">—</div>
                             </div>
+                            <div class="summary-card accent-orange">
+                                <div class="sc-label" data-i18n="totalPaidAmount">Total Paid Amount</div>
+                                <div class="sc-value" id="scPaidAmount">—</div>
+                            </div>
                             <div class="summary-card accent-red">
-                                <div class="sc-label" data-i18n="totalCollected">Total Collected</div>
-                                <div class="sc-value" id="scGrandTotal">—</div>
+                                <div class="sc-label" data-i18n="totalBalanceAmount">Total Balance Amount</div>
+                                <div class="sc-value" id="scBalanceAmount">—</div>
                             </div>
                         </div>
 
@@ -314,9 +262,6 @@
                                         style="display:none;"></span>
                                 </div>
                                 <div class="grid-toolbar-left">
-                                    <!-- <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportPdf"
-                                        onclick="exportPdf()" style="display:none;"><i
-                                            class="bi bi-file-earmark-pdf"></i> Export PDF</button> -->
                                     <button class="btn-jlms btn-jlms-outline btn-sm" id="btnExportExcel"
                                         onclick="exportExcel()" style="display:none;"><i
                                             class="bi bi-file-earmark-excel"></i> <span data-i18n="exportExcel">Export
@@ -326,53 +271,24 @@
                                         <span data-i18n="print">Print</span></button>
                                 </div>
                             </div>
-                            <div class="panel-body no-pad table-jlms-wrap">
-                                <div class="amt-legend">
-                                    <span class="legend-item"><span class="legend-dot principal"></span><span
-                                            data-i18n="principal">Principal</span></span>
-                                    <span class="legend-item"><span class="legend-dot interest"></span><span
-                                            data-i18n="interest">Interest</span></span>
-                                    <span class="legend-item"><span class="legend-dot fmi"></span><span
-                                            data-i18n="firstMonthInterest">1st Month Interest</span></span>
-                                </div>
-                                <table class="table-jlms" id="CollectionTable">
-                                    <thead>
-                                        <tr>
-                                            <th data-i18n="txnDate">Txn Date</th>
-                                            <th data-i18n="loanNo">Loan No.</th>
-                                            <th data-i18n="bookNo">Book No</th>
-                                            <th data-i18n="loanDate">Loan Date</th>
-                                            <th data-i18n="customer">Customer</th>
-                                            <th data-i18n="scheme">Scheme</th>
-                                            <th class="text-end" data-i18n="loanAmt">Loan Amt</th>
-                                            <th class="text-end" data-i18n="principalAmt">Principal Amt</th>
-                                            <th class="text-end" data-i18n="interestAmt">Interest Amt</th>
-                                            <th class="text-end" data-i18n="paidAmount">Paid Amount</th>
-                                            <th class="text-end" data-i18n="balAmt">Bal Amt</th>
-
-                                        </tr>
+                            <div class="panel-body no-pad table-jlms-wrap" style="overflow-x: auto;">
+                                <table class="table-jlms" id="LoanPaymentTable">
+                                    <thead id="loanPaymentTableHead">
+                                        <!-- Dynamic headers will be generated here -->
                                     </thead>
-                                    <tbody id="collectionTableBody">
+                                    <tbody id="loanPaymentTableBody">
                                         <tr>
                                             <td colspan="10">
                                                 <div class="state-panel">
                                                     <i class="bi bi-arrow-repeat spin"></i>
-                                                    <p data-i18n="loadingCollectionReport">Loading collection report…
+                                                    <p data-i18n="loadingLoanPaymentReport">Loading loan payment report…
                                                     </p>
                                                 </div>
                                             </td>
                                         </tr>
                                     </tbody>
-                                    <tfoot id="collectionTableFoot" style="display:none;">
-                                        <tr>
-                                            <td colspan="6"><strong data-i18n="pageTotal">Page Total</strong></td>
-                                            <!-- Txn Date, Loan No, Book No, Loan Date, Customer, Scheme -->
-                                            <td class="text-end" id="footLoanAmt">—</td> <!-- Loan Amt -->
-                                            <td class="text-end" id="footPrincipal">—</td> <!-- Principal Amt -->
-                                            <td class="text-end" id="footInterest">—</td> <!-- Interest Amt -->
-                                            <td class="text-end" id="footTotal">—</td> <!-- Paid Amount -->
-                                            <td class="text-end" id="footBalAmt">—</td> <!-- Bal Amt -->
-                                        </tr>
+                                    <tfoot id="loanPaymentTableFoot" style="display:none;">
+                                        <!-- Dynamic footer will be generated here -->
                                     </tfoot>
                                 </table>
                             </div>
@@ -389,57 +305,81 @@
     </div>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
-    <script>window.JLMS_ACTIVE = "collection-reports";</script>
+    <script>window.JLMS_ACTIVE = "loan-payment-report";</script>
     <script src="js/language.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/jlms-shell.js"></script>
     <script>
         jlmsInitShell();
-(function hideLoanPaymentReportLinkForBranch1() {
-    const user = Session.get();
-    if (user && Number(user.branchId) === 1) {
-        document.querySelectorAll('.report-cat-item[onclick*="loan-payment-report.html"]')
-            .forEach(el => el.style.display = "none");
-    }
-})();
-        /* ════════════════════════════════════════════════════════════════
-           Collection Reports – Page Logic
-           ════════════════════════════════════════════════════════════════
 
-           Behaviour:
-           • On page load  → shows ALL Collection loans (no filters).
-           • Apply Filters → queries with whatever the user has set.
-           • Pagination    → remembers the last-applied filters.
+        // ── Branch access restriction ───────────────────────────────
+// Loan Payment Report is not available to Branch 1; every other branch can use it.
+let __accessDenied = false;
+const __currentUser = Session.get();
+if (__currentUser && Number(__currentUser.branchId) === 1) {
+    __accessDenied = true;
+    document.querySelector(".page-content").innerHTML = `
+        <div class="panel">
+            <div class="panel-body">
+                <div class="state-panel">
+                    <i class="bi bi-shield-lock" style="color:#dc2626;"></i>
+                    <p data-i18n="loanPaymentReportRestricted">
+                        The Loan Payment Report is not available for your branch.
+                    </p>
+                </div>
+            </div>
+        </div>`;
+}
+        /* ════════════════════════════════════════════════════════════════
+           Loan Payment Report – Page Logic
            ════════════════════════════════════════════════════════════════ */
 
         // ── State ──────────────────────────────────────────────────────
         let currentPage = 1;
-        const PAGE_SIZE = 5;
+        const PAGE_SIZE = 25;
         let lastResult = null;
-        let activeFilters = {};   // {} = no filter; updated when Apply is clicked
+        let activeFilters = {};
 
         // ── DOM refs ───────────────────────────────────────────────────
-        const elFromDate = document.getElementById("filterFromDate");
-        const elToDate = document.getElementById("filterToDate");
+        const elYear = document.getElementById("filterYear");
+        const elMonth = document.getElementById("filterMonth");
         const elCustomer = document.getElementById("filterCustomer");
         const elLoanNo = document.getElementById("filterLoanNo");
         const elApply = document.getElementById("btnApplyFilters");
-        const elTBody = document.getElementById("collectionTableBody");
-        const elTFoot = document.getElementById("collectionTableFoot");
+        const elTHead = document.getElementById("loanPaymentTableHead");
+        const elTBody = document.getElementById("loanPaymentTableBody");
+        const elTFoot = document.getElementById("loanPaymentTableFoot");
         const elBadge = document.getElementById("recordsBadge");
         const elSummary = document.getElementById("summaryCards");
         const elPaginFoot = document.getElementById("paginationFooter");
         const elPaginInfo = document.getElementById("paginationInfo");
         const elPaginCtrls = document.getElementById("paginationControls");
 
-        // ── Default date values (set for UI convenience, NOT applied on load) ──
+        // ── Initialize Year and Month dropdowns ─────────────────────────
         (function () {
             const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, "0");
-            const d = String(now.getDate()).padStart(2, "0");
-            elFromDate.value = `${y}-${m}-${d}`;
-            elToDate.value = `${y}-${m}-${d}`;
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+
+            // Populate year dropdown (last 5 years + current year)
+            for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+                const opt = document.createElement("option");
+                opt.value = y;
+                opt.textContent = y;
+                if (y === currentYear) opt.selected = true;
+                elYear.appendChild(opt);
+            }
+
+            // Populate month dropdown
+            const months = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+            months.forEach((m, idx) => {
+                const opt = document.createElement("option");
+                opt.value = idx + 1;
+                opt.textContent = m;
+                if (idx + 1 === currentMonth) opt.selected = true;
+                elMonth.appendChild(opt);
+            });
         })();
 
         // ── Helpers ────────────────────────────────────────────────────
@@ -448,39 +388,25 @@
             return "₹" + Number(n).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
-        // function fmtDate(dt) {
-        //     if (!dt) return "—";
-        //     return new Date(dt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-        // }
         function fmtDate(dt) {
             if (!dt) return "—";
-            return new Date(dt).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
-        }
-        // Wraps a Principal Amt value in a colored pill. Renders plain "—"/0
-        // (via fmt) with no pill when there's nothing to highlight.
-        function principalCell(row) {
-            if (!row.principalAmount) return fmt(row.principalAmount);
-            return `<span class="amt-badge principal">${fmt(row.principalAmount)}</span>`;
+            const d = new Date(dt);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = String(d.getFullYear()).slice(-2);
+            return `${day}/${month}/${year}`;
         }
 
-        // Wraps an Interest Amt value in a colored pill. "Disbursement" rows
-        // in this report ONLY represent first-month-interest collected at
-        // loan creation, so they get the distinct "fmi" (purple) color
-        // instead of the regular interest (amber) color.
-        function interestCell(row) {
-            if (!row.interestAmount) return fmt(row.interestAmount);
-            const cls = row.transactionType === "Disbursement" ? "fmi" : "interest";
-            return `<span class="amt-badge ${cls}">${fmt(row.interestAmount)}</span>`;
+        function fmtDateFull(dt) {
+            if (!dt) return "—";
+            const d = new Date(dt);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
         }
+
         function t(key, fallback) { return (lang && lang[key]) || fallback; }
-
-        function statusBadge(status, daysOverdue) {
-            let cls = "badge-success", label = status;
-            if (status === "Overdue") { cls = "badge-danger"; label = daysOverdue > 0 ? `${t("overdue", "Overdue")} (${daysOverdue}d)` : t("overdue", "Overdue"); }
-            else if (status === "Due") { cls = "badge-warning"; label = t("due", "Due"); }
-            else if (status === "Active") { label = t("active", "Active"); }
-            return `<span class="badge-jlms ${cls}"><span class="dot"></span>${label}</span>`;
-        }
 
         function setExportBtnsVisible(v) {
             ["btnExportExcel", "btnPrint"].forEach(id => {
@@ -492,10 +418,7 @@
         async function loadCustomerDropdown() {
             try {
                 const user = Session.get();
-                const data = await Api.searchCustomers({
-                    pageSize: 200,
-                    branchId: user?.branchId
-                });
+                const data = await Api.searchCustomers({ pageSize: 200, branchId: user?.branchId });
                 const customers = data.items || [];
                 elCustomer.innerHTML = `<option value="">All Customers</option>`;
                 customers.forEach(c => {
@@ -505,10 +428,11 @@
                     elCustomer.appendChild(opt);
                 });
             } catch (err) {
-                console.error("Failed to load customers:", err); // ← was empty before
+                console.error("Failed to load customers:", err);
             }
             elCustomer.disabled = false;
         }
+
         async function loadLoanDropdown(customerId) {
             elLoanNo.innerHTML = `<option value="">All Loans</option>`;
             if (!customerId) {
@@ -518,7 +442,7 @@
             elLoanNo.disabled = true;
             elLoanNo.innerHTML = `<option value="">Loading…</option>`;
             try {
-                const loans = await Api.getLoansByCustomer(customerId);
+                const loans = await Api.getLoansByCustomerForLoanPaymentReport(customerId);
                 elLoanNo.innerHTML = `<option value="">All Loans</option>`;
                 loans.forEach(l => {
                     const opt = document.createElement("option");
@@ -532,13 +456,30 @@
             elLoanNo.disabled = false;
         }
 
-        // Re-populate Loan No dropdown whenever the customer changes
         elCustomer.addEventListener("change", () => {
             loadLoanDropdown(elCustomer.value);
         });
+
+        // ── Build Table Headers ─────────────────────────────────────────
+        function buildTableHeaders() {
+            let html = `<tr>
+                <th data-i18n="loanDate">Loan Date</th>
+                <th data-i18n="loanNo">Loan No.</th>
+                <th class="text-end" data-i18n="loanAmt">Loan Amt</th>
+                <th data-i18n="customer">Customer Name</th>
+                <th data-i18n="guardianName">Guardian Name</th>
+                <th data-i18n="mobile">Mobile No</th>
+                <th data-i18n="month">TXN Date</th>
+                <th class="text-end" data-i18n="principalAmt">Principal Amt</th>
+                <th class="text-end" data-i18n="interestAmt">Interest Amt</th>
+                <th class="text-end" data-i18n="paidAmt">Paid Amt</th>
+                <th class="text-end" data-i18n="balAmt">Bal Amt</th>
+            </tr>`;
+
+            elTHead.innerHTML = html;
+        }
+
         // ── Load Report ────────────────────────────────────────────────
-        // filters = {} → no filter (all data)
-        // filters = { fromDate, toDate, customerId } → filtered data
         async function loadReport(filters) {
             clearApiError();
             const params = { ...(filters || {}), page: currentPage, pageSize: PAGE_SIZE };
@@ -551,7 +492,7 @@
             setExportBtnsVisible(false);
 
             try {
-                const data = await Api.getCollectionReport(params);
+                const data = await Api.getLoanPaymentReport(params);
                 lastResult = data;
                 renderGrid(data);
             } catch (err) {
@@ -564,8 +505,8 @@
         elApply.addEventListener("click", () => {
             currentPage = 1;
             activeFilters = {
-                fromDate: elFromDate.value || undefined,
-                toDate: elToDate.value || undefined,
+                year: parseInt(elYear.value),
+                month: parseInt(elMonth.value),
                 customerId: elCustomer.value || undefined,
                 loanId: elLoanNo.value || undefined
             };
@@ -574,13 +515,15 @@
 
         // ── Render Grid ────────────────────────────────────────────────
         function renderGrid(data) {
-            const { items, totalCount, page, pageSize,
-                totalPrincipalCollected, totalInterestCollected, grandTotalCollected } = data;
+            const { items, totalCount, page, pageSize, year, month,
+                totalLoanAmount, totalPrincipalAmount, totalInterestAmount, totalPaidAmount, totalBalanceAmount } = data;
 
             document.getElementById("scTotalRecords").textContent = totalCount.toLocaleString("en-IN");
-            document.getElementById("scPrincipal").textContent = fmt(totalPrincipalCollected);
-            document.getElementById("scInterest").textContent = fmt(totalInterestCollected);
-            document.getElementById("scGrandTotal").textContent = fmt(grandTotalCollected);
+            document.getElementById("scLoanAmount").textContent = fmt(totalLoanAmount);
+            document.getElementById("scPrincipal").textContent = fmt(totalPrincipalAmount);
+            document.getElementById("scInterest").textContent = fmt(totalInterestAmount);
+            document.getElementById("scPaidAmount").textContent = fmt(totalPaidAmount);
+            document.getElementById("scBalanceAmount").textContent = fmt(totalBalanceAmount);
             elSummary.style.display = "flex";
 
             elBadge.textContent = t("xRecords", "{count} records").replace("{count}", totalCount.toLocaleString("en-IN"));
@@ -589,46 +532,54 @@
 
             if (!items || items.length === 0) {
                 elTBody.innerHTML = `<tr><td colspan="11"><div class="state-panel"><i class="bi bi-inbox"></i><p>${t("noLoansFoundFilters", "No loans found for the selected filters.")}</p></div></td></tr>`;
-                elTFoot.style.display = "none"; elPaginFoot.style.display = "none";
+                elTFoot.style.display = "none";
+                elPaginFoot.style.display = "none";
                 return;
             }
 
-            let pgLoanAmt = 0, pgPrinc = 0, pgInt = 0, pgTotal = 0, pgBal = 0;
+            let pgLoanAmt = 0, pgPrincipal = 0, pgInterest = 0, pgPaidAmt = 0, pgBalAmt = 0;
+
             const rows = items.map(row => {
                 pgLoanAmt += row.loanAmount || 0;
-                pgPrinc += row.principalAmount || 0;
-                pgInt += row.interestAmount || 0;
-                pgTotal += row.totalAmount || 0;
-                pgBal += row.balanceAmount || 0;
+                pgPrincipal += row.principalAmount || 0;
+                pgInterest += row.interestAmount || 0;
+                pgPaidAmt += row.paidAmount || 0;
+                pgBalAmt += row.balanceAmount || 0;
+
                 return `<tr>
-       <td>${fmtDate(row.transactionDate)}</td>
-       <td class="cell-link" title="Type: ${row.transactionType} | Date: ${fmtDate(row.transactionDate)}">${row.loanNumber}</td>
-       <td>${row.bookNo || '-'}</td>
-       <td>${fmtDate(row.loanDate)}</td>
-      <td data-export="${row.customerName} (${row.customerCode} · ${row.customerMobile})">
-        <div style="font-weight:600;">${row.customerName}</div>
-        <div style="font-size:11px;color:#9aa4b2;">${row.customerCode} · ${row.customerMobile}</div>
-      </td>
-      <td>${row.schemeName}</td>
-      <td class="text-end">${fmt(row.loanAmount)}</td>
-     <td class="text-end">${principalCell(row)}</td>
-     <td class="text-end">${interestCell(row)}</td>
-      <td class="text-end cell-strong">${fmt(row.totalAmount)}</td>
-      <td class="text-end">${fmt(row.balanceAmount)}</td>
-    </tr>`;
+                    <td>${fmtDate(row.loanDate)}</td>
+                    <td>${row.loanNumber}</td>
+                    <td class="text-end">${fmt(row.loanAmount)}</td>
+                    <td>${row.customerName}</td>
+                    <td>${row.guardianName || "—"}</td>
+                    <td>${row.mobile}</td>
+                    <td>${fmtDateFull(row.paymentDate)}</td>
+                    <td class="text-end">${fmt(row.principalAmount)}</td>
+                    <td class="text-end">${fmt(row.interestAmount)}</td>
+                    <td class="text-end cell-strong">${fmt(row.paidAmount)}</td>
+                    <td class="text-end">${fmt(row.balanceAmount)}</td>
+                </tr>`;
             });
 
             elTBody.innerHTML = rows.join("");
 
-            document.getElementById("footLoanAmt").textContent = fmt(pgLoanAmt);
-            document.getElementById("footPrincipal").textContent = fmt(pgPrinc);
-            document.getElementById("footInterest").textContent = fmt(pgInt);
-            document.getElementById("footTotal").textContent = fmt(pgTotal);
-            document.getElementById("footBalAmt").textContent = fmt(pgBal);
+            // Build footer totals
+            let footerHtml = `<tr>
+                <td colspan="2"><strong data-i18n="pageTotal">Page Total</strong></td>
+                <td class="text-end">${fmt(pgLoanAmt)}</td>
+                <td colspan="4"></td>
+                <td class="text-end">${fmt(pgPrincipal)}</td>
+                <td class="text-end">${fmt(pgInterest)}</td>
+                <td class="text-end">${fmt(pgPaidAmt)}</td>
+                <td class="text-end"></td>
+            </tr>`;
+
+            elTFoot.innerHTML = footerHtml;
             elTFoot.style.display = "";
 
             renderPagination(totalCount, page, pageSize);
         }
+
         // ── Pagination ─────────────────────────────────────────────────
         function renderPagination(totalCount, page, pageSize) {
             const totalPages = Math.ceil(totalCount / pageSize);
@@ -651,88 +602,70 @@
             if (p < 1 || !lastResult) return;
             if (p > Math.ceil(lastResult.totalCount / PAGE_SIZE)) return;
             currentPage = p;
-            loadReport(activeFilters);  // reuse last-applied filters across pages
+            loadReport(activeFilters);
         }
 
         // ── Export / Print ─────────────────────────────────────────────
         function exportExcel() {
             if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
 
-            const header = ["Txn Date", "Loan No.", "Loan Date", "Customer", "Scheme", "Loan Amt", "Principal Amt", "Interest Amt", "Paid Amount", "Bal Amt"];
+            const header = ["Loan Date", "Loan No.", "Loan Amt", "Customer Name", "Guardian Name", "Mobile No", "TXN Date", "Principal Amt", "Interest Amt", "Paid Amt", "Bal Amt", "Book No"];
 
-            const rows = lastResult.items.map(row => [
-                fmtDate(row.transactionDate),
-                `${row.loanNumber}\n${row.bookNo || '-'}`,
-                fmtDate(row.loanDate),
-                `${row.customerName} (${row.customerCode} · ${row.customerMobile})`,
-                row.schemeName,
-                row.loanAmount || 0,
-                row.principalAmount || 0,
-                row.interestAmount || 0,
-                row.totalAmount || 0,
-                row.balanceAmount || 0
-            ]);
+            const rows = lastResult.items.map(row => {
+                return [
+                    fmtDate(row.loanDate),
+                    row.loanNumber,
+                    row.loanAmount || 0,
+                    row.customerName,
+                    row.guardianName || "",
+                    row.mobile,
+                    fmtDateFull(row.paymentDate),
+                    row.principalAmount || 0,
+                    row.interestAmount || 0,
+                    row.paidAmount || 0,
+                    row.balanceAmount || 0,
+                    row.bookNo
+                ];
+            });
 
             const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
 
-            // Format amount columns (E–I) as ₹ currency
-            const currencyFmt = '₹#,##,##0';
-            ["E", "F", "G", "H", "I"].forEach(col => {
-                for (let r = 2; r <= rows.length + 1; r++) {
-                    const cell = ws[`${col}${r}`];
-                    if (cell) cell.z = currencyFmt;
+            // Format amount columns as currency
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = 2; C <= range.e.c; ++C) {  // Start from column 2 (Loan Amt)
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (!ws[cellAddress]) continue;
+                    ws[cellAddress].z = '"₹"#,##0';
                 }
-            });
-
-            ws["!cols"] = [
-                { wch: 12 }, { wch: 16 }, { wch: 30 }, { wch: 12 },
-                { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }
-            ];
+            }
 
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Collection Report");
-            XLSX.writeFile(wb, `Collection_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, "Loan Payment Report");
+            XLSX.writeFile(wb, `LoanPaymentReport_${elYear.value}_${elMonth.value}.xlsx`);
         }
-
-        // function exportPdf() {
-        //     alert("PDF export requires a server-side PDF library. This feature is planned for a future release.");
-        // }
 
         function printReport() {
-            const tbl = document.getElementById("CollectionTable").outerHTML;
-            const win = window.open("", "_blank");
-            win.document.write(`<!DOCTYPE html><html><head><title>Collection Report</title>
-        <style>body{font-family:Arial,sans-serif;font-size:12px;}
-        table{border-collapse:collapse;width:100%;}
-        th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;}
-        th{background:#f0f0f0;font-weight:700;}.text-end{text-align:right;}
-        </style></head><body>
-        <h2 style="margin-bottom:6px;">Collection Report</h2>
-        <p style="color:#666;margin-bottom:14px;">Generated: ${new Date().toLocaleString("en-IN")}</p>
-        ${tbl}</body></html>`);
-            win.document.close(); win.print();
+            window.print();
         }
 
-        // ── Init: fires both in parallel on page open ──────────────────
-        // loadReport({}) = no filters → shows ALL outstanding loans immediately.
-        // loadCustomerDropdown() populates the dropdown in the background.
-        activeFilters = {
-            fromDate: elFromDate.value || undefined,
-            toDate: elToDate.value || undefined,
-            customerId: elCustomer.value || undefined,
-            loanId: elLoanNo.value || undefined
-        };
-        loadCustomerDropdown();
-        // Wait for language to load before loading report
-        loadLanguage(currentLanguage).then(() => {
-            loadReport(activeFilters);
-        });
+        function clearApiError() {
+            document.getElementById("apiErrorBanner").style.display = "none";
+        }
 
-        // Re-render dynamic content when language switches
-        registerLanguageCallback(() => {
-            loadCustomerDropdown();
-            if (lastResult) renderGrid(lastResult);
-        });
+        function showApiError(err) {
+            const banner = document.getElementById("apiErrorBanner");
+            banner.textContent = err.message || "An error occurred while loading the report.";
+            banner.style.display = "";
+        }
+
+        // ── Initial load ───────────────────────────────────────────────
+       if (!__accessDenied) {
+    buildTableHeaders();
+    loadCustomerDropdown();
+    // Auto-load with current month on page load
+    elApply.click();
+}
     </script>
 </body>
 

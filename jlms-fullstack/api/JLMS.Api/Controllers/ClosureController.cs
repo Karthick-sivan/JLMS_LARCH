@@ -143,7 +143,7 @@ public class ClosureController : ControllerBase
             throw lastError;
 
         return Ok(new ReceiptDto(receiptNo, txn.TransactionDate, loan.LoanNumber, loan.Customer?.CustomerName ?? "",
-            calc.OutstandingInterest, calc.Penalty, calc.TotalClosureAmount, request.PaymentMode, 0, null));
+            calc.OutstandingInterest, calc.Penalty, calc.TotalClosureAmount, request.PaymentMode, 0, null, loan.BookNo));
     }
 
     // POST /api/loans/5/renew

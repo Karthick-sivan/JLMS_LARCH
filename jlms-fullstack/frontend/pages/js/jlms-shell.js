@@ -80,7 +80,7 @@ function jlmsBuildSidebar() {
         hasItems = true;
         const lbl = jlmsLabel(item.labelKey, item.label);
         // report-center matches all report pages
-        const isActive = item.id === active || (item.id === "report-center" && (active === "active-loans-report" || active === "loandetails-report" || active === "collection-reports" || active === "closureloan-report" || active === "outstanding-reports"));
+        const isActive = item.id === active || (item.id === "report-center" && (active === "active-loans-report" || active === "loandetails-report" || active === "collection-reports" || active === "closureloan-report" || active === "outstanding-reports"||active === "loan-payment-report"));
         itemsHtml += `<a class="nav-item ${isActive ? 'active' : ''}" href="${item.href}" title="${lbl}">
           <span class="icon"><i class="bi ${item.icon}"></i></span>
           <span class="label">${lbl}</span>

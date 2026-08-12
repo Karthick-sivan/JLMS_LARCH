@@ -141,11 +141,12 @@
                     <th class="text-end">Out. Interest</th>
                     <!--<th class="text-end">Penalty</th>-->
                     <th class="text-end">Total Outstanding</th>
+                    <th>Book No.</th>
                     <!-- <th>Status</th> -->
                   </tr>
                 </thead>
                 <tbody id="outstandingTableBody">
-                  <tr><td colspan="8">
+                  <tr><td colspan="9">
                     <div class="state-panel">
                       <i class="bi bi-arrow-repeat spin"></i>
                       <p>Loading outstanding report…</p>
@@ -325,7 +326,7 @@ function renderGrid(data) {
   }
 
   let pgLoan = 0, pgPrinc = 0, pgInt = 0, pgPen = 0, pgTotal = 0;
-  const rows = items.map(row => {
+  const rows = items.map((row, i) => {
     pgLoan  += row.loanAmount           || 0;
     pgPrinc += row.outstandingPrincipal || 0;
     pgInt   += row.outstandingInterest  || 0;
@@ -343,6 +344,7 @@ function renderGrid(data) {
       <td class="text-end">${fmt(row.outstandingInterest)}</td>
       
       <td class="text-end cell-strong">${fmt(row.totalOutstanding)}</td>
+      <td>${row.bookNo || '-'}</td>
     </tr>`;
   });
 
@@ -386,7 +388,7 @@ function goPage(p) {
 function exportExcel() {
   if (!lastResult || !lastResult.items || lastResult.items.length === 0) return;
 
-  const header = ["Loan No.","Customer","Scheme","Loan Amt","Out. Principal","Out. Interest","Total Outstanding"];
+  const header = ["Loan No.","Customer","Scheme","Loan Amt","Out. Principal","Out. Interest","Total Outstanding","Book No."];
 
   const rows = lastResult.items.map(row => [
     row.loanNumber,
@@ -395,7 +397,8 @@ function exportExcel() {
     row.loanAmount || 0,
     row.outstandingPrincipal || 0,
     row.outstandingInterest || 0,
-    row.totalOutstanding || 0
+    row.totalOutstanding || 0,
+    row.bookNo || '-'
     // row.status
   ]);
 

@@ -137,7 +137,8 @@ public class LoanOperationsService
                 l.InterestRatePct,
                 l.Status,
                 l.LoanDate,
-                l.MaturityDate
+                l.MaturityDate,
+                l.BookNo
             );
         }).ToList();
 
@@ -263,7 +264,7 @@ public class LoanOperationsService
             loan.LoanAmount, loan.OverallInterest, loan.OutstandingPrincipal,
             interestCalc.OutstandingInterest,  // daily-accrued total (carry-forward + newly accrued), not raw DB value
             interestCalc.MaxPayable,           // outstandingInterest + outstandingPrincipal
-            lastPaymentDate, branchName, createdByName, interestCalc);
+            lastPaymentDate, branchName, createdByName, interestCalc, loan.BookNo);
     }
 
     // ===================================================================
@@ -452,7 +453,7 @@ public class LoanOperationsService
             FormatScheme(loan),
             loan.ProcessingFee, totalAmountPaid,
             loan.OutstandingPrincipal, outstandingInterest, otherCharges,
-            grandTotal, grandTotal <= 0.009m);
+            grandTotal, grandTotal <= 0.009m, loan.BookNo);
     }
 
     public async Task<LoanOperationsClosureResponseDto> CloseLoanAsync(int loanId, LoanOperationsClosureRequestDto request, string? closePhotoPath = null)
@@ -732,7 +733,7 @@ public class LoanOperationsService
             loan.ProcessingFee, loan.Status,
             pagedRows, totalCount, safePage, safePageSize,
             totalInterestCollected, totalPrincipalCollected,
-            Round2(loan.OutstandingPrincipal + loan.OutstandingInterest));
+            Round2(loan.OutstandingPrincipal + loan.OutstandingInterest), loan.BookNo);
     }
 
     private static string DescribeTransaction(LoanTransaction t) => t.TransactionType switch

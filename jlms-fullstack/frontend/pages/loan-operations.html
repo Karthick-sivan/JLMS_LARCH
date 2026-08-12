@@ -489,6 +489,7 @@
                                 <tr>
                                     <th class="text-center" data-i18n="actions">Actions</th>
                                     <th style="width: 150px; min-width: 150px;" data-i18n="loanNo">Loan No</th>
+                                    <th style="width: 100px; min-width: 100px;" data-i18n="bookNo">Book No</th>
                                     <th style="width: 100px; min-width: 100px;" data-i18n="loanDate">Loan Date</th>
                                     <th data-i18n="customerName">Customer Name</th>
                                     <th data-i18n="loanScheme">Loan Scheme</th>
@@ -506,7 +507,7 @@
                             </thead>
                             <tbody id="resultsBody">
                                 <tr>
-                                    <td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">
+                                    <td colspan="14" class="text-center text-muted-jlms" style="padding:28px;">
                                         Loading...</td>
                                 </tr>
                             </tbody>
@@ -564,6 +565,10 @@
                                         <div class="info-row">
                                             <div class="info-label" data-i18n="loanNo">Loan No</div>
                                             <div class="info-value" id="payLoanNo">-</div>
+                                        </div>
+                                        <div class="info-row">
+                                            <div class="info-label" data-i18n="bookNo">Book No</div>
+                                            <div class="info-value" id="payBookNo">-</div>
                                         </div>
                                         <div class="info-row">
                                             <div class="info-label" data-i18n="loanDate">Loan Date</div>
@@ -865,6 +870,10 @@
                                     <div class="info-row mb-2">
                                         <div class="info-label" data-i18n="loanNo">Loan No</div>
                                         <div class="info-value" id="closeLoanNo">-</div>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <div class="info-label" data-i18n="bookNo">Book No</div>
+                                        <div class="info-value" id="closeBookNo">-</div>
                                     </div>
                                     <div class="info-row">
                                         <div class="info-label" data-i18n="totalAmountPaid">Total Amount Paid</div>
@@ -1267,7 +1276,7 @@
             clearApiError();
             currentPage = page;
             const body = document.getElementById('resultsBody');
-            body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
+            body.innerHTML = '<tr><td colspan="14" class="text-center text-muted-jlms" style="padding:28px;">Searching...</td></tr>';
 
             const f = currentFilters();
             const params = {
@@ -1285,7 +1294,7 @@
                 document.getElementById('resultCount').textContent = `${totalCount} loan${totalCount === 1 ? '' : 's'}`;
 
                 if (rows.length === 0) {
-                    body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">No loans found. Try different filters.</td></tr>';
+                    body.innerHTML = '<tr><td colspan="14" class="text-center text-muted-jlms" style="padding:28px;">No loans found. Try different filters.</td></tr>';
                     renderPagination(0, 0);
                     return;
                 }
@@ -1308,6 +1317,7 @@
                               </div>
                             </td>
                             <td class="loan-no-cell">${l.loanNo}</td>
+                            <td>${l.bookNo || '-'}</td>
                             <td>${fmtDate(l.loanDate)}</td>
                             <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
                             <td>${l.loanScheme}</td>
@@ -1327,7 +1337,7 @@
                 renderPagination(currentPage, totalPages);
             } catch (err) {
                 showApiError(err);
-                body.innerHTML = '<tr><td colspan="13" class="text-center text-muted-jlms" style="padding:28px;">Could not load loans.</td></tr>';
+                body.innerHTML = '<tr><td colspan="14" class="text-center text-muted-jlms" style="padding:28px;">Could not load loans.</td></tr>';
                 renderPagination(0, 0);
             }
         }
@@ -1404,6 +1414,7 @@
                 document.getElementById('payLoanNoLabel').textContent = details.loanNo;
                 document.getElementById('payCustomerName').textContent = details.customerName;
                 document.getElementById('payLoanNo').textContent = details.loanNo;
+                document.getElementById('payBookNo').textContent = details.bookNo || '-';
                 document.getElementById('payLoanDate').textContent = fmtDate(details.loanDate);
                 document.getElementById('payAadhaar').textContent = details.aadhaar || '-';
                 document.getElementById('payPan').textContent = details.pan || '-';
@@ -1885,6 +1896,7 @@
                 document.getElementById('closeLoanNoLabel').textContent = details.loanNo;
                 document.getElementById('closeCustomerName').textContent = details.customerName;
                 document.getElementById('closeLoanNo').textContent = details.loanNo;
+                document.getElementById('closeBookNo').textContent = details.bookNo || '-';
                 document.getElementById('closeScheme').textContent = details.loanScheme;
                 document.getElementById('closeProcessingFee').textContent = inr(details.processingFee);
                 document.getElementById('closeTotalPaid').textContent = inr(details.totalAmountPaid);

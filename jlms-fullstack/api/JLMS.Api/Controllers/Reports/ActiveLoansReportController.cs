@@ -149,7 +149,8 @@ public class ActiveLoansReportController : ControllerBase
                 LastPaymentDate: lastPayments.TryGetValue(l.LoanId, out var lp) ? lp : (DateTime?)null,
                 DaysOverdue: daysOverdue,
                 Status: derivedStatus,
-                BranchName: branchNames.TryGetValue(l.BranchId, out var bn) ? bn : ""
+                BranchName: branchNames.TryGetValue(l.BranchId, out var bn) ? bn : "",
+                BookNo: l.BookNo
             );
         }).ToList();
 

@@ -146,6 +146,10 @@ CREATE TABLE Loans (
     CustomerId        INT NOT NULL REFERENCES Customers(CustomerId),
     LoanSchemeId      INT NOT NULL REFERENCES LoanSchemes(LoanSchemeId),
     BranchId          INT NOT NULL REFERENCES Branches(BranchId),
+    BookNo            AS (CASE 
+                            WHEN BranchId = 2 THEN LoanNumber
+                            ELSE CAST(CAST(RIGHT(LoanNumber, PATINDEX('%[0-9]%', REVERSE(LoanNumber))) AS INT) AS VARCHAR(10))
+                          END) PERSISTED,
 
     LoanDate          DATE NULL,
     MaturityDate      DATE NULL,
