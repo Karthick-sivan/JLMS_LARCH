@@ -91,7 +91,8 @@ public class CollectionReportsController : ControllerBase
              PrincipalAmount: isDisbursement ? 0 : t.PrincipalAmount,
             InterestAmount: isDisbursement ? (t.FirstMonthInt ?? 0) : t.InterestAmount,
             TotalAmount: isDisbursement ? (t.FirstMonthInt ?? 0) : t.TotalAmount,
-            BalanceAmount: t.BalancePrincipalAfter ?? 0
+            BalanceAmount: t.BalancePrincipalAfter ?? 0,
+            BookNo: t.Loan?.BookNo
                 
 
             );

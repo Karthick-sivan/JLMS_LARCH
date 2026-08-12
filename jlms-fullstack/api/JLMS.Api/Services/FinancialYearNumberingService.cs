@@ -13,7 +13,7 @@ public class FinancialYearNumberingService
 
     // Branch 2 gets its own LOAN NUMBER scheme only — CustomerCode for branch 2
     // still goes through the normal FinancialYear-driven path below, untouched.
-    private const int Branch2Id = 2;
+    private const int Branch2Id = 100;
     private const int Branch2BlockSize = 10000;
 
     private readonly JlmsDbContext _db;
@@ -52,7 +52,28 @@ public class FinancialYearNumberingService
                 (branchId.HasValue ? $" for branch {branchId.Value}" : "") +
                 ". Add one on the Financial Year screen.");
 
-        var seq = fy.GoldLoanNoStartsFrom;
+        // Find the last loan number for this financial year/branch to start from the correct sequence
+        var lastLoan = await _db.Loans.AsNoTracking()
+            .Where(l => l.LoanNumber.StartsWith(fy.Prefix))
+            .Where(l => branchId.HasValue ? l.BranchId == branchId.Value : true)
+            .OrderByDescending(l => l.LoanNumber)
+            .FirstOrDefaultAsync();
+
+        int seq;
+        if (lastLoan != null && lastLoan.LoanNumber.Length >= fy.Prefix.Length + 5)
+        {
+            // Extract the 5-digit sequence from the last loan number
+            var seqStr = lastLoan.LoanNumber.Substring(fy.Prefix.Length, 5);
+            if (int.TryParse(seqStr, out int lastSeq))
+                seq = lastSeq + 1;
+            else
+                seq = fy.GoldLoanNoStartsFrom;
+        }
+        else
+        {
+            seq = fy.GoldLoanNoStartsFrom;
+        }
+
         string candidate;
         do
         {

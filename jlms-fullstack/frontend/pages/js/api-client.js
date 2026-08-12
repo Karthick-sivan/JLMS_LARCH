@@ -8,8 +8,8 @@
    when you run the API).
    ============================================================ */
 
-// const API_BASE_URL = "http://localhost:5080/api";
-const API_BASE_URL = "https://jlmsapi.larcherp.com/api";
+const API_BASE_URL = "http://localhost:5080/api";
+// const API_BASE_URL = "https://jlmsapi.larcherp.com/api";
 
 
 class ApiError extends Error {
@@ -244,6 +244,16 @@ searchLoansForLoanDetailsReport: (q) => apiRequest(`/loandetails-report/loan-sea
         return apiRequest(`/closed-loans-report${qs ? "?" + qs : ""}`);
     },
     searchCustomersForClosedReport: (q) => apiRequest(`/closed-loans-report/customer-search?q=${encodeURIComponent(q)}`),
+
+    // ---- Loan Payment Report ----
+    getLoanPaymentReport: (params = {}) => {
+        const qs = new URLSearchParams(
+            Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""))
+        ).toString();
+        return apiRequest(`/loan-payment-report${qs ? "?" + qs : ""}`);
+    },
+    searchCustomersForLoanPaymentReport: (q) => apiRequest(`/loan-payment-report/customer-search?q=${encodeURIComponent(q)}`),
+    getLoansByCustomerForLoanPaymentReport: (customerId) => apiRequest(`/loan-payment-report/loans-by-customer?customerId=${customerId}`),
 
     // ---- Branches (used by report filter dropdowns — adjust path if your actual
     // branches endpoint differs; I couldn't see a BranchesController in what you shared) ----

@@ -203,7 +203,7 @@ public class CollectionsController : ControllerBase
             throw lastError;
 
         return Ok(new ReceiptDto(receiptNo, txn.TransactionDate, loan.LoanNumber, loan.Customer?.CustomerName ?? "",
-            interestCollected, penaltyCollected, txn.TotalAmount, request.PaymentMode, loan.OutstandingPrincipal, nextDue));
+            interestCollected, penaltyCollected, txn.TotalAmount, request.PaymentMode, loan.OutstandingPrincipal, nextDue, loan.BookNo));
     }
 
     // POST /api/loans/5/collect-principal

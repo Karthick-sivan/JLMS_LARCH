@@ -113,7 +113,7 @@ public record LoanSummaryDto(
     int LoanId, string LoanNumber, string CustomerName, string Status,
     decimal MarketValue, decimal EligibleAmount, decimal LoanAmount,
     decimal OutstandingPrincipal, decimal OutstandingInterest,
-    DateTime? LoanDate, DateTime? MaturityDate
+    DateTime? LoanDate, DateTime? MaturityDate, string? BookNo
 );
 
 // ---------- New Loan creation response (includes created jewel item ids so the
@@ -122,7 +122,7 @@ public record NewLoanJewelItemRefDto(int JewelItemId, int JewelTypeId);
 public record NewLoanResponseDto(
     int LoanId, string LoanNumber, string Status,
     decimal MarketValue, decimal EligibleAmount, decimal LoanAmount, decimal OverallInterest,
-    List<NewLoanJewelItemRefDto> JewelItems
+    List<NewLoanJewelItemRefDto> JewelItems, string? BookNo
 );
 
 // ---------- Approval / Disbursement ----------
@@ -134,7 +134,7 @@ public record InterestCollectionRequestDto(decimal AmountReceived, string Paymen
 public record PrincipalCollectionRequestDto(decimal PrincipalAmount, string PaymentMode, string? ReferenceNo, int ProcessedByUserId);
 public record ReceiptDto(string ReceiptNumber, DateTime TransactionDate, string LoanNumber, string CustomerName,
     decimal InterestCollected, decimal PenaltyCollected, decimal TotalReceived, string PaymentMode,
-    decimal BalancePrincipal, DateTime? NextDueDate);
+    decimal BalancePrincipal, DateTime? NextDueDate, string? BookNo);
 
 // ---------- Renewal / Closure ----------
 public record RenewalRequestDto(decimal RenewalCharges, int NewTenureMonths, int ProcessedByUserId);
@@ -154,7 +154,8 @@ public record LoanDueRowDto(
     string CustomerName,
     decimal OutstandingPrincipal,
     DateTime MaturityDate,
-    bool IsOverdue
+    bool IsOverdue,
+    string? BookNo
 );
 // ---------- User Master ----------
 public record UserMasterDto(
@@ -219,7 +220,8 @@ public record OutstandingReportRowDto(
     //decimal PenaltyAccrued,
     decimal TotalOutstanding,
     int DaysOverdue,
-    string Status
+    string Status,
+    string? BookNo
 );
 
 public record OutstandingReportPagedDto(
@@ -250,7 +252,8 @@ public record CollectionReportRowDto(
     decimal PrincipalAmount,
     decimal InterestAmount,
     decimal TotalAmount,
-    decimal BalanceAmount
+    decimal BalanceAmount,
+    string? BookNo
 );
 
 public record CollectionReportPagedDto(
@@ -298,7 +301,8 @@ public record LoanOperationsGridRowDto(
     decimal AnnualInterestRate,
     string Status,
     DateTime? LoanDate,
-    DateTime? MaturityDate
+    DateTime? MaturityDate,
+    string? BookNo
 );
 
 public record LoanOperationsGridResultDto(
@@ -416,7 +420,7 @@ public record SubmitForApprovalResponseDto(
     int ApprovedByUserId, DateTime ApprovedAt, string ReceiptNumber, DateTime DisbursedAt,
     DateTime? LoanDate, DateTime? MaturityDate, decimal LoanAmount, decimal ProcessingFee,
     decimal NetDisbursedAmount, decimal OutstandingPrincipal, decimal OutstandingInterest,
-    string PaymentMode
+    string PaymentMode, string? BookNo
 );
 
 
@@ -440,7 +444,8 @@ public record LoanOperationsLedgerResponseDto(
     int PageSize,
     decimal TotalInterestCollected,
     decimal TotalPrincipalCollected,
-    decimal CurrentOutstanding
+    decimal CurrentOutstanding,
+    string? BookNo
 );
 
 
@@ -457,7 +462,8 @@ public record LoanOperationsClosureDetailsDto(
     decimal OutstandingInterest,
     decimal OtherCharges,
     decimal GrandTotal,
-    bool IsClosable
+    bool IsClosable,
+    string? BookNo
 );
 
 
@@ -484,7 +490,8 @@ public record LoanOperationsPaymentDetailsDto(
     DateTime? LastPaymentDate,
     string BranchName,
     string? CreatedByName,
-    LoanOperationsInterestCalculationDto InterestCalculation
+    LoanOperationsInterestCalculationDto InterestCalculation,
+    string? BookNo
 );
 
 // ---------- Customers: lightweight list for the "browse customers" picker ----------
@@ -515,7 +522,8 @@ public record ActiveLoanReportRowDto(
     DateTime? LastPaymentDate,
     int DaysOverdue,
     string Status,                 // derived: Active / Due / Overdue
-    string BranchName
+    string BranchName,
+    string? BookNo
 );
 
 public record ActiveLoanReportPagedDto(
@@ -560,7 +568,8 @@ public record LoanDetailsReportRowDto(
     DateTime? LastPaymentDate,
     int DaysOverdue,
     string Status,
-    string BranchName
+    string BranchName,
+    string? BookNo
 );
 public record LoanDetailsReportPagedDto(
     List<LoanDetailsReportRowDto> Items,
@@ -607,7 +616,8 @@ public record ClosedLoanReportRowDto(
     string BranchName,
     string? ClosureReceiptNo,
     string Status,
-    string? Remarks
+    string? Remarks,
+    string? BookNo
 );
 
 public record ClosedLoanReportPagedDto(
@@ -638,7 +648,12 @@ public record PaymentReceiptPdfDto(
     decimal AmountReceived,
     decimal RemainingInterest,
     decimal RemainingPrincipal,
-    string? GuardianName = null
+    string? GuardianName = null,
+    int BranchId = 1,
+    string? BranchName = null,
+    string? City = null,
+    string? State = null,
+    string? BookNo = null
 );
 
 // ---- Closure Receipt PDF ----
@@ -654,7 +669,12 @@ public record ClosureReceiptPdfDto(
     decimal OutstandingInterest,
     decimal OtherCharges,
     decimal GrandTotal,
-      string? GuardianName = null
+      string? GuardianName = null,
+    int BranchId = 1,
+    string? BranchName = null,
+    string? City = null,
+    string? State = null,
+    string? BookNo = null
 );
 
 
@@ -695,3 +715,34 @@ public record FinancialYearUpdateDto(
     string Status,
     int? BranchId
     );
+
+// ---------- Loan Payment Report ----------
+public record LoanPaymentReportRowDto(
+    int LoanId,
+    string LoanNumber,
+    DateTime? LoanDate,
+    decimal LoanAmount,
+    string CustomerName,
+    string? GuardianName,
+    string Mobile,
+    DateTime PaymentDate,
+    decimal PrincipalAmount,
+    decimal InterestAmount,
+    decimal PaidAmount,
+    decimal BalanceAmount,
+    string? BookNo
+);
+
+public record LoanPaymentReportPagedDto(
+    List<LoanPaymentReportRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    int Year,
+    int Month,
+    decimal TotalLoanAmount,
+    decimal TotalPrincipalAmount,
+    decimal TotalInterestAmount,
+    decimal TotalPaidAmount,
+    decimal TotalBalanceAmount
+);

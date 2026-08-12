@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       body.innerHTML = rows.map(r => `
         <tr>
-          <td class="cell-link">${r.loanNumber}</td>
+          <td class="cell-link">${r.loanNumber}<br><small style="color:#6b7280;font-size:0.75em;">${r.bookNo || '-'}</small></td>
           <td>${r.customerName}</td>
           <td class="text-end cell-strong">₹${Number(r.totalAmount).toLocaleString('en-IN')}</td>
           <td><span class="badge-jlms badge-neutral"><span class="dot"></span>${r.paymentMode || '—'}</span></td>
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       body.innerHTML = rows.map(r => `
         <tr class="${r.isOverdue ? 'row-alert' : ''}">
-          <td class="cell-link">${r.loanNumber}</td>
+          <td class="cell-link">${r.loanNumber}<br><small style="color:#6b7280;font-size:0.75em;">${r.bookNo || '-'}</small></td>
           <td>${r.customerName}</td>
           <td class="text-end cell-strong">₹${Number(r.outstandingPrincipal).toLocaleString('en-IN')}</td>
           <td>${new Date(r.maturityDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>

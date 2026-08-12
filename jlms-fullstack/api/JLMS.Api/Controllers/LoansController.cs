@@ -43,7 +43,7 @@ public class LoansController : ControllerBase
         return Ok(loans.Select(l => new LoanSummaryDto(
             l.LoanId, l.LoanNumber, l.Customer?.CustomerName ?? "", l.Status,
             l.MarketValue, l.EligibleAmount, l.LoanAmount,
-            l.OutstandingPrincipal, l.OutstandingInterest, l.LoanDate, l.MaturityDate)));
+            l.OutstandingPrincipal, l.OutstandingInterest, l.LoanDate, l.MaturityDate, l.BookNo)));
     }
 
     // GET /api/loans/JL-20261247
@@ -70,6 +70,7 @@ public class LoansController : ControllerBase
         {
             loan.LoanId,
             loan.LoanNumber,
+            loan.BookNo,
             loan.Status,
             CustomerName = loan.Customer?.CustomerName,
             CustomerCode = loan.Customer?.CustomerCode,
@@ -389,7 +390,7 @@ public class LoansController : ControllerBase
             txn?.ReceiptNumber ?? "", loan.DisbursedAt ?? DateTime.MinValue,
             loan.LoanDate, loan.MaturityDate, loan.LoanAmount, loan.ProcessingFee,
             txn?.TotalAmount ?? 0, loan.OutstandingPrincipal, loan.OutstandingInterest,
-            txn?.PaymentMode ?? ""
+            txn?.PaymentMode ?? "", loan.BookNo
         );
     }
 
@@ -489,7 +490,8 @@ public class LoansController : ControllerBase
             Status = "PendingApproval",
             Remarks = request.Remarks,
             CreatedAt = DateTime.UtcNow,
-            JewelItems = jewelItemEntities
+            JewelItems = jewelItemEntities,
+            BookNo = LoanReceiptPdfService.ExtractBookNo(loanNumber, branchId)
         };
 
         _db.Loans.Add(loan);
@@ -503,7 +505,8 @@ public class LoansController : ControllerBase
             loan.EligibleAmount,
             loan.LoanAmount,
             loan.OverallInterest,
-            jewelItemEntities.Select(ji => new NewLoanJewelItemRefDto(ji.JewelItemId, ji.JewelTypeId)).ToList()
+            jewelItemEntities.Select(ji => new NewLoanJewelItemRefDto(ji.JewelItemId, ji.JewelTypeId)).ToList(),
+            loan.BookNo
         ));
     }
 
@@ -649,7 +652,15 @@ public class LoansController : ControllerBase
         if (loan == null) return NotFound(new { message = "Loan not found." });
         if (loan.Customer == null) return BadRequest(new { message = "Loan has no linked customer." });
 
-        var bytes = _receiptService.GenerateReceipt(loan);
+        // Fetch current user's branch details (not the loan's branch)
+        var currentUser = HttpContext.Items["CurrentUser"] as Models.User;
+        var userBranchId = currentUser?.BranchId ?? loan.BranchId;
+        var branch = await _db.Branches.FindAsync(userBranchId);
+        string? branchName = branch?.BranchName;
+        string? city = branch?.City;
+        string? state = branch?.State;
+
+        var bytes = _receiptService.GenerateReceipt(loan, branchName, city, state);
         Response.Headers["Content-Disposition"] = $"inline; filename=Receipt-{loan.LoanNumber}.pdf";
         return File(bytes, "application/pdf");
     }
@@ -778,6 +789,6 @@ public class LoansController : ControllerBase
             throw lastError;
 
         return Ok(new ReceiptDto(receiptNo, txn.TransactionDate, loan.LoanNumber, loan.Customer?.CustomerName ?? "",
-            0, 0, netDisbursement, request.PaymentMode, loan.OutstandingPrincipal, maturity));
+            0, 0, netDisbursement, request.PaymentMode, loan.OutstandingPrincipal, maturity, loan.BookNo));
     }
 }

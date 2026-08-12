@@ -119,6 +119,7 @@ public class Loan
     public int LoanSchemeId { get; set; }
     public LoanScheme? LoanScheme { get; set; }
     public int BranchId { get; set; }
+    public string? BookNo { get; set; }
 
     public DateTime? LoanDate { get; set; }
     public DateTime? MaturityDate { get; set; }
