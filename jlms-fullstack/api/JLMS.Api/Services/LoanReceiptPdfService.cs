@@ -263,7 +263,7 @@ public class LoanReceiptPdfService
         if (string.IsNullOrWhiteSpace(loanNumber))
             return string.Empty;
 
-        if (branchId == 2)
+        if (branchId == 100)
             return loanNumber;
 
         // Extract last 5 digits (the book number portion)
