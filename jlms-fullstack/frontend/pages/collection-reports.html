@@ -340,7 +340,7 @@
                                         <tr>
                                             <th data-i18n="txnDate">Txn Date</th>
                                             <th data-i18n="loanNo">Loan No.</th>
-                                            <th data-i18n="bookNo">Book No</th>
+                                            <th class="text-end" data-i18n="bookNo">Book No</th>
                                             <th data-i18n="loanDate">Loan Date</th>
                                             <th data-i18n="customer">Customer</th>
                                             <th data-i18n="scheme">Scheme</th>
@@ -603,7 +603,7 @@
                 return `<tr>
        <td>${fmtDate(row.transactionDate)}</td>
        <td class="cell-link" title="Type: ${row.transactionType} | Date: ${fmtDate(row.transactionDate)}">${row.loanNumber}</td>
-       <td>${row.bookNo || '-'}</td>
+       <td class="text-end">${row.bookNo || '-'}</td>
        <td>${fmtDate(row.loanDate)}</td>
       <td data-export="${row.customerName} (${row.customerCode} · ${row.customerMobile})">
         <div style="font-weight:600;">${row.customerName}</div>
