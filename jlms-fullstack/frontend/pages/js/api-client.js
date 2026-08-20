@@ -168,6 +168,17 @@ const Api = {
   disburseLoan: (id, dto) => apiRequest(`/loans/${id}/disburse`, { method: "POST", body: dto }),
   submitForApproval: (id, dto) => apiRequest(`/loans/${id}/submit-for-approval`, { method: "POST", body: dto }),
 
+    // ---- Loans: main list grid + pre-disbursement edit ----
+  getLoansGrid: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(params).filter(([, v]) => v !== null && v !== undefined && v !== ""))
+    ).toString();
+    return apiRequest(`/loans/grid${qs ? "?" + qs : ""}`);
+  },
+  getLoanEditDetails: (loanId) => apiRequest(`/loans/${loanId}/edit-details`),
+  updateLoan: (loanId, dto) => apiRequest(`/loans/${loanId}`, { method: "PUT", body: dto }),
+
+  
   // ---- Collections ----
   getOutstanding: (loanId) => apiRequest(`/loans/${loanId}/outstanding`),
   collectInterest: (loanId, dto) => apiRequest(`/loans/${loanId}/collect-interest`, { method: "POST", body: dto }),

@@ -1,15 +1,12 @@
 {
   "appName": "Gold Loan Management",
-
   "home": "Home",
   "dashboard": "Dashboard",
-
   "login": "Sign In",
   "logout": "Sign Out",
   "username": "Username",
   "password": "Password",
   "forgotPassword": "Forgot Password?",
-
   "customer": "Customer",
   "customers": "Customers",
   "customerId": "Customer ID",
@@ -17,7 +14,6 @@
   "customerCode": "Customer Code",
   "customerRegistration": "Customer Registration",
   "customerSearch": "Customer Search",
-
   "loan": "Loan",
   "loanNo": "Loan No",
   "loanNumber": "Loan Number",
@@ -31,7 +27,6 @@
   "closedLoan": "Closed Loan",
   "loanRenewal": "Loan Renewal",
   "loanRelease": "Jewel Release",
-
   "goldDetails": "Gold Details",
   "ornament": "Ornament",
   "ornamentType": "Ornament Type",
@@ -41,7 +36,6 @@
   "purity": "Purity",
   "karat": "Karat",
   "quantity": "Quantity",
-
   "principalAmount": "Principal Amount",
   "interest": "Interest",
   "interestRate": "Interest Rate",
@@ -49,44 +43,34 @@
   "penalty": "Penalty",
   "totalAmount": "Total Amount",
   "balanceAmount": "Balance Amount",
-
   "branch": "Branch",
-
   "employee": "Employee",
   "employeeName": "Employee Name",
-
   "address": "Address",
   "city": "City",
   "district": "District",
   "state": "State",
   "country": "Country",
   "pincode": "Pincode",
-
   "mobile": "Mobile Number",
   "phone": "Phone",
   "email": "Email",
-
   "aadhaar": "Aadhaar Number",
   "pan": "PAN Number",
-
   "gender": "Gender",
   "male": "Male",
   "female": "Female",
   "other": "Other",
-
   "dateOfBirth": "Date of Birth",
   "age": "Age",
-
   "status": "Status",
   "remarks": "Remarks",
   "description": "Description",
-
   "search": "Search",
   "filter": "Filter",
   "clear": "Clear",
   "reset": "Reset",
   "refresh": "Refresh",
-
   "save": "Save",
   "update": "Update",
   "edit": "Edit",
@@ -96,51 +80,40 @@
   "submit": "Submit",
   "approve": "Approve",
   "reject": "Reject",
-
   "add": "Add",
   "remove": "Remove",
   "view": "View",
   "details": "Details",
   "action": "Action",
-
   "print": "Print",
   "preview": "Preview",
   "download": "Download",
-
   "active": "Active",
   "inactive": "Inactive",
   "pending": "Pending",
   "completed": "Completed",
   "rejected": "Rejected",
   "approved": "Approved",
-
   "yes": "Yes",
   "no": "No",
-
   "loading": "Loading...",
   "noData": "No data available",
   "noRecords": "No records found",
-
   "total": "Total",
   "subtotal": "Subtotal",
   "grandTotal": "Grand Total",
-
   "dailyReport": "Daily Report",
   "monthlyReport": "Monthly Report",
   "yearlyReport": "Yearly Report",
-
   "fromDate": "From Date",
   "toDate": "To Date",
   "date": "Date",
-
   "financialYear": "Financial Year",
-
   "settings": "Settings",
   "configuration": "Configuration",
   "users": "Users",
   "roles": "Roles",
   "permissions": "Permissions",
-
   "customerDetails": "Customer Details",
   "nomineeDetails": "Nominee Details",
   "uploadPhoto": "Upload Photo",
@@ -158,7 +131,6 @@
   "nomineeDocumentUpload": "Nominee Document Upload",
   "nomineePhoto": "Nominee Photo",
   "nomineeAadhaarCopy": "Nominee Aadhaar Copy",
-
   "searchCustomer": "Search customer by name, mobile, or code",
   "browseCustomers": "Browse Customers",
   "addJewelItem": "Add Jewel Item",
@@ -168,77 +140,63 @@
   "loanSummary": "Loan Summary",
   "calculateValuation": "Calculate Valuation",
   "submitForApproval": "Submit for Approval",
-
   "paymentDate": "Payment Date",
   "paymentMode": "Payment Mode",
   "closureReceipt": "Closure Receipt",
   "results": "Results",
-
   "loanSchemeMaster": "Loan Scheme Master",
   "addScheme": "Add Scheme",
   "schemeName": "Scheme Name",
   "tenure": "Tenure",
   "maxLtvRatio": "Max LTV Ratio(Loan Limit %)",
   "loanSchemes": "Loan Schemes",
-
   "closureCalculation": "Closure Calculation",
   "referenceNo": "Reference No.",
-
   "loanDisbursement": "Loan Disbursement",
   "findApprovedLoan": "Find Approved Loan",
   "approvedLoans": "Approved Loans",
   "referenceChequeNo": "Reference / Cheque No.",
-
   "loanApprovalQueue": "Loan Approval Queue",
   "pendingApprovals": "Pending Approvals",
   "jewelSummary": "Jewel Summary",
   "approvalDecision": "Approval Decision",
-
   "jewelRelease": "Jewel Release",
   "loanCustomerDetails": "Loan & Customer Details",
   "customerAcknowledgement": "Customer Acknowledgement",
   "customerSignature": "Customer Signature",
   "releaseChecklist": "Release Checklist",
-
   "interestCollection": "Interest Collection",
   "receivePayment": "Receive Payment",
   "amountReceived": "Amount Received",
-
   "principalPartPaymentCollection": "Principal (Part-Payment) Collection",
   "receivePrincipalPayment": "Receive Principal Payment",
-
   "currentLoan": "Current Loan",
   "renewalTerms": "Renewal Terms",
   "interestSettlement": "Interest Settlement",
   "renewalCharges": "Renewal Charges",
   "newTenure": "New Tenure",
-
   "jewelAppraisal": "Jewel Appraisal",
   "appraisalDate": "Appraisal Date",
   "appraisedBy": "Appraised By",
   "jewelItems": "Jewel Items",
   "jewelPhotos": "Jewel Photos",
   "valuationSummary": "Valuation Summary",
-
   "branchMaster": "Branch Master",
   "systemBranches": "System Branches",
   "newBranch": "New Branch",
   "branchCode": "Branch Code",
-
   "goldRateMaster": "Gold Rate Master",
   "updateTodaysRate": "Update Today's Rate",
   "rate22K": "22K Rate (per gram)",
   "silverRate": "Silver Rate (per gram)",
   "rateTrend": "Rate Trend — 22K & Silver (Last 30 Days)",
   "rateHistory": "Rate History",
-
   "jewelTypeMaster": "Jewel Type Master",
   "addJewelType": "Add Jewel Type",
   "jewelTypeName": "Jewel Type Name",
   "defaultPurity": "Default Purity",
   "standardWastage": "Standard Wastage %",
   "jewelTypes": "Jewel Types",
-
   "allFinancialYears": "All Financial Years",
   "financialYearCode": "Financial Year Code",
   "seriesType": "Series Type",
@@ -279,7 +237,6 @@
   "cusPlaceholder": "CUS-000000",
   "mobilePlaceholder": "10-digit mobile",
   "aadhaarPlaceholder": "XXXX-XXXX-XXXX",
-
   "loanAmt": "Loan Amt",
   "balAmt": "Bal Amt",
   "closureDate": "Closure Date",
@@ -313,7 +270,6 @@
   "grossWt": "Gross Wt (g)",
   "outPrincipal": "Out. Principal",
   "outInterest": "Out. Interest",
-
   "reportCategories": "Report Categories",
   "loanReport": "Loan Report",
   "loanItemReports": "Loan & Item Reports",
@@ -331,7 +287,6 @@
   "loadingLoanReport": "Loading Loan Report…",
   "pageTotal": "Page Total",
   "prefix": "Prefix",
-
   "serialNo": "Serial No",
   "welcome": "Welcome",
   "ongoingLoans": "Ongoing Loans",
@@ -349,7 +304,6 @@
   "loanScheme": "Loan Scheme",
   "loansDueTodaySoon": "Loans Due Today/Soon",
   "customerPhoto": "Customer Photo",
-
   "amount": "Amount",
   "mode": "Mode",
   "outstanding": "Outstanding",
@@ -365,13 +319,11 @@
   "kycInformation": "KYC Information",
   "documentUpload": "Document Upload",
   "namePlaceholder": "Search by customer name",
-
   "transactions": "Transactions",
   "masters": "Masters",
   "reports": "Reports",
   "reportCenter": "Report Center",
   "createAdministrator": "Create Administrator",
-
   "step1SelectCustomer": "Step 1 — Select Customer",
   "step2JewelItemsAppraisal": "Step 2 — Jewel Items & Appraisal",
   "step3LoanTerms": "Step 3 — Loan Terms",
@@ -385,5 +337,15 @@
   "dontValidateExceed": "Don't validate — allow requested amount to exceed eligible amount",
   "requestedLoanAmount": "Requested Loan Amount",
   "addJewelCalculateFirst": "Add jewel items & calculate valuation first",
-  "firstMonthInterest": "First Month Interest"
+  "firstMonthInterest": "First Month Interest",
+  "loanList": "Loan List",
+  "editLoan": "Edit Loan",
+  "saveChanges": "Save Changes",
+  "allStatuses": "All Statuses",
+  "lockedEditNotice": "This loan has already moved past disbursement (a payment/closure has been recorded) and can no longer be edited here.",
+  "loanNoPlaceholder": "Loan No.",
+  "customerNamePlaceholderShort": "Customer name",
+  "noLoansFound": "No loans found.",
+
+  "statusProcessing": "Processing"
 }

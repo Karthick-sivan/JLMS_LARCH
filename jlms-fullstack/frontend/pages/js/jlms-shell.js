@@ -8,11 +8,11 @@ const JLMS_MENU = [
   { sectionKey: "", sectionLabel: "", items: [
     { id: "dashboard", icon: "bi-speedometer2", labelKey: "dashboard", label: "Dashboard", href: "dashboard.html" }
   ]},
-  { sectionKey: "transactions", sectionLabel: "Transactions", items: [
+ { sectionKey: "transactions", sectionLabel: "Transactions", items: [
     { id: "customer-registration", icon: "bi-person-plus",     labelKey: "customerRegistration", label: "Customer Registration", href: "customer-registration.html" },
-    { id: "new-loan",             icon: "bi-file-earmark-plus", labelKey: "newLoan",             label: "New Loan",             href: "new-loan.html" },
+    { id: "new-loan",             icon: "bi-file-earmark-plus", labelKey: "newLoan",             label: "New Loan",             href: "loans-list.html" },   // ← was new-loan.html
     { id: "loan-operations",      icon: "bi-unlock",            labelKey: "loanOperations",      label: "Loan Operations",      href: "loan-operations.html" }
-  ]},
+]},
   { sectionKey: "masters", sectionLabel: "Masters", items: [
     { id: "branch-master",      icon: "bi-building",      labelKey: "branchMaster",     label: "Branch Master",      href: "branch-master.html" },
     { id: "user-master",        icon: "bi-people",        labelKey: "users",            label: "User Master",        href: "user-master.html" },

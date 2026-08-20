@@ -791,4 +791,271 @@ public class LoansController : ControllerBase
         return Ok(new ReceiptDto(receiptNo, txn.TransactionDate, loan.LoanNumber, loan.Customer?.CustomerName ?? "",
             0, 0, netDisbursement, request.PaymentMode, loan.OutstandingPrincipal, maturity, loan.BookNo));
     }
+
+    [HttpGet("grid")]
+    public async Task<ActionResult<LoanListGridResultDto>> GetLoanListGrid([FromQuery] LoanListGridQueryDto q)
+    {
+        var query = _db.Loans.AsNoTracking()
+            .Include(l => l.Customer)
+            .Include(l => l.LoanScheme)
+            .Include(l => l.JewelItems).ThenInclude(ji => ji.JewelType)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(q.LoanNo))
+            query = query.Where(l => l.LoanNumber.Contains(q.LoanNo));
+        if (!string.IsNullOrWhiteSpace(q.CustomerName))
+            query = query.Where(l => l.Customer!.CustomerName.Contains(q.CustomerName));
+        if (!string.IsNullOrWhiteSpace(q.Mobile))
+            query = query.Where(l => l.Customer!.Mobile.Contains(q.Mobile));
+        if (!string.IsNullOrWhiteSpace(q.Status))
+            query = query.Where(l => l.Status == q.Status);
+
+        var totalCount = await query.CountAsync();
+        var page = q.Page < 1 ? 1 : q.Page;
+        var pageSize = q.PageSize < 1 ? 10 : q.PageSize;
+
+        var loans = await query
+            .OrderByDescending(l => l.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var loanIds = loans.Select(l => l.LoanId).ToList();
+
+        // Edit rule: a loan stays editable ONLY while every transaction recorded
+        // against it is still "Disbursement". The instant any other transaction
+        // type shows up (payment, closure, etc.), it's locked from this screen.
+        var lockedLoanIds = await _db.LoanTransactions.AsNoTracking()
+            .Where(t => loanIds.Contains(t.LoanId) && t.TransactionType != "Disbursement")
+            .Select(t => t.LoanId)
+            .Distinct()
+            .ToListAsync();
+
+        var firstMonthInts = await _db.LoanTransactions.AsNoTracking()
+            .Where(t => loanIds.Contains(t.LoanId) && t.TransactionType == "Disbursement")
+            .GroupBy(t => t.LoanId)
+            .Select(g => new
+            {
+                LoanId = g.Key,
+                FirstMonthInt = g.OrderByDescending(x => x.TransactionDate).First().FirstMonthInt
+            })
+            .ToListAsync();
+
+        var items = loans.Select(l => new LoanListRowDto(
+            l.LoanId,
+            l.LoanNumber,
+            l.BookNo,
+
+            l.Customer?.CustomerName ?? "",
+            l.Customer?.Mobile ?? "",
+            l.LoanScheme?.SchemeName ?? "",
+            l.Status,
+            l.LoanAmount,
+            l.MarketValue,
+            l.EligibleAmount,
+            firstMonthInts.FirstOrDefault(f => f.LoanId == l.LoanId)?.FirstMonthInt ?? 0,
+            l.LoanDate ?? l.CreatedAt,
+            !lockedLoanIds.Contains(l.LoanId),
+            l.JewelItems.Select(ji => new LoanListJewelItemDto(
+                ji.JewelType?.JewelTypeName ?? "",
+                ji.Quantity,
+                ji.Model,
+                ji.Varient,
+                ji.GrossWeightGrams
+            )).ToList()
+        )).ToList();
+
+        return Ok(new LoanListGridResultDto(items, totalCount, page, pageSize));
+    }
+
+    // GET /api/loans/5/edit-details
+    // Feeds the edit modal: current jewel items + whether editing is still allowed.
+    [HttpGet("{id:int}/edit-details")]
+    public async Task<ActionResult<LoanEditDetailsDto>> GetLoanEditDetails(int id)
+    {
+        var loan = await _db.Loans.AsNoTracking()
+            .Include(l => l.Customer)
+            .Include(l => l.JewelItems)
+            .FirstOrDefaultAsync(l => l.LoanId == id);
+        if (loan == null) return NotFound($"Loan {id} not found.");
+
+        var isEditable = !await _db.LoanTransactions.AsNoTracking()
+            .AnyAsync(t => t.LoanId == id && t.TransactionType != "Disbursement");
+
+        var lastDisbursement = await _db.LoanTransactions.AsNoTracking()
+            .Where(t => t.LoanId == id && t.TransactionType == "Disbursement")
+            .OrderByDescending(t => t.TransactionDate)
+            .FirstOrDefaultAsync();
+
+        return Ok(new LoanEditDetailsDto(
+            loan.LoanId,
+            loan.LoanNumber,
+            loan.BookNo,
+
+            isEditable,
+            loan.CustomerId,
+            loan.Customer?.CustomerName ?? "",
+            loan.Customer?.CustomerCode ?? "",
+            loan.Customer?.Mobile ?? "",
+            loan.LoanSchemeId,
+            loan.InterestRatePct,
+            loan.TenureMonths,
+            loan.ProcessingFee,
+            loan.Remarks,
+            loan.LoanAmount,
+            loan.EligibleAmount,
+            loan.MarketValue,
+            lastDisbursement?.FirstMonthInt ?? 0,
+            loan.JewelItems.Select(ji => new LoanEditJewelItemDto(
+                ji.JewelItemId, ji.JewelTypeId, ji.Quantity, ji.GrossWeightGrams,
+                ji.StoneWeightGrams, ji.Purity, ji.Model, ji.Varient)).ToList()
+        ));
+    }
+
+    // PUT /api/loans/5
+    // Saves the fully-edited loan — customer, scheme, jewel items, amount,
+    // processing fee, remarks — same scope of fields as loan creation.
+    // Locked server-side (not just in the UI): a stale grid or a direct API
+    // call can't slip an edit through once the loan has moved past disbursement.
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<LoanEditResponseDto>> EditLoan(int id, [FromBody] LoanEditRequestDto request)
+    {
+        await using var tx = await _db.Database.BeginTransactionAsync();
+        try
+        {
+            var loan = await _db.Loans
+                .Include(l => l.JewelItems)
+                .FirstOrDefaultAsync(l => l.LoanId == id);
+            if (loan == null) return NotFound($"Loan {id} not found.");
+
+            var isLocked = await _db.LoanTransactions
+                .AnyAsync(t => t.LoanId == id && t.TransactionType != "Disbursement");
+            if (isLocked)
+                return BadRequest("This loan has moved past disbursement and can no longer be edited here.");
+
+            var customer = await _db.Customers.FindAsync(request.CustomerId);
+            if (customer == null) return BadRequest("Customer not found.");
+
+            var scheme = await _db.LoanSchemes.FindAsync(request.LoanSchemeId);
+            if (scheme == null || !scheme.IsActive) return BadRequest("Loan scheme is missing or inactive.");
+
+            if (request.JewelItems == null || request.JewelItems.Count == 0)
+                return BadRequest("At least one jewel item is required.");
+
+            if (request.ProcessingFee < 0)
+                return BadRequest("Processing fee cannot be negative.");
+
+            var today = DateTime.UtcNow.Date;
+            var goldRate = await _db.GoldRates.AsNoTracking()
+                .Where(r => r.EffectiveDate <= today)
+                .OrderByDescending(r => r.EffectiveDate)
+                .FirstOrDefaultAsync();
+            if (goldRate == null) return BadRequest("No gold rate configured. Set today's rate first.");
+
+            var jewelTypeIds = request.JewelItems.Select(i => i.JewelTypeId).Distinct().ToList();
+            var jewelTypes = await _db.JewelTypes.AsNoTracking()
+                .Where(jt => jewelTypeIds.Contains(jt.JewelTypeId))
+                .ToDictionaryAsync(jt => jt.JewelTypeId);
+
+            // Simplest safe way to sync type/qty/weight edits: replace the item set wholesale.
+            _db.JewelItems.RemoveRange(loan.JewelItems);
+
+            decimal totalMarketValue = 0;
+            var newItems = new List<JewelItem>();
+            foreach (var item in request.JewelItems)
+            {
+                if (!jewelTypes.TryGetValue(item.JewelTypeId, out var jewelType))
+                    return BadRequest($"Unknown JewelTypeId {item.JewelTypeId}.");
+
+                var purity = item.Purity ?? jewelType.DefaultPurity;
+                var (netWeight, marketValue) = _calc.CalculateJewelValue(
+                    item.GrossWeightGrams, item.StoneWeightGrams, purity,
+                    goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K);
+
+                totalMarketValue += marketValue;
+                newItems.Add(new JewelItem
+                {
+                    LoanId = loan.LoanId,
+                    JewelTypeId = item.JewelTypeId,
+                    Quantity = item.Quantity,
+                    GrossWeightGrams = item.GrossWeightGrams,
+                    StoneWeightGrams = item.StoneWeightGrams,
+                    NetWeightGrams = netWeight,
+                    Purity = purity,
+                    Model = item.Model,
+                    Varient = item.Varient,
+                    MarketValue = marketValue,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+            _db.JewelItems.AddRange(newItems);
+
+            var eligibleAmount = _calc.CalculateEligibleAmount(totalMarketValue, scheme.MaxLtvPercent);
+            if (!request.AllowExceedEligible && request.RequestedLoanAmount > eligibleAmount)
+                return BadRequest(
+                    $"Requested amount \u20b9{request.RequestedLoanAmount:N2} exceeds eligible amount \u20b9{eligibleAmount:N2}. " +
+                    "Set allowExceedEligible to override.");
+
+            var overallInterest = Math.Round(
+                request.RequestedLoanAmount * scheme.InterestRatePct / 100m, 2, MidpointRounding.AwayFromZero);
+            var firstMonthInterest = Math.Round(
+                request.RequestedLoanAmount * scheme.InterestRatePct / 100m / scheme.TenureMonths, 2, MidpointRounding.AwayFromZero);
+
+            // Customer, scheme (and its rate/tenure), processing fee, remarks — all editable now.
+            loan.CustomerId = request.CustomerId;
+            loan.LoanSchemeId = request.LoanSchemeId;
+            loan.InterestRatePct = scheme.InterestRatePct;
+            loan.TenureMonths = scheme.TenureMonths;
+            loan.ProcessingFee = request.ProcessingFee;
+            loan.Remarks = request.Remarks;
+
+            loan.MarketValue = totalMarketValue;
+            loan.EligibleAmount = eligibleAmount;
+            loan.LoanAmount = request.RequestedLoanAmount;
+            loan.OverallInterest = overallInterest;
+            loan.OutstandingPrincipal = request.RequestedLoanAmount;
+            loan.OutstandingInterest = overallInterest;
+            loan.UpdatedAt = DateTime.UtcNow;
+
+            // Keep the existing Disbursement ledger row (and any receipt built from it)
+            // in sync with the edited amount, processing fee, and FirstMonthInt.
+            var disbursementTxn = await _db.LoanTransactions
+                .Where(t => t.LoanId == id && t.TransactionType == "Disbursement")
+                .OrderByDescending(t => t.TransactionDate)
+                .FirstOrDefaultAsync();
+            if (disbursementTxn != null)
+            {
+                disbursementTxn.PrincipalAmount = loan.LoanAmount;
+                disbursementTxn.ChargesAmount = loan.ProcessingFee;
+                disbursementTxn.TotalAmount = loan.LoanAmount - loan.ProcessingFee;
+                disbursementTxn.BalancePrincipalAfter = loan.OutstandingPrincipal;
+                disbursementTxn.FirstMonthInt = firstMonthInterest;
+            }
+
+            _db.AuditLogs.Add(new AuditLog
+            {
+                EventTime = DateTime.UtcNow,
+                UserId = request.EditedByUserId,
+                ModuleName = "LoanEdit",
+                ActionDescription =
+                    $"Edited loan {loan.LoanNumber} while still pre-disbursement-lock: " +
+                    $"customer/scheme/amount/jewel items updated (amount -> \u20b9{loan.LoanAmount:N2}).",
+                RecordReference = loan.LoanNumber
+            });
+
+            await _db.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return Ok(new LoanEditResponseDto(
+                loan.LoanId, loan.LoanNumber,loan.BookNo, loan.MarketValue, loan.EligibleAmount,
+                loan.LoanAmount, loan.OverallInterest, firstMonthInterest));
+        }
+        catch
+        {
+            if (_db.Database.CurrentTransaction != null) await tx.RollbackAsync();
+            throw;
+        }
+    }
+
+
 }
