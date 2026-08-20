@@ -489,7 +489,8 @@
                                 <tr>
                                     <th class="text-center" data-i18n="actions">Actions</th>
                                     <th style="width: 150px; min-width: 150px;" data-i18n="loanNo">Loan No</th>
-                                    <th style="width: 100px; min-width: 100px;" data-i18n="bookNo">Book No</th>
+                                    <!-- <th style="width: 100px; min-width: 100px;" data-i18n="bookNo">Book No</th> -->
+                                     <th class="text-end" style="width: 100px; min-width: 100px;" data-i18n="bookNo">Book No</th>
                                     <th style="width: 100px; min-width: 100px;" data-i18n="loanDate">Loan Date</th>
                                     <th data-i18n="customerName">Customer Name</th>
                                     <th data-i18n="loanScheme">Loan Scheme</th>
@@ -1317,7 +1318,7 @@
                               </div>
                             </td>
                             <td class="loan-no-cell">${l.loanNo}</td>
-                            <td>${l.bookNo || '-'}</td>
+                            <td class="text-end">${l.bookNo || '-'}</td>
                             <td>${fmtDate(l.loanDate)}</td>
                             <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
                             <td>${l.loanScheme}</td>

@@ -473,5 +473,18 @@
 "closeLoanBtn": "அடகு முடி",
 
 
-"loanLedger": "அடகு பேரேடு"
+"loanLedger": "அடகு பேரேடு",
+
+
+"loanList": "அடகு பட்டியல்",
+"editLoan": "அடகு திருத்து",
+"saveChanges": "மாற்றங்களை சேமி",
+"allStatuses": "அனைத்து நிலைகள்",
+"lockedEditNotice": "இந்த அடகு ஏற்கனவே வழங்கலுக்குப் பிறகு நகர்ந்துவிட்டது (ஒரு கட்டணம்/முடிப்பு பதிவு செய்யப்பட்டுள்ளது) — இங்கு இனி திருத்த முடியாது.",
+"loanNoPlaceholder": "அடகு எண்",
+"customerNamePlaceholderShort": "வாடிக்கையாளர் பெயர்",
+"noLoansFound": "அடகுகள் எதுவும் கிடைக்கவில்லை.",
+
+"statusProcessing": "செயலாக்கத்தில்"
+
 }

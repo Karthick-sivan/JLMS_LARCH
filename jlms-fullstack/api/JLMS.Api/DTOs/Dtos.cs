@@ -746,3 +746,107 @@ public record LoanPaymentReportPagedDto(
     decimal TotalPaidAmount,
     decimal TotalBalanceAmount
 );
+
+
+
+public record LoanListGridQueryDto(
+    string? LoanNo,
+    string? CustomerName,
+    string? Mobile,
+    string? Status,
+    int Page = 1,
+    int PageSize = 10
+);
+
+public record LoanListJewelItemDto(
+    string JewelTypeName,
+    int Quantity,
+    string? Model,
+    string? Variant,
+    decimal GrossWeightGrams
+);
+
+public record LoanListRowDto(
+    int LoanId,
+    string LoanNumber,
+    string BookNo,
+    string CustomerName,
+    string Mobile,
+    string SchemeName,
+    string Status,
+    decimal LoanAmount,
+    decimal MarketValue,
+    decimal EligibleAmount,
+    decimal FirstMonthInt,
+    DateTime LoanDate,
+    bool IsEditable,   // false the moment any transaction other than "Disbursement" exists
+    List<LoanListJewelItemDto> JewelItems
+);
+
+public record LoanListGridResultDto(
+    List<LoanListRowDto> Items,
+    int TotalCount,
+    int Page,
+    int PageSize
+);
+
+// ---------- Full edit page (edit-loan.html) ----------
+
+public record LoanEditJewelItemDto(
+    int? JewelItemId,      // null = brand-new row added while editing
+    int JewelTypeId,
+    int Quantity,
+    decimal GrossWeightGrams,
+    decimal StoneWeightGrams,
+    string? Purity,
+    string? Model,
+    string? Varient
+);
+
+// Everything the edit page needs to render itself pre-filled, same shape of
+// information new-loan.html gathers when creating — customer, scheme,
+// jewel items, processing fee, remarks — plus the editable/lock flag.
+public record LoanEditDetailsDto(
+    int LoanId,
+    string LoanNumber,
+    string BookNo,
+
+    bool IsEditable,
+    int CustomerId,
+    string CustomerName,
+    string CustomerCode,
+    string CustomerMobile,
+    int LoanSchemeId,
+    decimal InterestRatePct,
+    int TenureMonths,
+    decimal ProcessingFee,
+    string? Remarks,
+    decimal RequestedLoanAmount,
+    decimal EligibleAmount,
+    decimal MarketValue,
+    decimal FirstMonthInt,
+    List<LoanEditJewelItemDto> JewelItems
+);
+
+public record LoanEditRequestDto(
+    int CustomerId,
+    int LoanSchemeId,
+    List<LoanEditJewelItemDto> JewelItems,
+    decimal RequestedLoanAmount,
+    decimal ProcessingFee,
+    string? Remarks,
+    bool AllowExceedEligible,
+    int EditedByUserId
+);
+
+public record LoanEditResponseDto(
+    int LoanId,
+    string LoanNumber,
+    string BookNo,
+
+    decimal MarketValue,
+    decimal EligibleAmount,
+    decimal LoanAmount,
+    decimal OverallInterest,
+    decimal FirstMonthInt
+);

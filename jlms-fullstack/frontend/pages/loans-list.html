@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>JLMS — Loans</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/jlms-core.css">
+  <style>
+    /* ---- Loan List page-scoped styles (mirrors loan-operations.html) ---- */
+    .btn-icon-jlms {
+      border: none;
+      background: transparent;
+      color: var(--navy-700);
+      font-size: 1.05rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      line-height: 1;
+    }
+
+    .btn-icon-jlms:hover:not(:disabled) {
+      background: rgba(13, 59, 102, 0.08);
+    }
+
+    .btn-icon-jlms:disabled {
+      color: var(--n-300);
+      cursor: not-allowed;
+    }
+
+    .loan-no-cell {
+      font-weight: 600;
+      color: var(--navy-700);
+    }
+
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-top: 1px solid #eef0f3;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pagination-bar .page-info {
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    .page-size-select {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .page-size-select select {
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid #d7dce3;
+      font-size: 0.85rem;
+    }
+
+    .actions-cell {
+      white-space: nowrap;
+    }
+
+    .action-icons-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    /* ---- Edit modal (jewel-items grid) ---- */
+    .appraisal-table input,
+    .appraisal-table select {
+      width: 100%;
+      border: 1px solid var(--n-200);
+      border-radius: 3px;
+      padding: 5px 7px;
+      font-size: 12px;
+    }
+
+    .appraisal-table select { min-width: 140px; }
+    .appraisal-table input { text-align: right; }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <div id="jlmsSidebarMount"></div>
+    <div class="main-col">
+      <div id="jlmsTopbarMount"></div>
+      <div class="page-content">
+
+        <div class="page-header">
+          <div>
+            <div class="h1" data-i18n="loanList">New Loan</div>
+          </div>
+          <div class="page-actions">
+            <a href="new-loan.html" class="btn-jlms btn-jlms-primary"><i class="bi bi-plus-lg"></i> <span data-i18n="newLoan">New Loan</span></a>
+          </div>
+        </div>
+
+        <div id="apiErrorBanner" class="api-error-banner"></div>
+        <div id="apiSuccessBanner" class="api-success-banner"></div>
+
+        <!-- Filters -->
+        <div class="panel mb-3">
+          <div class="panel-body">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-3">
+                <label class="field-label" data-i18n="loanNo">Loan No</label>
+                <input type="text" class="form-control-jlms" id="fltLoanNo" data-i18n-placeholder="loanNumberPlaceholder" placeholder="Search by loan number">
+              </div>
+              <div class="col-md-3">
+                <label class="field-label" data-i18n="customerName">Customer Name</label>
+                <input type="text" class="form-control-jlms" id="fltCustomer" data-i18n-placeholder="customerNamePlaceholder" placeholder="Search by name">
+              </div>
+              <div class="col-md-3">
+                <label class="field-label" data-i18n="mobile">Mobile</label>
+                <input type="text" class="form-control-jlms" id="fltMobile" data-i18n-placeholder="mobilePlaceholder" placeholder="10-digit mobile">
+              </div>
+              <div class="col-md-3 d-flex gap-2 justify-content-end">
+                <button class="btn-jlms btn-jlms-outline" id="btnReset"><i class="bi bi-x-circle"></i> <span data-i18n="reset">Reset</span></button>
+                <button class="btn-jlms btn-jlms-primary" id="btnFilter"><i class="bi bi-search"></i> <span data-i18n="search">Search</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results grid -->
+        <div class="panel">
+          <div class="grid-toolbar">
+            <div class="grid-toolbar-left">
+              <span class="h4" data-i18n="loanList">Loan List</span>
+              <span class="badge-jlms badge-neutral" id="resultCount">0 loans</span>
+            </div>
+          </div>
+          <div class="panel-body no-pad table-jlms-wrap">
+            <table class="table-jlms">
+              <thead>
+                <tr>
+                  <th class="text-center" style="width:6%;" data-i18n="edit">Edit</th>
+                  <th style="width:10%;" data-i18n="loanNo">Loan No</th>
+                  <th class="text-end" style="width:6%;" data-i18n="bookNo">Book No</th>
+
+                  <th class="text-end" style="width:14%;" data-i18n="loanAmount">Loan Amount</th>
+
+                  <th style="width:9%;" data-i18n="loanDate">Loan Date</th>
+                  <th style="width:16%;" data-i18n="customerName">Customer</th>
+                  <th style="width:12%;" data-i18n="jewelType">Jewel Type</th>
+                  <th class="text-center" style="width:6%;" data-i18n="quantity">Qty</th>
+                  <th style="width:10%;" data-i18n="model">Model</th>
+                  <th style="width:8%;" data-i18n="variant">Variant</th>
+                  <th class="text-end" style="width:9%;" data-i18n="grossWeight">Gross Wt (g)</th>
+                  <!-- <th class="text-end" data-i18n="firstMonthInterest">First Month Int.</th>
+                  <th data-i18n="status">Status</th> -->
+                </tr>
+              </thead>
+              <tbody id="loansGridBody">
+                <tr><td colspan="11" class="text-center text-muted-jlms" style="padding:28px;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination-bar">
+            <div class="page-size-select">
+              <span data-i18n="rowsPerPage">Rows per page</span>
+              <select id="pageSizeSelect">
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+            <div class="page-info" id="pageInfo"></div>
+            <nav>
+              <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+            </nav>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script>window.JLMS_ACTIVE = "new-loan";</script>
+  <script src="js/language.js"></script>
+  <script src="js/api-client.js"></script>
+  <script src="js/jlms-shell.js"></script>
+  <script>
+    jlmsInitShell();
+
+    function inr(n) {
+      return `₹${Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function fmtDate(d) {
+      if (!d) return '-';
+      const dt = new Date(d);
+      const day = String(dt.getDate()).padStart(2, '0');
+      const month = String(dt.getMonth() + 1).padStart(2, '0');
+      const year = dt.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+
+    function initials(name) {
+      return (name || '').split(' ').filter(Boolean).map(p => p[0]).join('').substring(0, 2).toUpperCase() || '—';
+    }
+
+  
+
+    /* ============================ Grid state =============================== */
+
+    let pageSize = 10;
+    let currentPage = 1;
+    let totalPages = 1;
+
+    function currentFilters() {
+      return {
+        loanNo: document.getElementById('fltLoanNo').value.trim(),
+        customerName: document.getElementById('fltCustomer').value.trim(),
+        mobile: document.getElementById('fltMobile').value.trim(),
+      };
+    }
+
+    async function runSearch(page = 1) {
+      clearApiError();
+      currentPage = page;
+      const tbody = document.getElementById('loansGridBody');
+      tbody.innerHTML = `<tr><td colspan="11" class="text-center text-muted-jlms" style="padding:28px;">${lang.searching || 'Searching...'}</td></tr>`;
+
+      const f = currentFilters();
+      try {
+        const result = await Api.getLoansGrid({
+          page: currentPage,
+          pageSize: pageSize,
+          loanNo: f.loanNo,
+          customerName: f.customerName,
+          mobile: f.mobile,
+      
+        });
+
+        const rows = result.items || [];
+        const totalCount = result.totalCount ?? rows.length;
+
+        document.getElementById('resultCount').textContent =
+          `${totalCount} ${totalCount === 1 ? (lang.loan || 'loan') : (lang.loans || 'loans')}`;
+
+        if (rows.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="11" class="text-center text-muted-jlms" style="padding:28px;">${lang.noLoansFound || 'No loans found. Try different filters.'}</td></tr>`;
+          renderPagination(0, 0);
+          return;
+        }
+
+        tbody.innerHTML = rows.map(l => {
+          const jewelItems = l.jewelItems || [];
+          const firstItem = jewelItems[0] || {};
+          const jewelInfo = jewelItems.length > 1 
+            ? `${firstItem.jewelTypeName || ''} (+${jewelItems.length - 1})` 
+            : (firstItem.jewelTypeName || '');
+          
+          return `
+          <tr>
+            <td class="text-center actions-cell">
+              <div class="action-icons-row">
+                <button class="btn-icon-jlms" data-loan-id="${l.loanId}" ${l.isEditable ? '' : 'disabled'}
+                  title="${l.isEditable ? (lang.edit || 'Edit') : 'Locked — a non-disbursement transaction already exists'}">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+              </div>
+            </td>
+            <td class="loan-no-cell">${l.loanNumber}</td>
+           <td class="text-end">${l.bookNo}</td>
+
+            <td class="text-end">${inr(l.loanAmount)}</td>
+            <td>${fmtDate(l.loanDate)}</td>
+            <td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar-sm">${initials(l.customerName)}</div>${l.customerName}</div></td>
+            <td>${jewelInfo}</td>
+            <td class="text-center">${firstItem.quantity || '-'}</td>
+            <td>${firstItem.model || '-'}</td>
+            <td>${firstItem.variant || '-'}</td>
+            <td class="text-end">${firstItem.grossWeightGrams ? Number(firstItem.grossWeightGrams).toFixed(3) : '-'}</td>
+       
+          </tr>`;
+        }).join('');
+
+        tbody.querySelectorAll('.btn-icon-jlms:not(:disabled)').forEach(btn => {
+          btn.addEventListener('click', () => {
+            window.location.href = `edit-loan.html?id=${btn.dataset.loanId}`;
+          });
+        });
+
+        totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+        renderPagination(currentPage, totalPages);
+      } catch (err) {
+        showApiError(err);
+        tbody.innerHTML = `<tr><td colspan="11" class="text-center text-muted-jlms" style="padding:28px;">Could not load loans.</td></tr>`;
+        renderPagination(0, 0);
+      }
+    }
+
+    function renderPagination(page, pages) {
+      const info = document.getElementById('pageInfo');
+      const controls = document.getElementById('paginationControls');
+      if (pages === 0) {
+        info.textContent = '';
+        controls.innerHTML = '';
+        return;
+      }
+      info.textContent = (lang.pageOf || 'Page {page} of {pages}').replace('{page}', page).replace('{pages}', pages);
+
+      let html = '';
+      html += `<li class="page-item ${page <= 1 ? 'disabled' : ''}">
+        <button class="page-link" onclick="runSearch(${page - 1})">${lang.previous || 'Prev'}</button></li>`;
+
+      const windowSize = 5;
+      let start = Math.max(1, page - Math.floor(windowSize / 2));
+      let end = Math.min(pages, start + windowSize - 1);
+      start = Math.max(1, end - windowSize + 1);
+
+      for (let p = start; p <= end; p++) {
+        html += `<li class="page-item ${p === page ? 'active' : ''}">
+          <button class="page-link" onclick="runSearch(${p})">${p}</button></li>`;
+      }
+
+      html += `<li class="page-item ${page >= pages ? 'disabled' : ''}">
+        <button class="page-link" onclick="runSearch(${page + 1})">${lang.next || 'Next'}</button></li>`;
+
+      controls.innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Session.requireLogin();
+
+      const carriedMsg = sessionStorage.getItem('jlms_loanCreatedMsg');
+      if (carriedMsg) {
+        const successBanner = document.getElementById('apiSuccessBanner');
+        successBanner.textContent = carriedMsg;
+        successBanner.style.display = 'block';
+        sessionStorage.removeItem('jlms_loanCreatedMsg');
+      }
+
+      document.getElementById('btnFilter').addEventListener('click', () => runSearch(1));
+      document.getElementById('btnReset').addEventListener('click', () => {
+        ['fltLoanNo', 'fltCustomer', 'fltMobile'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('fltStatus').value = '';
+        runSearch(1);
+      });
+      ['fltLoanNo', 'fltCustomer', 'fltMobile'].forEach(id => {
+        document.getElementById(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(1); });
+      });
+      document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+        pageSize = parseInt(e.target.value, 10) || 10;
+        runSearch(1);
+      });
+
+      runSearch(1);
+    });
+
+    window.runSearch = runSearch;
+  </script>
+</body>
+
+</html>
