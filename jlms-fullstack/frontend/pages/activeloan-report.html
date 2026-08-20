@@ -358,7 +358,7 @@
                     <tr>
                       <th data-i18n="serialNo">S.No</th>
                       <th data-i18n="loanNo">Loan No</th>
-                      <th data-i18n="bookNo">Book No</th>
+                      <th class="text-end" data-i18n="bookNo">Book No</th>
                       <th data-i18n="loanDate">Loan Date</th>
                       <th data-i18n="customer">Customer</th>
                       <th class="text-end" data-i18n="loanAmt">Loan Amt</th>
@@ -602,7 +602,7 @@
         return `<tr>
     <td>${startNo + i}</td>
     <td class="nowrap" title="Maturity: ${fmtDate(r.maturityDate)}">${r.loanNumber}</td>
-    <td>${r.bookNo || '-'}</td>
+    <td class="text-end">${r.bookNo || '-'}</td>
     <td>${fmtDate(r.loanDate)}</td>
     <td data-export="${r.customerName} (${r.customerCode})">${r.customerName}<br><small style="color:#9aa4b2;font-size:0.78em;">${r.customerCode}</small></td>
     <td class="text-end">${fmt(r.principalAmount)}</td>
