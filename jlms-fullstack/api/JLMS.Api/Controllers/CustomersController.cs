@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+ï»¿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JLMS.Api.Data;
 using JLMS.Api.Models;
@@ -260,7 +260,7 @@ public class CustomersController : ControllerBase
             panPath = Path.Combine("PAN", fileName).Replace("\\", "/");
         }
 
-        // Nominee documents are optional — only saved if the user actually uploaded them.
+        // Nominee documents are optional ï¿½ only saved if the user actually uploaded them.
         if (dto.NomineePhoto != null && dto.NomineePhoto.Length > 0)
         {
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.NomineePhoto.FileName);
@@ -300,7 +300,7 @@ public class CustomersController : ControllerBase
             AadhaarDocPath = aadhaarPath,
             PanDocPath = panPath,
 
-            // Nominee fields are all optional — stored as null/blank when not provided.
+            // Nominee fields are all optional ï¿½ stored as null/blank when not provided.
             NomineeName = string.IsNullOrWhiteSpace(dto.NomineeName) ? null : dto.NomineeName,
             NomineeMobile = string.IsNullOrWhiteSpace(dto.NomineeMobile) ? null : dto.NomineeMobile,
             NomineeAddress = string.IsNullOrWhiteSpace(dto.NomineeAddress) ? null : dto.NomineeAddress,
@@ -371,7 +371,7 @@ public class CustomersController : ControllerBase
         entity.KycVerified = dto.KycVerified;
 
         // Nominee text fields are optional and editable via this endpoint.
-        // Nominee documents are not updated here — add a dedicated [FromForm] endpoint if needed.
+        // Nominee documents are not updated here ï¿½ add a dedicated [FromForm] endpoint if needed.
         entity.NomineeName = string.IsNullOrWhiteSpace(dto.NomineeName) ? null : dto.NomineeName;
         entity.NomineeMobile = string.IsNullOrWhiteSpace(dto.NomineeMobile) ? null : dto.NomineeMobile;
         entity.NomineeAddress = string.IsNullOrWhiteSpace(dto.NomineeAddress) ? null : dto.NomineeAddress;
@@ -419,12 +419,16 @@ public async Task<IActionResult> UploadDocument(int id, string docType, IFormFil
             return BadRequest(new { message = "Invalid document type." });
     }
 
-    // Server-side enforcement: never allow overwriting a doc that's already there.
-    if (!string.IsNullOrEmpty(existingPath))
-        return BadRequest(new { message = "This document is already uploaded and locked." });
-
     var uploadsRoot = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
     Directory.CreateDirectory(Path.Combine(uploadsRoot, folder));
+
+    // If a previous file exists on disk, delete it before saving the replacement
+    if (!string.IsNullOrEmpty(existingPath))
+    {
+        var oldFilePath = Path.Combine(uploadsRoot, existingPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        if (System.IO.File.Exists(oldFilePath))
+            System.IO.File.Delete(oldFilePath);
+    }
 
     var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
     var filePath = Path.Combine(uploadsRoot, folder, fileName);

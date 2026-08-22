@@ -316,10 +316,14 @@
                         </button>
 
                       </div>
-                      <!-- EDIT MODE: badge shown instead of upload buttons -->
+                      <!-- EDIT MODE: change button shown instead of lock badge -->
                       <div id="photoEditBadge" style="display:none;" class="mt-2">
-                        <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be
-                          changed</span>
+                        <button type="button" class="btn btn-sm btn-outline-warning w-100" id="photoChangeBtn">
+                          <i class="bi bi-arrow-repeat"></i> Change Photo
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success mt-1 w-100" id="capturePhotoEditBtn">
+                          <i class="bi bi-camera"></i> Capture New Photo
+                        </button>
                       </div>
 
                       <input type="file" id="customerPhoto" accept=".jpg,.jpeg,.png" hidden>
@@ -336,10 +340,11 @@
                         <div class="ul-text" id="aadhaarText">Click or drag to upload</div>
                         <div class="ul-sub">PDF, JPG up to 5MB</div>
                       </div>
-                      <!-- EDIT MODE: badge shown, upload box hidden -->
+                      <!-- EDIT MODE: change button shown instead of lock badge -->
                       <div id="aadhaarEditBadge" style="display:none;" class="mt-2">
-                        <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be
-                          changed</span>
+                        <button type="button" class="btn btn-sm btn-outline-warning w-100" id="aadhaarChangeBtn">
+                          <i class="bi bi-arrow-repeat"></i> Change Aadhaar Copy
+                        </button>
                       </div>
 
                       <input type="file" id="aadhaarFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
@@ -356,10 +361,11 @@
                         <div class="ul-text" id="panText">Click or drag to upload</div>
                         <div class="ul-sub">PDF, JPG up to 5MB</div>
                       </div>
-                      <!-- EDIT MODE: badge shown, upload box hidden -->
+                      <!-- EDIT MODE: change button shown instead of lock badge -->
                       <div id="panEditBadge" style="display:none;" class="mt-2">
-                        <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be
-                          changed</span>
+                        <button type="button" class="btn btn-sm btn-outline-warning w-100" id="panChangeBtn">
+                          <i class="bi bi-arrow-repeat"></i> Change PAN Copy
+                        </button>
                       </div>
 
                       <input type="file" id="panFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
@@ -429,10 +435,11 @@
                         <div class="ul-text" id="nomineePhotoText">Click or drag to upload</div>
                         <div class="ul-sub">JPG, PNG up to 5MB</div>
                       </div>
-                      <!-- EDIT MODE: badge shown in edit mode -->
+                      <!-- EDIT MODE: change button shown instead of lock badge -->
                       <div id="nomineePhotoEditBadge" style="display:none;" class="mt-2">
-                        <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be
-                          changed</span>
+                        <button type="button" class="btn btn-sm btn-outline-warning w-100" id="nomineePhotoChangeBtn">
+                          <i class="bi bi-arrow-repeat"></i> Change Nominee Photo
+                        </button>
                       </div>
                       <input type="file" id="nomineePhoto" accept=".jpg,.jpeg,.png" hidden>
                     </div>
@@ -446,10 +453,11 @@
                         <div class="ul-text" id="nomineeAadhaarText">Click or drag to upload</div>
                         <div class="ul-sub">PDF, JPG up to 5MB</div>
                       </div>
-                      <!-- EDIT MODE: badge shown in edit mode -->
+                      <!-- EDIT MODE: change button shown instead of lock badge -->
                       <div id="nomineeAadhaarEditBadge" style="display:none;" class="mt-2">
-                        <span class="edit-doc-badge"><i class="bi bi-lock-fill"></i> Document locked — cannot be
-                          changed</span>
+                        <button type="button" class="btn btn-sm btn-outline-warning w-100" id="nomineeAadhaarChangeBtn">
+                          <i class="bi bi-arrow-repeat"></i> Change Nominee Aadhaar
+                        </button>
                       </div>
                       <input type="file" id="nomineeAadhaarFile" accept=".pdf,.jpg,.jpeg,.png" hidden>
                     </div>
@@ -480,15 +488,30 @@
 
     let editModeDocState = { photo: false, aadhaar: false, pan: false, nomineePhoto: false, nomineeAadhaar: false };
 
+    // In edit mode: if a doc already exists show the "Change" badge button,
+    // hide the regular upload control. Clicking the badge button reveals the
+    // upload control again so the user can pick a replacement file.
     function setDocLockState(hasDoc, uploadEl, badgeEl) {
       if (!uploadEl || !badgeEl) return;
       if (hasDoc) {
         uploadEl.style.setProperty('display', 'none', 'important');
         badgeEl.style.display = 'block';
       } else {
-        uploadEl.style.display = '';   // leave upload control usable
+        uploadEl.style.display = '';
         badgeEl.style.display = 'none';
       }
+    }
+
+    function bindChangeBtn(changeBtnId, uploadEl, badgeEl, fileInputId) {
+      const btn = document.getElementById(changeBtnId);
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        // Show upload control, hide badge so user can pick a new file
+        uploadEl.style.display = '';
+        badgeEl.style.display = 'none';
+        // Trigger file picker immediately
+        document.getElementById(fileInputId).click();
+      });
     }
     jlmsInitShell();
     let selectedGender = null;
@@ -612,15 +635,31 @@
         custNameInput.style.background = '#f3f4f6';
         custNameInput.title = 'Customer name cannot be changed after registration';
 
-        // Lock: Aadhaar & PAN text inputs — read-only in edit mode
-        document.getElementById('custAadhaar').readOnly = true;
-        document.getElementById('custAadhaar').style.background = '#f3f4f6';
-        document.getElementById('custPan').readOnly = true;
-        document.getElementById('custPan').style.background = '#f3f4f6';
+        // Aadhaar & PAN remain EDITABLE in edit mode (user can correct them)
+        // (no lock applied)
 
 
         // Load and populate the form
         loadCustomerForEdit(editId);
+
+        // Bind "Change" buttons for each document type
+        // (these buttons are inside the badge divs; wiring done after DOM ready)
+        // We defer until after loadCustomerForEdit populates editModeDocState
+        setTimeout(() => {
+          bindChangeBtn('photoChangeBtn',         document.getElementById('photoUploadControls'), document.getElementById('photoEditBadge'),         'customerPhoto');
+          bindChangeBtn('aadhaarChangeBtn',       document.getElementById('aadhaarUploadBox'),    document.getElementById('aadhaarEditBadge'),       'aadhaarFile');
+          bindChangeBtn('panChangeBtn',           document.getElementById('panUploadBox'),        document.getElementById('panEditBadge'),           'panFile');
+          bindChangeBtn('nomineePhotoChangeBtn',  document.getElementById('nomineePhotoUploadBox'), document.getElementById('nomineePhotoEditBadge'), 'nomineePhoto');
+          bindChangeBtn('nomineeAadhaarChangeBtn',document.getElementById('nomineeAadhaarUploadBox'), document.getElementById('nomineeAadhaarEditBadge'), 'nomineeAadhaarFile');
+
+          // Wire Capture Photo button in edit mode
+          const captureEditBtn = document.getElementById('capturePhotoEditBtn');
+          if (captureEditBtn) {
+            captureEditBtn.addEventListener('click', () => {
+              document.getElementById('capturePhotoBtn').click();
+            });
+          }
+        }, 1500);
       }
       // ──────────────────────────────────────────────────────────────────────────
 
@@ -1108,7 +1147,8 @@
             ];
 
             for (const f of docFieldMap) {
-              if (!editModeDocState[f.key] && f.file) {
+              // Upload whenever the user selected a new file (regardless of prior state)
+              if (f.file) {
                 await uploadCustomerDocument(editId, f.type, f.file);
                 editModeDocState[f.key] = true;
                 setDocLockState(true, f.uploadEl, f.badgeEl);
