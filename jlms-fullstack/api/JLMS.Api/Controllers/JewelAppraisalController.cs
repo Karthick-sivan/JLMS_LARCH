@@ -42,18 +42,27 @@ public class JewelAppraisalController : ControllerBase
             .Where(jt => jewelTypeIds.Contains(jt.JewelTypeId))
             .ToDictionaryAsync(jt => jt.JewelTypeId);
 
+        var categoryNames = await _db.JewelCategories.AsNoTracking()
+            .ToDictionaryAsync(c => c.JewelCategoryId, c => c.CategoryName);
+
         var results = new List<JewelItemResultDto>();
         decimal totalGross = 0, totalStone = 0, totalNet = 0, totalValue = 0;
+        bool hasGold = false, hasSilver = false;
 
         foreach (var item in request.Items)
         {
             if (!jewelTypes.TryGetValue(item.JewelTypeId, out var jewelType))
                 return BadRequest($"Unknown JewelTypeId {item.JewelTypeId}. Please check Jewel Type Master.");
 
+            var isSilver = LoanCalculationService.IsSilverCategory(
+                item.JewelCategoryId is int cid && categoryNames.TryGetValue(cid, out var picked) ? picked : jewelType.Category);
+
             var purity = item.Purity ?? jewelType.DefaultPurity;
             var (netWeight, marketValue) = _calc.CalculateJewelValue(
                 item.GrossWeightGrams, item.StoneWeightGrams, purity,
-                goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K);
+                goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K, goldRate.SilverRate, isSilver);
+
+            if (isSilver) hasSilver = true; else hasGold = true;
 
             var lineNetWeight = netWeight;
             var lineMarketValue = marketValue;
@@ -67,6 +76,10 @@ public class JewelAppraisalController : ControllerBase
             totalValue += lineMarketValue;
         }
 
-        return Ok(new AppraisalResultDto(results, totalGross, totalStone, totalNet, goldRate.Rate22K, totalValue));
+        return Ok(new AppraisalResultDto(
+            results, totalGross, totalStone, totalNet,
+            hasGold ? goldRate.Rate22K : null,
+            hasSilver ? goldRate.SilverRate : null,
+            totalValue));
     }
 }

@@ -63,6 +63,23 @@ public class JewelTypesController : ControllerBase
 }
 
 [ApiController]
+[Route("api/jewel-categories")]
+public class JewelCategoriesController : ControllerBase
+{
+    private readonly JlmsDbContext _db;
+    public JewelCategoriesController(JlmsDbContext db) => _db = db;
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<JewelCategoryDto>>> GetAll([FromQuery] bool activeOnly = false)
+    {
+        var query = _db.JewelCategories.AsNoTracking().AsQueryable();
+        if (activeOnly) query = query.Where(c => c.IsActive);
+        var items = await query.OrderBy(c => c.JewelCategoryId).ToListAsync();
+        return Ok(items.Select(c => new JewelCategoryDto(c.JewelCategoryId, c.CategoryName, c.IsActive, c.BranchId)));
+    }
+}
+
+[ApiController]
 [Route("api/gold-rates")]
 public class GoldRatesController : ControllerBase
 {

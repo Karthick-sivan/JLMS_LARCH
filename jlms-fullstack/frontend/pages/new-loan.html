@@ -520,6 +520,7 @@
                   <thead id="jewelItemsThead">
                     <tr>
                       <th style="width:36px;">#</th>
+                      <th data-i18n="category">Category</th>
                       <th data-i18n="jewelTypeName">Jewel Type</th>
                       <th class="text-center" data-i18n="quantity">Qty</th>
                       <th data-i18n="model">Model</th>
@@ -531,7 +532,7 @@
                   <tbody id="jewelItemsBody"></tbody>
                   <tfoot>
                     <tr style="font-weight:700; background:var(--n-50);">
-                      <td colspan="2" class="text-end">Total</td>
+                      <td colspan="3" class="text-end">Total</td>
                       <td class="text-center" id="totalQty">0</td>
                       <td colspan="2"></td>
                       <td class="text-end" id="totalGrossWt">0.000</td>
@@ -607,8 +608,10 @@
                       id="sumScheme">—</span></div>
                   <div class="summary-row"><span class="label" data-i18n="totalWeight">Total Weight</span><span class="value"
                       id="sumTotalWeight">0.000 g</span></div>
-                  <div class="summary-row"><span class="label" data-i18n="goldRate">Gold Rate (per gram)</span><span class="value"
+                  <div class="summary-row" id="goldRateRow"><span class="label" data-i18n="goldRate">Gold Rate (per gram)</span><span class="value"
                       id="sumGoldRate">—</span></div>
+                  <div class="summary-row" id="silverRateRow" style="display:none;"><span class="label"
+                      data-i18n="silverRate">Silver Rate (per gram)</span><span class="value" id="sumSilverRate">—</span></div>
                   <div class="summary-row"><span class="label" data-i18n="totalMarketValue">Total Market Value</span><span class="value"
                       id="sumMarketValue">₹0</span></div>
                   <div class="summary-row"><span class="label" data-i18n="schemeMaxLtv">Scheme Max LTV(Loan Limit %)</span><span class="value"
@@ -759,17 +762,32 @@
     watchBannerAndScroll('apiSuccessBanner');
     let selectedCustomer = null;
     let jewelTypesCache = [];
+    let categoriesCache = [];
     let schemesCache = [];
     let itemRowCount = 0;
     let lastAppraisalResult = null;
     let activeCustomersCache = [];
 
+    function categoryOptionsHtml(selectedId) {
+      return categoriesCache.map(c =>
+        `<option value="${c.jewelCategoryId}" data-name="${c.categoryName}"${c.jewelCategoryId === selectedId ? ' selected' : ''}>${c.categoryName}</option>`).join('');
+    }
+
+    // Jewel types are strictly scoped to the row's category.
+    function jewelTypeOptionsHtml(categoryName, selectedId) {
+      return jewelTypesCache
+        .filter(jt => jt.category === categoryName)
+        .map(jt =>
+          `<option value="${jt.jewelTypeId}" data-purity="${jt.defaultPurity || ''}"${jt.jewelTypeId === selectedId ? ' selected' : ''}>${jt.jewelTypeName}</option>`).join('');
+    }
+
     function jewelRowHtml(rowId) {
-      const options = jewelTypesCache.map(jt => `<option value="${jt.jewelTypeId}" data-purity="${jt.defaultPurity || ''}">${jt.jewelTypeName}</option>`).join('');
+      const category = categoriesCache[0];
       return `
     <tr data-row-id="${rowId}">
       <td class="text-muted-jlms">${rowId}</td>
-      <td><select class="jewelTypeSelect">${options}</select></td>
+      <td><select class="jewelCategorySelect">${categoryOptionsHtml(category?.jewelCategoryId)}</select></td>
+      <td><select class="jewelTypeSelect">${jewelTypeOptionsHtml(category?.categoryName)}</select></td>
       <td><input type="number" class="qtyInput" value="1" min="1" style="text-align:center;"></td>
       <td><input type="text" class="modelInput"  data-i18n-placeholder="modelplaceholder" placeholder="Enter Model"></td>
       <td><input type="text" class="varientInput" data-i18n-placeholder="variantplaceholder" placeholder="Enter Variant"></td>
@@ -790,6 +808,9 @@
       tr.querySelector('.removeRowBtn').addEventListener('click', () => {
         tr.remove();
         updateGridTotals();
+      });
+      tr.querySelector('.jewelCategorySelect').addEventListener('change', (e) => {
+        tr.querySelector('.jewelTypeSelect').innerHTML = jewelTypeOptionsHtml(e.target.selectedOptions[0].dataset.name);
       });
       tr.querySelector('.jewelTypeSelect').addEventListener('change', (e) => {
         const purity = e.target.selectedOptions[0].dataset.purity;
@@ -814,18 +835,20 @@
       const items = [];
       rows.forEach(tr => {
         const jewelTypeId = parseInt(tr.querySelector('.jewelTypeSelect').value, 10);
+        const jewelCategoryId = parseInt(tr.querySelector('.jewelCategorySelect').value, 10) || null;
         const quantity = parseInt(tr.querySelector('.qtyInput').value, 10) || 1;
         const grossWeightGrams = parseFloat(tr.querySelector('.grossInput').value) || 0;
         const stoneWeightGrams = parseFloat(tr.querySelector('.stoneInput').value) || 0;
         const purity = tr.querySelector('.purityInput').value;
         const model = tr.querySelector('.modelInput').value.trim() || null;
         const varient = tr.querySelector('.varientInput').value.trim() || null;
-        if (grossWeightGrams > 0) items.push({ jewelTypeId, quantity, grossWeightGrams, stoneWeightGrams, purity, model, varient });
+        if (grossWeightGrams > 0) items.push({ jewelTypeId, jewelCategoryId, quantity, grossWeightGrams, stoneWeightGrams, purity, model, varient });
       });
       return items;
     }
 
     async function loadLookups() {
+      categoriesCache = await Api.getJewelCategories(true);
       jewelTypesCache = await Api.getJewelTypes(true);
       schemesCache = await Api.getLoanSchemes(true);
 
@@ -837,9 +860,12 @@
           `<option value="${s.loanSchemeId}">${s.schemeName} — ${s.interestRatePct}% / ${s.tenureMonths}mo / LTV ${s.maxLtvPercent}%</option>`).join('');
       }
 
-      if (jewelTypesCache.length === 0) {
+      if (categoriesCache.length === 0) {
         document.getElementById('jewelItemsBody').innerHTML =
-          '<tr><td colspan="7" class="text-center text-muted-jlms" style="padding:16px;">No jewel types configured yet — add one in Jewel Type Master, then come back here.</td></tr>';
+          '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:16px;">No active jewel categories for this branch — add rows in the JewelCategory table, then come back here.</td></tr>';
+      } else if (jewelTypesCache.length === 0) {
+        document.getElementById('jewelItemsBody').innerHTML =
+          '<tr><td colspan="8" class="text-center text-muted-jlms" style="padding:16px;">No jewel types configured yet — add one in Jewel Type Master, then come back here.</td></tr>';
       } else {
         addJewelRow();
       }
@@ -1280,6 +1306,23 @@
 
     // ---------------- Valuation ----------------
 
+    function formatRate(rate) {
+      return '₹' + Number(rate).toLocaleString('en-IN', { maximumFractionDigits: 2 }) + '/g';
+    }
+
+    // The API sends null for a metal no item in this loan used, so only the
+    // applicable rate lines are shown (gold-only, silver-only, or both).
+    function renderSummaryRates(goldRate, silverRate) {
+      const goldRow = document.getElementById('goldRateRow');
+      const silverRow = document.getElementById('silverRateRow');
+      if (goldRow) goldRow.style.display = goldRate == null ? 'none' : '';
+      if (silverRow) silverRow.style.display = silverRate == null ? 'none' : '';
+      const sumGoldRate = document.getElementById('sumGoldRate');
+      const sumSilverRate = document.getElementById('sumSilverRate');
+      if (sumGoldRate) sumGoldRate.textContent = goldRate == null ? '—' : formatRate(goldRate);
+      if (sumSilverRate) sumSilverRate.textContent = silverRate == null ? '—' : formatRate(silverRate);
+    }
+
     async function calculateValuation() {
       clearApiError();
       const items = collectJewelItems();
@@ -1292,11 +1335,10 @@
         lastAppraisalResult = result;
 
         const sumTotalWeight = document.getElementById('sumTotalWeight');
-        const sumGoldRate = document.getElementById('sumGoldRate');
         const sumMarketValue = document.getElementById('sumMarketValue');
 
         if (sumTotalWeight) sumTotalWeight.textContent = Number(result.totalNetWeight).toFixed(3) + ' g';
-        if (sumGoldRate) sumGoldRate.textContent = '₹' + Number(result.goldRateUsed).toLocaleString('en-IN', { maximumFractionDigits: 2 }) + '/g';
+        renderSummaryRates(result.goldRateUsed, result.silverRateUsed);
         if (sumMarketValue) sumMarketValue.textContent = '₹' + Number(result.totalMarketValue).toLocaleString('en-IN');
 
         applySchemeToSummary();
@@ -1341,7 +1383,10 @@
       // Summary
       lastAppraisalResult = null;
       document.getElementById('sumTotalWeight').textContent = '0.000 g';
+      document.getElementById('goldRateRow').style.display = '';
       document.getElementById('sumGoldRate').textContent = '—';
+      document.getElementById('silverRateRow').style.display = 'none';
+      document.getElementById('sumSilverRate').textContent = '—';
       document.getElementById('sumMarketValue').textContent = '₹0';
       document.getElementById('sumEligible').textContent = '₹0';
       applySchemeToSummary();

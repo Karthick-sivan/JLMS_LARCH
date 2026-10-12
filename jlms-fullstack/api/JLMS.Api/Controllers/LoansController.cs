@@ -417,6 +417,9 @@ public class LoansController : ControllerBase
         var jewelTypes = await _db.JewelTypes.AsNoTracking()
             .Where(jt => jewelTypeIds.Contains(jt.JewelTypeId)).ToDictionaryAsync(jt => jt.JewelTypeId);
 
+        var categoryNames = await _db.JewelCategories.AsNoTracking()
+            .ToDictionaryAsync(c => c.JewelCategoryId, c => c.CategoryName);
+
         var jewelItemEntities = new List<JewelItem>();
         decimal totalMarketValue = 0;
 
@@ -425,10 +428,13 @@ public class LoansController : ControllerBase
             if (!jewelTypes.TryGetValue(item.JewelTypeId, out var jewelType))
                 return BadRequest($"Unknown JewelTypeId {item.JewelTypeId}.");
 
+            var isSilver = LoanCalculationService.IsSilverCategory(
+                item.JewelCategoryId is int cid && categoryNames.TryGetValue(cid, out var picked) ? picked : jewelType.Category);
+
             var purity = item.Purity ?? jewelType.DefaultPurity;
             var (netWeight, marketValuePerUnit) = _calc.CalculateJewelValue(
                 item.GrossWeightGrams, item.StoneWeightGrams, purity,
-                goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K);
+                goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K, goldRate.SilverRate, isSilver);
 
             var lineMarketValue = marketValuePerUnit;
             totalMarketValue += lineMarketValue;
@@ -436,6 +442,7 @@ public class LoansController : ControllerBase
             jewelItemEntities.Add(new JewelItem
             {
                 JewelTypeId = item.JewelTypeId,
+                JewelCategoryId = item.JewelCategoryId,
                 Quantity = item.Quantity,
                 GrossWeightGrams = item.GrossWeightGrams,
                 StoneWeightGrams = item.StoneWeightGrams,
@@ -792,6 +799,13 @@ public class LoansController : ControllerBase
             0, 0, netDisbursement, request.PaymentMode, loan.OutstandingPrincipal, maturity, loan.BookNo));
     }
 
+    // Items stored before the category was captured on the row fall back to the
+    // jewel type's own category, so the grid never shows a blank.
+    private static string? ResolveCategoryName(JewelItem ji, Dictionary<int, string> categoryNames) =>
+        ji.JewelCategoryId != null && categoryNames.TryGetValue(ji.JewelCategoryId.Value, out var name)
+            ? name
+            : ji.JewelType?.Category;
+
     [HttpGet("grid")]
     public async Task<ActionResult<LoanListGridResultDto>> GetLoanListGrid([FromQuery] LoanListGridQueryDto q)
     {
@@ -841,6 +855,9 @@ public class LoansController : ControllerBase
             })
             .ToListAsync();
 
+        var categoryNames = await _db.JewelCategories.AsNoTracking()
+            .ToDictionaryAsync(c => c.JewelCategoryId, c => c.CategoryName);
+
         var items = loans.Select(l => new LoanListRowDto(
             l.LoanId,
             l.LoanNumber,
@@ -861,7 +878,8 @@ public class LoansController : ControllerBase
                 ji.Quantity,
                 ji.Model,
                 ji.Varient,
-                ji.GrossWeightGrams
+                ji.GrossWeightGrams,
+                ResolveCategoryName(ji, categoryNames)
             )).ToList()
         )).ToList();
 
@@ -875,9 +893,12 @@ public class LoansController : ControllerBase
     {
         var loan = await _db.Loans.AsNoTracking()
             .Include(l => l.Customer)
-            .Include(l => l.JewelItems)
+            .Include(l => l.JewelItems).ThenInclude(ji => ji.JewelType)
             .FirstOrDefaultAsync(l => l.LoanId == id);
         if (loan == null) return NotFound($"Loan {id} not found.");
+
+        var categoryNames = await _db.JewelCategories.AsNoTracking()
+            .ToDictionaryAsync(c => c.JewelCategoryId, c => c.CategoryName);
 
         var isEditable = !await _db.LoanTransactions.AsNoTracking()
             .AnyAsync(t => t.LoanId == id && t.TransactionType != "Disbursement");
@@ -908,7 +929,8 @@ public class LoansController : ControllerBase
             lastDisbursement?.FirstMonthInt ?? 0,
             loan.JewelItems.Select(ji => new LoanEditJewelItemDto(
                 ji.JewelItemId, ji.JewelTypeId, ji.Quantity, ji.GrossWeightGrams,
-                ji.StoneWeightGrams, ji.Purity, ji.Model, ji.Varient)).ToList()
+                ji.StoneWeightGrams, ji.Purity, ji.Model, ji.Varient,
+                ji.JewelCategoryId, ResolveCategoryName(ji, categoryNames))).ToList()
         ));
     }
 
@@ -957,6 +979,9 @@ public class LoansController : ControllerBase
                 .Where(jt => jewelTypeIds.Contains(jt.JewelTypeId))
                 .ToDictionaryAsync(jt => jt.JewelTypeId);
 
+            var categoryNames = await _db.JewelCategories.AsNoTracking()
+                .ToDictionaryAsync(c => c.JewelCategoryId, c => c.CategoryName);
+
             // Simplest safe way to sync type/qty/weight edits: replace the item set wholesale.
             _db.JewelItems.RemoveRange(loan.JewelItems);
 
@@ -967,16 +992,20 @@ public class LoansController : ControllerBase
                 if (!jewelTypes.TryGetValue(item.JewelTypeId, out var jewelType))
                     return BadRequest($"Unknown JewelTypeId {item.JewelTypeId}.");
 
+                var isSilver = LoanCalculationService.IsSilverCategory(
+                    item.JewelCategoryId is int cid && categoryNames.TryGetValue(cid, out var picked) ? picked : jewelType.Category);
+
                 var purity = item.Purity ?? jewelType.DefaultPurity;
                 var (netWeight, marketValue) = _calc.CalculateJewelValue(
                     item.GrossWeightGrams, item.StoneWeightGrams, purity,
-                    goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K);
+                    goldRate.Rate24K, goldRate.Rate22K, goldRate.Rate18K, goldRate.SilverRate, isSilver);
 
                 totalMarketValue += marketValue;
                 newItems.Add(new JewelItem
                 {
                     LoanId = loan.LoanId,
                     JewelTypeId = item.JewelTypeId,
+                    JewelCategoryId = item.JewelCategoryId,
                     Quantity = item.Quantity,
                     GrossWeightGrams = item.GrossWeightGrams,
                     StoneWeightGrams = item.StoneWeightGrams,

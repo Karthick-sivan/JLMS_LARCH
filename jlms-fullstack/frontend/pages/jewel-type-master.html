@@ -40,10 +40,6 @@
     id="ddlCategory"
     class="form-select-jlms">
 
-    <option value="Ornament">Ornament</option>
-    <option value="Coin">Coin</option>
-    <option value="Bar">Bar</option>
-
 </select></div>
               <div class="field-group"><label class="field-label" data-i18n="defaultPurity">Default Purity</label><select
     id="ddlPurity"
@@ -116,6 +112,7 @@ jlmsInitShell();
 
 let editingId = 0;
 let jewelTypeList = [];
+let categoryList = [];
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -146,7 +143,65 @@ document.addEventListener("DOMContentLoaded", () => {
     btnSave.addEventListener("click", saveJewelType);
     btnClear.addEventListener("click", clearForm);
 
+    loadCategories();
+
     loadJewelTypes();
+
+    //-------------------------------------------------------
+    // Load Categories (from the JewelCategory master table)
+    //-------------------------------------------------------
+
+    async function loadCategories() {
+
+        try {
+
+            const items = await Api.getJewelCategories(true);
+
+            categoryList = items.map(i => i.categoryName);
+
+            renderCategoryOptions();
+
+        }
+        catch (err) {
+
+            showApiError(err);
+
+        }
+
+    }
+
+    //-------------------------------------------------------
+    // Render Category Dropdown
+    // A stored jewel type can hold a category that is no longer
+    // in the master (rows saved before this table existed), so
+    // keep that value selectable instead of silently dropping it.
+    //-------------------------------------------------------
+
+    function renderCategoryOptions(selected) {
+
+        const names = [...categoryList];
+
+        if (selected && !names.includes(selected))
+            names.push(selected);
+
+        ddlCategory.innerHTML = "";
+
+        names.forEach(name => {
+
+            const option = document.createElement("option");
+
+            option.value = name;
+
+            option.textContent = name;
+
+            ddlCategory.appendChild(option);
+
+        });
+
+        if (selected)
+            ddlCategory.value = selected;
+
+    }
 
     //-------------------------------------------------------
     // Load Jewel Types
@@ -265,6 +320,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
+        if (dto.category === "") {
+
+            showApiError(new Error("Please select Category."));
+            return;
+
+        }
+
         if (isNaN(dto.wastagePercent)) {
 
             showApiError(new Error("Please enter Wastage %."));
@@ -330,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         txtJewelTypeName.value = item.jewelTypeName;
 
-        ddlCategory.value = item.category;
+        renderCategoryOptions(item.category);
 
         ddlPurity.value = item.defaultPurity;
 
@@ -362,7 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         txtJewelTypeName.value = "";
 
-        ddlCategory.value = "Ornament";
+        renderCategoryOptions();
 
         ddlPurity.value = "22K";
 

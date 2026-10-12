@@ -83,6 +83,14 @@ public class JewelType
     public int? BranchId { get; set; }
 }
 
+public class JewelCategory
+{
+    public int JewelCategoryId { get; set; }
+    public string CategoryName { get; set; } = "";
+    public bool IsActive { get; set; } = true;
+    public int? BranchId { get; set; }
+}
+
 public class GoldRate
 {
     public int GoldRateId { get; set; }
@@ -174,6 +182,8 @@ public class JewelItem
     public int LoanId { get; set; }
     public int JewelTypeId { get; set; }
     public JewelType? JewelType { get; set; }
+    // Column is literally named "JewelCategory" on JewelItems (int FK to JewelCategory.JewelCategoryId).
+    public int? JewelCategoryId { get; set; }
     public int Quantity { get; set; } = 1;
     public decimal GrossWeightGrams { get; set; }
     public decimal StoneWeightGrams { get; set; }
