@@ -7,26 +7,37 @@ public class LoanCalculationService
     /// <summary>
     /// Calculates net weight and market value for a single jewel item.
     /// NetWeight = GrossWeight - StoneWeight.
-    /// MarketValue = NetWeight * rate-per-gram-for-purity (uses 22K rate by default
-    /// unless purity string contains "24K" or "18K").
+    /// Gold: MarketValue = NetWeight * rate for the item's purity (22K unless the
+    /// purity string says 24K / 18K).
+    /// Silver: MarketValue = NetWeight * SilverRate — GoldRates holds one silver
+    /// rate, so purity does not apply to silver items.
     /// </summary>
     public (decimal netWeight, decimal marketValue) CalculateJewelValue(
         decimal grossWeight, decimal stoneWeight, string? purity,
-        decimal rate24K, decimal rate22K, decimal rate18K)
+        decimal rate24K, decimal rate22K, decimal rate18K,
+        decimal silverRate, bool isSilver)
     {
         var netWeight = Math.Max(0, grossWeight - stoneWeight);
-
-        decimal ratePerGram = rate22K; // default / most common
-        if (!string.IsNullOrWhiteSpace(purity))
-        {
-            if (purity.Contains("24")) ratePerGram = rate24K;
-            else if (purity.Contains("18")) ratePerGram = rate18K;
-            else if (purity.Contains("22")) ratePerGram = rate22K;
-        }
+        var ratePerGram = isSilver ? silverRate : GoldRateForPurity(purity, rate24K, rate22K, rate18K);
 
         var marketValue = Math.Round(netWeight * ratePerGram, 2);
         return (netWeight, marketValue);
     }
+
+    private static decimal GoldRateForPurity(string? purity, decimal rate24K, decimal rate22K, decimal rate18K)
+    {
+        if (string.IsNullOrWhiteSpace(purity)) return rate22K;
+        if (purity.Contains("24")) return rate24K;
+        if (purity.Contains("18")) return rate18K;
+        return rate22K;
+    }
+
+    /// <summary>
+    /// The JewelCategory master drives which rate column prices an item; anything
+    /// other than a silver category is financed on the gold ladder.
+    /// </summary>
+    public static bool IsSilverCategory(string? categoryName) =>
+        !string.IsNullOrWhiteSpace(categoryName) && categoryName.Contains("silver", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Eligible loan amount = total market value * scheme's max LTV%.

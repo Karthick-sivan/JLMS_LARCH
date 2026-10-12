@@ -33,6 +33,7 @@ public class JlmsDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<JewelType> JewelTypes => Set<JewelType>();
+    public DbSet<JewelCategory> JewelCategories => Set<JewelCategory>();
     public DbSet<GoldRate> GoldRates => Set<GoldRate>();
     public DbSet<LoanScheme> LoanSchemes => Set<LoanScheme>();
     public DbSet<Loan> Loans => Set<Loan>();
@@ -52,6 +53,7 @@ public class JlmsDbContext : DbContext
         modelBuilder.Entity<User>().ToTable("Users");
         modelBuilder.Entity<Customer>().ToTable("Customers");
         modelBuilder.Entity<JewelType>().ToTable("JewelTypes");
+        modelBuilder.Entity<JewelCategory>().ToTable("JewelCategory");
         modelBuilder.Entity<GoldRate>().ToTable("GoldRates");
         modelBuilder.Entity<LoanScheme>().ToTable("LoanSchemes");
         modelBuilder.Entity<Loan>().ToTable("Loans");
@@ -85,6 +87,7 @@ public class JlmsDbContext : DbContext
         modelBuilder.Entity<Loan>().Property(p => p.PenaltyAccrued).HasColumnType("decimal(12,2)");
 
         modelBuilder.Entity<JewelItem>().Property(p => p.GrossWeightGrams).HasColumnType("decimal(8,3)");
+        modelBuilder.Entity<JewelItem>().Property(p => p.JewelCategoryId).HasColumnName("JewelCategory");
         modelBuilder.Entity<JewelItem>().Property(p => p.StoneWeightGrams).HasColumnType("decimal(8,3)");
         modelBuilder.Entity<JewelItem>().Property(p => p.NetWeightGrams).HasColumnType("decimal(8,3)");
         modelBuilder.Entity<JewelItem>().Property(p => p.MarketValue).HasColumnType("decimal(12,2)");
@@ -152,6 +155,7 @@ public class JlmsDbContext : DbContext
         modelBuilder.Entity<Customer>().HasQueryFilter(c => CurrentBranchId == null || c.BranchId == CurrentBranchId);
         modelBuilder.Entity<LoanTransaction>().HasQueryFilter(t => CurrentBranchId == null || t.BranchId == CurrentBranchId);
         modelBuilder.Entity<JewelType>().HasQueryFilter(j => CurrentBranchId == null || j.BranchId == CurrentBranchId || j.BranchId == null);
+        modelBuilder.Entity<JewelCategory>().HasQueryFilter(c => CurrentBranchId == null || c.BranchId == CurrentBranchId || c.BranchId == null);
         modelBuilder.Entity<LoanScheme>().HasQueryFilter(s => CurrentBranchId == null || s.BranchId == CurrentBranchId || s.BranchId == null);
         modelBuilder.Entity<GoldRate>().HasQueryFilter(g => CurrentBranchId == null || g.BranchId == CurrentBranchId || g.BranchId == null);
     }

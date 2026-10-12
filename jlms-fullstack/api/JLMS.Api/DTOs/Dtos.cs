@@ -83,6 +83,8 @@ string? NomineeAadhaarNumber, string? NomineePhotoPath, string? NomineeAadhaarDo
 public record JewelTypeDto(int JewelTypeId, string JewelTypeName, string Category, string? DefaultPurity, decimal WastagePercent, bool IsActive, int? BranchId);
 public record JewelTypeCreateDto(string JewelTypeName, string Category, string? DefaultPurity, decimal WastagePercent, bool IsActive, int? BranchId = null);
 
+public record JewelCategoryDto(int JewelCategoryId, string CategoryName, bool IsActive, int? BranchId);
+
 public record GoldRateDto(int GoldRateId, DateTime EffectiveDate, decimal Rate24K, decimal Rate22K, decimal Rate18K, decimal SilverRate, int? BranchId);
 public record GoldRateCreateDto(decimal Rate24K, decimal Rate22K, decimal Rate18K, decimal SilverRate, int? BranchId = null);
 
@@ -90,14 +92,16 @@ public record LoanSchemeDto(int LoanSchemeId, string SchemeName, decimal Interes
 public record LoanSchemeCreateDto(string SchemeName, decimal InterestRatePct, int TenureMonths, decimal MaxLtvPercent, decimal ProcessingFee, decimal PenaltyRatePerDay, bool IsActive, int? BranchId = null);
 
 // ---------- Jewel Appraisal ----------
-public record JewelItemInputDto(int JewelTypeId, int Quantity, decimal GrossWeightGrams, decimal StoneWeightGrams, string? Purity, string? Model = null, string? Varient = null);
+public record JewelItemInputDto(int JewelTypeId, int Quantity, decimal GrossWeightGrams, decimal StoneWeightGrams, string? Purity, string? Model = null, string? Varient = null, int? JewelCategoryId = null);
 public record JewelItemResultDto(int JewelItemId, string JewelTypeName, int Quantity, decimal GrossWeightGrams, decimal StoneWeightGrams, decimal NetWeightGrams, string? Purity, decimal MarketValue);
 
 public record AppraisalRequestDto(int CustomerId, List<JewelItemInputDto> Items);
 public record AppraisalResultDto(
     List<JewelItemResultDto> Items,
     decimal TotalGrossWeight, decimal TotalStoneWeight, decimal TotalNetWeight,
-    decimal GoldRateUsed, decimal TotalMarketValue
+    // Null when the loan has no item of that metal, so the summary can show only
+    // the rate lines that actually applied.
+    decimal? GoldRateUsed, decimal? SilverRateUsed, decimal TotalMarketValue
 );
 
 // ---------- New Loan ----------
@@ -763,7 +767,8 @@ public record LoanListJewelItemDto(
     int Quantity,
     string? Model,
     string? Variant,
-    decimal GrossWeightGrams
+    decimal GrossWeightGrams,
+    string? CategoryName
 );
 
 public record LoanListRowDto(
@@ -800,7 +805,9 @@ public record LoanEditJewelItemDto(
     decimal StoneWeightGrams,
     string? Purity,
     string? Model,
-    string? Varient
+    string? Varient,
+    int? JewelCategoryId = null,   // sent back on save; read side carries CategoryName instead
+    string? CategoryName = null    // resolved name for pre-filling the Category dropdown
 );
 
 // Everything the edit page needs to render itself pre-filled, same shape of

@@ -113,6 +113,7 @@ const Api = {
   updateCustomer: (id, dto) => apiRequest(`/customers/${id}`, { method: "PUT", body: dto }),
 
   // ---- Masters ----
+  getJewelCategories: (activeOnly = false) => apiRequest(`/jewel-categories?activeOnly=${activeOnly}`),
   getJewelTypes: (activeOnly = true) => apiRequest(`/jewel-types?activeOnly=${activeOnly}`),
   createJewelType: (dto) => apiRequest("/jewel-types", { method: "POST", body: dto }),
    updateJewelType: (id, dto) =>
